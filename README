@@ -1,0 +1,11 @@
+LLVMVF - LLVM Verification Framework
+
+Motivation
+----------
+The widespread usage of concurrent software boosted the need for verification tools to help designers and implementors in the overall software engineering process. Currently, most of the verification approaches have only been applied to sequential software or partially to concurrent software. We propose the design and implementation of a framework for formal verification of concurrent software. The goal of this framework is a reliable and scalable infrastructure for verification of several commonly used concurrent mechanisms. We propose an implementation in a functional setting leveraging the advantages of expressive type systems to achieve our design goals.
+
+Info
+----
+This project source code is a part of my MSc. Thesis at Utrecht Universiteit, The Netherlands and Bogazici University, Turkey.
+More information at:
+http://dl.dropbox.com/u/279177/msproposal.pdf
