@@ -1,0 +1,89 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Base
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Language.LLVMIR.Base}{}{}
+
+imports 
+{
+import Prelude              hiding (sequence)
+import Data.Char            (chr)
+}
+
+-------------------------------------------------------------------------------
+-- LLModule - LLVM IR Module
+-------------------------------------------------------------------------------
+
+
+type Id = (String)
+type Functions = [Function]
+type Identifiers = [Identifier]
+
+type MLinkageTy = maybe LinkageTy
+type MVisibility = maybe Visibility
+type MCallingConvention = maybe CallingConvention
+type MUnnamedAddr = maybe UnnamedAddr
+
+data Identifier 
+      | Global name :: String -- (functions, global variables) begin with the '@'
+      | Local  name :: String -- (register names, types) begin with the '%'
+
+data LLModule 
+      | LLModule 
+          funs   :: Functions
+          idents :: Identifiers 
+--        symbtbl :: {[SymbolTableEntry]}
+
+-- data GlobalVar = GlobalVar LinkageTy DefinitionTy (Maybe UnnamedAddr) Id
+
+data Function 
+      | Function 
+          linkage :: MLinkageTy
+          visibility :: MVisibility
+          callconv :: MCallingConvention
+          uaddr :: MUnnamedAddr
+          name :: Id
+
+data LinkageTy 
+      | Private
+      | LinkerPrivate
+      | LinkerPrivateWeak
+      | LinkerPrivateWeakDefAuto
+      | Internal
+      | AvailableExternally
+      | Linkonce
+      | Weak
+      | Common
+      | Appending
+      | ExternWeak
+      | LinkonceOdr
+      | WeakOdr
+      | External
+      | Dllimport
+      | Dllexport 
+
+data CallingConvention 
+      | Ccc
+      | Fastcc
+      | Coldcc
+      | Cc10
+      | Cc Int
+
+data Visibility 
+      | Default
+      | Hidden
+      | Protected
+                       
+data DefinitionTy
+      | ThreadLocal
+      | Constant
+
+data LocalVar 
+      | Register name :: Id
+      | NamedTy -- complete
+
+data UnnamedAddr 
+      | UnnamedAddr
