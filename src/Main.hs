@@ -11,7 +11,7 @@ import Control.Monad
 import System.Console.CmdArgs
 import System.IO               
 import System.FilePath
-import Language.LLVMIR.Base     (LLModule)
+import Language.LLVMIR.Base     (Module)
 import Language.LLVMIR.Parser   (parse)
 
 import Debug.Trace

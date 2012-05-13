@@ -8,9 +8,9 @@ module Language.LLVMIR.Parser where
 import Control.Monad(forM_)
 import System.FilePath
 
-import Language.LLVMIR.Base (LLModule)
+import qualified Language.LLVMIR.Base as LL (Module)
 
-import LLVM.Core hiding (Value)
+import LLVM.Core hiding (Value) 
 import LLVM.ExecutionEngine
 
 import qualified LLVM.FFI.Core as FFI
@@ -18,7 +18,7 @@ import qualified LLVM.FFI.Target as FFI
 
 import Foreign.C.String
 
---parse :: FilePath -> LLModule
+--parse :: FilePath -> Module
 parse :: FilePath -> IO ()
 parse file = do mdl <- readBitcodeFromFile file                         
                 parseModule mdl
