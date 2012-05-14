@@ -5,7 +5,7 @@
 
 module Language.LLVMIR.Parser where
 
-import Control.Monad(forM_, forM)
+import Control.Monad(forM_, forM, foldM)
 import System.FilePath
 
 import qualified Language.LLVMIR.Base as LL
@@ -76,4 +76,6 @@ getBasicBlock (bbname, bbvalue) = do instr  <- getInstructions bbvalue
                                      return $ LL.BasicBlock bbname instrs
                    
 getInstruction :: (String, Value) -> IO LL.Instruction
-getInstruction (instr, instrv) = return $ LL.Instruction instr
+getInstruction (instr, instrv) = do (s,inst) <- getInstrDesc instrv
+                                   -- sops <- foldM (\s (v,_) -> return $ v ++ " " ++ s) "" ops
+                                    return $ LL.Instruction (s ++ "=" ++ show inst)
