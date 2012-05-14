@@ -11,6 +11,9 @@ imports
 {
 import Prelude              hiding (sequence)
 import Data.Char            (chr)
+import qualified Data.Map as Data.Map
+import qualified Data.Map as Map
+import Data.Map
 }
 
 -------------------------------------------------------------------------------
@@ -18,7 +21,7 @@ import Data.Char            (chr)
 -------------------------------------------------------------------------------
 
 type Id = (String)
-type Label = (Int)
+type Label = (String) 
 type MLabel = maybe Label
 
 type Functions = [Function]
@@ -28,33 +31,53 @@ type Arguments = [Argument]
 type FuncAttrs = [FunAttr]
 type BasicBlocks = [BasicBlock]
 type Instructions = [Instruction]
+type ParamAttrs = [ParamAttr]
+type ModuleAsms = [ModuleAsm]
+type NamedTys = [NamedTy]
+type Aliases = [Alias]
+type Ints = [Int]
+type Types = [Type]
 
 type MLinkageTy = maybe LinkageTy
 type MVisibility = maybe Visibility
 type MCConv = maybe CConv
 type MUnnamedAddr = maybe Bool -- maybe () would be better
-type MParamAttrs = maybe [ParamAttr]
+type MConstant = maybe Bool
+type MDefinitionTy = maybe DefinitionTy
+type MParamAttrs = maybe ParamAttrs
 type MAlign = maybe Align
 type MGCName = maybe GCName
-type MModuleAsms = maybe [ModuleAsm]
+type MModuleAsms = maybe ModuleAsms
 type MSection = maybe Section
-type MNamedTys = maybe [NamedTy]
-type MAliases = maybe [Alias]
+type MNamedTys = maybe NamedTys
+type MAliases = maybe Aliases
+type MValue = maybe Value
 
-data Identifier 
-      | Global name :: String -- (functions, global variables) begin with the '@'
-      | Local  name :: String -- (register names, types) begin with the '%'
+type Triplet = (Int, Int, Int)
+type MapTyInt = map {Type} Triplet
+type PTyInt = (Type, Int)
+type PTyIntL = [PTyInt]
+
+type IntTyValId = (Type, Value, Identifier)
+type IntTyValIdL = [IntTyValId]
 
 data Module 
-      | Module 
+      | Module
+          layout :: TargetData
           funs  :: Functions
           gvars :: GlobalVars
-          namedty :: MNamedTys
-          aliases :: MAliases
+--          namedty :: MNamedTys
+--          aliases :: MAliases
 --          symbtbl :: {[SymbolTableEntry]}
 --          namedm :: NamedMetadata
 --          mdlasm :: MModuleAsms
 
+data TargetData
+      | TargetData s :: String
+--          littleEndian :: Bool
+--          pointerSize :: Int
+--          prefAlignTy :: MapTyInt
+          
 data ModuleAsm
       | ModuleAsm asm :: String
       
@@ -65,48 +88,88 @@ data NamedTy
 
 data GlobalVar 
       | GlobalVar 
-          name :: Id
-          
---          LinkageTy DefinitionTy MUnnamedAddr Id
+          name     :: Id
+--          linkage  :: MLinkageTy
+--          init     :: MValue
+--          section  :: MSection
+--          optAlign :: MAlign
+--          defTy    :: MDefinitionTy
+--          constant :: MConstant
+--          uaddr    :: MUnnamedAddr
+
 
 data Function 
       | FunctionDef 
-          linkage    :: MLinkageTy
-          visibility :: MVisibility
-          cconv      :: MCConv
-          uaddr      :: MUnnamedAddr
-          retty      :: Type
-          paramattr  :: MParamAttrs
+--          linkage    :: MLinkageTy
+--          visibility :: MVisibility
+--          cconv      :: MCConv
+--          uaddr      :: MUnnamedAddr
+--          retty      :: Type
+--          paramattr  :: MParamAttrs
           name       :: Id
-          args       :: Arguments
-          fnAttrs    :: FuncAttrs
-          section    :: MSection
-          optAlign   :: MAlign
-          gcName     :: MGCName
+--          args       :: Arguments
+--          fnAttrs    :: FuncAttrs
+--          section    :: MSection
+--          optAlign   :: MAlign
+--          gcName     :: MGCName
           bb         :: BasicBlocks
       | FunctionDecl
-          linkage    :: MLinkageTy
-          visibility :: MVisibility
-          cconv      :: MCConv
-          uaddr      :: MUnnamedAddr
-          retty      :: Type
-          paramattr  :: MParamAttrs
           name       :: Id
-          args       :: Arguments
-          optAlign   :: MAlign          
-          gcName     :: MGCName
+--          linkage    :: MLinkageTy
+--          visibility :: MVisibility
+--          cconv      :: MCConv
+--          uaddr      :: MUnnamedAddr
+--          retty      :: Type
+--          paramattr  :: MParamAttrs
+--          args       :: Arguments
+--          optAlign   :: MAlign          
+--          gcName     :: MGCName
           
 data BasicBlock
       | BasicBlock 
-          label  :: MLabel
+          label  :: Label
           instrs :: Instructions
-          tmn    :: Terminator
+--          tmn    :: Terminator
 
 data Terminator
-      | Terminator
+      | Ret 
+          v :: MValue
+      | Br  
+          v :: Bool 
+          t :: Identifier 
+          f :: Identifier
+      | UBr 
+          d :: Identifier
+      | Switch 
+          elems :: IntTyValIdL
       
 data Instruction
-      | Instruction
+--      | Add v1 :: Value v2 :: Value
+      | Instruction s :: String
+      
+data Value 
+      | Id v :: Identifier
+      | Const c :: Constant
+
+data Identifier 
+      | Global name :: Id -- (functions, global variables) begin with the '@'
+      | Local  name :: Id -- (register names, types) begin with the '%'
+
+-- Constants
+-- Metadata node constant missing
+-- Poison values
+data Constant
+      | BoolC v :: Bool
+      | IntC  v :: Int ty :: Type
+      | FloatC v :: Float ty :: Type
+      | StructC elems :: PTyIntL
+      | ArrayC elems ::  PTyIntL
+      | VectorC elems :: PTyIntL      
+      | ZeroInitC ty :: Type
+      | NullC ty :: Type
+      | UndefC
+      | BlockAddr fun :: Identifier label :: Identifier
+
       
 data Align
       | Align n :: Int
@@ -115,10 +178,71 @@ data Section
       | Section s :: String
       
 data Type
-      | Intz
-      
+      | IntTy i :: Int
+      | FpTy  fp :: FpTy
+      | VoidTy
+      | X86mmxTy
+      | LabelTy
+      | MetadataTy
+      | ArrayTy 
+          elems :: Ints
+          ty    :: Type
+      | FunctionTy
+          party :: Types
+          retty :: Type
+      | StructureTy
+          tys :: Types
+      | OpaqueTy
+      | PointerTy
+          ty :: Type
+      | VectorTy
+          elems :: Ints
+          ty    :: Type
+
+data FpTy
+      | HalfTy
+      | FloatTy
+      | DoubleTy
+      | Fp128Ty
+      | X86fp80Ty
+      | Ppcfp128ty
+
 data Argument
       | Argument
+
+--  All Global Variables and Functions have one of the following types of linkage.
+data LinkageTy 
+      | Private
+      | LinkerPrivate
+      | LinkerPrivateWeak
+      | LinkerPrivateWeakDefAuto
+      | Internal
+      | AvailableExternally
+      | Linkonce
+      | Weak
+      | Common
+      | Appending
+      | ExternWeak
+      | LinkonceOdr
+      | WeakOdr
+      | External
+      | Dllimport
+      | Dllexport 
+
+-- Call Convention
+-- LLVM functions, calls and invokes can all have an optional calling convention specified for the call.
+data CConv 
+      | Ccc    -- The C calling convention
+      | Fastcc -- The fast calling convention
+      | Coldcc -- The cold calling convention
+      | Cc10   -- GHC convention
+      | Cc n :: Int -- Numbered convention
+
+-- All Global Variables and Functions have one of the following visibility styles.
+data Visibility 
+      | Default
+      | Hidden
+      | Protected
 
 -- Parameter Attributes      
 data ParamAttr
@@ -155,41 +279,7 @@ data FunAttr
       | Ssp
       | Sspreq
       | Uwtable
-      
---  All Global Variables and Functions have one of the following types of linkage.
-data LinkageTy 
-      | Private
-      | LinkerPrivate
-      | LinkerPrivateWeak
-      | LinkerPrivateWeakDefAuto
-      | Internal
-      | AvailableExternally
-      | Linkonce
-      | Weak
-      | Common
-      | Appending
-      | ExternWeak
-      | LinkonceOdr
-      | WeakOdr
-      | External
-      | Dllimport
-      | Dllexport 
-
--- Call Convention
--- LLVM functions, calls and invokes can all have an optional calling convention specified for the call.
-data CConv 
-      | Ccc    -- The C calling convention
-      | Fastcc -- The fast calling convention
-      | Coldcc -- The cold calling convention
-      | Cc10   -- GHC convention
-      | Cc n :: Int -- Numbered convention
-
--- All Global Variables and Functions have one of the following visibility styles.
-data Visibility 
-      | Default
-      | Hidden
-      | Protected
-                       
+                  
 data DefinitionTy
       | ThreadLocal
       | Constant
@@ -202,7 +292,8 @@ data Alias
           aliaseeTy  :: Type
           aliasee    :: Id
   
-set Every = Module GlobalVar Function LinkageTy CConv Visibility DefinitionTy LocalVar Type ParamAttribute Argument Align GCName FunAttr BasicBlock Instruction Terminator
+set Every = Module GlobalVar Function LinkageTy CConv Visibility DefinitionTy LocalVar Type Argument Align GCName FunAttr BasicBlock Instruction Terminator NamedTy TargetData Alias ParamAttr Section Value Identifier FpTy Constant
 
 deriving Every: Show
 deriving Every: Eq
+deriving Every: Ord

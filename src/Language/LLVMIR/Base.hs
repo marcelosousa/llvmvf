@@ -7,17 +7,107 @@ module Language.LLVMIR.Base where
 
 import Prelude              hiding (sequence)
 import Data.Char            (chr)
-{-# LINE 11 "src/Language/LLVMIR/Base.hs" #-}
+import qualified Data.Map as Data.Map
+import qualified Data.Map as Map
+import Data.Map
+{-# LINE 14 "src/Language/LLVMIR/Base.hs" #-}
 {-# LINE 1 "src/Language/LLVMIR/Base.ag" #-}
 
 -------------------------------------------------------------------------------
 -- Module    :  Language.LLVMIR.Base
 -- Copyright :  (c) 2012 Marcelo Sousa
 -------------------------------------------------------------------------------
-{-# LINE 18 "src/Language/LLVMIR/Base.hs" #-}
+{-# LINE 21 "src/Language/LLVMIR/Base.hs" #-}
+-- Alias -------------------------------------------------------
+data Alias  = Alias (Id ) (MLinkageTy ) (MVisibility ) (Type ) (Id ) 
+            deriving ( Eq,Ord,Show)
+-- cata
+sem_Alias :: Alias  ->
+             T_Alias 
+sem_Alias (Alias _name _linkage _visibility _aliaseeTy _aliasee )  =
+    (sem_Alias_Alias (sem_Id _name ) (sem_MLinkageTy _linkage ) (sem_MVisibility _visibility ) (sem_Type _aliaseeTy ) (sem_Id _aliasee ) )
+-- semantic domain
+type T_Alias  = ( Alias )
+data Inh_Alias  = Inh_Alias {}
+data Syn_Alias  = Syn_Alias {self_Syn_Alias :: Alias }
+wrap_Alias :: T_Alias  ->
+              Inh_Alias  ->
+              Syn_Alias 
+wrap_Alias sem (Inh_Alias )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_Alias _lhsOself ))
+sem_Alias_Alias :: T_Id  ->
+                   T_MLinkageTy  ->
+                   T_MVisibility  ->
+                   T_Type  ->
+                   T_Id  ->
+                   T_Alias 
+sem_Alias_Alias name_ linkage_ visibility_ aliaseeTy_ aliasee_  =
+    (let _lhsOself :: Alias 
+         _nameIself :: Id 
+         _linkageIself :: MLinkageTy 
+         _visibilityIself :: MVisibility 
+         _aliaseeTyIself :: Type 
+         _aliaseeIself :: Id 
+         _self =
+             Alias _nameIself _linkageIself _visibilityIself _aliaseeTyIself _aliaseeIself
+         _lhsOself =
+             _self
+         ( _nameIself) =
+             name_ 
+         ( _linkageIself) =
+             linkage_ 
+         ( _visibilityIself) =
+             visibility_ 
+         ( _aliaseeTyIself) =
+             aliaseeTy_ 
+         ( _aliaseeIself) =
+             aliasee_ 
+     in  ( _lhsOself))
+-- Aliases -----------------------------------------------------
+type Aliases  = [Alias ]
+-- cata
+sem_Aliases :: Aliases  ->
+               T_Aliases 
+sem_Aliases list  =
+    (Prelude.foldr sem_Aliases_Cons sem_Aliases_Nil (Prelude.map sem_Alias list) )
+-- semantic domain
+type T_Aliases  = ( Aliases )
+data Inh_Aliases  = Inh_Aliases {}
+data Syn_Aliases  = Syn_Aliases {self_Syn_Aliases :: Aliases }
+wrap_Aliases :: T_Aliases  ->
+                Inh_Aliases  ->
+                Syn_Aliases 
+wrap_Aliases sem (Inh_Aliases )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_Aliases _lhsOself ))
+sem_Aliases_Cons :: T_Alias  ->
+                    T_Aliases  ->
+                    T_Aliases 
+sem_Aliases_Cons hd_ tl_  =
+    (let _lhsOself :: Aliases 
+         _hdIself :: Alias 
+         _tlIself :: Aliases 
+         _self =
+             (:) _hdIself _tlIself
+         _lhsOself =
+             _self
+         ( _hdIself) =
+             hd_ 
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_Aliases_Nil :: T_Aliases 
+sem_Aliases_Nil  =
+    (let _lhsOself :: Aliases 
+         _self =
+             []
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 -- Align -------------------------------------------------------
 data Align  = Align (Int) 
-            deriving ( Eq,Show)
+            deriving ( Eq,Ord,Show)
 -- cata
 sem_Align :: Align  ->
              T_Align 
@@ -44,7 +134,7 @@ sem_Align_Align n_  =
      in  ( _lhsOself))
 -- Argument ----------------------------------------------------
 data Argument  = Argument 
-               deriving ( Eq,Show)
+               deriving ( Eq,Ord,Show)
 -- cata
 sem_Argument :: Argument  ->
                 T_Argument 
@@ -110,13 +200,13 @@ sem_Arguments_Nil  =
              _self
      in  ( _lhsOself))
 -- BasicBlock --------------------------------------------------
-data BasicBlock  = BasicBlock (MLabel ) (Instructions ) (Terminator ) 
-                 deriving ( Eq,Show)
+data BasicBlock  = BasicBlock (Label ) (Instructions ) 
+                 deriving ( Eq,Ord,Show)
 -- cata
 sem_BasicBlock :: BasicBlock  ->
                   T_BasicBlock 
-sem_BasicBlock (BasicBlock _label _instrs _tmn )  =
-    (sem_BasicBlock_BasicBlock (sem_MLabel _label ) (sem_Instructions _instrs ) (sem_Terminator _tmn ) )
+sem_BasicBlock (BasicBlock _label _instrs )  =
+    (sem_BasicBlock_BasicBlock (sem_Label _label ) (sem_Instructions _instrs ) )
 -- semantic domain
 type T_BasicBlock  = ( BasicBlock )
 data Inh_BasicBlock  = Inh_BasicBlock {}
@@ -127,25 +217,21 @@ wrap_BasicBlock :: T_BasicBlock  ->
 wrap_BasicBlock sem (Inh_BasicBlock )  =
     (let ( _lhsOself) = sem 
      in  (Syn_BasicBlock _lhsOself ))
-sem_BasicBlock_BasicBlock :: T_MLabel  ->
+sem_BasicBlock_BasicBlock :: T_Label  ->
                              T_Instructions  ->
-                             T_Terminator  ->
                              T_BasicBlock 
-sem_BasicBlock_BasicBlock label_ instrs_ tmn_  =
+sem_BasicBlock_BasicBlock label_ instrs_  =
     (let _lhsOself :: BasicBlock 
-         _labelIself :: MLabel 
+         _labelIself :: Label 
          _instrsIself :: Instructions 
-         _tmnIself :: Terminator 
          _self =
-             BasicBlock _labelIself _instrsIself _tmnIself
+             BasicBlock _labelIself _instrsIself
          _lhsOself =
              _self
          ( _labelIself) =
              label_ 
          ( _instrsIself) =
              instrs_ 
-         ( _tmnIself) =
-             tmn_ 
      in  ( _lhsOself))
 -- BasicBlocks -------------------------------------------------
 type BasicBlocks  = [BasicBlock ]
@@ -194,7 +280,7 @@ data CConv  = Cc (Int)
             | Ccc 
             | Coldcc 
             | Fastcc 
-            deriving ( Eq,Show)
+            deriving ( Eq,Ord,Show)
 -- cata
 sem_CConv :: CConv  ->
              T_CConv 
@@ -259,10 +345,174 @@ sem_CConv_Fastcc  =
          _lhsOself =
              _self
      in  ( _lhsOself))
+-- Constant ----------------------------------------------------
+data Constant  = ArrayC (PTyIntL ) 
+               | BlockAddr (Identifier ) (Identifier ) 
+               | BoolC (Bool) 
+               | FloatC (Float) (Type ) 
+               | IntC (Int) (Type ) 
+               | NullC (Type ) 
+               | StructC (PTyIntL ) 
+               | UndefC 
+               | VectorC (PTyIntL ) 
+               | ZeroInitC (Type ) 
+               deriving ( Eq,Ord,Show)
+-- cata
+sem_Constant :: Constant  ->
+                T_Constant 
+sem_Constant (ArrayC _elems )  =
+    (sem_Constant_ArrayC (sem_PTyIntL _elems ) )
+sem_Constant (BlockAddr _fun _label )  =
+    (sem_Constant_BlockAddr (sem_Identifier _fun ) (sem_Identifier _label ) )
+sem_Constant (BoolC _v )  =
+    (sem_Constant_BoolC _v )
+sem_Constant (FloatC _v _ty )  =
+    (sem_Constant_FloatC _v (sem_Type _ty ) )
+sem_Constant (IntC _v _ty )  =
+    (sem_Constant_IntC _v (sem_Type _ty ) )
+sem_Constant (NullC _ty )  =
+    (sem_Constant_NullC (sem_Type _ty ) )
+sem_Constant (StructC _elems )  =
+    (sem_Constant_StructC (sem_PTyIntL _elems ) )
+sem_Constant (UndefC )  =
+    (sem_Constant_UndefC )
+sem_Constant (VectorC _elems )  =
+    (sem_Constant_VectorC (sem_PTyIntL _elems ) )
+sem_Constant (ZeroInitC _ty )  =
+    (sem_Constant_ZeroInitC (sem_Type _ty ) )
+-- semantic domain
+type T_Constant  = ( Constant )
+data Inh_Constant  = Inh_Constant {}
+data Syn_Constant  = Syn_Constant {self_Syn_Constant :: Constant }
+wrap_Constant :: T_Constant  ->
+                 Inh_Constant  ->
+                 Syn_Constant 
+wrap_Constant sem (Inh_Constant )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_Constant _lhsOself ))
+sem_Constant_ArrayC :: T_PTyIntL  ->
+                       T_Constant 
+sem_Constant_ArrayC elems_  =
+    (let _lhsOself :: Constant 
+         _elemsIself :: PTyIntL 
+         _self =
+             ArrayC _elemsIself
+         _lhsOself =
+             _self
+         ( _elemsIself) =
+             elems_ 
+     in  ( _lhsOself))
+sem_Constant_BlockAddr :: T_Identifier  ->
+                          T_Identifier  ->
+                          T_Constant 
+sem_Constant_BlockAddr fun_ label_  =
+    (let _lhsOself :: Constant 
+         _funIself :: Identifier 
+         _labelIself :: Identifier 
+         _self =
+             BlockAddr _funIself _labelIself
+         _lhsOself =
+             _self
+         ( _funIself) =
+             fun_ 
+         ( _labelIself) =
+             label_ 
+     in  ( _lhsOself))
+sem_Constant_BoolC :: Bool ->
+                      T_Constant 
+sem_Constant_BoolC v_  =
+    (let _lhsOself :: Constant 
+         _self =
+             BoolC v_
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Constant_FloatC :: Float ->
+                       T_Type  ->
+                       T_Constant 
+sem_Constant_FloatC v_ ty_  =
+    (let _lhsOself :: Constant 
+         _tyIself :: Type 
+         _self =
+             FloatC v_ _tyIself
+         _lhsOself =
+             _self
+         ( _tyIself) =
+             ty_ 
+     in  ( _lhsOself))
+sem_Constant_IntC :: Int ->
+                     T_Type  ->
+                     T_Constant 
+sem_Constant_IntC v_ ty_  =
+    (let _lhsOself :: Constant 
+         _tyIself :: Type 
+         _self =
+             IntC v_ _tyIself
+         _lhsOself =
+             _self
+         ( _tyIself) =
+             ty_ 
+     in  ( _lhsOself))
+sem_Constant_NullC :: T_Type  ->
+                      T_Constant 
+sem_Constant_NullC ty_  =
+    (let _lhsOself :: Constant 
+         _tyIself :: Type 
+         _self =
+             NullC _tyIself
+         _lhsOself =
+             _self
+         ( _tyIself) =
+             ty_ 
+     in  ( _lhsOself))
+sem_Constant_StructC :: T_PTyIntL  ->
+                        T_Constant 
+sem_Constant_StructC elems_  =
+    (let _lhsOself :: Constant 
+         _elemsIself :: PTyIntL 
+         _self =
+             StructC _elemsIself
+         _lhsOself =
+             _self
+         ( _elemsIself) =
+             elems_ 
+     in  ( _lhsOself))
+sem_Constant_UndefC :: T_Constant 
+sem_Constant_UndefC  =
+    (let _lhsOself :: Constant 
+         _self =
+             UndefC
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Constant_VectorC :: T_PTyIntL  ->
+                        T_Constant 
+sem_Constant_VectorC elems_  =
+    (let _lhsOself :: Constant 
+         _elemsIself :: PTyIntL 
+         _self =
+             VectorC _elemsIself
+         _lhsOself =
+             _self
+         ( _elemsIself) =
+             elems_ 
+     in  ( _lhsOself))
+sem_Constant_ZeroInitC :: T_Type  ->
+                          T_Constant 
+sem_Constant_ZeroInitC ty_  =
+    (let _lhsOself :: Constant 
+         _tyIself :: Type 
+         _self =
+             ZeroInitC _tyIself
+         _lhsOself =
+             _self
+         ( _tyIself) =
+             ty_ 
+     in  ( _lhsOself))
 -- DefinitionTy ------------------------------------------------
 data DefinitionTy  = Constant 
                    | ThreadLocal 
-                   deriving ( Eq,Show)
+                   deriving ( Eq,Ord,Show)
 -- cata
 sem_DefinitionTy :: DefinitionTy  ->
                     T_DefinitionTy 
@@ -296,6 +546,87 @@ sem_DefinitionTy_ThreadLocal  =
          _lhsOself =
              _self
      in  ( _lhsOself))
+-- FpTy --------------------------------------------------------
+data FpTy  = DoubleTy 
+           | FloatTy 
+           | Fp128Ty 
+           | HalfTy 
+           | Ppcfp128ty 
+           | X86fp80Ty 
+           deriving ( Eq,Ord,Show)
+-- cata
+sem_FpTy :: FpTy  ->
+            T_FpTy 
+sem_FpTy (DoubleTy )  =
+    (sem_FpTy_DoubleTy )
+sem_FpTy (FloatTy )  =
+    (sem_FpTy_FloatTy )
+sem_FpTy (Fp128Ty )  =
+    (sem_FpTy_Fp128Ty )
+sem_FpTy (HalfTy )  =
+    (sem_FpTy_HalfTy )
+sem_FpTy (Ppcfp128ty )  =
+    (sem_FpTy_Ppcfp128ty )
+sem_FpTy (X86fp80Ty )  =
+    (sem_FpTy_X86fp80Ty )
+-- semantic domain
+type T_FpTy  = ( FpTy )
+data Inh_FpTy  = Inh_FpTy {}
+data Syn_FpTy  = Syn_FpTy {self_Syn_FpTy :: FpTy }
+wrap_FpTy :: T_FpTy  ->
+             Inh_FpTy  ->
+             Syn_FpTy 
+wrap_FpTy sem (Inh_FpTy )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_FpTy _lhsOself ))
+sem_FpTy_DoubleTy :: T_FpTy 
+sem_FpTy_DoubleTy  =
+    (let _lhsOself :: FpTy 
+         _self =
+             DoubleTy
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_FpTy_FloatTy :: T_FpTy 
+sem_FpTy_FloatTy  =
+    (let _lhsOself :: FpTy 
+         _self =
+             FloatTy
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_FpTy_Fp128Ty :: T_FpTy 
+sem_FpTy_Fp128Ty  =
+    (let _lhsOself :: FpTy 
+         _self =
+             Fp128Ty
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_FpTy_HalfTy :: T_FpTy 
+sem_FpTy_HalfTy  =
+    (let _lhsOself :: FpTy 
+         _self =
+             HalfTy
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_FpTy_Ppcfp128ty :: T_FpTy 
+sem_FpTy_Ppcfp128ty  =
+    (let _lhsOself :: FpTy 
+         _self =
+             Ppcfp128ty
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_FpTy_X86fp80Ty :: T_FpTy 
+sem_FpTy_X86fp80Ty  =
+    (let _lhsOself :: FpTy 
+         _self =
+             X86fp80Ty
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 -- FunAttr -----------------------------------------------------
 data FunAttr  = AddressSafety 
               | Alignstack (Int) 
@@ -315,7 +646,7 @@ data FunAttr  = AddressSafety
               | Ssp 
               | Sspreq 
               | Uwtable 
-              deriving ( Eq,Show)
+              deriving ( Eq,Ord,Show)
 -- cata
 sem_FunAttr :: FunAttr  ->
                T_FunAttr 
@@ -552,16 +883,16 @@ sem_FuncAttrs_Nil  =
              _self
      in  ( _lhsOself))
 -- Function ----------------------------------------------------
-data Function  = FunctionDecl (MLinkageTy ) (MVisibility ) (MCConv ) (MUnnamedAddr ) (Type ) (MParamAttribute ) (Id ) (Arguments ) (MAlign ) (MGCName ) 
-               | FunctionDef (MLinkageTy ) (MVisibility ) (MCConv ) (MUnnamedAddr ) (Type ) (MParamAttribute ) (Id ) (Arguments ) (FuncAttrs ) (MAlign ) (MGCName ) (BasicBlocks ) 
-               deriving ( Eq,Show)
+data Function  = FunctionDecl (Id ) 
+               | FunctionDef (Id ) (BasicBlocks ) 
+               deriving ( Eq,Ord,Show)
 -- cata
 sem_Function :: Function  ->
                 T_Function 
-sem_Function (FunctionDecl _linkage _visibility _cconv _uaddr _retty _paramattr _name _args _optAlign _gcName )  =
-    (sem_Function_FunctionDecl (sem_MLinkageTy _linkage ) (sem_MVisibility _visibility ) (sem_MCConv _cconv ) (sem_MUnnamedAddr _uaddr ) (sem_Type _retty ) (sem_MParamAttribute _paramattr ) (sem_Id _name ) (sem_Arguments _args ) (sem_MAlign _optAlign ) (sem_MGCName _gcName ) )
-sem_Function (FunctionDef _linkage _visibility _cconv _uaddr _retty _paramattr _name _args _fnAttrs _optAlign _gcName _bb )  =
-    (sem_Function_FunctionDef (sem_MLinkageTy _linkage ) (sem_MVisibility _visibility ) (sem_MCConv _cconv ) (sem_MUnnamedAddr _uaddr ) (sem_Type _retty ) (sem_MParamAttribute _paramattr ) (sem_Id _name ) (sem_Arguments _args ) (sem_FuncAttrs _fnAttrs ) (sem_MAlign _optAlign ) (sem_MGCName _gcName ) (sem_BasicBlocks _bb ) )
+sem_Function (FunctionDecl _name )  =
+    (sem_Function_FunctionDecl (sem_Id _name ) )
+sem_Function (FunctionDef _name _bb )  =
+    (sem_Function_FunctionDef (sem_Id _name ) (sem_BasicBlocks _bb ) )
 -- semantic domain
 type T_Function  = ( Function )
 data Inh_Function  = Inh_Function {}
@@ -572,107 +903,31 @@ wrap_Function :: T_Function  ->
 wrap_Function sem (Inh_Function )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Function _lhsOself ))
-sem_Function_FunctionDecl :: T_MLinkageTy  ->
-                             T_MVisibility  ->
-                             T_MCConv  ->
-                             T_MUnnamedAddr  ->
-                             T_Type  ->
-                             T_MParamAttribute  ->
-                             T_Id  ->
-                             T_Arguments  ->
-                             T_MAlign  ->
-                             T_MGCName  ->
+sem_Function_FunctionDecl :: T_Id  ->
                              T_Function 
-sem_Function_FunctionDecl linkage_ visibility_ cconv_ uaddr_ retty_ paramattr_ name_ args_ optAlign_ gcName_  =
+sem_Function_FunctionDecl name_  =
     (let _lhsOself :: Function 
-         _linkageIself :: MLinkageTy 
-         _visibilityIself :: MVisibility 
-         _cconvIself :: MCConv 
-         _uaddrIself :: MUnnamedAddr 
-         _rettyIself :: Type 
-         _paramattrIself :: MParamAttribute 
          _nameIself :: Id 
-         _argsIself :: Arguments 
-         _optAlignIself :: MAlign 
-         _gcNameIself :: MGCName 
          _self =
-             FunctionDecl _linkageIself _visibilityIself _cconvIself _uaddrIself _rettyIself _paramattrIself _nameIself _argsIself _optAlignIself _gcNameIself
+             FunctionDecl _nameIself
          _lhsOself =
              _self
-         ( _linkageIself) =
-             linkage_ 
-         ( _visibilityIself) =
-             visibility_ 
-         ( _cconvIself) =
-             cconv_ 
-         ( _uaddrIself) =
-             uaddr_ 
-         ( _rettyIself) =
-             retty_ 
-         ( _paramattrIself) =
-             paramattr_ 
          ( _nameIself) =
              name_ 
-         ( _argsIself) =
-             args_ 
-         ( _optAlignIself) =
-             optAlign_ 
-         ( _gcNameIself) =
-             gcName_ 
      in  ( _lhsOself))
-sem_Function_FunctionDef :: T_MLinkageTy  ->
-                            T_MVisibility  ->
-                            T_MCConv  ->
-                            T_MUnnamedAddr  ->
-                            T_Type  ->
-                            T_MParamAttribute  ->
-                            T_Id  ->
-                            T_Arguments  ->
-                            T_FuncAttrs  ->
-                            T_MAlign  ->
-                            T_MGCName  ->
+sem_Function_FunctionDef :: T_Id  ->
                             T_BasicBlocks  ->
                             T_Function 
-sem_Function_FunctionDef linkage_ visibility_ cconv_ uaddr_ retty_ paramattr_ name_ args_ fnAttrs_ optAlign_ gcName_ bb_  =
+sem_Function_FunctionDef name_ bb_  =
     (let _lhsOself :: Function 
-         _linkageIself :: MLinkageTy 
-         _visibilityIself :: MVisibility 
-         _cconvIself :: MCConv 
-         _uaddrIself :: MUnnamedAddr 
-         _rettyIself :: Type 
-         _paramattrIself :: MParamAttribute 
          _nameIself :: Id 
-         _argsIself :: Arguments 
-         _fnAttrsIself :: FuncAttrs 
-         _optAlignIself :: MAlign 
-         _gcNameIself :: MGCName 
          _bbIself :: BasicBlocks 
          _self =
-             FunctionDef _linkageIself _visibilityIself _cconvIself _uaddrIself _rettyIself _paramattrIself _nameIself _argsIself _fnAttrsIself _optAlignIself _gcNameIself _bbIself
+             FunctionDef _nameIself _bbIself
          _lhsOself =
              _self
-         ( _linkageIself) =
-             linkage_ 
-         ( _visibilityIself) =
-             visibility_ 
-         ( _cconvIself) =
-             cconv_ 
-         ( _uaddrIself) =
-             uaddr_ 
-         ( _rettyIself) =
-             retty_ 
-         ( _paramattrIself) =
-             paramattr_ 
          ( _nameIself) =
              name_ 
-         ( _argsIself) =
-             args_ 
-         ( _fnAttrsIself) =
-             fnAttrs_ 
-         ( _optAlignIself) =
-             optAlign_ 
-         ( _gcNameIself) =
-             gcName_ 
          ( _bbIself) =
              bb_ 
      in  ( _lhsOself))
@@ -719,7 +974,7 @@ sem_Functions_Nil  =
      in  ( _lhsOself))
 -- GCName ------------------------------------------------------
 data GCName  = GCName (String) 
-             deriving ( Eq,Show)
+             deriving ( Eq,Ord,Show)
 -- cata
 sem_GCName :: GCName  ->
               T_GCName 
@@ -746,7 +1001,7 @@ sem_GCName_GCName name_  =
      in  ( _lhsOself))
 -- GlobalVar ---------------------------------------------------
 data GlobalVar  = GlobalVar (Id ) 
-                deriving ( Eq,Show)
+                deriving ( Eq,Ord,Show)
 -- cata
 sem_GlobalVar :: GlobalVar  ->
                  T_GlobalVar 
@@ -842,15 +1097,16 @@ sem_Id_Tuple x1_  =
              _self
      in  ( _lhsOself))
 -- Identifier --------------------------------------------------
-data Identifier  = Global (String) 
-                 | Local (String) 
+data Identifier  = Global (Id ) 
+                 | Local (Id ) 
+                 deriving ( Eq,Ord,Show)
 -- cata
 sem_Identifier :: Identifier  ->
                   T_Identifier 
 sem_Identifier (Global _name )  =
-    (sem_Identifier_Global _name )
+    (sem_Identifier_Global (sem_Id _name ) )
 sem_Identifier (Local _name )  =
-    (sem_Identifier_Local _name )
+    (sem_Identifier_Local (sem_Id _name ) )
 -- semantic domain
 type T_Identifier  = ( Identifier )
 data Inh_Identifier  = Inh_Identifier {}
@@ -861,23 +1117,29 @@ wrap_Identifier :: T_Identifier  ->
 wrap_Identifier sem (Inh_Identifier )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Identifier _lhsOself ))
-sem_Identifier_Global :: String ->
+sem_Identifier_Global :: T_Id  ->
                          T_Identifier 
 sem_Identifier_Global name_  =
     (let _lhsOself :: Identifier 
+         _nameIself :: Id 
          _self =
-             Global name_
+             Global _nameIself
          _lhsOself =
              _self
+         ( _nameIself) =
+             name_ 
      in  ( _lhsOself))
-sem_Identifier_Local :: String ->
+sem_Identifier_Local :: T_Id  ->
                         T_Identifier 
 sem_Identifier_Local name_  =
     (let _lhsOself :: Identifier 
+         _nameIself :: Id 
          _self =
-             Local name_
+             Local _nameIself
          _lhsOself =
              _self
+         ( _nameIself) =
+             name_ 
      in  ( _lhsOself))
 -- Identifiers -------------------------------------------------
 type Identifiers  = [Identifier ]
@@ -921,13 +1183,13 @@ sem_Identifiers_Nil  =
              _self
      in  ( _lhsOself))
 -- Instruction -------------------------------------------------
-data Instruction  = Instruction 
-                  deriving ( Eq,Show)
+data Instruction  = Instruction (String) 
+                  deriving ( Eq,Ord,Show)
 -- cata
 sem_Instruction :: Instruction  ->
                    T_Instruction 
-sem_Instruction (Instruction )  =
-    (sem_Instruction_Instruction )
+sem_Instruction (Instruction _s )  =
+    (sem_Instruction_Instruction _s )
 -- semantic domain
 type T_Instruction  = ( Instruction )
 data Inh_Instruction  = Inh_Instruction {}
@@ -938,11 +1200,12 @@ wrap_Instruction :: T_Instruction  ->
 wrap_Instruction sem (Inh_Instruction )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Instruction _lhsOself ))
-sem_Instruction_Instruction :: T_Instruction 
-sem_Instruction_Instruction  =
+sem_Instruction_Instruction :: String ->
+                               T_Instruction 
+sem_Instruction_Instruction s_  =
     (let _lhsOself :: Instruction 
          _self =
-             Instruction
+             Instruction s_
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -987,8 +1250,124 @@ sem_Instructions_Nil  =
          _lhsOself =
              _self
      in  ( _lhsOself))
+-- IntTyValId --------------------------------------------------
+type IntTyValId  = ( Type ,Value ,Identifier )
+-- cata
+sem_IntTyValId :: IntTyValId  ->
+                  T_IntTyValId 
+sem_IntTyValId ( x1,x2,x3)  =
+    (sem_IntTyValId_Tuple (sem_Type x1 ) (sem_Value x2 ) (sem_Identifier x3 ) )
+-- semantic domain
+type T_IntTyValId  = ( IntTyValId )
+data Inh_IntTyValId  = Inh_IntTyValId {}
+data Syn_IntTyValId  = Syn_IntTyValId {self_Syn_IntTyValId :: IntTyValId }
+wrap_IntTyValId :: T_IntTyValId  ->
+                   Inh_IntTyValId  ->
+                   Syn_IntTyValId 
+wrap_IntTyValId sem (Inh_IntTyValId )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_IntTyValId _lhsOself ))
+sem_IntTyValId_Tuple :: T_Type  ->
+                        T_Value  ->
+                        T_Identifier  ->
+                        T_IntTyValId 
+sem_IntTyValId_Tuple x1_ x2_ x3_  =
+    (let _lhsOself :: IntTyValId 
+         _x1Iself :: Type 
+         _x2Iself :: Value 
+         _x3Iself :: Identifier 
+         _self =
+             (_x1Iself,_x2Iself,_x3Iself)
+         _lhsOself =
+             _self
+         ( _x1Iself) =
+             x1_ 
+         ( _x2Iself) =
+             x2_ 
+         ( _x3Iself) =
+             x3_ 
+     in  ( _lhsOself))
+-- IntTyValIdL -------------------------------------------------
+type IntTyValIdL  = [IntTyValId ]
+-- cata
+sem_IntTyValIdL :: IntTyValIdL  ->
+                   T_IntTyValIdL 
+sem_IntTyValIdL list  =
+    (Prelude.foldr sem_IntTyValIdL_Cons sem_IntTyValIdL_Nil (Prelude.map sem_IntTyValId list) )
+-- semantic domain
+type T_IntTyValIdL  = ( IntTyValIdL )
+data Inh_IntTyValIdL  = Inh_IntTyValIdL {}
+data Syn_IntTyValIdL  = Syn_IntTyValIdL {self_Syn_IntTyValIdL :: IntTyValIdL }
+wrap_IntTyValIdL :: T_IntTyValIdL  ->
+                    Inh_IntTyValIdL  ->
+                    Syn_IntTyValIdL 
+wrap_IntTyValIdL sem (Inh_IntTyValIdL )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_IntTyValIdL _lhsOself ))
+sem_IntTyValIdL_Cons :: T_IntTyValId  ->
+                        T_IntTyValIdL  ->
+                        T_IntTyValIdL 
+sem_IntTyValIdL_Cons hd_ tl_  =
+    (let _lhsOself :: IntTyValIdL 
+         _hdIself :: IntTyValId 
+         _tlIself :: IntTyValIdL 
+         _self =
+             (:) _hdIself _tlIself
+         _lhsOself =
+             _self
+         ( _hdIself) =
+             hd_ 
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_IntTyValIdL_Nil :: T_IntTyValIdL 
+sem_IntTyValIdL_Nil  =
+    (let _lhsOself :: IntTyValIdL 
+         _self =
+             []
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- Ints --------------------------------------------------------
+type Ints  = [(Int)]
+-- cata
+sem_Ints :: Ints  ->
+            T_Ints 
+sem_Ints list  =
+    (Prelude.foldr sem_Ints_Cons sem_Ints_Nil list )
+-- semantic domain
+type T_Ints  = ( Ints )
+data Inh_Ints  = Inh_Ints {}
+data Syn_Ints  = Syn_Ints {self_Syn_Ints :: Ints }
+wrap_Ints :: T_Ints  ->
+             Inh_Ints  ->
+             Syn_Ints 
+wrap_Ints sem (Inh_Ints )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_Ints _lhsOself ))
+sem_Ints_Cons :: Int ->
+                 T_Ints  ->
+                 T_Ints 
+sem_Ints_Cons hd_ tl_  =
+    (let _lhsOself :: Ints 
+         _tlIself :: Ints 
+         _self =
+             (:) hd_ _tlIself
+         _lhsOself =
+             _self
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_Ints_Nil :: T_Ints 
+sem_Ints_Nil  =
+    (let _lhsOself :: Ints 
+         _self =
+             []
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 -- Label -------------------------------------------------------
-type Label  = ( (Int))
+type Label  = ( (String))
 -- cata
 sem_Label :: Label  ->
              T_Label 
@@ -1004,7 +1383,7 @@ wrap_Label :: T_Label  ->
 wrap_Label sem (Inh_Label )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Label _lhsOself ))
-sem_Label_Tuple :: Int ->
+sem_Label_Tuple :: String ->
                    T_Label 
 sem_Label_Tuple x1_  =
     (let _lhsOself :: Label 
@@ -1030,7 +1409,7 @@ data LinkageTy  = Appending
                 | Private 
                 | Weak 
                 | WeakOdr 
-                deriving ( Eq,Show)
+                deriving ( Eq,Ord,Show)
 -- cata
 sem_LinkageTy :: LinkageTy  ->
                  T_LinkageTy 
@@ -1204,46 +1583,44 @@ sem_LinkageTy_WeakOdr  =
          _lhsOself =
              _self
      in  ( _lhsOself))
--- LocalVar ----------------------------------------------------
-data LocalVar  = NamedTy 
-               | Register (Id ) 
-               deriving ( Eq,Show)
+-- MAliases ----------------------------------------------------
+type MAliases  = Maybe Aliases 
 -- cata
-sem_LocalVar :: LocalVar  ->
-                T_LocalVar 
-sem_LocalVar (NamedTy )  =
-    (sem_LocalVar_NamedTy )
-sem_LocalVar (Register _name )  =
-    (sem_LocalVar_Register (sem_Id _name ) )
+sem_MAliases :: MAliases  ->
+                T_MAliases 
+sem_MAliases (Prelude.Just x )  =
+    (sem_MAliases_Just (sem_Aliases x ) )
+sem_MAliases Prelude.Nothing  =
+    sem_MAliases_Nothing
 -- semantic domain
-type T_LocalVar  = ( LocalVar )
-data Inh_LocalVar  = Inh_LocalVar {}
-data Syn_LocalVar  = Syn_LocalVar {self_Syn_LocalVar :: LocalVar }
-wrap_LocalVar :: T_LocalVar  ->
-                 Inh_LocalVar  ->
-                 Syn_LocalVar 
-wrap_LocalVar sem (Inh_LocalVar )  =
+type T_MAliases  = ( MAliases )
+data Inh_MAliases  = Inh_MAliases {}
+data Syn_MAliases  = Syn_MAliases {self_Syn_MAliases :: MAliases }
+wrap_MAliases :: T_MAliases  ->
+                 Inh_MAliases  ->
+                 Syn_MAliases 
+wrap_MAliases sem (Inh_MAliases )  =
     (let ( _lhsOself) = sem 
-     in  (Syn_LocalVar _lhsOself ))
-sem_LocalVar_NamedTy :: T_LocalVar 
-sem_LocalVar_NamedTy  =
-    (let _lhsOself :: LocalVar 
+     in  (Syn_MAliases _lhsOself ))
+sem_MAliases_Just :: T_Aliases  ->
+                     T_MAliases 
+sem_MAliases_Just just_  =
+    (let _lhsOself :: MAliases 
+         _justIself :: Aliases 
          _self =
-             NamedTy
+             Just _justIself
          _lhsOself =
              _self
+         ( _justIself) =
+             just_ 
      in  ( _lhsOself))
-sem_LocalVar_Register :: T_Id  ->
-                         T_LocalVar 
-sem_LocalVar_Register name_  =
-    (let _lhsOself :: LocalVar 
-         _nameIself :: Id 
+sem_MAliases_Nothing :: T_MAliases 
+sem_MAliases_Nothing  =
+    (let _lhsOself :: MAliases 
          _self =
-             Register _nameIself
+             Nothing
          _lhsOself =
              _self
-         ( _nameIself) =
-             name_ 
      in  ( _lhsOself))
 -- MAlign ------------------------------------------------------
 type MAlign  = Maybe Align 
@@ -1318,6 +1695,81 @@ sem_MCConv_Just just_  =
 sem_MCConv_Nothing :: T_MCConv 
 sem_MCConv_Nothing  =
     (let _lhsOself :: MCConv 
+         _self =
+             Nothing
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- MConstant ---------------------------------------------------
+type MConstant  = Maybe (Bool)
+-- cata
+sem_MConstant :: MConstant  ->
+                 T_MConstant 
+sem_MConstant (Prelude.Just x )  =
+    (sem_MConstant_Just x )
+sem_MConstant Prelude.Nothing  =
+    sem_MConstant_Nothing
+-- semantic domain
+type T_MConstant  = ( MConstant )
+data Inh_MConstant  = Inh_MConstant {}
+data Syn_MConstant  = Syn_MConstant {self_Syn_MConstant :: MConstant }
+wrap_MConstant :: T_MConstant  ->
+                  Inh_MConstant  ->
+                  Syn_MConstant 
+wrap_MConstant sem (Inh_MConstant )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_MConstant _lhsOself ))
+sem_MConstant_Just :: Bool ->
+                      T_MConstant 
+sem_MConstant_Just just_  =
+    (let _lhsOself :: MConstant 
+         _self =
+             Just just_
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_MConstant_Nothing :: T_MConstant 
+sem_MConstant_Nothing  =
+    (let _lhsOself :: MConstant 
+         _self =
+             Nothing
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- MDefinitionTy -----------------------------------------------
+type MDefinitionTy  = Maybe DefinitionTy 
+-- cata
+sem_MDefinitionTy :: MDefinitionTy  ->
+                     T_MDefinitionTy 
+sem_MDefinitionTy (Prelude.Just x )  =
+    (sem_MDefinitionTy_Just (sem_DefinitionTy x ) )
+sem_MDefinitionTy Prelude.Nothing  =
+    sem_MDefinitionTy_Nothing
+-- semantic domain
+type T_MDefinitionTy  = ( MDefinitionTy )
+data Inh_MDefinitionTy  = Inh_MDefinitionTy {}
+data Syn_MDefinitionTy  = Syn_MDefinitionTy {self_Syn_MDefinitionTy :: MDefinitionTy }
+wrap_MDefinitionTy :: T_MDefinitionTy  ->
+                      Inh_MDefinitionTy  ->
+                      Syn_MDefinitionTy 
+wrap_MDefinitionTy sem (Inh_MDefinitionTy )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_MDefinitionTy _lhsOself ))
+sem_MDefinitionTy_Just :: T_DefinitionTy  ->
+                          T_MDefinitionTy 
+sem_MDefinitionTy_Just just_  =
+    (let _lhsOself :: MDefinitionTy 
+         _justIself :: DefinitionTy 
+         _self =
+             Just _justIself
+         _lhsOself =
+             _self
+         ( _justIself) =
+             just_ 
+     in  ( _lhsOself))
+sem_MDefinitionTy_Nothing :: T_MDefinitionTy 
+sem_MDefinitionTy_Nothing  =
+    (let _lhsOself :: MDefinitionTy 
          _self =
              Nothing
          _lhsOself =
@@ -1440,30 +1892,30 @@ sem_MLinkageTy_Nothing  =
          _lhsOself =
              _self
      in  ( _lhsOself))
--- MParamAttribute ---------------------------------------------
-type MParamAttribute  = Maybe ParamAttribute 
+-- MModuleAsms -------------------------------------------------
+type MModuleAsms  = Maybe ModuleAsms 
 -- cata
-sem_MParamAttribute :: MParamAttribute  ->
-                       T_MParamAttribute 
-sem_MParamAttribute (Prelude.Just x )  =
-    (sem_MParamAttribute_Just (sem_ParamAttribute x ) )
-sem_MParamAttribute Prelude.Nothing  =
-    sem_MParamAttribute_Nothing
+sem_MModuleAsms :: MModuleAsms  ->
+                   T_MModuleAsms 
+sem_MModuleAsms (Prelude.Just x )  =
+    (sem_MModuleAsms_Just (sem_ModuleAsms x ) )
+sem_MModuleAsms Prelude.Nothing  =
+    sem_MModuleAsms_Nothing
 -- semantic domain
-type T_MParamAttribute  = ( MParamAttribute )
-data Inh_MParamAttribute  = Inh_MParamAttribute {}
-data Syn_MParamAttribute  = Syn_MParamAttribute {self_Syn_MParamAttribute :: MParamAttribute }
-wrap_MParamAttribute :: T_MParamAttribute  ->
-                        Inh_MParamAttribute  ->
-                        Syn_MParamAttribute 
-wrap_MParamAttribute sem (Inh_MParamAttribute )  =
+type T_MModuleAsms  = ( MModuleAsms )
+data Inh_MModuleAsms  = Inh_MModuleAsms {}
+data Syn_MModuleAsms  = Syn_MModuleAsms {self_Syn_MModuleAsms :: MModuleAsms }
+wrap_MModuleAsms :: T_MModuleAsms  ->
+                    Inh_MModuleAsms  ->
+                    Syn_MModuleAsms 
+wrap_MModuleAsms sem (Inh_MModuleAsms )  =
     (let ( _lhsOself) = sem 
-     in  (Syn_MParamAttribute _lhsOself ))
-sem_MParamAttribute_Just :: T_ParamAttribute  ->
-                            T_MParamAttribute 
-sem_MParamAttribute_Just just_  =
-    (let _lhsOself :: MParamAttribute 
-         _justIself :: ParamAttribute 
+     in  (Syn_MModuleAsms _lhsOself ))
+sem_MModuleAsms_Just :: T_ModuleAsms  ->
+                        T_MModuleAsms 
+sem_MModuleAsms_Just just_  =
+    (let _lhsOself :: MModuleAsms 
+         _justIself :: ModuleAsms 
          _self =
              Just _justIself
          _lhsOself =
@@ -1471,21 +1923,138 @@ sem_MParamAttribute_Just just_  =
          ( _justIself) =
              just_ 
      in  ( _lhsOself))
-sem_MParamAttribute_Nothing :: T_MParamAttribute 
-sem_MParamAttribute_Nothing  =
-    (let _lhsOself :: MParamAttribute 
+sem_MModuleAsms_Nothing :: T_MModuleAsms 
+sem_MModuleAsms_Nothing  =
+    (let _lhsOself :: MModuleAsms 
+         _self =
+             Nothing
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- MNamedTys ---------------------------------------------------
+type MNamedTys  = Maybe NamedTys 
+-- cata
+sem_MNamedTys :: MNamedTys  ->
+                 T_MNamedTys 
+sem_MNamedTys (Prelude.Just x )  =
+    (sem_MNamedTys_Just (sem_NamedTys x ) )
+sem_MNamedTys Prelude.Nothing  =
+    sem_MNamedTys_Nothing
+-- semantic domain
+type T_MNamedTys  = ( MNamedTys )
+data Inh_MNamedTys  = Inh_MNamedTys {}
+data Syn_MNamedTys  = Syn_MNamedTys {self_Syn_MNamedTys :: MNamedTys }
+wrap_MNamedTys :: T_MNamedTys  ->
+                  Inh_MNamedTys  ->
+                  Syn_MNamedTys 
+wrap_MNamedTys sem (Inh_MNamedTys )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_MNamedTys _lhsOself ))
+sem_MNamedTys_Just :: T_NamedTys  ->
+                      T_MNamedTys 
+sem_MNamedTys_Just just_  =
+    (let _lhsOself :: MNamedTys 
+         _justIself :: NamedTys 
+         _self =
+             Just _justIself
+         _lhsOself =
+             _self
+         ( _justIself) =
+             just_ 
+     in  ( _lhsOself))
+sem_MNamedTys_Nothing :: T_MNamedTys 
+sem_MNamedTys_Nothing  =
+    (let _lhsOself :: MNamedTys 
+         _self =
+             Nothing
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- MParamAttrs -------------------------------------------------
+type MParamAttrs  = Maybe ParamAttrs 
+-- cata
+sem_MParamAttrs :: MParamAttrs  ->
+                   T_MParamAttrs 
+sem_MParamAttrs (Prelude.Just x )  =
+    (sem_MParamAttrs_Just (sem_ParamAttrs x ) )
+sem_MParamAttrs Prelude.Nothing  =
+    sem_MParamAttrs_Nothing
+-- semantic domain
+type T_MParamAttrs  = ( MParamAttrs )
+data Inh_MParamAttrs  = Inh_MParamAttrs {}
+data Syn_MParamAttrs  = Syn_MParamAttrs {self_Syn_MParamAttrs :: MParamAttrs }
+wrap_MParamAttrs :: T_MParamAttrs  ->
+                    Inh_MParamAttrs  ->
+                    Syn_MParamAttrs 
+wrap_MParamAttrs sem (Inh_MParamAttrs )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_MParamAttrs _lhsOself ))
+sem_MParamAttrs_Just :: T_ParamAttrs  ->
+                        T_MParamAttrs 
+sem_MParamAttrs_Just just_  =
+    (let _lhsOself :: MParamAttrs 
+         _justIself :: ParamAttrs 
+         _self =
+             Just _justIself
+         _lhsOself =
+             _self
+         ( _justIself) =
+             just_ 
+     in  ( _lhsOself))
+sem_MParamAttrs_Nothing :: T_MParamAttrs 
+sem_MParamAttrs_Nothing  =
+    (let _lhsOself :: MParamAttrs 
+         _self =
+             Nothing
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- MSection ----------------------------------------------------
+type MSection  = Maybe Section 
+-- cata
+sem_MSection :: MSection  ->
+                T_MSection 
+sem_MSection (Prelude.Just x )  =
+    (sem_MSection_Just (sem_Section x ) )
+sem_MSection Prelude.Nothing  =
+    sem_MSection_Nothing
+-- semantic domain
+type T_MSection  = ( MSection )
+data Inh_MSection  = Inh_MSection {}
+data Syn_MSection  = Syn_MSection {self_Syn_MSection :: MSection }
+wrap_MSection :: T_MSection  ->
+                 Inh_MSection  ->
+                 Syn_MSection 
+wrap_MSection sem (Inh_MSection )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_MSection _lhsOself ))
+sem_MSection_Just :: T_Section  ->
+                     T_MSection 
+sem_MSection_Just just_  =
+    (let _lhsOself :: MSection 
+         _justIself :: Section 
+         _self =
+             Just _justIself
+         _lhsOself =
+             _self
+         ( _justIself) =
+             just_ 
+     in  ( _lhsOself))
+sem_MSection_Nothing :: T_MSection 
+sem_MSection_Nothing  =
+    (let _lhsOself :: MSection 
          _self =
              Nothing
          _lhsOself =
              _self
      in  ( _lhsOself))
 -- MUnnamedAddr ------------------------------------------------
-type MUnnamedAddr  = Maybe UnnamedAddr 
+type MUnnamedAddr  = Maybe (Bool)
 -- cata
 sem_MUnnamedAddr :: MUnnamedAddr  ->
                     T_MUnnamedAddr 
 sem_MUnnamedAddr (Prelude.Just x )  =
-    (sem_MUnnamedAddr_Just (sem_UnnamedAddr x ) )
+    (sem_MUnnamedAddr_Just x )
 sem_MUnnamedAddr Prelude.Nothing  =
     sem_MUnnamedAddr_Nothing
 -- semantic domain
@@ -1498,11 +2067,47 @@ wrap_MUnnamedAddr :: T_MUnnamedAddr  ->
 wrap_MUnnamedAddr sem (Inh_MUnnamedAddr )  =
     (let ( _lhsOself) = sem 
      in  (Syn_MUnnamedAddr _lhsOself ))
-sem_MUnnamedAddr_Just :: T_UnnamedAddr  ->
+sem_MUnnamedAddr_Just :: Bool ->
                          T_MUnnamedAddr 
 sem_MUnnamedAddr_Just just_  =
     (let _lhsOself :: MUnnamedAddr 
-         _justIself :: UnnamedAddr 
+         _self =
+             Just just_
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_MUnnamedAddr_Nothing :: T_MUnnamedAddr 
+sem_MUnnamedAddr_Nothing  =
+    (let _lhsOself :: MUnnamedAddr 
+         _self =
+             Nothing
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- MValue ------------------------------------------------------
+type MValue  = Maybe Value 
+-- cata
+sem_MValue :: MValue  ->
+              T_MValue 
+sem_MValue (Prelude.Just x )  =
+    (sem_MValue_Just (sem_Value x ) )
+sem_MValue Prelude.Nothing  =
+    sem_MValue_Nothing
+-- semantic domain
+type T_MValue  = ( MValue )
+data Inh_MValue  = Inh_MValue {}
+data Syn_MValue  = Syn_MValue {self_Syn_MValue :: MValue }
+wrap_MValue :: T_MValue  ->
+               Inh_MValue  ->
+               Syn_MValue 
+wrap_MValue sem (Inh_MValue )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_MValue _lhsOself ))
+sem_MValue_Just :: T_Value  ->
+                   T_MValue 
+sem_MValue_Just just_  =
+    (let _lhsOself :: MValue 
+         _justIself :: Value 
          _self =
              Just _justIself
          _lhsOself =
@@ -1510,9 +2115,9 @@ sem_MUnnamedAddr_Just just_  =
          ( _justIself) =
              just_ 
      in  ( _lhsOself))
-sem_MUnnamedAddr_Nothing :: T_MUnnamedAddr 
-sem_MUnnamedAddr_Nothing  =
-    (let _lhsOself :: MUnnamedAddr 
+sem_MValue_Nothing :: T_MValue 
+sem_MValue_Nothing  =
+    (let _lhsOself :: MValue 
          _self =
              Nothing
          _lhsOself =
@@ -1557,14 +2162,56 @@ sem_MVisibility_Nothing  =
          _lhsOself =
              _self
      in  ( _lhsOself))
+-- MapTyInt ----------------------------------------------------
+type MapTyInt  = Map ((Type)) (Triplet )
+-- cata
+sem_MapTyInt :: MapTyInt  ->
+                T_MapTyInt 
+sem_MapTyInt m  =
+    (Data.Map.foldrWithKey sem_MapTyInt_Entry sem_MapTyInt_Nil (Data.Map.map sem_Triplet m ) )
+-- semantic domain
+type T_MapTyInt  = ( MapTyInt )
+data Inh_MapTyInt  = Inh_MapTyInt {}
+data Syn_MapTyInt  = Syn_MapTyInt {self_Syn_MapTyInt :: MapTyInt }
+wrap_MapTyInt :: T_MapTyInt  ->
+                 Inh_MapTyInt  ->
+                 Syn_MapTyInt 
+wrap_MapTyInt sem (Inh_MapTyInt )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_MapTyInt _lhsOself ))
+sem_MapTyInt_Entry :: Type ->
+                      T_Triplet  ->
+                      T_MapTyInt  ->
+                      T_MapTyInt 
+sem_MapTyInt_Entry key_ val_ tl_  =
+    (let _lhsOself :: MapTyInt 
+         _valIself :: Triplet 
+         _tlIself :: MapTyInt 
+         _self =
+             Map.insert key_ _valIself _tlIself
+         _lhsOself =
+             _self
+         ( _valIself) =
+             val_ 
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_MapTyInt_Nil :: T_MapTyInt 
+sem_MapTyInt_Nil  =
+    (let _lhsOself :: MapTyInt 
+         _self =
+             Map.empty
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 -- Module ------------------------------------------------------
-data Module  = Module (Functions ) (GlobalVars ) 
-             deriving ( Eq,Show)
+data Module  = Module (TargetData ) (Functions ) (GlobalVars ) 
+             deriving ( Eq,Ord,Show)
 -- cata
 sem_Module :: Module  ->
               T_Module 
-sem_Module (Module _funs _gvars )  =
-    (sem_Module_Module (sem_Functions _funs ) (sem_GlobalVars _gvars ) )
+sem_Module (Module _layout _funs _gvars )  =
+    (sem_Module_Module (sem_TargetData _layout ) (sem_Functions _funs ) (sem_GlobalVars _gvars ) )
 -- semantic domain
 type T_Module  = ( Module )
 data Inh_Module  = Inh_Module {}
@@ -1575,56 +2222,454 @@ wrap_Module :: T_Module  ->
 wrap_Module sem (Inh_Module )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Module _lhsOself ))
-sem_Module_Module :: T_Functions  ->
+sem_Module_Module :: T_TargetData  ->
+                     T_Functions  ->
                      T_GlobalVars  ->
                      T_Module 
-sem_Module_Module funs_ gvars_  =
+sem_Module_Module layout_ funs_ gvars_  =
     (let _lhsOself :: Module 
+         _layoutIself :: TargetData 
          _funsIself :: Functions 
          _gvarsIself :: GlobalVars 
          _self =
-             Module _funsIself _gvarsIself
+             Module _layoutIself _funsIself _gvarsIself
          _lhsOself =
              _self
+         ( _layoutIself) =
+             layout_ 
          ( _funsIself) =
              funs_ 
          ( _gvarsIself) =
              gvars_ 
      in  ( _lhsOself))
--- ParamAttribute ----------------------------------------------
-data ParamAttribute  = ParaAttribute 
-                     deriving ( Eq,Show)
+-- ModuleAsm ---------------------------------------------------
+data ModuleAsm  = ModuleAsm (String) 
 -- cata
-sem_ParamAttribute :: ParamAttribute  ->
-                      T_ParamAttribute 
-sem_ParamAttribute (ParaAttribute )  =
-    (sem_ParamAttribute_ParaAttribute )
+sem_ModuleAsm :: ModuleAsm  ->
+                 T_ModuleAsm 
+sem_ModuleAsm (ModuleAsm _asm )  =
+    (sem_ModuleAsm_ModuleAsm _asm )
 -- semantic domain
-type T_ParamAttribute  = ( ParamAttribute )
-data Inh_ParamAttribute  = Inh_ParamAttribute {}
-data Syn_ParamAttribute  = Syn_ParamAttribute {self_Syn_ParamAttribute :: ParamAttribute }
-wrap_ParamAttribute :: T_ParamAttribute  ->
-                       Inh_ParamAttribute  ->
-                       Syn_ParamAttribute 
-wrap_ParamAttribute sem (Inh_ParamAttribute )  =
+type T_ModuleAsm  = ( ModuleAsm )
+data Inh_ModuleAsm  = Inh_ModuleAsm {}
+data Syn_ModuleAsm  = Syn_ModuleAsm {self_Syn_ModuleAsm :: ModuleAsm }
+wrap_ModuleAsm :: T_ModuleAsm  ->
+                  Inh_ModuleAsm  ->
+                  Syn_ModuleAsm 
+wrap_ModuleAsm sem (Inh_ModuleAsm )  =
     (let ( _lhsOself) = sem 
-     in  (Syn_ParamAttribute _lhsOself ))
-sem_ParamAttribute_ParaAttribute :: T_ParamAttribute 
-sem_ParamAttribute_ParaAttribute  =
-    (let _lhsOself :: ParamAttribute 
+     in  (Syn_ModuleAsm _lhsOself ))
+sem_ModuleAsm_ModuleAsm :: String ->
+                           T_ModuleAsm 
+sem_ModuleAsm_ModuleAsm asm_  =
+    (let _lhsOself :: ModuleAsm 
          _self =
-             ParaAttribute
+             ModuleAsm asm_
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- ModuleAsms --------------------------------------------------
+type ModuleAsms  = [ModuleAsm ]
+-- cata
+sem_ModuleAsms :: ModuleAsms  ->
+                  T_ModuleAsms 
+sem_ModuleAsms list  =
+    (Prelude.foldr sem_ModuleAsms_Cons sem_ModuleAsms_Nil (Prelude.map sem_ModuleAsm list) )
+-- semantic domain
+type T_ModuleAsms  = ( ModuleAsms )
+data Inh_ModuleAsms  = Inh_ModuleAsms {}
+data Syn_ModuleAsms  = Syn_ModuleAsms {self_Syn_ModuleAsms :: ModuleAsms }
+wrap_ModuleAsms :: T_ModuleAsms  ->
+                   Inh_ModuleAsms  ->
+                   Syn_ModuleAsms 
+wrap_ModuleAsms sem (Inh_ModuleAsms )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_ModuleAsms _lhsOself ))
+sem_ModuleAsms_Cons :: T_ModuleAsm  ->
+                       T_ModuleAsms  ->
+                       T_ModuleAsms 
+sem_ModuleAsms_Cons hd_ tl_  =
+    (let _lhsOself :: ModuleAsms 
+         _hdIself :: ModuleAsm 
+         _tlIself :: ModuleAsms 
+         _self =
+             (:) _hdIself _tlIself
+         _lhsOself =
+             _self
+         ( _hdIself) =
+             hd_ 
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_ModuleAsms_Nil :: T_ModuleAsms 
+sem_ModuleAsms_Nil  =
+    (let _lhsOself :: ModuleAsms 
+         _self =
+             []
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- NamedTy -----------------------------------------------------
+data NamedTy  = NamedTy (Id ) (Type ) 
+              deriving ( Eq,Ord,Show)
+-- cata
+sem_NamedTy :: NamedTy  ->
+               T_NamedTy 
+sem_NamedTy (NamedTy _name _ty )  =
+    (sem_NamedTy_NamedTy (sem_Id _name ) (sem_Type _ty ) )
+-- semantic domain
+type T_NamedTy  = ( NamedTy )
+data Inh_NamedTy  = Inh_NamedTy {}
+data Syn_NamedTy  = Syn_NamedTy {self_Syn_NamedTy :: NamedTy }
+wrap_NamedTy :: T_NamedTy  ->
+                Inh_NamedTy  ->
+                Syn_NamedTy 
+wrap_NamedTy sem (Inh_NamedTy )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_NamedTy _lhsOself ))
+sem_NamedTy_NamedTy :: T_Id  ->
+                       T_Type  ->
+                       T_NamedTy 
+sem_NamedTy_NamedTy name_ ty_  =
+    (let _lhsOself :: NamedTy 
+         _nameIself :: Id 
+         _tyIself :: Type 
+         _self =
+             NamedTy _nameIself _tyIself
+         _lhsOself =
+             _self
+         ( _nameIself) =
+             name_ 
+         ( _tyIself) =
+             ty_ 
+     in  ( _lhsOself))
+-- NamedTys ----------------------------------------------------
+type NamedTys  = [NamedTy ]
+-- cata
+sem_NamedTys :: NamedTys  ->
+                T_NamedTys 
+sem_NamedTys list  =
+    (Prelude.foldr sem_NamedTys_Cons sem_NamedTys_Nil (Prelude.map sem_NamedTy list) )
+-- semantic domain
+type T_NamedTys  = ( NamedTys )
+data Inh_NamedTys  = Inh_NamedTys {}
+data Syn_NamedTys  = Syn_NamedTys {self_Syn_NamedTys :: NamedTys }
+wrap_NamedTys :: T_NamedTys  ->
+                 Inh_NamedTys  ->
+                 Syn_NamedTys 
+wrap_NamedTys sem (Inh_NamedTys )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_NamedTys _lhsOself ))
+sem_NamedTys_Cons :: T_NamedTy  ->
+                     T_NamedTys  ->
+                     T_NamedTys 
+sem_NamedTys_Cons hd_ tl_  =
+    (let _lhsOself :: NamedTys 
+         _hdIself :: NamedTy 
+         _tlIself :: NamedTys 
+         _self =
+             (:) _hdIself _tlIself
+         _lhsOself =
+             _self
+         ( _hdIself) =
+             hd_ 
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_NamedTys_Nil :: T_NamedTys 
+sem_NamedTys_Nil  =
+    (let _lhsOself :: NamedTys 
+         _self =
+             []
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- PTyInt ------------------------------------------------------
+type PTyInt  = ( Type ,(Int))
+-- cata
+sem_PTyInt :: PTyInt  ->
+              T_PTyInt 
+sem_PTyInt ( x1,x2)  =
+    (sem_PTyInt_Tuple (sem_Type x1 ) x2 )
+-- semantic domain
+type T_PTyInt  = ( PTyInt )
+data Inh_PTyInt  = Inh_PTyInt {}
+data Syn_PTyInt  = Syn_PTyInt {self_Syn_PTyInt :: PTyInt }
+wrap_PTyInt :: T_PTyInt  ->
+               Inh_PTyInt  ->
+               Syn_PTyInt 
+wrap_PTyInt sem (Inh_PTyInt )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_PTyInt _lhsOself ))
+sem_PTyInt_Tuple :: T_Type  ->
+                    Int ->
+                    T_PTyInt 
+sem_PTyInt_Tuple x1_ x2_  =
+    (let _lhsOself :: PTyInt 
+         _x1Iself :: Type 
+         _self =
+             (_x1Iself,x2_)
+         _lhsOself =
+             _self
+         ( _x1Iself) =
+             x1_ 
+     in  ( _lhsOself))
+-- PTyIntL -----------------------------------------------------
+type PTyIntL  = [PTyInt ]
+-- cata
+sem_PTyIntL :: PTyIntL  ->
+               T_PTyIntL 
+sem_PTyIntL list  =
+    (Prelude.foldr sem_PTyIntL_Cons sem_PTyIntL_Nil (Prelude.map sem_PTyInt list) )
+-- semantic domain
+type T_PTyIntL  = ( PTyIntL )
+data Inh_PTyIntL  = Inh_PTyIntL {}
+data Syn_PTyIntL  = Syn_PTyIntL {self_Syn_PTyIntL :: PTyIntL }
+wrap_PTyIntL :: T_PTyIntL  ->
+                Inh_PTyIntL  ->
+                Syn_PTyIntL 
+wrap_PTyIntL sem (Inh_PTyIntL )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_PTyIntL _lhsOself ))
+sem_PTyIntL_Cons :: T_PTyInt  ->
+                    T_PTyIntL  ->
+                    T_PTyIntL 
+sem_PTyIntL_Cons hd_ tl_  =
+    (let _lhsOself :: PTyIntL 
+         _hdIself :: PTyInt 
+         _tlIself :: PTyIntL 
+         _self =
+             (:) _hdIself _tlIself
+         _lhsOself =
+             _self
+         ( _hdIself) =
+             hd_ 
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_PTyIntL_Nil :: T_PTyIntL 
+sem_PTyIntL_Nil  =
+    (let _lhsOself :: PTyIntL 
+         _self =
+             []
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- ParamAttr ---------------------------------------------------
+data ParamAttr  = Byval 
+                | Inreg 
+                | Nest 
+                | Noalias 
+                | Nocapture 
+                | Signext 
+                | Sret 
+                | Zeroext 
+                deriving ( Eq,Ord,Show)
+-- cata
+sem_ParamAttr :: ParamAttr  ->
+                 T_ParamAttr 
+sem_ParamAttr (Byval )  =
+    (sem_ParamAttr_Byval )
+sem_ParamAttr (Inreg )  =
+    (sem_ParamAttr_Inreg )
+sem_ParamAttr (Nest )  =
+    (sem_ParamAttr_Nest )
+sem_ParamAttr (Noalias )  =
+    (sem_ParamAttr_Noalias )
+sem_ParamAttr (Nocapture )  =
+    (sem_ParamAttr_Nocapture )
+sem_ParamAttr (Signext )  =
+    (sem_ParamAttr_Signext )
+sem_ParamAttr (Sret )  =
+    (sem_ParamAttr_Sret )
+sem_ParamAttr (Zeroext )  =
+    (sem_ParamAttr_Zeroext )
+-- semantic domain
+type T_ParamAttr  = ( ParamAttr )
+data Inh_ParamAttr  = Inh_ParamAttr {}
+data Syn_ParamAttr  = Syn_ParamAttr {self_Syn_ParamAttr :: ParamAttr }
+wrap_ParamAttr :: T_ParamAttr  ->
+                  Inh_ParamAttr  ->
+                  Syn_ParamAttr 
+wrap_ParamAttr sem (Inh_ParamAttr )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_ParamAttr _lhsOself ))
+sem_ParamAttr_Byval :: T_ParamAttr 
+sem_ParamAttr_Byval  =
+    (let _lhsOself :: ParamAttr 
+         _self =
+             Byval
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_ParamAttr_Inreg :: T_ParamAttr 
+sem_ParamAttr_Inreg  =
+    (let _lhsOself :: ParamAttr 
+         _self =
+             Inreg
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_ParamAttr_Nest :: T_ParamAttr 
+sem_ParamAttr_Nest  =
+    (let _lhsOself :: ParamAttr 
+         _self =
+             Nest
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_ParamAttr_Noalias :: T_ParamAttr 
+sem_ParamAttr_Noalias  =
+    (let _lhsOself :: ParamAttr 
+         _self =
+             Noalias
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_ParamAttr_Nocapture :: T_ParamAttr 
+sem_ParamAttr_Nocapture  =
+    (let _lhsOself :: ParamAttr 
+         _self =
+             Nocapture
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_ParamAttr_Signext :: T_ParamAttr 
+sem_ParamAttr_Signext  =
+    (let _lhsOself :: ParamAttr 
+         _self =
+             Signext
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_ParamAttr_Sret :: T_ParamAttr 
+sem_ParamAttr_Sret  =
+    (let _lhsOself :: ParamAttr 
+         _self =
+             Sret
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_ParamAttr_Zeroext :: T_ParamAttr 
+sem_ParamAttr_Zeroext  =
+    (let _lhsOself :: ParamAttr 
+         _self =
+             Zeroext
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- ParamAttrs --------------------------------------------------
+type ParamAttrs  = [ParamAttr ]
+-- cata
+sem_ParamAttrs :: ParamAttrs  ->
+                  T_ParamAttrs 
+sem_ParamAttrs list  =
+    (Prelude.foldr sem_ParamAttrs_Cons sem_ParamAttrs_Nil (Prelude.map sem_ParamAttr list) )
+-- semantic domain
+type T_ParamAttrs  = ( ParamAttrs )
+data Inh_ParamAttrs  = Inh_ParamAttrs {}
+data Syn_ParamAttrs  = Syn_ParamAttrs {self_Syn_ParamAttrs :: ParamAttrs }
+wrap_ParamAttrs :: T_ParamAttrs  ->
+                   Inh_ParamAttrs  ->
+                   Syn_ParamAttrs 
+wrap_ParamAttrs sem (Inh_ParamAttrs )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_ParamAttrs _lhsOself ))
+sem_ParamAttrs_Cons :: T_ParamAttr  ->
+                       T_ParamAttrs  ->
+                       T_ParamAttrs 
+sem_ParamAttrs_Cons hd_ tl_  =
+    (let _lhsOself :: ParamAttrs 
+         _hdIself :: ParamAttr 
+         _tlIself :: ParamAttrs 
+         _self =
+             (:) _hdIself _tlIself
+         _lhsOself =
+             _self
+         ( _hdIself) =
+             hd_ 
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_ParamAttrs_Nil :: T_ParamAttrs 
+sem_ParamAttrs_Nil  =
+    (let _lhsOself :: ParamAttrs 
+         _self =
+             []
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- Section -----------------------------------------------------
+data Section  = Section (String) 
+              deriving ( Eq,Ord,Show)
+-- cata
+sem_Section :: Section  ->
+               T_Section 
+sem_Section (Section _s )  =
+    (sem_Section_Section _s )
+-- semantic domain
+type T_Section  = ( Section )
+data Inh_Section  = Inh_Section {}
+data Syn_Section  = Syn_Section {self_Syn_Section :: Section }
+wrap_Section :: T_Section  ->
+                Inh_Section  ->
+                Syn_Section 
+wrap_Section sem (Inh_Section )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_Section _lhsOself ))
+sem_Section_Section :: String ->
+                       T_Section 
+sem_Section_Section s_  =
+    (let _lhsOself :: Section 
+         _self =
+             Section s_
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- TargetData --------------------------------------------------
+data TargetData  = TargetData (String) 
+                 deriving ( Eq,Ord,Show)
+-- cata
+sem_TargetData :: TargetData  ->
+                  T_TargetData 
+sem_TargetData (TargetData _s )  =
+    (sem_TargetData_TargetData _s )
+-- semantic domain
+type T_TargetData  = ( TargetData )
+data Inh_TargetData  = Inh_TargetData {}
+data Syn_TargetData  = Syn_TargetData {self_Syn_TargetData :: TargetData }
+wrap_TargetData :: T_TargetData  ->
+                   Inh_TargetData  ->
+                   Syn_TargetData 
+wrap_TargetData sem (Inh_TargetData )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_TargetData _lhsOself ))
+sem_TargetData_TargetData :: String ->
+                             T_TargetData 
+sem_TargetData_TargetData s_  =
+    (let _lhsOself :: TargetData 
+         _self =
+             TargetData s_
          _lhsOself =
              _self
      in  ( _lhsOself))
 -- Terminator --------------------------------------------------
-data Terminator  = Terminator 
-                 deriving ( Eq,Show)
+data Terminator  = Br (Bool) (Identifier ) (Identifier ) 
+                 | Ret (MValue ) 
+                 | Switch (IntTyValIdL ) 
+                 | UBr (Identifier ) 
+                 deriving ( Eq,Ord,Show)
 -- cata
 sem_Terminator :: Terminator  ->
                   T_Terminator 
-sem_Terminator (Terminator )  =
-    (sem_Terminator_Terminator )
+sem_Terminator (Br _v _t _f )  =
+    (sem_Terminator_Br _v (sem_Identifier _t ) (sem_Identifier _f ) )
+sem_Terminator (Ret _v )  =
+    (sem_Terminator_Ret (sem_MValue _v ) )
+sem_Terminator (Switch _elems )  =
+    (sem_Terminator_Switch (sem_IntTyValIdL _elems ) )
+sem_Terminator (UBr _d )  =
+    (sem_Terminator_UBr (sem_Identifier _d ) )
 -- semantic domain
 type T_Terminator  = ( Terminator )
 data Inh_Terminator  = Inh_Terminator {}
@@ -1635,22 +2680,128 @@ wrap_Terminator :: T_Terminator  ->
 wrap_Terminator sem (Inh_Terminator )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Terminator _lhsOself ))
-sem_Terminator_Terminator :: T_Terminator 
-sem_Terminator_Terminator  =
+sem_Terminator_Br :: Bool ->
+                     T_Identifier  ->
+                     T_Identifier  ->
+                     T_Terminator 
+sem_Terminator_Br v_ t_ f_  =
     (let _lhsOself :: Terminator 
+         _tIself :: Identifier 
+         _fIself :: Identifier 
          _self =
-             Terminator
+             Br v_ _tIself _fIself
+         _lhsOself =
+             _self
+         ( _tIself) =
+             t_ 
+         ( _fIself) =
+             f_ 
+     in  ( _lhsOself))
+sem_Terminator_Ret :: T_MValue  ->
+                      T_Terminator 
+sem_Terminator_Ret v_  =
+    (let _lhsOself :: Terminator 
+         _vIself :: MValue 
+         _self =
+             Ret _vIself
+         _lhsOself =
+             _self
+         ( _vIself) =
+             v_ 
+     in  ( _lhsOself))
+sem_Terminator_Switch :: T_IntTyValIdL  ->
+                         T_Terminator 
+sem_Terminator_Switch elems_  =
+    (let _lhsOself :: Terminator 
+         _elemsIself :: IntTyValIdL 
+         _self =
+             Switch _elemsIself
+         _lhsOself =
+             _self
+         ( _elemsIself) =
+             elems_ 
+     in  ( _lhsOself))
+sem_Terminator_UBr :: T_Identifier  ->
+                      T_Terminator 
+sem_Terminator_UBr d_  =
+    (let _lhsOself :: Terminator 
+         _dIself :: Identifier 
+         _self =
+             UBr _dIself
+         _lhsOself =
+             _self
+         ( _dIself) =
+             d_ 
+     in  ( _lhsOself))
+-- Triplet -----------------------------------------------------
+type Triplet  = ( (Int),(Int),(Int))
+-- cata
+sem_Triplet :: Triplet  ->
+               T_Triplet 
+sem_Triplet ( x1,x2,x3)  =
+    (sem_Triplet_Tuple x1 x2 x3 )
+-- semantic domain
+type T_Triplet  = ( Triplet )
+data Inh_Triplet  = Inh_Triplet {}
+data Syn_Triplet  = Syn_Triplet {self_Syn_Triplet :: Triplet }
+wrap_Triplet :: T_Triplet  ->
+                Inh_Triplet  ->
+                Syn_Triplet 
+wrap_Triplet sem (Inh_Triplet )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_Triplet _lhsOself ))
+sem_Triplet_Tuple :: Int ->
+                     Int ->
+                     Int ->
+                     T_Triplet 
+sem_Triplet_Tuple x1_ x2_ x3_  =
+    (let _lhsOself :: Triplet 
+         _self =
+             (x1_,x2_,x3_)
          _lhsOself =
              _self
      in  ( _lhsOself))
 -- Type --------------------------------------------------------
-data Type  = Intz 
-           deriving ( Eq,Show)
+data Type  = ArrayTy (Ints ) (Type ) 
+           | FpTy (FpTy ) 
+           | FunctionTy (Types ) (Type ) 
+           | IntTy (Int) 
+           | LabelTy 
+           | MetadataTy 
+           | OpaqueTy 
+           | PointerTy (Type ) 
+           | StructureTy (Types ) 
+           | VectorTy (Ints ) (Type ) 
+           | VoidTy 
+           | X86mmxTy 
+           deriving ( Eq,Ord,Show)
 -- cata
 sem_Type :: Type  ->
             T_Type 
-sem_Type (Intz )  =
-    (sem_Type_Intz )
+sem_Type (ArrayTy _elems _ty )  =
+    (sem_Type_ArrayTy (sem_Ints _elems ) (sem_Type _ty ) )
+sem_Type (FpTy _fp )  =
+    (sem_Type_FpTy (sem_FpTy _fp ) )
+sem_Type (FunctionTy _party _retty )  =
+    (sem_Type_FunctionTy (sem_Types _party ) (sem_Type _retty ) )
+sem_Type (IntTy _i )  =
+    (sem_Type_IntTy _i )
+sem_Type (LabelTy )  =
+    (sem_Type_LabelTy )
+sem_Type (MetadataTy )  =
+    (sem_Type_MetadataTy )
+sem_Type (OpaqueTy )  =
+    (sem_Type_OpaqueTy )
+sem_Type (PointerTy _ty )  =
+    (sem_Type_PointerTy (sem_Type _ty ) )
+sem_Type (StructureTy _tys )  =
+    (sem_Type_StructureTy (sem_Types _tys ) )
+sem_Type (VectorTy _elems _ty )  =
+    (sem_Type_VectorTy (sem_Ints _elems ) (sem_Type _ty ) )
+sem_Type (VoidTy )  =
+    (sem_Type_VoidTy )
+sem_Type (X86mmxTy )  =
+    (sem_Type_X86mmxTy )
 -- semantic domain
 type T_Type  = ( Type )
 data Inh_Type  = Inh_Type {}
@@ -1661,45 +2812,230 @@ wrap_Type :: T_Type  ->
 wrap_Type sem (Inh_Type )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Type _lhsOself ))
-sem_Type_Intz :: T_Type 
-sem_Type_Intz  =
+sem_Type_ArrayTy :: T_Ints  ->
+                    T_Type  ->
+                    T_Type 
+sem_Type_ArrayTy elems_ ty_  =
+    (let _lhsOself :: Type 
+         _elemsIself :: Ints 
+         _tyIself :: Type 
+         _self =
+             ArrayTy _elemsIself _tyIself
+         _lhsOself =
+             _self
+         ( _elemsIself) =
+             elems_ 
+         ( _tyIself) =
+             ty_ 
+     in  ( _lhsOself))
+sem_Type_FpTy :: T_FpTy  ->
+                 T_Type 
+sem_Type_FpTy fp_  =
+    (let _lhsOself :: Type 
+         _fpIself :: FpTy 
+         _self =
+             FpTy _fpIself
+         _lhsOself =
+             _self
+         ( _fpIself) =
+             fp_ 
+     in  ( _lhsOself))
+sem_Type_FunctionTy :: T_Types  ->
+                       T_Type  ->
+                       T_Type 
+sem_Type_FunctionTy party_ retty_  =
+    (let _lhsOself :: Type 
+         _partyIself :: Types 
+         _rettyIself :: Type 
+         _self =
+             FunctionTy _partyIself _rettyIself
+         _lhsOself =
+             _self
+         ( _partyIself) =
+             party_ 
+         ( _rettyIself) =
+             retty_ 
+     in  ( _lhsOself))
+sem_Type_IntTy :: Int ->
+                  T_Type 
+sem_Type_IntTy i_  =
     (let _lhsOself :: Type 
          _self =
-             Intz
+             IntTy i_
          _lhsOself =
              _self
      in  ( _lhsOself))
--- UnnamedAddr -------------------------------------------------
-data UnnamedAddr  = UnnamedAddr 
-                  deriving ( Eq,Show)
--- cata
-sem_UnnamedAddr :: UnnamedAddr  ->
-                   T_UnnamedAddr 
-sem_UnnamedAddr (UnnamedAddr )  =
-    (sem_UnnamedAddr_UnnamedAddr )
--- semantic domain
-type T_UnnamedAddr  = ( UnnamedAddr )
-data Inh_UnnamedAddr  = Inh_UnnamedAddr {}
-data Syn_UnnamedAddr  = Syn_UnnamedAddr {self_Syn_UnnamedAddr :: UnnamedAddr }
-wrap_UnnamedAddr :: T_UnnamedAddr  ->
-                    Inh_UnnamedAddr  ->
-                    Syn_UnnamedAddr 
-wrap_UnnamedAddr sem (Inh_UnnamedAddr )  =
-    (let ( _lhsOself) = sem 
-     in  (Syn_UnnamedAddr _lhsOself ))
-sem_UnnamedAddr_UnnamedAddr :: T_UnnamedAddr 
-sem_UnnamedAddr_UnnamedAddr  =
-    (let _lhsOself :: UnnamedAddr 
+sem_Type_LabelTy :: T_Type 
+sem_Type_LabelTy  =
+    (let _lhsOself :: Type 
          _self =
-             UnnamedAddr
+             LabelTy
          _lhsOself =
              _self
+     in  ( _lhsOself))
+sem_Type_MetadataTy :: T_Type 
+sem_Type_MetadataTy  =
+    (let _lhsOself :: Type 
+         _self =
+             MetadataTy
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Type_OpaqueTy :: T_Type 
+sem_Type_OpaqueTy  =
+    (let _lhsOself :: Type 
+         _self =
+             OpaqueTy
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Type_PointerTy :: T_Type  ->
+                      T_Type 
+sem_Type_PointerTy ty_  =
+    (let _lhsOself :: Type 
+         _tyIself :: Type 
+         _self =
+             PointerTy _tyIself
+         _lhsOself =
+             _self
+         ( _tyIself) =
+             ty_ 
+     in  ( _lhsOself))
+sem_Type_StructureTy :: T_Types  ->
+                        T_Type 
+sem_Type_StructureTy tys_  =
+    (let _lhsOself :: Type 
+         _tysIself :: Types 
+         _self =
+             StructureTy _tysIself
+         _lhsOself =
+             _self
+         ( _tysIself) =
+             tys_ 
+     in  ( _lhsOself))
+sem_Type_VectorTy :: T_Ints  ->
+                     T_Type  ->
+                     T_Type 
+sem_Type_VectorTy elems_ ty_  =
+    (let _lhsOself :: Type 
+         _elemsIself :: Ints 
+         _tyIself :: Type 
+         _self =
+             VectorTy _elemsIself _tyIself
+         _lhsOself =
+             _self
+         ( _elemsIself) =
+             elems_ 
+         ( _tyIself) =
+             ty_ 
+     in  ( _lhsOself))
+sem_Type_VoidTy :: T_Type 
+sem_Type_VoidTy  =
+    (let _lhsOself :: Type 
+         _self =
+             VoidTy
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Type_X86mmxTy :: T_Type 
+sem_Type_X86mmxTy  =
+    (let _lhsOself :: Type 
+         _self =
+             X86mmxTy
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- Types -------------------------------------------------------
+type Types  = [Type ]
+-- cata
+sem_Types :: Types  ->
+             T_Types 
+sem_Types list  =
+    (Prelude.foldr sem_Types_Cons sem_Types_Nil (Prelude.map sem_Type list) )
+-- semantic domain
+type T_Types  = ( Types )
+data Inh_Types  = Inh_Types {}
+data Syn_Types  = Syn_Types {self_Syn_Types :: Types }
+wrap_Types :: T_Types  ->
+              Inh_Types  ->
+              Syn_Types 
+wrap_Types sem (Inh_Types )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_Types _lhsOself ))
+sem_Types_Cons :: T_Type  ->
+                  T_Types  ->
+                  T_Types 
+sem_Types_Cons hd_ tl_  =
+    (let _lhsOself :: Types 
+         _hdIself :: Type 
+         _tlIself :: Types 
+         _self =
+             (:) _hdIself _tlIself
+         _lhsOself =
+             _self
+         ( _hdIself) =
+             hd_ 
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_Types_Nil :: T_Types 
+sem_Types_Nil  =
+    (let _lhsOself :: Types 
+         _self =
+             []
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+-- Value -------------------------------------------------------
+data Value  = Const (Constant ) 
+            | Id (Identifier ) 
+            deriving ( Eq,Ord,Show)
+-- cata
+sem_Value :: Value  ->
+             T_Value 
+sem_Value (Const _c )  =
+    (sem_Value_Const (sem_Constant _c ) )
+sem_Value (Id _v )  =
+    (sem_Value_Id (sem_Identifier _v ) )
+-- semantic domain
+type T_Value  = ( Value )
+data Inh_Value  = Inh_Value {}
+data Syn_Value  = Syn_Value {self_Syn_Value :: Value }
+wrap_Value :: T_Value  ->
+              Inh_Value  ->
+              Syn_Value 
+wrap_Value sem (Inh_Value )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_Value _lhsOself ))
+sem_Value_Const :: T_Constant  ->
+                   T_Value 
+sem_Value_Const c_  =
+    (let _lhsOself :: Value 
+         _cIself :: Constant 
+         _self =
+             Const _cIself
+         _lhsOself =
+             _self
+         ( _cIself) =
+             c_ 
+     in  ( _lhsOself))
+sem_Value_Id :: T_Identifier  ->
+                T_Value 
+sem_Value_Id v_  =
+    (let _lhsOself :: Value 
+         _vIself :: Identifier 
+         _self =
+             Id _vIself
+         _lhsOself =
+             _self
+         ( _vIself) =
+             v_ 
      in  ( _lhsOself))
 -- Visibility --------------------------------------------------
 data Visibility  = Default 
                  | Hidden 
                  | Protected 
-                 deriving ( Eq,Show)
+                 deriving ( Eq,Ord,Show)
 -- cata
 sem_Visibility :: Visibility  ->
                   T_Visibility 
