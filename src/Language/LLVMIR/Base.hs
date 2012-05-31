@@ -509,13 +509,52 @@ sem_Constant_ZeroInitC ty_  =
          ( _tyIself) =
              ty_ 
      in  ( _lhsOself))
+-- DLayout -----------------------------------------------------
+type DLayout  = [(String)]
+-- cata
+sem_DLayout :: DLayout  ->
+               T_DLayout 
+sem_DLayout list  =
+    (Prelude.foldr sem_DLayout_Cons sem_DLayout_Nil list )
+-- semantic domain
+type T_DLayout  = ( DLayout )
+data Inh_DLayout  = Inh_DLayout {}
+data Syn_DLayout  = Syn_DLayout {self_Syn_DLayout :: DLayout }
+wrap_DLayout :: T_DLayout  ->
+                Inh_DLayout  ->
+                Syn_DLayout 
+wrap_DLayout sem (Inh_DLayout )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_DLayout _lhsOself ))
+sem_DLayout_Cons :: String ->
+                    T_DLayout  ->
+                    T_DLayout 
+sem_DLayout_Cons hd_ tl_  =
+    (let _lhsOself :: DLayout 
+         _tlIself :: DLayout 
+         _self =
+             (:) hd_ _tlIself
+         _lhsOself =
+             _self
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_DLayout_Nil :: T_DLayout 
+sem_DLayout_Nil  =
+    (let _lhsOself :: DLayout 
+         _self =
+             []
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 -- DataLayout --------------------------------------------------
-type DataLayout  = [(String)]
+data DataLayout  = DataLayout (DLayout ) 
+                 deriving ( Eq,Ord,Show)
 -- cata
 sem_DataLayout :: DataLayout  ->
                   T_DataLayout 
-sem_DataLayout list  =
-    (Prelude.foldr sem_DataLayout_Cons sem_DataLayout_Nil list )
+sem_DataLayout (DataLayout _s )  =
+    (sem_DataLayout_DataLayout (sem_DLayout _s ) )
 -- semantic domain
 type T_DataLayout  = ( DataLayout )
 data Inh_DataLayout  = Inh_DataLayout {}
@@ -526,26 +565,17 @@ wrap_DataLayout :: T_DataLayout  ->
 wrap_DataLayout sem (Inh_DataLayout )  =
     (let ( _lhsOself) = sem 
      in  (Syn_DataLayout _lhsOself ))
-sem_DataLayout_Cons :: String ->
-                       T_DataLayout  ->
-                       T_DataLayout 
-sem_DataLayout_Cons hd_ tl_  =
+sem_DataLayout_DataLayout :: T_DLayout  ->
+                             T_DataLayout 
+sem_DataLayout_DataLayout s_  =
     (let _lhsOself :: DataLayout 
-         _tlIself :: DataLayout 
+         _sIself :: DLayout 
          _self =
-             (:) hd_ _tlIself
+             DataLayout _sIself
          _lhsOself =
              _self
-         ( _tlIself) =
-             tl_ 
-     in  ( _lhsOself))
-sem_DataLayout_Nil :: T_DataLayout 
-sem_DataLayout_Nil  =
-    (let _lhsOself :: DataLayout 
-         _self =
-             []
-         _lhsOself =
-             _self
+         ( _sIself) =
+             s_ 
      in  ( _lhsOself))
 -- DefinitionTy ------------------------------------------------
 data DefinitionTy  = Constant 
@@ -2243,13 +2273,13 @@ sem_MapTyInt_Nil  =
              _self
      in  ( _lhsOself))
 -- Module ------------------------------------------------------
-data Module  = Module (TargetData ) (Functions ) (GlobalVars ) 
+data Module  = Module (DataLayout ) (TargetData ) (Functions ) (GlobalVars ) 
              deriving ( Eq,Ord,Show)
 -- cata
 sem_Module :: Module  ->
               T_Module 
-sem_Module (Module _layout _funs _gvars )  =
-    (sem_Module_Module (sem_TargetData _layout ) (sem_Functions _funs ) (sem_GlobalVars _gvars ) )
+sem_Module (Module _layout _target _funs _gvars )  =
+    (sem_Module_Module (sem_DataLayout _layout ) (sem_TargetData _target ) (sem_Functions _funs ) (sem_GlobalVars _gvars ) )
 -- semantic domain
 type T_Module  = ( Module )
 data Inh_Module  = Inh_Module {}
@@ -2260,21 +2290,25 @@ wrap_Module :: T_Module  ->
 wrap_Module sem (Inh_Module )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Module _lhsOself ))
-sem_Module_Module :: T_TargetData  ->
+sem_Module_Module :: T_DataLayout  ->
+                     T_TargetData  ->
                      T_Functions  ->
                      T_GlobalVars  ->
                      T_Module 
-sem_Module_Module layout_ funs_ gvars_  =
+sem_Module_Module layout_ target_ funs_ gvars_  =
     (let _lhsOself :: Module 
-         _layoutIself :: TargetData 
+         _layoutIself :: DataLayout 
+         _targetIself :: TargetData 
          _funsIself :: Functions 
          _gvarsIself :: GlobalVars 
          _self =
-             Module _layoutIself _funsIself _gvarsIself
+             Module _layoutIself _targetIself _funsIself _gvarsIself
          _lhsOself =
              _self
          ( _layoutIself) =
              layout_ 
+         ( _targetIself) =
+             target_ 
          ( _funsIself) =
              funs_ 
          ( _gvarsIself) =
@@ -2665,13 +2699,12 @@ sem_Section_Section s_  =
              _self
      in  ( _lhsOself))
 -- TargetData --------------------------------------------------
-data TargetData  = TargetData (DataLayout ) 
-                 deriving ( Eq,Ord,Show)
+type TargetData  = ( (String))
 -- cata
 sem_TargetData :: TargetData  ->
                   T_TargetData 
-sem_TargetData (TargetData _s )  =
-    (sem_TargetData_TargetData (sem_DataLayout _s ) )
+sem_TargetData ( x1)  =
+    (sem_TargetData_Tuple x1 )
 -- semantic domain
 type T_TargetData  = ( TargetData )
 data Inh_TargetData  = Inh_TargetData {}
@@ -2682,17 +2715,14 @@ wrap_TargetData :: T_TargetData  ->
 wrap_TargetData sem (Inh_TargetData )  =
     (let ( _lhsOself) = sem 
      in  (Syn_TargetData _lhsOself ))
-sem_TargetData_TargetData :: T_DataLayout  ->
-                             T_TargetData 
-sem_TargetData_TargetData s_  =
+sem_TargetData_Tuple :: String ->
+                        T_TargetData 
+sem_TargetData_Tuple x1_  =
     (let _lhsOself :: TargetData 
-         _sIself :: DataLayout 
          _self =
-             TargetData _sIself
+             (x1_)
          _lhsOself =
              _self
-         ( _sIself) =
-             s_ 
      in  ( _lhsOself))
 -- Terminator --------------------------------------------------
 data Terminator  = Br (Bool) (Identifier ) (Identifier ) 

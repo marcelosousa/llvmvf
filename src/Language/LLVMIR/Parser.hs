@@ -12,7 +12,7 @@ import System.FilePath
 import qualified Language.LLVMIR.Base as LL
 
 import LLVM.Core hiding (Value) 
-import LLVM.ExecutionEngine
+import LLVM.ExecutionEngine hiding (getTargetData)
 
 import qualified LLVM.FFI.Core as FFI
 import qualified LLVM.FFI.Target as FFI
@@ -38,16 +38,25 @@ parse file = do mdl <- readBitcodeFromFile file
 parse :: FilePath -> IO LL.Module 
 parse file = do mdl <- readBitcodeFromFile file
                 layout <- getSDataLayoutModule mdl
+                target <- getTargetData mdl
                 funs <- getFuncs mdl
                 gvars <- getGlobalVar mdl
-                return $ LL.Module layout funs gvars
+                return $ LL.Module layout target funs gvars
 
+-- Target data
+
+getTargetData :: Module -> IO LL.TargetData
+getTargetData mdl = withModule mdl $ \mdlPtr -> do 
+                     cs <- FFI.getTarget mdlPtr
+                     s <- peekCString cs                            
+                     return s
+  
 -- Data Layout    
-getSDataLayoutModule :: Module -> IO LL.TargetData
+getSDataLayoutModule :: Module -> IO LL.DataLayout
 getSDataLayoutModule mdl = withModule mdl $ \mdlPtr -> do 
                             cs <- FFI.getDataLayout mdlPtr
                             s <- peekCString cs                            
-                            return $ LL.TargetData $ runParser "error" pDataLayout s
+                            return $ LL.DataLayout $ runParser "error" pDataLayout s
                             
 getDataLayoutModule :: Module -> IO TargetData
 getDataLayoutModule mdl = withModule mdl $ \mdlPtr -> do 

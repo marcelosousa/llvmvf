@@ -58,14 +58,16 @@ type MapTyInt = map {Type} Triplet
 type PTyInt = (Type, Int)
 type PTyIntL = [PTyInt]
 
-type DataLayout = [String]
+type DLayout = [String]
+type TargetData = (String)
 
 type IntTyValId = (Type, Value, Identifier)
 type IntTyValIdL = [IntTyValId]
 
 data Module 
       | Module
-          layout :: TargetData
+          layout :: DataLayout
+          target :: TargetData
           funs  :: Functions
           gvars :: GlobalVars
 --          namedty :: MNamedTys
@@ -78,9 +80,9 @@ data Module
 --       | BigEndian
 --       | LittleEndian
       
-data TargetData
-      | TargetData 
-          s :: DataLayout
+data DataLayout
+      | DataLayout 
+          s :: DLayout
 --          endianness :: Endianness
 --          pointerSize :: Int
 --          prefAlignTy :: MapTyInt
@@ -299,7 +301,7 @@ data Alias
           aliaseeTy  :: Type
           aliasee    :: Id
   
-set Every = Module GlobalVar Function LinkageTy CConv Visibility DefinitionTy LocalVar Type Argument Align GCName FunAttr BasicBlock Instruction Terminator NamedTy TargetData Alias ParamAttr Section Value Identifier FpTy Constant
+set Every = Module GlobalVar Function LinkageTy CConv Visibility DefinitionTy LocalVar Type Argument Align GCName FunAttr BasicBlock Instruction Terminator NamedTy DataLayout Alias ParamAttr Section Value Identifier FpTy Constant
 
 deriving Every: Show
 deriving Every: Eq
