@@ -2698,13 +2698,51 @@ sem_Section_Section s_  =
          _lhsOself =
              _self
      in  ( _lhsOself))
+-- Target ------------------------------------------------------
+data Target  = Linux 
+             | MacOs 
+             deriving ( Eq,Ord,Show)
+-- cata
+sem_Target :: Target  ->
+              T_Target 
+sem_Target (Linux )  =
+    (sem_Target_Linux )
+sem_Target (MacOs )  =
+    (sem_Target_MacOs )
+-- semantic domain
+type T_Target  = ( Target )
+data Inh_Target  = Inh_Target {}
+data Syn_Target  = Syn_Target {self_Syn_Target :: Target }
+wrap_Target :: T_Target  ->
+               Inh_Target  ->
+               Syn_Target 
+wrap_Target sem (Inh_Target )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_Target _lhsOself ))
+sem_Target_Linux :: T_Target 
+sem_Target_Linux  =
+    (let _lhsOself :: Target 
+         _self =
+             Linux
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Target_MacOs :: T_Target 
+sem_Target_MacOs  =
+    (let _lhsOself :: Target 
+         _self =
+             MacOs
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 -- TargetData --------------------------------------------------
-type TargetData  = ( (String))
+data TargetData  = TargetData (String) (Target ) 
+                 deriving ( Eq,Ord,Show)
 -- cata
 sem_TargetData :: TargetData  ->
                   T_TargetData 
-sem_TargetData ( x1)  =
-    (sem_TargetData_Tuple x1 )
+sem_TargetData (TargetData _s _t )  =
+    (sem_TargetData_TargetData _s (sem_Target _t ) )
 -- semantic domain
 type T_TargetData  = ( TargetData )
 data Inh_TargetData  = Inh_TargetData {}
@@ -2715,14 +2753,18 @@ wrap_TargetData :: T_TargetData  ->
 wrap_TargetData sem (Inh_TargetData )  =
     (let ( _lhsOself) = sem 
      in  (Syn_TargetData _lhsOself ))
-sem_TargetData_Tuple :: String ->
-                        T_TargetData 
-sem_TargetData_Tuple x1_  =
+sem_TargetData_TargetData :: String ->
+                             T_Target  ->
+                             T_TargetData 
+sem_TargetData_TargetData s_ t_  =
     (let _lhsOself :: TargetData 
+         _tIself :: Target 
          _self =
-             (x1_)
+             TargetData s_ _tIself
          _lhsOself =
              _self
+         ( _tIself) =
+             t_ 
      in  ( _lhsOself))
 -- Terminator --------------------------------------------------
 data Terminator  = Br (Bool) (Identifier ) (Identifier ) 

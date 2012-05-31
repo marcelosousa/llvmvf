@@ -45,11 +45,19 @@ parse file = do mdl <- readBitcodeFromFile file
 
 -- Target data
 
+pSomewhere :: String -> Parser String
+pSomewhere x =  pToken x <* pList pAscii
+            <|> pAscii *> pSomewhere x
+
+pTarget :: Parser LL.Target
+pTarget =  const LL.MacOs <$> pSomewhere "apple"
+       <|> const LL.Linux <$> pSomewhere "linux"  
+          
 getTargetData :: Module -> IO LL.TargetData
 getTargetData mdl = withModule mdl $ \mdlPtr -> do 
                      cs <- FFI.getTarget mdlPtr
                      s <- peekCString cs                            
-                     return s
+                     return $ LL.TargetData s $ runParser "parsing target" pTarget s
   
 -- Data Layout    
 getSDataLayoutModule :: Module -> IO LL.DataLayout

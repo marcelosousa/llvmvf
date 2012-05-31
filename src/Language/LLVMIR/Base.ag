@@ -59,7 +59,6 @@ type PTyInt = (Type, Int)
 type PTyIntL = [PTyInt]
 
 type DLayout = [String]
-type TargetData = (String)
 
 type IntTyValId = (Type, Value, Identifier)
 type IntTyValIdL = [IntTyValId]
@@ -79,14 +78,23 @@ data Module
 -- data Endianness
 --       | BigEndian
 --       | LittleEndian
-      
+
 data DataLayout
       | DataLayout 
           s :: DLayout
 --          endianness :: Endianness
 --          pointerSize :: Int
 --          prefAlignTy :: MapTyInt
-          
+
+data Target
+    | MacOs
+    | Linux
+    
+data TargetData
+    | TargetData
+        s :: String
+        t :: Target
+
 data ModuleAsm
       | ModuleAsm asm :: String
       
@@ -301,7 +309,7 @@ data Alias
           aliaseeTy  :: Type
           aliasee    :: Id
   
-set Every = Module GlobalVar Function LinkageTy CConv Visibility DefinitionTy LocalVar Type Argument Align GCName FunAttr BasicBlock Instruction Terminator NamedTy DataLayout Alias ParamAttr Section Value Identifier FpTy Constant
+set Every = Module GlobalVar Function LinkageTy CConv Visibility DefinitionTy LocalVar Type Argument Align GCName FunAttr BasicBlock Instruction Terminator NamedTy DataLayout Alias ParamAttr Section Value Identifier FpTy Constant TargetData Target
 
 deriving Every: Show
 deriving Every: Eq
