@@ -1,3 +1,4 @@
+{-#LANGUAGE FlexibleContexts #-}
 -------------------------------------------------------------------------------
 -- Module    :  Language.LLVMIR.Parser
 -- Copyright :  (c) 2012 Marcelo Sousa
@@ -15,6 +16,10 @@ import LLVM.ExecutionEngine
 
 import qualified LLVM.FFI.Core as FFI
 import qualified LLVM.FFI.Target as FFI
+
+import Text.ParserCombinators.UU hiding (parse)
+import Text.ParserCombinators.UU.Utils
+import Text.ParserCombinators.UU.BasicInstances
 
 import Foreign.C.String
 
@@ -42,7 +47,7 @@ getSDataLayoutModule :: Module -> IO LL.TargetData
 getSDataLayoutModule mdl = withModule mdl $ \mdlPtr -> do 
                             cs <- FFI.getDataLayout mdlPtr
                             s <- peekCString cs                            
-                            return $ LL.TargetData s
+                            return $ LL.TargetData $ runParser "error" pDataLayout s
                             
 getDataLayoutModule :: Module -> IO TargetData
 getDataLayoutModule mdl = withModule mdl $ \mdlPtr -> do 
@@ -50,6 +55,19 @@ getDataLayoutModule mdl = withModule mdl $ \mdlPtr -> do
                             trgPtr <- FFI.createTargetData cs
                             return $ makeTargetData trgPtr
 
+pChar :: Parser Char
+pChar = pLetter <|> pDigit <|> pSym ':'
+
+pElem :: Parser String
+pElem = pList1 pChar
+
+pDataLayout :: Parser [String]
+pDataLayout = (:) <$> pElem <*> pList (pSym '-' *> pElem)
+
+-- pEndianness :: Parser Endianness
+-- pEndianness =  const BigEndian    <$> pToken "E"
+--            <|> const LittleEndian <$> pToken "e"
+           
 -- Global Variables
 getGlobalVar :: Module -> IO LL.GlobalVars
 getGlobalVar mdl = do globals <- getGlobalVariables mdl

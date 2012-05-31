@@ -63,10 +63,10 @@
   (major1) == 2 && (major2) <  0 || \
   (major1) == 2 && (major2) == 0 && (minor) <= 1)
 
-/* package uu-parsinglib-2.7.1.1 */
-#define VERSION_uu_parsinglib "2.7.1.1"
+/* package uu-parsinglib-2.7.3.2 */
+#define VERSION_uu_parsinglib "2.7.3.2"
 #define MIN_VERSION_uu_parsinglib(major1,major2,minor) (\
   (major1) <  2 || \
   (major1) == 2 && (major2) <  7 || \
-  (major1) == 2 && (major2) == 7 && (minor) <= 1)
+  (major1) == 2 && (major2) == 7 && (minor) <= 3)
 

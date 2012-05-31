@@ -58,6 +58,8 @@ type MapTyInt = map {Type} Triplet
 type PTyInt = (Type, Int)
 type PTyIntL = [PTyInt]
 
+type DataLayout = [String]
+
 type IntTyValId = (Type, Value, Identifier)
 type IntTyValIdL = [IntTyValId]
 
@@ -72,9 +74,14 @@ data Module
 --          namedm :: NamedMetadata
 --          mdlasm :: MModuleAsms
 
+-- data Endianness
+--       | BigEndian
+--       | LittleEndian
+      
 data TargetData
-      | TargetData s :: String
---          littleEndian :: Bool
+      | TargetData 
+          s :: DataLayout
+--          endianness :: Endianness
 --          pointerSize :: Int
 --          prefAlignTy :: MapTyInt
           

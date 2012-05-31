@@ -509,6 +509,44 @@ sem_Constant_ZeroInitC ty_  =
          ( _tyIself) =
              ty_ 
      in  ( _lhsOself))
+-- DataLayout --------------------------------------------------
+type DataLayout  = [(String)]
+-- cata
+sem_DataLayout :: DataLayout  ->
+                  T_DataLayout 
+sem_DataLayout list  =
+    (Prelude.foldr sem_DataLayout_Cons sem_DataLayout_Nil list )
+-- semantic domain
+type T_DataLayout  = ( DataLayout )
+data Inh_DataLayout  = Inh_DataLayout {}
+data Syn_DataLayout  = Syn_DataLayout {self_Syn_DataLayout :: DataLayout }
+wrap_DataLayout :: T_DataLayout  ->
+                   Inh_DataLayout  ->
+                   Syn_DataLayout 
+wrap_DataLayout sem (Inh_DataLayout )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_DataLayout _lhsOself ))
+sem_DataLayout_Cons :: String ->
+                       T_DataLayout  ->
+                       T_DataLayout 
+sem_DataLayout_Cons hd_ tl_  =
+    (let _lhsOself :: DataLayout 
+         _tlIself :: DataLayout 
+         _self =
+             (:) hd_ _tlIself
+         _lhsOself =
+             _self
+         ( _tlIself) =
+             tl_ 
+     in  ( _lhsOself))
+sem_DataLayout_Nil :: T_DataLayout 
+sem_DataLayout_Nil  =
+    (let _lhsOself :: DataLayout 
+         _self =
+             []
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 -- DefinitionTy ------------------------------------------------
 data DefinitionTy  = Constant 
                    | ThreadLocal 
@@ -2627,13 +2665,13 @@ sem_Section_Section s_  =
              _self
      in  ( _lhsOself))
 -- TargetData --------------------------------------------------
-data TargetData  = TargetData (String) 
+data TargetData  = TargetData (DataLayout ) 
                  deriving ( Eq,Ord,Show)
 -- cata
 sem_TargetData :: TargetData  ->
                   T_TargetData 
 sem_TargetData (TargetData _s )  =
-    (sem_TargetData_TargetData _s )
+    (sem_TargetData_TargetData (sem_DataLayout _s ) )
 -- semantic domain
 type T_TargetData  = ( TargetData )
 data Inh_TargetData  = Inh_TargetData {}
@@ -2644,14 +2682,17 @@ wrap_TargetData :: T_TargetData  ->
 wrap_TargetData sem (Inh_TargetData )  =
     (let ( _lhsOself) = sem 
      in  (Syn_TargetData _lhsOself ))
-sem_TargetData_TargetData :: String ->
+sem_TargetData_TargetData :: T_DataLayout  ->
                              T_TargetData 
 sem_TargetData_TargetData s_  =
     (let _lhsOself :: TargetData 
+         _sIself :: DataLayout 
          _self =
-             TargetData s_
+             TargetData _sIself
          _lhsOself =
              _self
+         ( _sIself) =
+             s_ 
      in  ( _lhsOself))
 -- Terminator --------------------------------------------------
 data Terminator  = Br (Bool) (Identifier ) (Identifier ) 
