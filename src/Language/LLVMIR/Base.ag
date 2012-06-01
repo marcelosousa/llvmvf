@@ -36,9 +36,8 @@ type ModuleAsms = [ModuleAsm]
 type NamedTys = [NamedTy]
 type Aliases = [Alias]
 type Ints = [Int]
-type Types = [Type]
 
-type MLinkageTy = maybe LinkageTy
+type MLinkageTy = maybe Linkage
 type MVisibility = maybe Visibility
 type MCConv = maybe CConv
 type MUnnamedAddr = maybe Bool -- maybe () would be better
@@ -106,7 +105,7 @@ data NamedTy
 data GlobalVar 
       | GlobalVar 
           name     :: Id
---          linkage  :: MLinkageTy
+--          linkage  :: Linkage
 --          init     :: MValue
 --          section  :: MSection
 --          optAlign :: MAlign
@@ -161,8 +160,12 @@ data Terminator
           elems :: IntTyValIdL
       
 data Instruction
---      | Add v1 :: Value v2 :: Value
       | Instruction s :: String
+      | Alloca
+          id    :: Identifier
+          ty    :: Type
+--          num   :: Int
+--          align :: Align
       
 data Value 
       | Id v :: Identifier
@@ -194,41 +197,11 @@ data Align
 data Section
       | Section s :: String
       
-data Type
-      | IntTy i :: Int
-      | FpTy  fp :: FpTy
-      | VoidTy
-      | X86mmxTy
-      | LabelTy
-      | MetadataTy
-      | ArrayTy 
-          elems :: Ints
-          ty    :: Type
-      | FunctionTy
-          party :: Types
-          retty :: Type
-      | StructureTy
-          tys :: Types
-      | OpaqueTy
-      | PointerTy
-          ty :: Type
-      | VectorTy
-          elems :: Ints
-          ty    :: Type
-
-data FpTy
-      | HalfTy
-      | FloatTy
-      | DoubleTy
-      | Fp128Ty
-      | X86fp80Ty
-      | Ppcfp128ty
-
 data Argument
       | Argument
 
 --  All Global Variables and Functions have one of the following types of linkage.
-data LinkageTy 
+data Linkage
       | Private
       | LinkerPrivate
       | LinkerPrivateWeak
@@ -309,7 +282,7 @@ data Alias
           aliaseeTy  :: Type
           aliasee    :: Id
   
-set Every = Module GlobalVar Function LinkageTy CConv Visibility DefinitionTy LocalVar Type Argument Align GCName FunAttr BasicBlock Instruction Terminator NamedTy DataLayout Alias ParamAttr Section Value Identifier FpTy Constant TargetData Target
+set Every = Module GlobalVar Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction Terminator NamedTy DataLayout Alias ParamAttr Section Value Identifier Constant TargetData Target
 
 deriving Every: Show
 deriving Every: Eq

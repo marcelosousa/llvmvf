@@ -21,6 +21,8 @@ import Text.ParserCombinators.UU hiding (parse)
 import Text.ParserCombinators.UU.Utils
 import Text.ParserCombinators.UU.BasicInstances
 
+import Language.LLVMIR.Converter
+
 import Foreign.C.String
 
 type FunctionName = String
@@ -111,6 +113,6 @@ getBasicBlock (bbname, bbvalue) = do instr  <- getInstructions bbvalue
                                      return $ LL.BasicBlock bbname instrs
                    
 getInstruction :: (String, Value) -> IO LL.Instruction
-getInstruction (instr, instrv) = do (s,inst) <- getInstrDesc instrv
+getInstruction (instr, instrv) = getInst instrv
                                    -- sops <- foldM (\s (v,_) -> return $ v ++ " " ++ s) "" ops
-                                    return $ LL.Instruction (s ++ "=" ++ show inst)
+                                 --   return $ LL.Instruction (s ++ "=" ++ show inst)

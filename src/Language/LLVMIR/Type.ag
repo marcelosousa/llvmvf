@@ -1,0 +1,48 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Type
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Language.LLVMIR.Type}{}{}
+
+type Types = [Type]
+
+data Type 
+    | TyVoid
+    | TyX86mmx
+    | TyLabel
+    | TyMetadata
+    | TyOpaque
+    | TyInt 
+        p :: Int
+    | TyFloatPoint
+        p :: TyFloatPoint
+    | TyArray
+        elems :: Ints
+        ty    :: Type
+    | TyFunction
+        party :: Types
+        retty :: Type
+    | TyStruct
+        tys :: Types
+    | TyPointer
+        ty :: Type
+    | TyVector
+        elems :: Ints
+        ty    :: Type
+
+data TyFloatPoint
+    | TyHalfTy
+    | TyFloat
+    | TyDouble
+    | Tyfp128
+    | Tyx86fp80
+    | Typpcfp128
+      
+set Types = Type TyFloatPoint
+
+deriving Types: Show
+deriving Types: Eq
+deriving Types: Ord

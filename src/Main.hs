@@ -26,7 +26,7 @@ instance Default Options where
 
 runOption :: FilePath -> Options -> IO ()
 runOption file Parse = do mdl <- parse file
-                          print $ pretty mdl
+                          print mdl
 
 data ProgramOptions = PHPAnalysis {
     input  :: FilePath

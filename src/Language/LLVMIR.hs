@@ -12,7 +12,7 @@ import qualified Data.Map as Map
 import Data.Map
 {-# LINE 14 "src/Language/LLVMIR.hs" #-}
 
-{-# LINE 11 "src/Language/LLVMIR/PPrinter.ag" #-}
+{-# LINE 11 "src/Language/LLVMIR/Printer.ag" #-}
 
 import UU.PPrint as P
 {-# LINE 19 "src/Language/LLVMIR.hs" #-}
@@ -34,15 +34,23 @@ import UU.PPrint as P
 -------------------------------------------------------------------------------
 {-# LINE 36 "src/Language/LLVMIR.hs" #-}
 
-{-# LINE 1 "src/Language/LLVMIR/PPrinter.ag" #-}
+{-# LINE 1 "src/Language/LLVMIR/Type.ag" #-}
 
 -------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.PPrinter
+-- Module    :  Language.LLVMIR.Type
 -- Copyright :  (c) 2012 Marcelo Sousa
 -------------------------------------------------------------------------------
 {-# LINE 44 "src/Language/LLVMIR.hs" #-}
 
-{-# LINE 36 "src/Language/LLVMIR/PPrinter.ag" #-}
+{-# LINE 1 "src/Language/LLVMIR/Printer.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Printer
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 52 "src/Language/LLVMIR.hs" #-}
+
+{-# LINE 36 "src/Language/LLVMIR/Printer.ag" #-}
 
 instance Pretty Module where
     pretty mdl = pp_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
@@ -50,7 +58,7 @@ instance Pretty Module where
 instance Pretty DataLayout where
     pretty d = pp_Syn_DataLayout $ wrap_DataLayout (sem_DataLayout d) $ Inh_DataLayout {}
 
-{-# LINE 54 "src/Language/LLVMIR.hs" #-}
+{-# LINE 62 "src/Language/LLVMIR.hs" #-}
 -- Alias -------------------------------------------------------
 data Alias  = Alias (Id ) (MLinkageTy ) (MVisibility ) (Type ) (Id ) 
             deriving ( Eq,Ord,Show)
@@ -605,9 +613,9 @@ sem_DataLayout_DataLayout s_  =
          _lhsOself :: DataLayout 
          _sIself :: DLayout 
          _lhsOpp =
-             ({-# LINE 23 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 23 "src/Language/LLVMIR/Printer.ag" #-}
               text "target datalayout =" <+> dquotes (Prelude.foldr1 (\x y -> x <> char '-' <> y) (Prelude.map text _sIself))
-              {-# LINE 611 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 619 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              DataLayout _sIself
@@ -650,87 +658,6 @@ sem_DefinitionTy_ThreadLocal  =
     (let _lhsOself :: DefinitionTy 
          _self =
              ThreadLocal
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
--- FpTy --------------------------------------------------------
-data FpTy  = DoubleTy 
-           | FloatTy 
-           | Fp128Ty 
-           | HalfTy 
-           | Ppcfp128ty 
-           | X86fp80Ty 
-           deriving ( Eq,Ord,Show)
--- cata
-sem_FpTy :: FpTy  ->
-            T_FpTy 
-sem_FpTy (DoubleTy )  =
-    (sem_FpTy_DoubleTy )
-sem_FpTy (FloatTy )  =
-    (sem_FpTy_FloatTy )
-sem_FpTy (Fp128Ty )  =
-    (sem_FpTy_Fp128Ty )
-sem_FpTy (HalfTy )  =
-    (sem_FpTy_HalfTy )
-sem_FpTy (Ppcfp128ty )  =
-    (sem_FpTy_Ppcfp128ty )
-sem_FpTy (X86fp80Ty )  =
-    (sem_FpTy_X86fp80Ty )
--- semantic domain
-type T_FpTy  = ( FpTy )
-data Inh_FpTy  = Inh_FpTy {}
-data Syn_FpTy  = Syn_FpTy {self_Syn_FpTy :: FpTy }
-wrap_FpTy :: T_FpTy  ->
-             Inh_FpTy  ->
-             Syn_FpTy 
-wrap_FpTy sem (Inh_FpTy )  =
-    (let ( _lhsOself) = sem 
-     in  (Syn_FpTy _lhsOself ))
-sem_FpTy_DoubleTy :: T_FpTy 
-sem_FpTy_DoubleTy  =
-    (let _lhsOself :: FpTy 
-         _self =
-             DoubleTy
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_FpTy_FloatTy :: T_FpTy 
-sem_FpTy_FloatTy  =
-    (let _lhsOself :: FpTy 
-         _self =
-             FloatTy
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_FpTy_Fp128Ty :: T_FpTy 
-sem_FpTy_Fp128Ty  =
-    (let _lhsOself :: FpTy 
-         _self =
-             Fp128Ty
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_FpTy_HalfTy :: T_FpTy 
-sem_FpTy_HalfTy  =
-    (let _lhsOself :: FpTy 
-         _self =
-             HalfTy
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_FpTy_Ppcfp128ty :: T_FpTy 
-sem_FpTy_Ppcfp128ty  =
-    (let _lhsOself :: FpTy 
-         _self =
-             Ppcfp128ty
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_FpTy_X86fp80Ty :: T_FpTy 
-sem_FpTy_X86fp80Ty  =
-    (let _lhsOself :: FpTy 
-         _self =
-             X86fp80Ty
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -1065,9 +992,9 @@ sem_Functions_Cons hd_ tl_  =
          _tlIpp :: Doc
          _tlIself :: Functions 
          _lhsOpp =
-             ({-# LINE 16 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 16 "src/Language/LLVMIR/Printer.ag" #-}
               _tlIpp
-              {-# LINE 1071 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 998 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -1083,9 +1010,9 @@ sem_Functions_Nil  =
     (let _lhsOpp :: Doc
          _lhsOself :: Functions 
          _lhsOpp =
-             ({-# LINE 16 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 16 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 1089 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1016 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              []
@@ -1176,9 +1103,9 @@ sem_GlobalVars_Cons hd_ tl_  =
          _tlIpp :: Doc
          _tlIself :: GlobalVars 
          _lhsOpp =
-             ({-# LINE 16 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 16 "src/Language/LLVMIR/Printer.ag" #-}
               _tlIpp
-              {-# LINE 1182 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1109 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -1194,9 +1121,9 @@ sem_GlobalVars_Nil  =
     (let _lhsOpp :: Doc
          _lhsOself :: GlobalVars 
          _lhsOpp =
-             ({-# LINE 16 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 16 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 1200 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1127 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              []
@@ -1316,11 +1243,14 @@ sem_Identifiers_Nil  =
              _self
      in  ( _lhsOself))
 -- Instruction -------------------------------------------------
-data Instruction  = Instruction (String) 
+data Instruction  = Alloca (Identifier ) (Type ) 
+                  | Instruction (String) 
                   deriving ( Eq,Ord,Show)
 -- cata
 sem_Instruction :: Instruction  ->
                    T_Instruction 
+sem_Instruction (Alloca _id _ty )  =
+    (sem_Instruction_Alloca (sem_Identifier _id ) (sem_Type _ty ) )
 sem_Instruction (Instruction _s )  =
     (sem_Instruction_Instruction _s )
 -- semantic domain
@@ -1333,6 +1263,22 @@ wrap_Instruction :: T_Instruction  ->
 wrap_Instruction sem (Inh_Instruction )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Instruction _lhsOself ))
+sem_Instruction_Alloca :: T_Identifier  ->
+                          T_Type  ->
+                          T_Instruction 
+sem_Instruction_Alloca id_ ty_  =
+    (let _lhsOself :: Instruction 
+         _idIself :: Identifier 
+         _tyIself :: Type 
+         _self =
+             Alloca _idIself _tyIself
+         _lhsOself =
+             _self
+         ( _idIself) =
+             id_ 
+         ( _tyIself) =
+             ty_ 
+     in  ( _lhsOself))
 sem_Instruction_Instruction :: String ->
                                T_Instruction 
 sem_Instruction_Instruction s_  =
@@ -1525,192 +1471,192 @@ sem_Label_Tuple x1_  =
          _lhsOself =
              _self
      in  ( _lhsOself))
--- LinkageTy ---------------------------------------------------
-data LinkageTy  = Appending 
-                | AvailableExternally 
-                | Common 
-                | Dllexport 
-                | Dllimport 
-                | ExternWeak 
-                | External 
-                | Internal 
-                | LinkerPrivate 
-                | LinkerPrivateWeak 
-                | LinkerPrivateWeakDefAuto 
-                | Linkonce 
-                | LinkonceOdr 
-                | Private 
-                | Weak 
-                | WeakOdr 
-                deriving ( Eq,Ord,Show)
+-- Linkage -----------------------------------------------------
+data Linkage  = Appending 
+              | AvailableExternally 
+              | Common 
+              | Dllexport 
+              | Dllimport 
+              | ExternWeak 
+              | External 
+              | Internal 
+              | LinkerPrivate 
+              | LinkerPrivateWeak 
+              | LinkerPrivateWeakDefAuto 
+              | Linkonce 
+              | LinkonceOdr 
+              | Private 
+              | Weak 
+              | WeakOdr 
+              deriving ( Eq,Ord,Show)
 -- cata
-sem_LinkageTy :: LinkageTy  ->
-                 T_LinkageTy 
-sem_LinkageTy (Appending )  =
-    (sem_LinkageTy_Appending )
-sem_LinkageTy (AvailableExternally )  =
-    (sem_LinkageTy_AvailableExternally )
-sem_LinkageTy (Common )  =
-    (sem_LinkageTy_Common )
-sem_LinkageTy (Dllexport )  =
-    (sem_LinkageTy_Dllexport )
-sem_LinkageTy (Dllimport )  =
-    (sem_LinkageTy_Dllimport )
-sem_LinkageTy (ExternWeak )  =
-    (sem_LinkageTy_ExternWeak )
-sem_LinkageTy (External )  =
-    (sem_LinkageTy_External )
-sem_LinkageTy (Internal )  =
-    (sem_LinkageTy_Internal )
-sem_LinkageTy (LinkerPrivate )  =
-    (sem_LinkageTy_LinkerPrivate )
-sem_LinkageTy (LinkerPrivateWeak )  =
-    (sem_LinkageTy_LinkerPrivateWeak )
-sem_LinkageTy (LinkerPrivateWeakDefAuto )  =
-    (sem_LinkageTy_LinkerPrivateWeakDefAuto )
-sem_LinkageTy (Linkonce )  =
-    (sem_LinkageTy_Linkonce )
-sem_LinkageTy (LinkonceOdr )  =
-    (sem_LinkageTy_LinkonceOdr )
-sem_LinkageTy (Private )  =
-    (sem_LinkageTy_Private )
-sem_LinkageTy (Weak )  =
-    (sem_LinkageTy_Weak )
-sem_LinkageTy (WeakOdr )  =
-    (sem_LinkageTy_WeakOdr )
+sem_Linkage :: Linkage  ->
+               T_Linkage 
+sem_Linkage (Appending )  =
+    (sem_Linkage_Appending )
+sem_Linkage (AvailableExternally )  =
+    (sem_Linkage_AvailableExternally )
+sem_Linkage (Common )  =
+    (sem_Linkage_Common )
+sem_Linkage (Dllexport )  =
+    (sem_Linkage_Dllexport )
+sem_Linkage (Dllimport )  =
+    (sem_Linkage_Dllimport )
+sem_Linkage (ExternWeak )  =
+    (sem_Linkage_ExternWeak )
+sem_Linkage (External )  =
+    (sem_Linkage_External )
+sem_Linkage (Internal )  =
+    (sem_Linkage_Internal )
+sem_Linkage (LinkerPrivate )  =
+    (sem_Linkage_LinkerPrivate )
+sem_Linkage (LinkerPrivateWeak )  =
+    (sem_Linkage_LinkerPrivateWeak )
+sem_Linkage (LinkerPrivateWeakDefAuto )  =
+    (sem_Linkage_LinkerPrivateWeakDefAuto )
+sem_Linkage (Linkonce )  =
+    (sem_Linkage_Linkonce )
+sem_Linkage (LinkonceOdr )  =
+    (sem_Linkage_LinkonceOdr )
+sem_Linkage (Private )  =
+    (sem_Linkage_Private )
+sem_Linkage (Weak )  =
+    (sem_Linkage_Weak )
+sem_Linkage (WeakOdr )  =
+    (sem_Linkage_WeakOdr )
 -- semantic domain
-type T_LinkageTy  = ( LinkageTy )
-data Inh_LinkageTy  = Inh_LinkageTy {}
-data Syn_LinkageTy  = Syn_LinkageTy {self_Syn_LinkageTy :: LinkageTy }
-wrap_LinkageTy :: T_LinkageTy  ->
-                  Inh_LinkageTy  ->
-                  Syn_LinkageTy 
-wrap_LinkageTy sem (Inh_LinkageTy )  =
+type T_Linkage  = ( Linkage )
+data Inh_Linkage  = Inh_Linkage {}
+data Syn_Linkage  = Syn_Linkage {self_Syn_Linkage :: Linkage }
+wrap_Linkage :: T_Linkage  ->
+                Inh_Linkage  ->
+                Syn_Linkage 
+wrap_Linkage sem (Inh_Linkage )  =
     (let ( _lhsOself) = sem 
-     in  (Syn_LinkageTy _lhsOself ))
-sem_LinkageTy_Appending :: T_LinkageTy 
-sem_LinkageTy_Appending  =
-    (let _lhsOself :: LinkageTy 
+     in  (Syn_Linkage _lhsOself ))
+sem_Linkage_Appending :: T_Linkage 
+sem_Linkage_Appending  =
+    (let _lhsOself :: Linkage 
          _self =
              Appending
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_AvailableExternally :: T_LinkageTy 
-sem_LinkageTy_AvailableExternally  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_AvailableExternally :: T_Linkage 
+sem_Linkage_AvailableExternally  =
+    (let _lhsOself :: Linkage 
          _self =
              AvailableExternally
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_Common :: T_LinkageTy 
-sem_LinkageTy_Common  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_Common :: T_Linkage 
+sem_Linkage_Common  =
+    (let _lhsOself :: Linkage 
          _self =
              Common
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_Dllexport :: T_LinkageTy 
-sem_LinkageTy_Dllexport  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_Dllexport :: T_Linkage 
+sem_Linkage_Dllexport  =
+    (let _lhsOself :: Linkage 
          _self =
              Dllexport
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_Dllimport :: T_LinkageTy 
-sem_LinkageTy_Dllimport  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_Dllimport :: T_Linkage 
+sem_Linkage_Dllimport  =
+    (let _lhsOself :: Linkage 
          _self =
              Dllimport
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_ExternWeak :: T_LinkageTy 
-sem_LinkageTy_ExternWeak  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_ExternWeak :: T_Linkage 
+sem_Linkage_ExternWeak  =
+    (let _lhsOself :: Linkage 
          _self =
              ExternWeak
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_External :: T_LinkageTy 
-sem_LinkageTy_External  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_External :: T_Linkage 
+sem_Linkage_External  =
+    (let _lhsOself :: Linkage 
          _self =
              External
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_Internal :: T_LinkageTy 
-sem_LinkageTy_Internal  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_Internal :: T_Linkage 
+sem_Linkage_Internal  =
+    (let _lhsOself :: Linkage 
          _self =
              Internal
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_LinkerPrivate :: T_LinkageTy 
-sem_LinkageTy_LinkerPrivate  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_LinkerPrivate :: T_Linkage 
+sem_Linkage_LinkerPrivate  =
+    (let _lhsOself :: Linkage 
          _self =
              LinkerPrivate
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_LinkerPrivateWeak :: T_LinkageTy 
-sem_LinkageTy_LinkerPrivateWeak  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_LinkerPrivateWeak :: T_Linkage 
+sem_Linkage_LinkerPrivateWeak  =
+    (let _lhsOself :: Linkage 
          _self =
              LinkerPrivateWeak
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_LinkerPrivateWeakDefAuto :: T_LinkageTy 
-sem_LinkageTy_LinkerPrivateWeakDefAuto  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_LinkerPrivateWeakDefAuto :: T_Linkage 
+sem_Linkage_LinkerPrivateWeakDefAuto  =
+    (let _lhsOself :: Linkage 
          _self =
              LinkerPrivateWeakDefAuto
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_Linkonce :: T_LinkageTy 
-sem_LinkageTy_Linkonce  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_Linkonce :: T_Linkage 
+sem_Linkage_Linkonce  =
+    (let _lhsOself :: Linkage 
          _self =
              Linkonce
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_LinkonceOdr :: T_LinkageTy 
-sem_LinkageTy_LinkonceOdr  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_LinkonceOdr :: T_Linkage 
+sem_Linkage_LinkonceOdr  =
+    (let _lhsOself :: Linkage 
          _self =
              LinkonceOdr
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_Private :: T_LinkageTy 
-sem_LinkageTy_Private  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_Private :: T_Linkage 
+sem_Linkage_Private  =
+    (let _lhsOself :: Linkage 
          _self =
              Private
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_Weak :: T_LinkageTy 
-sem_LinkageTy_Weak  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_Weak :: T_Linkage 
+sem_Linkage_Weak  =
+    (let _lhsOself :: Linkage 
          _self =
              Weak
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_LinkageTy_WeakOdr :: T_LinkageTy 
-sem_LinkageTy_WeakOdr  =
-    (let _lhsOself :: LinkageTy 
+sem_Linkage_WeakOdr :: T_Linkage 
+sem_Linkage_WeakOdr  =
+    (let _lhsOself :: Linkage 
          _self =
              WeakOdr
          _lhsOself =
@@ -1987,12 +1933,12 @@ sem_MLabel_Nothing  =
              _self
      in  ( _lhsOself))
 -- MLinkageTy --------------------------------------------------
-type MLinkageTy  = Maybe LinkageTy 
+type MLinkageTy  = Maybe Linkage 
 -- cata
 sem_MLinkageTy :: MLinkageTy  ->
                   T_MLinkageTy 
 sem_MLinkageTy (Prelude.Just x )  =
-    (sem_MLinkageTy_Just (sem_LinkageTy x ) )
+    (sem_MLinkageTy_Just (sem_Linkage x ) )
 sem_MLinkageTy Prelude.Nothing  =
     sem_MLinkageTy_Nothing
 -- semantic domain
@@ -2005,11 +1951,11 @@ wrap_MLinkageTy :: T_MLinkageTy  ->
 wrap_MLinkageTy sem (Inh_MLinkageTy )  =
     (let ( _lhsOself) = sem 
      in  (Syn_MLinkageTy _lhsOself ))
-sem_MLinkageTy_Just :: T_LinkageTy  ->
+sem_MLinkageTy_Just :: T_Linkage  ->
                        T_MLinkageTy 
 sem_MLinkageTy_Just just_  =
     (let _lhsOself :: MLinkageTy 
-         _justIself :: LinkageTy 
+         _justIself :: Linkage 
          _self =
              Just _justIself
          _lhsOself =
@@ -2372,9 +2318,9 @@ sem_Module_Module layout_ target_ funs_ gvars_  =
          _gvarsIpp :: Doc
          _gvarsIself :: GlobalVars 
          _lhsOpp =
-             ({-# LINE 34 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 34 "src/Language/LLVMIR/Printer.ag" #-}
               _layoutIpp <$> _targetIpp <$> _gvarsIpp <$> _funsIpp
-              {-# LINE 2378 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2324 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Module _layoutIself _targetIself _funsIself _gvarsIself
@@ -2799,9 +2745,9 @@ sem_Target_Linux  =
     (let _lhsOpp :: Doc
          _lhsOself :: Target 
          _lhsOpp =
-             ({-# LINE 31 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 31 "src/Language/LLVMIR/Printer.ag" #-}
               text "Linux"
-              {-# LINE 2805 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2751 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Linux
@@ -2813,9 +2759,9 @@ sem_Target_MacOs  =
     (let _lhsOpp :: Doc
          _lhsOself :: Target 
          _lhsOpp =
-             ({-# LINE 30 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 30 "src/Language/LLVMIR/Printer.ag" #-}
               text "MacOs"
-              {-# LINE 2819 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2765 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              MacOs
@@ -2849,9 +2795,9 @@ sem_TargetData_TargetData s_ t_  =
          _tIpp :: Doc
          _tIself :: Target 
          _lhsOpp =
-             ({-# LINE 27 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 27 "src/Language/LLVMIR/Printer.ag" #-}
               text "target triple =" <+> dquotes (text s_)
-              {-# LINE 2855 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2801 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TargetData s_ _tIself
@@ -2968,47 +2914,128 @@ sem_Triplet_Tuple x1_ x2_ x3_  =
          _lhsOself =
              _self
      in  ( _lhsOself))
+-- TyFloatPoint ------------------------------------------------
+data TyFloatPoint  = TyDouble 
+                   | TyFloat 
+                   | TyHalfTy 
+                   | Tyfp128 
+                   | Typpcfp128 
+                   | Tyx86fp80 
+                   deriving ( Eq,Ord,Show)
+-- cata
+sem_TyFloatPoint :: TyFloatPoint  ->
+                    T_TyFloatPoint 
+sem_TyFloatPoint (TyDouble )  =
+    (sem_TyFloatPoint_TyDouble )
+sem_TyFloatPoint (TyFloat )  =
+    (sem_TyFloatPoint_TyFloat )
+sem_TyFloatPoint (TyHalfTy )  =
+    (sem_TyFloatPoint_TyHalfTy )
+sem_TyFloatPoint (Tyfp128 )  =
+    (sem_TyFloatPoint_Tyfp128 )
+sem_TyFloatPoint (Typpcfp128 )  =
+    (sem_TyFloatPoint_Typpcfp128 )
+sem_TyFloatPoint (Tyx86fp80 )  =
+    (sem_TyFloatPoint_Tyx86fp80 )
+-- semantic domain
+type T_TyFloatPoint  = ( TyFloatPoint )
+data Inh_TyFloatPoint  = Inh_TyFloatPoint {}
+data Syn_TyFloatPoint  = Syn_TyFloatPoint {self_Syn_TyFloatPoint :: TyFloatPoint }
+wrap_TyFloatPoint :: T_TyFloatPoint  ->
+                     Inh_TyFloatPoint  ->
+                     Syn_TyFloatPoint 
+wrap_TyFloatPoint sem (Inh_TyFloatPoint )  =
+    (let ( _lhsOself) = sem 
+     in  (Syn_TyFloatPoint _lhsOself ))
+sem_TyFloatPoint_TyDouble :: T_TyFloatPoint 
+sem_TyFloatPoint_TyDouble  =
+    (let _lhsOself :: TyFloatPoint 
+         _self =
+             TyDouble
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_TyFloatPoint_TyFloat :: T_TyFloatPoint 
+sem_TyFloatPoint_TyFloat  =
+    (let _lhsOself :: TyFloatPoint 
+         _self =
+             TyFloat
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_TyFloatPoint_TyHalfTy :: T_TyFloatPoint 
+sem_TyFloatPoint_TyHalfTy  =
+    (let _lhsOself :: TyFloatPoint 
+         _self =
+             TyHalfTy
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_TyFloatPoint_Tyfp128 :: T_TyFloatPoint 
+sem_TyFloatPoint_Tyfp128  =
+    (let _lhsOself :: TyFloatPoint 
+         _self =
+             Tyfp128
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_TyFloatPoint_Typpcfp128 :: T_TyFloatPoint 
+sem_TyFloatPoint_Typpcfp128  =
+    (let _lhsOself :: TyFloatPoint 
+         _self =
+             Typpcfp128
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_TyFloatPoint_Tyx86fp80 :: T_TyFloatPoint 
+sem_TyFloatPoint_Tyx86fp80  =
+    (let _lhsOself :: TyFloatPoint 
+         _self =
+             Tyx86fp80
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 -- Type --------------------------------------------------------
-data Type  = ArrayTy (Ints ) (Type ) 
-           | FpTy (FpTy ) 
-           | FunctionTy (Types ) (Type ) 
-           | IntTy (Int) 
-           | LabelTy 
-           | MetadataTy 
-           | OpaqueTy 
-           | PointerTy (Type ) 
-           | StructureTy (Types ) 
-           | VectorTy (Ints ) (Type ) 
-           | VoidTy 
-           | X86mmxTy 
+data Type  = TyArray (Ints ) (Type ) 
+           | TyFloatPoint (TyFloatPoint ) 
+           | TyFunction (Types) (Type ) 
+           | TyInt (Int) 
+           | TyLabel 
+           | TyMetadata 
+           | TyOpaque 
+           | TyPointer (Type ) 
+           | TyStruct (Types) 
+           | TyVector (Ints ) (Type ) 
+           | TyVoid 
+           | TyX86mmx 
            deriving ( Eq,Ord,Show)
 -- cata
 sem_Type :: Type  ->
             T_Type 
-sem_Type (ArrayTy _elems _ty )  =
-    (sem_Type_ArrayTy (sem_Ints _elems ) (sem_Type _ty ) )
-sem_Type (FpTy _fp )  =
-    (sem_Type_FpTy (sem_FpTy _fp ) )
-sem_Type (FunctionTy _party _retty )  =
-    (sem_Type_FunctionTy (sem_Types _party ) (sem_Type _retty ) )
-sem_Type (IntTy _i )  =
-    (sem_Type_IntTy _i )
-sem_Type (LabelTy )  =
-    (sem_Type_LabelTy )
-sem_Type (MetadataTy )  =
-    (sem_Type_MetadataTy )
-sem_Type (OpaqueTy )  =
-    (sem_Type_OpaqueTy )
-sem_Type (PointerTy _ty )  =
-    (sem_Type_PointerTy (sem_Type _ty ) )
-sem_Type (StructureTy _tys )  =
-    (sem_Type_StructureTy (sem_Types _tys ) )
-sem_Type (VectorTy _elems _ty )  =
-    (sem_Type_VectorTy (sem_Ints _elems ) (sem_Type _ty ) )
-sem_Type (VoidTy )  =
-    (sem_Type_VoidTy )
-sem_Type (X86mmxTy )  =
-    (sem_Type_X86mmxTy )
+sem_Type (TyArray _elems _ty )  =
+    (sem_Type_TyArray (sem_Ints _elems ) (sem_Type _ty ) )
+sem_Type (TyFloatPoint _p )  =
+    (sem_Type_TyFloatPoint (sem_TyFloatPoint _p ) )
+sem_Type (TyFunction _party _retty )  =
+    (sem_Type_TyFunction _party (sem_Type _retty ) )
+sem_Type (TyInt _p )  =
+    (sem_Type_TyInt _p )
+sem_Type (TyLabel )  =
+    (sem_Type_TyLabel )
+sem_Type (TyMetadata )  =
+    (sem_Type_TyMetadata )
+sem_Type (TyOpaque )  =
+    (sem_Type_TyOpaque )
+sem_Type (TyPointer _ty )  =
+    (sem_Type_TyPointer (sem_Type _ty ) )
+sem_Type (TyStruct _tys )  =
+    (sem_Type_TyStruct _tys )
+sem_Type (TyVector _elems _ty )  =
+    (sem_Type_TyVector (sem_Ints _elems ) (sem_Type _ty ) )
+sem_Type (TyVoid )  =
+    (sem_Type_TyVoid )
+sem_Type (TyX86mmx )  =
+    (sem_Type_TyX86mmx )
 -- semantic domain
 type T_Type  = ( Type )
 data Inh_Type  = Inh_Type {}
@@ -3019,15 +3046,15 @@ wrap_Type :: T_Type  ->
 wrap_Type sem (Inh_Type )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Type _lhsOself ))
-sem_Type_ArrayTy :: T_Ints  ->
+sem_Type_TyArray :: T_Ints  ->
                     T_Type  ->
                     T_Type 
-sem_Type_ArrayTy elems_ ty_  =
+sem_Type_TyArray elems_ ty_  =
     (let _lhsOself :: Type 
          _elemsIself :: Ints 
          _tyIself :: Type 
          _self =
-             ArrayTy _elemsIself _tyIself
+             TyArray _elemsIself _tyIself
          _lhsOself =
              _self
          ( _elemsIself) =
@@ -3035,100 +3062,94 @@ sem_Type_ArrayTy elems_ ty_  =
          ( _tyIself) =
              ty_ 
      in  ( _lhsOself))
-sem_Type_FpTy :: T_FpTy  ->
-                 T_Type 
-sem_Type_FpTy fp_  =
+sem_Type_TyFloatPoint :: T_TyFloatPoint  ->
+                         T_Type 
+sem_Type_TyFloatPoint p_  =
     (let _lhsOself :: Type 
-         _fpIself :: FpTy 
+         _pIself :: TyFloatPoint 
          _self =
-             FpTy _fpIself
+             TyFloatPoint _pIself
          _lhsOself =
              _self
-         ( _fpIself) =
-             fp_ 
+         ( _pIself) =
+             p_ 
      in  ( _lhsOself))
-sem_Type_FunctionTy :: T_Types  ->
+sem_Type_TyFunction :: Types ->
                        T_Type  ->
                        T_Type 
-sem_Type_FunctionTy party_ retty_  =
+sem_Type_TyFunction party_ retty_  =
     (let _lhsOself :: Type 
-         _partyIself :: Types 
          _rettyIself :: Type 
          _self =
-             FunctionTy _partyIself _rettyIself
+             TyFunction party_ _rettyIself
          _lhsOself =
              _self
-         ( _partyIself) =
-             party_ 
          ( _rettyIself) =
              retty_ 
      in  ( _lhsOself))
-sem_Type_IntTy :: Int ->
+sem_Type_TyInt :: Int ->
                   T_Type 
-sem_Type_IntTy i_  =
+sem_Type_TyInt p_  =
     (let _lhsOself :: Type 
          _self =
-             IntTy i_
+             TyInt p_
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Type_LabelTy :: T_Type 
-sem_Type_LabelTy  =
+sem_Type_TyLabel :: T_Type 
+sem_Type_TyLabel  =
     (let _lhsOself :: Type 
          _self =
-             LabelTy
+             TyLabel
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Type_MetadataTy :: T_Type 
-sem_Type_MetadataTy  =
+sem_Type_TyMetadata :: T_Type 
+sem_Type_TyMetadata  =
     (let _lhsOself :: Type 
          _self =
-             MetadataTy
+             TyMetadata
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Type_OpaqueTy :: T_Type 
-sem_Type_OpaqueTy  =
+sem_Type_TyOpaque :: T_Type 
+sem_Type_TyOpaque  =
     (let _lhsOself :: Type 
          _self =
-             OpaqueTy
+             TyOpaque
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Type_PointerTy :: T_Type  ->
+sem_Type_TyPointer :: T_Type  ->
                       T_Type 
-sem_Type_PointerTy ty_  =
+sem_Type_TyPointer ty_  =
     (let _lhsOself :: Type 
          _tyIself :: Type 
          _self =
-             PointerTy _tyIself
+             TyPointer _tyIself
          _lhsOself =
              _self
          ( _tyIself) =
              ty_ 
      in  ( _lhsOself))
-sem_Type_StructureTy :: T_Types  ->
-                        T_Type 
-sem_Type_StructureTy tys_  =
+sem_Type_TyStruct :: Types ->
+                     T_Type 
+sem_Type_TyStruct tys_  =
     (let _lhsOself :: Type 
-         _tysIself :: Types 
          _self =
-             StructureTy _tysIself
+             TyStruct tys_
          _lhsOself =
              _self
-         ( _tysIself) =
-             tys_ 
      in  ( _lhsOself))
-sem_Type_VectorTy :: T_Ints  ->
+sem_Type_TyVector :: T_Ints  ->
                      T_Type  ->
                      T_Type 
-sem_Type_VectorTy elems_ ty_  =
+sem_Type_TyVector elems_ ty_  =
     (let _lhsOself :: Type 
          _elemsIself :: Ints 
          _tyIself :: Type 
          _self =
-             VectorTy _elemsIself _tyIself
+             TyVector _elemsIself _tyIself
          _lhsOself =
              _self
          ( _elemsIself) =
@@ -3136,19 +3157,19 @@ sem_Type_VectorTy elems_ ty_  =
          ( _tyIself) =
              ty_ 
      in  ( _lhsOself))
-sem_Type_VoidTy :: T_Type 
-sem_Type_VoidTy  =
+sem_Type_TyVoid :: T_Type 
+sem_Type_TyVoid  =
     (let _lhsOself :: Type 
          _self =
-             VoidTy
+             TyVoid
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Type_X86mmxTy :: T_Type 
-sem_Type_X86mmxTy  =
+sem_Type_TyX86mmx :: T_Type 
+sem_Type_TyX86mmx  =
     (let _lhsOself :: Type 
          _self =
-             X86mmxTy
+             TyX86mmx
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -3160,39 +3181,19 @@ sem_Types :: Types  ->
 sem_Types list  =
     (Prelude.foldr sem_Types_Cons sem_Types_Nil (Prelude.map sem_Type list) )
 -- semantic domain
-type T_Types  = ( Types )
-data Inh_Types  = Inh_Types {}
-data Syn_Types  = Syn_Types {self_Syn_Types :: Types }
-wrap_Types :: T_Types  ->
-              Inh_Types  ->
-              Syn_Types 
-wrap_Types sem (Inh_Types )  =
-    (let ( _lhsOself) = sem 
-     in  (Syn_Types _lhsOself ))
+type T_Types  = ( )
 sem_Types_Cons :: T_Type  ->
                   T_Types  ->
                   T_Types 
 sem_Types_Cons hd_ tl_  =
-    (let _lhsOself :: Types 
-         _hdIself :: Type 
-         _tlIself :: Types 
-         _self =
-             (:) _hdIself _tlIself
-         _lhsOself =
-             _self
+    (let _hdIself :: Type 
          ( _hdIself) =
              hd_ 
-         ( _tlIself) =
-             tl_ 
-     in  ( _lhsOself))
+     in  ( ))
 sem_Types_Nil :: T_Types 
 sem_Types_Nil  =
-    (let _lhsOself :: Types 
-         _self =
-             []
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
+    (let 
+     in  ( ))
 -- Value -------------------------------------------------------
 data Value  = Const (Constant ) 
             | Id (Identifier ) 

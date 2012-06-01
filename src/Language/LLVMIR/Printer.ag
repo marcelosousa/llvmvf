@@ -1,0 +1,43 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Printer
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Language.LLVMIR.Printer}{}{}
+
+imports 
+{
+import UU.PPrint as P
+}
+
+attr Module TargetData DataLayout Functions GlobalVars
+  syn pp use {<$>} {P.empty} :: {Doc}
+
+attr Target 
+  syn pp :: {Doc}
+
+sem DataLayout
+  | DataLayout
+     lhs.pp = text "target datalayout =" <+> dquotes (Prelude.foldr1 (\x y -> x <> char '-' <> y) (Prelude.map text @s.self))
+
+sem TargetData
+  | TargetData
+      lhs.pp = text "target triple =" <+> dquotes (text @s)
+
+sem Target
+  | MacOs lhs.pp = text "MacOs"
+  | Linux lhs.pp = text "Linux"
+
+sem Module
+  | Module lhs.pp = @layout.pp <$> @target.pp <$> @gvars.pp <$> @funs.pp  
+
+{
+instance Pretty Module where
+    pretty mdl = pp_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
+    
+instance Pretty DataLayout where
+    pretty d = pp_Syn_DataLayout $ wrap_DataLayout (sem_DataLayout d) $ Inh_DataLayout {}
+
+}

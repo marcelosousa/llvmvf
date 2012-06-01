@@ -3,11 +3,12 @@ CABAL-BUILD-FLAGS :=
 VERSION	:= 0.0.1
 
 BASEAG := src/Language/LLVMIR/Base.ag
-PRINTAG := src/Language/LLVMIR/PPrinter.ag
+PRINTAG := src/Language/LLVMIR/Printer.ag
+TYPEAG := src/Language/LLVMIR/Type.ag
 
 all : haskell
 
-llvmir : $(PRINTAG) $(BASEAG)
+llvmir : $(PRINTAG) $(BASEAG) $(TYPEAG)
 	uuagc -Hdcfws --self -P src/Language/LLVMIR src/Language/LLVMIR.ag
 
 haskell : llvmir

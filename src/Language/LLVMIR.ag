@@ -10,4 +10,5 @@
 module {Language.LLVMIR}{}{}
 
 include "Base.ag"
-include "PPrinter.ag"
+include "Type.ag"
+include "Printer.ag"
