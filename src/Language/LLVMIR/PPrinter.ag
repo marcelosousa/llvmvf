@@ -20,7 +20,11 @@ attr Target
 
 sem DataLayout
   | DataLayout
-     lhs.pp = text "target datalayout =" <+> Prelude.foldr1 (\x y -> x <> char '-' <> y) (Prelude.map text @s.self)
+     lhs.pp = text "target datalayout =" <+> dquotes (Prelude.foldr1 (\x y -> x <> char '-' <> y) (Prelude.map text @s.self))
+
+sem TargetData
+  | TargetData
+      lhs.pp = text "target triple =" <+> dquotes (text @s)
 
 sem Target
   | MacOs lhs.pp = text "MacOs"

@@ -42,7 +42,7 @@ import UU.PPrint as P
 -------------------------------------------------------------------------------
 {-# LINE 44 "src/Language/LLVMIR.hs" #-}
 
-{-# LINE 32 "src/Language/LLVMIR/PPrinter.ag" #-}
+{-# LINE 36 "src/Language/LLVMIR/PPrinter.ag" #-}
 
 instance Pretty Module where
     pretty mdl = pp_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
@@ -606,7 +606,7 @@ sem_DataLayout_DataLayout s_  =
          _sIself :: DLayout 
          _lhsOpp =
              ({-# LINE 23 "src/Language/LLVMIR/PPrinter.ag" #-}
-              text "target datalayout =" <+> Prelude.foldr1 (\x y -> x <> char '-' <> y) (Prelude.map text _sIself)
+              text "target datalayout =" <+> dquotes (Prelude.foldr1 (\x y -> x <> char '-' <> y) (Prelude.map text _sIself))
               {-# LINE 611 "src/Language/LLVMIR.hs" #-}
               )
          _self =
@@ -2372,7 +2372,7 @@ sem_Module_Module layout_ target_ funs_ gvars_  =
          _gvarsIpp :: Doc
          _gvarsIself :: GlobalVars 
          _lhsOpp =
-             ({-# LINE 30 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 34 "src/Language/LLVMIR/PPrinter.ag" #-}
               _layoutIpp <$> _targetIpp <$> _gvarsIpp <$> _funsIpp
               {-# LINE 2378 "src/Language/LLVMIR.hs" #-}
               )
@@ -2799,7 +2799,7 @@ sem_Target_Linux  =
     (let _lhsOpp :: Doc
          _lhsOself :: Target 
          _lhsOpp =
-             ({-# LINE 27 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 31 "src/Language/LLVMIR/PPrinter.ag" #-}
               text "Linux"
               {-# LINE 2805 "src/Language/LLVMIR.hs" #-}
               )
@@ -2813,7 +2813,7 @@ sem_Target_MacOs  =
     (let _lhsOpp :: Doc
          _lhsOself :: Target 
          _lhsOpp =
-             ({-# LINE 26 "src/Language/LLVMIR/PPrinter.ag" #-}
+             ({-# LINE 30 "src/Language/LLVMIR/PPrinter.ag" #-}
               text "MacOs"
               {-# LINE 2819 "src/Language/LLVMIR.hs" #-}
               )
@@ -2849,8 +2849,8 @@ sem_TargetData_TargetData s_ t_  =
          _tIpp :: Doc
          _tIself :: Target 
          _lhsOpp =
-             ({-# LINE 16 "src/Language/LLVMIR/PPrinter.ag" #-}
-              _tIpp
+             ({-# LINE 27 "src/Language/LLVMIR/PPrinter.ag" #-}
+              text "target triple =" <+> dquotes (text s_)
               {-# LINE 2855 "src/Language/LLVMIR.hs" #-}
               )
          _self =
