@@ -11,8 +11,9 @@ import Control.Monad
 import System.Console.CmdArgs
 import System.IO               
 import System.FilePath
-import Language.LLVMIR.Base     (Module)
+import Language.LLVMIR     (Module)
 import Language.LLVMIR.Parser   (parse)
+import UU.PPrint 
 
 import Debug.Trace
 
@@ -25,7 +26,7 @@ instance Default Options where
 
 runOption :: FilePath -> Options -> IO ()
 runOption file Parse = do mdl <- parse file
-                          print mdl
+                          print $ pretty mdl
 
 data ProgramOptions = PHPAnalysis {
     input  :: FilePath

@@ -15,7 +15,7 @@ Executable llvmvf
                     , uu-parsinglib >= 2.7.1
                     , mtl           >= 1.1.0.2
                     , fgl           >= 5.4.2.3
-                    , cco           >= 0.0.4
+                    , uulib         >= 0.9.14
                     , cmdargs
                     , llvm-base
                     , llvm

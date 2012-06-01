@@ -9,7 +9,7 @@ module Language.LLVMIR.Parser where
 import Control.Monad(forM_, forM, foldM)
 import System.FilePath
 
-import qualified Language.LLVMIR.Base as LL
+import qualified Language.LLVMIR as LL
 
 import LLVM.Core hiding (Value) 
 import LLVM.ExecutionEngine hiding (getTargetData)
