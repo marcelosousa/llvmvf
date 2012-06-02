@@ -1243,14 +1243,14 @@ sem_Identifiers_Nil  =
              _self
      in  ( _lhsOself))
 -- Instruction -------------------------------------------------
-data Instruction  = Alloca (Identifier ) (Type ) 
+data Instruction  = Alloca (Identifier ) (Type ) (Int) 
                   | Instruction (String) 
                   deriving ( Eq,Ord,Show)
 -- cata
 sem_Instruction :: Instruction  ->
                    T_Instruction 
-sem_Instruction (Alloca _id _ty )  =
-    (sem_Instruction_Alloca (sem_Identifier _id ) (sem_Type _ty ) )
+sem_Instruction (Alloca _id _ty _align )  =
+    (sem_Instruction_Alloca (sem_Identifier _id ) (sem_Type _ty ) _align )
 sem_Instruction (Instruction _s )  =
     (sem_Instruction_Instruction _s )
 -- semantic domain
@@ -1265,13 +1265,14 @@ wrap_Instruction sem (Inh_Instruction )  =
      in  (Syn_Instruction _lhsOself ))
 sem_Instruction_Alloca :: T_Identifier  ->
                           T_Type  ->
+                          Int ->
                           T_Instruction 
-sem_Instruction_Alloca id_ ty_  =
+sem_Instruction_Alloca id_ ty_ align_  =
     (let _lhsOself :: Instruction 
          _idIself :: Identifier 
          _tyIself :: Type 
          _self =
-             Alloca _idIself _tyIself
+             Alloca _idIself _tyIself align_
          _lhsOself =
              _self
          ( _idIself) =
@@ -2320,7 +2321,7 @@ sem_Module_Module layout_ target_ funs_ gvars_  =
          _lhsOpp =
              ({-# LINE 34 "src/Language/LLVMIR/Printer.ag" #-}
               _layoutIpp <$> _targetIpp <$> _gvarsIpp <$> _funsIpp
-              {-# LINE 2324 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2325 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Module _layoutIself _targetIself _funsIself _gvarsIself
@@ -2747,7 +2748,7 @@ sem_Target_Linux  =
          _lhsOpp =
              ({-# LINE 31 "src/Language/LLVMIR/Printer.ag" #-}
               text "Linux"
-              {-# LINE 2751 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2752 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Linux
@@ -2761,7 +2762,7 @@ sem_Target_MacOs  =
          _lhsOpp =
              ({-# LINE 30 "src/Language/LLVMIR/Printer.ag" #-}
               text "MacOs"
-              {-# LINE 2765 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2766 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              MacOs
@@ -2797,7 +2798,7 @@ sem_TargetData_TargetData s_ t_  =
          _lhsOpp =
              ({-# LINE 27 "src/Language/LLVMIR/Printer.ag" #-}
               text "target triple =" <+> dquotes (text s_)
-              {-# LINE 2801 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2802 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TargetData s_ _tIself
@@ -2916,27 +2917,27 @@ sem_Triplet_Tuple x1_ x2_ x3_  =
      in  ( _lhsOself))
 -- TyFloatPoint ------------------------------------------------
 data TyFloatPoint  = TyDouble 
+                   | TyFP128 
                    | TyFloat 
-                   | TyHalfTy 
-                   | Tyfp128 
-                   | Typpcfp128 
-                   | Tyx86fp80 
+                   | TyHalf 
+                   | TyPPCFP128 
+                   | Tyx86FP80 
                    deriving ( Eq,Ord,Show)
 -- cata
 sem_TyFloatPoint :: TyFloatPoint  ->
                     T_TyFloatPoint 
 sem_TyFloatPoint (TyDouble )  =
     (sem_TyFloatPoint_TyDouble )
+sem_TyFloatPoint (TyFP128 )  =
+    (sem_TyFloatPoint_TyFP128 )
 sem_TyFloatPoint (TyFloat )  =
     (sem_TyFloatPoint_TyFloat )
-sem_TyFloatPoint (TyHalfTy )  =
-    (sem_TyFloatPoint_TyHalfTy )
-sem_TyFloatPoint (Tyfp128 )  =
-    (sem_TyFloatPoint_Tyfp128 )
-sem_TyFloatPoint (Typpcfp128 )  =
-    (sem_TyFloatPoint_Typpcfp128 )
-sem_TyFloatPoint (Tyx86fp80 )  =
-    (sem_TyFloatPoint_Tyx86fp80 )
+sem_TyFloatPoint (TyHalf )  =
+    (sem_TyFloatPoint_TyHalf )
+sem_TyFloatPoint (TyPPCFP128 )  =
+    (sem_TyFloatPoint_TyPPCFP128 )
+sem_TyFloatPoint (Tyx86FP80 )  =
+    (sem_TyFloatPoint_Tyx86FP80 )
 -- semantic domain
 type T_TyFloatPoint  = ( TyFloatPoint )
 data Inh_TyFloatPoint  = Inh_TyFloatPoint {}
@@ -2955,6 +2956,14 @@ sem_TyFloatPoint_TyDouble  =
          _lhsOself =
              _self
      in  ( _lhsOself))
+sem_TyFloatPoint_TyFP128 :: T_TyFloatPoint 
+sem_TyFloatPoint_TyFP128  =
+    (let _lhsOself :: TyFloatPoint 
+         _self =
+             TyFP128
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 sem_TyFloatPoint_TyFloat :: T_TyFloatPoint 
 sem_TyFloatPoint_TyFloat  =
     (let _lhsOself :: TyFloatPoint 
@@ -2963,40 +2972,32 @@ sem_TyFloatPoint_TyFloat  =
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_TyFloatPoint_TyHalfTy :: T_TyFloatPoint 
-sem_TyFloatPoint_TyHalfTy  =
+sem_TyFloatPoint_TyHalf :: T_TyFloatPoint 
+sem_TyFloatPoint_TyHalf  =
     (let _lhsOself :: TyFloatPoint 
          _self =
-             TyHalfTy
+             TyHalf
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_TyFloatPoint_Tyfp128 :: T_TyFloatPoint 
-sem_TyFloatPoint_Tyfp128  =
+sem_TyFloatPoint_TyPPCFP128 :: T_TyFloatPoint 
+sem_TyFloatPoint_TyPPCFP128  =
     (let _lhsOself :: TyFloatPoint 
          _self =
-             Tyfp128
+             TyPPCFP128
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_TyFloatPoint_Typpcfp128 :: T_TyFloatPoint 
-sem_TyFloatPoint_Typpcfp128  =
+sem_TyFloatPoint_Tyx86FP80 :: T_TyFloatPoint 
+sem_TyFloatPoint_Tyx86FP80  =
     (let _lhsOself :: TyFloatPoint 
          _self =
-             Typpcfp128
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_TyFloatPoint_Tyx86fp80 :: T_TyFloatPoint 
-sem_TyFloatPoint_Tyx86fp80  =
-    (let _lhsOself :: TyFloatPoint 
-         _self =
-             Tyx86fp80
+             Tyx86FP80
          _lhsOself =
              _self
      in  ( _lhsOself))
 -- Type --------------------------------------------------------
-data Type  = TyArray (Ints ) (Type ) 
+data Type  = TyArray (Int) (Type ) 
            | TyFloatPoint (TyFloatPoint ) 
            | TyFunction (Types) (Type ) 
            | TyInt (Int) 
@@ -3005,15 +3006,16 @@ data Type  = TyArray (Ints ) (Type )
            | TyOpaque 
            | TyPointer (Type ) 
            | TyStruct (Types) 
-           | TyVector (Ints ) (Type ) 
+           | TyUnsupported 
+           | TyVector (Int) (Type ) 
            | TyVoid 
-           | TyX86mmx 
+           | Tyx86MMX 
            deriving ( Eq,Ord,Show)
 -- cata
 sem_Type :: Type  ->
             T_Type 
-sem_Type (TyArray _elems _ty )  =
-    (sem_Type_TyArray (sem_Ints _elems ) (sem_Type _ty ) )
+sem_Type (TyArray _numEl _ty )  =
+    (sem_Type_TyArray _numEl (sem_Type _ty ) )
 sem_Type (TyFloatPoint _p )  =
     (sem_Type_TyFloatPoint (sem_TyFloatPoint _p ) )
 sem_Type (TyFunction _party _retty )  =
@@ -3030,12 +3032,14 @@ sem_Type (TyPointer _ty )  =
     (sem_Type_TyPointer (sem_Type _ty ) )
 sem_Type (TyStruct _tys )  =
     (sem_Type_TyStruct _tys )
-sem_Type (TyVector _elems _ty )  =
-    (sem_Type_TyVector (sem_Ints _elems ) (sem_Type _ty ) )
+sem_Type (TyUnsupported )  =
+    (sem_Type_TyUnsupported )
+sem_Type (TyVector _numEl _ty )  =
+    (sem_Type_TyVector _numEl (sem_Type _ty ) )
 sem_Type (TyVoid )  =
     (sem_Type_TyVoid )
-sem_Type (TyX86mmx )  =
-    (sem_Type_TyX86mmx )
+sem_Type (Tyx86MMX )  =
+    (sem_Type_Tyx86MMX )
 -- semantic domain
 type T_Type  = ( Type )
 data Inh_Type  = Inh_Type {}
@@ -3046,19 +3050,16 @@ wrap_Type :: T_Type  ->
 wrap_Type sem (Inh_Type )  =
     (let ( _lhsOself) = sem 
      in  (Syn_Type _lhsOself ))
-sem_Type_TyArray :: T_Ints  ->
+sem_Type_TyArray :: Int ->
                     T_Type  ->
                     T_Type 
-sem_Type_TyArray elems_ ty_  =
+sem_Type_TyArray numEl_ ty_  =
     (let _lhsOself :: Type 
-         _elemsIself :: Ints 
          _tyIself :: Type 
          _self =
-             TyArray _elemsIself _tyIself
+             TyArray numEl_ _tyIself
          _lhsOself =
              _self
-         ( _elemsIself) =
-             elems_ 
          ( _tyIself) =
              ty_ 
      in  ( _lhsOself))
@@ -3141,19 +3142,24 @@ sem_Type_TyStruct tys_  =
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Type_TyVector :: T_Ints  ->
-                     T_Type  ->
-                     T_Type 
-sem_Type_TyVector elems_ ty_  =
+sem_Type_TyUnsupported :: T_Type 
+sem_Type_TyUnsupported  =
     (let _lhsOself :: Type 
-         _elemsIself :: Ints 
-         _tyIself :: Type 
          _self =
-             TyVector _elemsIself _tyIself
+             TyUnsupported
          _lhsOself =
              _self
-         ( _elemsIself) =
-             elems_ 
+     in  ( _lhsOself))
+sem_Type_TyVector :: Int ->
+                     T_Type  ->
+                     T_Type 
+sem_Type_TyVector numEl_ ty_  =
+    (let _lhsOself :: Type 
+         _tyIself :: Type 
+         _self =
+             TyVector numEl_ _tyIself
+         _lhsOself =
+             _self
          ( _tyIself) =
              ty_ 
      in  ( _lhsOself))
@@ -3165,11 +3171,11 @@ sem_Type_TyVoid  =
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Type_TyX86mmx :: T_Type 
-sem_Type_TyX86mmx  =
+sem_Type_Tyx86MMX :: T_Type 
+sem_Type_Tyx86MMX  =
     (let _lhsOself :: Type 
          _self =
-             TyX86mmx
+             Tyx86MMX
          _lhsOself =
              _self
      in  ( _lhsOself))

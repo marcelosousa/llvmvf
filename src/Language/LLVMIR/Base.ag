@@ -164,6 +164,7 @@ data Instruction
       | Alloca
           id    :: Identifier
           ty    :: Type
+          align :: Int
 --          num   :: Int
 --          align :: Align
       

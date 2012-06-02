@@ -13,28 +13,31 @@ import System.IO
 import System.FilePath
 import Language.LLVMIR     (Module)
 import Language.LLVMIR.Parser   (parse)
+import Mutation.Core (mutate)
 import UU.PPrint 
 
 import Debug.Trace
 
 -- Options 
-data Options =  Parse
+data Options = Parse
+             | Mutate
   deriving (Show, Data, Typeable)
 
 instance Default Options where
   def = Parse
 
 runOption :: FilePath -> Options -> IO ()
-runOption file Parse = do mdl <- parse file
-                          print mdl
+runOption bc Parse = do mdl <- parse bc
+                        print mdl
+runOption bc Mutate = mutate bc
 
-data ProgramOptions = PHPAnalysis {
+data ProgramOptions = LLVMVF {
     input  :: FilePath
   , typeoutput :: Options
 }
   deriving (Show, Data, Typeable)
 
-standard = cmdArgsMode $ PHPAnalysis 
+standard = cmdArgsMode $ LLVMVF 
            { 
              input         = (def &= args )
            , typeoutput    = (def &= help "Parse" &= typ "Parse")

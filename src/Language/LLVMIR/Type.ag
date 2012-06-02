@@ -9,9 +9,9 @@ module {Language.LLVMIR.Type}{}{}
 
 type Types = [Type]
 
-data Type 
+data Type
     | TyVoid
-    | TyX86mmx
+    | Tyx86MMX
     | TyLabel
     | TyMetadata
     | TyOpaque
@@ -20,7 +20,7 @@ data Type
     | TyFloatPoint
         p :: TyFloatPoint
     | TyArray
-        elems :: Ints
+        numEl :: Int -- ^ Flat arrays?
         ty    :: Type
     | TyFunction
         party :: Types
@@ -30,16 +30,17 @@ data Type
     | TyPointer
         ty :: Type
     | TyVector
-        elems :: Ints
+        numEl :: Int
         ty    :: Type
+    | TyUnsupported
 
 data TyFloatPoint
-    | TyHalfTy
+    | TyHalf -- ^ Compatible with i386?
     | TyFloat
     | TyDouble
-    | Tyfp128
-    | Tyx86fp80
-    | Typpcfp128
+    | TyFP128
+    | Tyx86FP80
+    | TyPPCFP128
       
 set Types = Type TyFloatPoint
 

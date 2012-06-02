@@ -35,19 +35,19 @@
   (major1) == 1 && (major2) <  2 || \
   (major1) == 1 && (major2) == 2 && (minor) <= 0)
 
-/* package llvm-3.0.0.0 */
-#define VERSION_llvm "3.0.0.0"
+/* package llvm-3.0.1.0 */
+#define VERSION_llvm "3.0.1.0"
 #define MIN_VERSION_llvm(major1,major2,minor) (\
   (major1) <  3 || \
   (major1) == 3 && (major2) <  0 || \
-  (major1) == 3 && (major2) == 0 && (minor) <= 0)
+  (major1) == 3 && (major2) == 0 && (minor) <= 1)
 
-/* package llvm-base-3.0.0.0 */
-#define VERSION_llvm_base "3.0.0.0"
+/* package llvm-base-3.0.1.0 */
+#define VERSION_llvm_base "3.0.1.0"
 #define MIN_VERSION_llvm_base(major1,major2,minor) (\
   (major1) <  3 || \
   (major1) == 3 && (major2) <  0 || \
-  (major1) == 3 && (major2) == 0 && (minor) <= 0)
+  (major1) == 3 && (major2) == 0 && (minor) <= 1)
 
 /* package mtl-2.0.1.0 */
 #define VERSION_mtl "2.0.1.0"

@@ -26,7 +26,6 @@ import Language.LLVMIR.Converter
 import Foreign.C.String
 
 type FunctionName = String
-type Value = FFI.ValueRef
 
 {-
 parse :: FilePath -> IO ()
@@ -39,7 +38,7 @@ parse file = do mdl <- readBitcodeFromFile file
 
 parse :: FilePath -> IO LL.Module 
 parse file = do mdl <- readBitcodeFromFile file
-                layout <- getSDataLayoutModule mdl
+                layout <- getDataLayout mdl
                 target <- getTargetData mdl
                 funs <- getFuncs mdl
                 gvars <- getGlobalVar mdl
@@ -62,17 +61,11 @@ getTargetData mdl = withModule mdl $ \mdlPtr -> do
                      return $ LL.TargetData s $ runParser "parsing target" pTarget s
   
 -- Data Layout    
-getSDataLayoutModule :: Module -> IO LL.DataLayout
-getSDataLayoutModule mdl = withModule mdl $ \mdlPtr -> do 
-                            cs <- FFI.getDataLayout mdlPtr
-                            s <- peekCString cs                            
-                            return $ LL.DataLayout $ runParser "error" pDataLayout s
-                            
-getDataLayoutModule :: Module -> IO TargetData
-getDataLayoutModule mdl = withModule mdl $ \mdlPtr -> do 
-                            cs <- FFI.getDataLayout mdlPtr
-                            trgPtr <- FFI.createTargetData cs
-                            return $ makeTargetData trgPtr
+getDataLayout :: Module -> IO LL.DataLayout
+getDataLayout mdl = withModule mdl $ \mdlPtr -> do 
+                     cs <- FFI.getDataLayout mdlPtr
+                     s <- peekCString cs                            
+                     return $ LL.DataLayout $ runParser "error" pDataLayout s
 
 pChar :: Parser Char
 pChar = pLetter <|> pDigit <|> pSym ':'
