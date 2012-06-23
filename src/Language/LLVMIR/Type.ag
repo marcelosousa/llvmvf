@@ -26,7 +26,8 @@ data Type
         party :: Types
         retty :: Type
     | TyStruct
-        tys :: Types
+        name :: String
+      --  tys :: Types
     | TyPointer
         ty :: Type
     | TyVector
@@ -42,8 +43,8 @@ data TyFloatPoint
     | Tyx86FP80
     | TyPPCFP128
       
-set Types = Type TyFloatPoint
+set TypesX = Type TyFloatPoint
 
-deriving Types: Show
-deriving Types: Eq
-deriving Types: Ord
+deriving TypesX: Show
+deriving TypesX: Eq
+deriving TypesX: Ord

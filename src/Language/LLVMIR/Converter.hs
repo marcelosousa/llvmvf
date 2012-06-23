@@ -13,50 +13,74 @@ type TypeKind = FFI.TypeKind
 
 type Opcode = Int
 
+convertLinkage :: FFI.Linkage -> LL.Linkage
+convertLinkage FFI.ExternalLinkage                 = LL.ExternalLinkage  
+convertLinkage FFI.AvailableExternallyLinkage      = LL.AvailableExternallyLinkage
+convertLinkage FFI.LinkOnceAnyLinkage              = LL.LinkOnceAnyLinkage             
+convertLinkage FFI.LinkOnceODRLinkage              = LL.LinkOnceODRLinkage             
+convertLinkage FFI.WeakAnyLinkage                  = LL.WeakAnyLinkage                 
+convertLinkage FFI.WeakODRLinkage                  = LL.WeakODRLinkage                 
+convertLinkage FFI.AppendingLinkage                = LL.AppendingLinkage               
+convertLinkage FFI.InternalLinkage                 = LL.InternalLinkage                
+convertLinkage FFI.PrivateLinkage                  = LL.PrivateLinkage                 
+convertLinkage FFI.DLLImportLinkage                = LL.DLLImportLinkage               
+convertLinkage FFI.DLLExportLinkage                = LL.DLLExportLinkage               
+convertLinkage FFI.ExternalWeakLinkage             = LL.ExternalWeakLinkage            
+convertLinkage FFI.GhostLinkage                    = LL.GhostLinkage                   
+convertLinkage FFI.CommonLinkage                   = LL.CommonLinkage                  
+convertLinkage FFI.LinkerPrivateLinkage            = LL.LinkerPrivateLinkage           
+convertLinkage FFI.LinkerPrivateWeakLinkage        = LL.LinkerPrivateWeakLinkage       
+convertLinkage FFI.LinkerPrivateWeakDefAutoLinkage = LL.LinkerPrivateWeakDefAutoLinkage
 
-getType :: Type -> TypeKind -> IO LL.Type
-getType ty FFI.VoidTypeKind      = return LL.TyVoid
-getType ty FFI.FloatTypeKind     = return $ LL.TyFloatPoint LL.TyFloat
-getType ty FFI.DoubleTypeKind    = return $ LL.TyFloatPoint LL.TyDouble
-getType ty FFI.X86_FP80TypeKind  = return $ LL.TyFloatPoint LL.Tyx86FP80
-getType ty FFI.FP128TypeKind     = return $ LL.TyFloatPoint LL.TyFP128
-getType ty FFI.PPC_FP128TypeKind = return $ LL.TyFloatPoint LL.TyPPCFP128
-getType ty FFI.LabelTypeKind     = return LL.TyLabel
-getType ty FFI.OpaqueTypeKind    = return LL.TyOpaque
-getType ty FFI.MetadataTypeKind  = return LL.TyMetadata 
-getType ty FFI.X86_MMXTypeKind   = return LL.Tyx86MMX
-getType ty FFI.IntegerTypeKind   = do n <- FFI.getIntTypeWidth ty
-                                      return $ LL.TyInt $ fromIntegral n
---getType FFI.FunctionTypeKind
---getType FFI.StructTypeKind -> return "(Struct ...)"
-getType ty FFI.PointerTypeKind   = do et  <- FFI.getElementType ty
-                                      etk <- FFI.getTypeKind et
-                                      etd <- getType et etk
-                                      return $ LL.TyPointer etd
---getType ty FFI.ArrayTypeKind     = do n   <- FFI.getArrayLength ty
---                                      et  <- FFI.getElementType ty
---                                      etk <- FFI.getTypeKind ty
---                                      etd <- getType et etk
---                                      return $ LL.TyArray (fromIntegral n) etd
---getType ty FFI.VectorTypeKind    = do n   <- FFI.getVectorSize ty
---                                      et  <- FFI.getElementType ty
---                                      etk <- FFI.getTypeKind ty
---                                      etd <- getType et etk
---                                      return $ LL.TyVector (fromIntegral n) etd
-getType ty _  = return LL.TyUnsupported
+
+{- TODO
+FFI.FunctionTypeKind
+FFI.StructTypeKind
+FFI.MetadataTypeKind 
+FFI.X86_MMXTypeKind
+-}
+getType :: Type -> IO LL.Type
+getType ty = do tyk <- FFI.getTypeKind ty
+                getTypeWithKind ty tyk
+
+getTypeWithKind :: Type -> TypeKind -> IO LL.Type
+getTypeWithKind ty FFI.VoidTypeKind      = return LL.TyVoid
+getTypeWithKind ty FFI.FloatTypeKind     = return $ LL.TyFloatPoint LL.TyFloat
+getTypeWithKind ty FFI.DoubleTypeKind    = return $ LL.TyFloatPoint LL.TyDouble
+getTypeWithKind ty FFI.X86_FP80TypeKind  = return $ LL.TyFloatPoint LL.Tyx86FP80
+getTypeWithKind ty FFI.FP128TypeKind     = return $ LL.TyFloatPoint LL.TyFP128
+getTypeWithKind ty FFI.PPC_FP128TypeKind = return $ LL.TyFloatPoint LL.TyPPCFP128
+getTypeWithKind ty FFI.LabelTypeKind     = return LL.TyLabel
+getTypeWithKind ty FFI.OpaqueTypeKind    = return LL.TyOpaque
+getTypeWithKind ty FFI.IntegerTypeKind   = do n <- FFI.getIntTypeWidth ty
+                                              return $ LL.TyInt $ fromIntegral n
+getTypeWithKind ty FFI.PointerTypeKind   = do et  <- FFI.getElementType ty
+                                              etd <- getType et 
+                                              return $ LL.TyPointer etd
+getTypeWithKind ty FFI.ArrayTypeKind     = do n   <- FFI.getArrayLength ty
+                                              et  <- FFI.getElementType ty
+                                              etd <- getType et 
+                                              return $ LL.TyArray (fromIntegral n) etd
+getTypeWithKind ty FFI.VectorTypeKind    = do n   <- FFI.getVectorSize ty
+                                              et  <- FFI.getElementType ty
+                                              etd <- getType et 
+                                              return $ LL.TyVector (fromIntegral n) etd
+getTypeWithKind ty FFI.StructTypeKind    = do s <- (FFI.getStructName ty) >>= peekCString
+                                              return $ LL.TyStruct s
+getTypeWithKind ty _  = return LL.TyUnsupported
 
 getInst :: Value -> IO LL.Instruction
 getInst v = do opcode <- FFI.instGetOpcode v
                getInstruction' v opcode
 
 getInstruction' :: Value -> Opcode -> IO LL.Instruction
-getInstruction' v 26 = do cs <- FFI.getValueName v
-                          n  <- peekCString cs
-                          tyref <- FFI.typeOf v
-                          tk <- FFI.getTypeKind tyref
-                          ty <- getType tyref tk
-                          a  <- FFI.getAlignment v
-                          return $ LL.Alloca (LL.Local n) ty (fromIntegral a)  --(LL.Align 1)
+--getInstruction' v 26 = do cs <- FFI.getValueName v
+--                          n  <- peekCString cs
+--                          tyref <- FFI.typeOf v
+--                          tk <- FFI.getTypeKind tyref
+--                          ty <- getType tyref tk
+--                          a  <- FFI.getAlignment v
+--                          return $ LL.Alloca (LL.Local n) ty 1 -- (fromIntegral a)
 getInstruction' v _  = do (s,inst) <- getInstrDesc v
                                    -- sops <- foldM (\s (v,_) -> return $ v ++ " " ++ s) "" ops
                           return $ LL.Instruction (s ++ "=" ++ show inst)

@@ -12,10 +12,10 @@ version = Version {versionBranch = [1,0], versionTags = []}
 
 bindir, libdir, datadir, libexecdir :: FilePath
 
-bindir     = "/Users/mabs/Library/Haskell/ghc-7.0.3/lib/llvmvf-1.0/bin"
-libdir     = "/Users/mabs/Library/Haskell/ghc-7.0.3/lib/llvmvf-1.0/lib"
-datadir    = "/Users/mabs/Library/Haskell/ghc-7.0.3/lib/llvmvf-1.0/share"
-libexecdir = "/Users/mabs/Library/Haskell/ghc-7.0.3/lib/llvmvf-1.0/libexec"
+bindir     = "/home/marcelosousa/.cabal/bin"
+libdir     = "/home/marcelosousa/.cabal/lib/llvmvf-1.0/ghc-7.0.3"
+datadir    = "/home/marcelosousa/.cabal/share/llvmvf-1.0"
+libexecdir = "/home/marcelosousa/.cabal/libexec"
 
 getBinDir, getLibDir, getDataDir, getLibexecDir :: IO FilePath
 getBinDir = catch (getEnv "llvmvf_bindir") (\_ -> return bindir)

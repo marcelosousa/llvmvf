@@ -28,7 +28,7 @@ instance Default Options where
 
 runOption :: FilePath -> Options -> IO ()
 runOption bc Parse = do mdl <- parse bc
-                        print mdl
+                        print $ pretty mdl
 runOption bc Mutate = mutate bc
 
 data ProgramOptions = LLVMVF {

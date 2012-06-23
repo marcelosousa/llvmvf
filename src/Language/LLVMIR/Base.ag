@@ -23,15 +23,17 @@ import Data.Map
 type Id = (String)
 type Label = (String) 
 type MLabel = maybe Label
+type MId = maybe Id
 
 type Functions = [Function]
 type GlobalVars = [GlobalVar]
 type Identifiers = [Identifier]
 type Arguments = [Argument]
+type Parameters = [Parameter]
 type FuncAttrs = [FunAttr]
 type BasicBlocks = [BasicBlock]
 type Instructions = [Instruction]
-type ParamAttrs = [ParamAttr]
+type Attributes = [Attribute]
 type ModuleAsms = [ModuleAsm]
 type NamedTys = [NamedTy]
 type Aliases = [Alias]
@@ -43,13 +45,12 @@ type MCConv = maybe CConv
 type MUnnamedAddr = maybe Bool -- maybe () would be better
 type MConstant = maybe Bool
 type MDefinitionTy = maybe DefinitionTy
-type MParamAttrs = maybe ParamAttrs
+type MAttributes = maybe Attributes
 type MAlign = maybe Align
 type MGCName = maybe GCName
 type MModuleAsms = maybe ModuleAsms
 type MSection = maybe Section
 type MNamedTys = maybe NamedTys
-type MAliases = maybe Aliases
 type MValue = maybe Value
 
 type Triplet = (Int, Int, Int)
@@ -64,12 +65,13 @@ type IntTyValIdL = [IntTyValId]
 
 data Module 
       | Module
+          id :: String
           layout :: DataLayout
           target :: TargetData
-          funs  :: Functions
           gvars :: GlobalVars
+          funs  :: Functions
+          aliases :: Aliases
 --          namedty :: MNamedTys
---          aliases :: MAliases
 --          symbtbl :: {[SymbolTableEntry]}
 --          namedm :: NamedMetadata
 --          mdlasm :: MModuleAsms
@@ -104,40 +106,39 @@ data NamedTy
 
 data GlobalVar 
       | GlobalVar 
-          name     :: Id
---          linkage  :: Linkage
---          init     :: MValue
+          name    :: Id
+          linkage :: Linkage
+          isConst :: Bool
+          isUaddr :: Bool 
+--          ty       :: Type 
+--          ival    :: MValue
 --          section  :: MSection
---          optAlign :: MAlign
---          defTy    :: MDefinitionTy
---          constant :: MConstant
---          uaddr    :: MUnnamedAddr
-
+          align :: Align
 
 data Function 
       | FunctionDef 
---          linkage    :: MLinkageTy
+          name    :: Id
+          linkage :: Linkage
+          retty   :: Type
+          params  :: Parameters
 --          visibility :: MVisibility
 --          cconv      :: MCConv
 --          uaddr      :: MUnnamedAddr
---          retty      :: Type
---          paramattr  :: MParamAttrs
-          name       :: Id
---          args       :: Arguments
+--          paramattr  :: MAttributes
 --          fnAttrs    :: FuncAttrs
 --          section    :: MSection
 --          optAlign   :: MAlign
 --          gcName     :: MGCName
-          bb         :: BasicBlocks
+--          bb         :: BasicBlocks
       | FunctionDecl
           name       :: Id
---          linkage    :: MLinkageTy
+          linkage    :: Linkage
+          retty      :: Type
+          params     :: Parameters
 --          visibility :: MVisibility
 --          cconv      :: MCConv
 --          uaddr      :: MUnnamedAddr
---          retty      :: Type
---          paramattr  :: MParamAttrs
---          args       :: Arguments
+--          paramattr  :: MAttributes
 --          optAlign   :: MAlign          
 --          gcName     :: MGCName
           
@@ -184,7 +185,7 @@ data Constant
       | IntC  v :: Int ty :: Type
       | FloatC v :: Float ty :: Type
       | StructC elems :: PTyIntL
-      | ArrayC elems ::  PTyIntL
+      | ArrayC ty :: Type val :: String -- elems ::  PTyIntL
       | VectorC elems :: PTyIntL      
       | ZeroInitC ty :: Type
       | NullC ty :: Type
@@ -201,24 +202,31 @@ data Section
 data Argument
       | Argument
 
+data Parameter
+      | Parameter 
+          var :: Id  -- ^In practice, the name is optional
+          ty  :: Type
+       -- attr :: MAttribute            
+
 --  All Global Variables and Functions have one of the following types of linkage.
 data Linkage
-      | Private
-      | LinkerPrivate
-      | LinkerPrivateWeak
-      | LinkerPrivateWeakDefAuto
-      | Internal
-      | AvailableExternally
-      | Linkonce
-      | Weak
-      | Common
-      | Appending
-      | ExternWeak
-      | LinkonceOdr
-      | WeakOdr
-      | External
-      | Dllimport
-      | Dllexport 
+    | ExternalLinkage     -- ^Externally visible function
+    | AvailableExternallyLinkage
+    | LinkOnceAnyLinkage  -- ^Keep one copy of function when linking (inline)
+    | LinkOnceODRLinkage  -- ^Same, but only replaced by something equivalent.
+    | WeakAnyLinkage      -- ^Keep one copy of named function when linking (weak)
+    | WeakODRLinkage      -- ^Same, but only replaced by something equivalent.
+    | AppendingLinkage    -- ^Special purpose, only applies to global arrays
+    | InternalLinkage     -- ^Rename collisions when linking (static functions)
+    | PrivateLinkage      -- ^Like Internal, but omit from symbol table
+    | DLLImportLinkage    -- ^Function to be imported from DLL
+    | DLLExportLinkage    -- ^Function to be accessible from DLL
+    | ExternalWeakLinkage -- ^ExternalWeak linkage description
+    | GhostLinkage        -- ^Stand-in functions for streaming fns from BC files
+    | CommonLinkage       -- ^Tentative definitions
+    | LinkerPrivateLinkage -- ^Like Private, but linker removes.
+    | LinkerPrivateWeakLinkage -- ^Similar to PrivateLinkage, but the symbol is weak.
+    | LinkerPrivateWeakDefAutoLinkage -- ^Similar to LinkerPrivateWeakLinkage, but its known that the address of the object is not taken.
 
 -- Call Convention
 -- LLVM functions, calls and invokes can all have an optional calling convention specified for the call.
@@ -236,15 +244,27 @@ data Visibility
       | Protected
 
 -- Parameter Attributes      
-data ParamAttr
-      | Zeroext
-      | Signext
-      | Inreg
-      | Byval
-      | Sret
-      | Noalias
-      | Nocapture
-      | Nest
+data Attribute
+    | ZExtAttribute
+    | SExtAttribute
+    | NoReturnAttribute
+    | InRegAttribute
+    | StructRetAttribute
+    | NoUnwindAttribute
+    | NoAliasAttribute
+    | ByValAttribute
+    | NestAttribute
+    | ReadNoneAttribute
+    | ReadOnlyAttribute
+    | NoInlineAttribute
+    | AlwaysInlineAttribute
+    | OptimizeForSizeAttribute
+    | StackProtectAttribute
+    | StackProtectReqAttribute
+    | NoCaptureAttribute
+    | NoRedZoneAttribute
+    | NoImplicitFloatAttribute
+    | NakedAttribute
 
 -- Garbage Collector Names   
 data GCName
@@ -278,13 +298,14 @@ data DefinitionTy
 data Alias
       | Alias 
           name       :: Id
-          linkage    :: MLinkageTy
-          visibility :: MVisibility
-          aliaseeTy  :: Type
-          aliasee    :: Id
+--          linkage    :: MLinkageTy
+--          visibility :: MVisibility
+--          aliaseeTy  :: Type
+--          aliasee    :: Id
   
-set Every = Module GlobalVar Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction Terminator NamedTy DataLayout Alias ParamAttr Section Value Identifier Constant TargetData Target
+set Every = Module GlobalVar Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction Terminator NamedTy DataLayout Alias Attribute Section Value Identifier Constant TargetData Target Parameter
 
 deriving Every: Show
 deriving Every: Eq
 deriving Every: Ord
+deriving Linkage: Enum

@@ -7,12 +7,12 @@
   (major1) == 4 && (major2) <  3 || \
   (major1) == 4 && (major2) == 3 && (minor) <= 1)
 
-/* package cmdargs-0.7 */
-#define VERSION_cmdargs "0.7"
+/* package cmdargs-0.9.5 */
+#define VERSION_cmdargs "0.9.5"
 #define MIN_VERSION_cmdargs(major1,major2,minor) (\
   (major1) <  0 || \
-  (major1) == 0 && (major2) <  7 || \
-  (major1) == 0 && (major2) == 7 && (minor) <= 0)
+  (major1) == 0 && (major2) <  9 || \
+  (major1) == 0 && (major2) == 9 && (minor) <= 5)
 
 /* package containers-0.4.0.0 */
 #define VERSION_containers "0.4.0.0"
@@ -21,8 +21,8 @@
   (major1) == 0 && (major2) <  4 || \
   (major1) == 0 && (major2) == 4 && (minor) <= 0)
 
-/* package fgl-5.4.2.3 */
-#define VERSION_fgl "5.4.2.3"
+/* package fgl-5.4.2.4 */
+#define VERSION_fgl "5.4.2.4"
 #define MIN_VERSION_fgl(major1,major2,minor) (\
   (major1) <  5 || \
   (major1) == 5 && (major2) <  4 || \
@@ -49,12 +49,12 @@
   (major1) == 3 && (major2) <  0 || \
   (major1) == 3 && (major2) == 0 && (minor) <= 1)
 
-/* package mtl-2.0.1.0 */
-#define VERSION_mtl "2.0.1.0"
+/* package mtl-2.1.1 */
+#define VERSION_mtl "2.1.1"
 #define MIN_VERSION_mtl(major1,major2,minor) (\
   (major1) <  2 || \
-  (major1) == 2 && (major2) <  0 || \
-  (major1) == 2 && (major2) == 0 && (minor) <= 1)
+  (major1) == 2 && (major2) <  1 || \
+  (major1) == 2 && (major2) == 1 && (minor) <= 1)
 
 /* package uu-parsinglib-2.7.3.2 */
 #define VERSION_uu_parsinglib "2.7.3.2"

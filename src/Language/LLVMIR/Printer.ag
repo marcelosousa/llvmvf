@@ -12,7 +12,16 @@ imports
 import UU.PPrint as P
 }
 
-attr Module TargetData DataLayout Functions GlobalVars
+attr Parameters Types
+  syn pp :: {Doc}
+
+sem Parameters Types 
+  | Nil  lhs.pp = P.empty
+  | Cons lhs.pp = if (length @tl.self == 0)
+                  then @hd.pp
+                  else @hd.pp <> char ',' <+> @tl.pp
+
+attr Module TargetData DataLayout Functions GlobalVars GlobalVar Linkage Align MValue Value Constant Type TyFloatPoint Function Aliases Alias Parameter
   syn pp use {<$>} {P.empty} :: {Doc}
 
 attr Target 
@@ -31,9 +40,97 @@ sem Target
   | Linux lhs.pp = text "Linux"
 
 sem Module
-  | Module lhs.pp = @layout.pp <$> @target.pp <$> @gvars.pp <$> @funs.pp  
+  | Module lhs.pp = text ("; ModuleID ='" ++ @id ++ "'") <$> @layout.pp <$> @target.pp <$> @aliases.pp <$> @gvars.pp <$> @funs.pp 
+
+sem GlobalVar
+  | GlobalVar lhs.pp = text "@" <> text @name.self <+> text "=" <+>  @linkage.pp <+> ppKeyword @isUaddr "unnamed_addr" <+> ppKeyword @isConst "constant" <+> text "," <+> @align.pp -- @ival.pp <> text "," <+> @align.pp 
+
+sem Function
+  | FunctionDef  lhs.pp = text "define"  <+> @linkage.pp <+> @retty.pp <+> char '@' <> text @name.self <> parens @params.pp
+  | FunctionDecl lhs.pp = text "declare" <+> @linkage.pp <+> @retty.pp <+> char '@' <> text @name.self <> parens @params.pp
+
+sem Parameter
+  | Parameter lhs.pp = @ty.pp <> ppPName @var.self
+ 
+sem Alias
+  | Alias lhs.pp = text "%" <> text @name.self
+
+sem Linkage
+  | ExternalLinkage            lhs.pp = text "external" 
+  | AvailableExternallyLinkage lhs.pp = text "available_externally"
+  | LinkOnceAnyLinkage         lhs.pp = text "linkonce" 
+  | LinkOnceODRLinkage         lhs.pp = text "linkonce_odr" 
+  | WeakAnyLinkage             lhs.pp = text "weak" 
+  | WeakODRLinkage             lhs.pp = text "weak_odr" 
+  | AppendingLinkage           lhs.pp = text "appending"
+  | InternalLinkage            lhs.pp = text "internal" 
+  | PrivateLinkage             lhs.pp = text "private" 
+  | DLLImportLinkage           lhs.pp = text "dllimport" 
+  | DLLExportLinkage           lhs.pp = text "dllexport"
+  | ExternalWeakLinkage        lhs.pp = text "external"
+  | GhostLinkage               lhs.pp = text "ghost" -- ^OBSOLETE
+  | CommonLinkage              lhs.pp = text "common"
+  | LinkerPrivateLinkage       lhs.pp = text "linker_private"
+  | LinkerPrivateWeakLinkage   lhs.pp = text "linker_private_weak"
+  | LinkerPrivateWeakDefAutoLinkage lhs.pp = text "linker_private_weak_def_auto" 
+
+sem Align
+  | Align lhs.pp = text "align" <+> text (show @n)
+
+sem MValue
+  | Nothing lhs.pp = P.empty
+  | Just    lhs.pp = @just.pp
+
+sem Value
+  | Id lhs.pp = P.empty
+  | Const lhs.pp = @c.pp
+
+sem Constant
+| ArrayC lhs.pp = @ty.pp <+> text "c" <> dquotes (escaped @val)
+
+sem Type
+  | TyVoid       lhs.pp = text "void"
+  | Tyx86MMX     lhs.pp = text "x86mmx" 
+  | TyLabel      lhs.pp = text "label"
+  | TyMetadata   lhs.pp = text "metadata" 
+  | TyOpaque     lhs.pp = text "opaque"
+  | TyInt        lhs.pp = char 'i' <> int @p 
+  | TyFloatPoint lhs.pp = @p.pp
+  | TyArray      lhs.pp = brackets $ int @numEl <+> char 'x' <+> @ty.pp
+  | TyFunction   lhs.pp = text "pp TyFunction TODO"
+  | TyStruct     lhs.pp = char '%' <> dquotes (text @name) -- char '{' <> @tys.pp <> char '}'
+  | TyPointer    lhs.pp = @ty.pp <> char '*'
+  | TyVector     lhs.pp = char '<' <> int @numEl <+> char 'x' <+> @ty.pp <> char '>'
+  | TyUnsupported lhs.pp = text "TyUnsupported" 
+
+sem TyFloatPoint
+  | TyHalf     lhs.pp = text "half" -- ^ Compatible with i386?
+  | TyFloat    lhs.pp = text "float"
+  | TyDouble   lhs.pp = text "double"
+  | TyFP128    lhs.pp = text "fp128"
+  | Tyx86FP80  lhs.pp = text "x86_fp80"
+  | TyPPCFP128 lhs.pp = text "ppc_fp128"
 
 {
+ppPName :: String -> Doc
+ppPName s = if (take 2 s == "0x")
+            then P.empty
+            else space <> char '%' <> text s
+
+escaped :: String -> Doc
+escaped ('\n':xs) = text "\\0A\\00" <> escaped xs
+escaped (c:xs)    = char c <> escaped xs
+escaped []        = P.empty
+
+ppKeyword :: Bool -> String -> Doc
+ppKeyword True s = text s
+ppKeyword _    _ = P.empty
+
+class MPretty a where
+  pretty' :: a -> Doc
+
+--instance Pretty 
+
 instance Pretty Module where
     pretty mdl = pp_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
     

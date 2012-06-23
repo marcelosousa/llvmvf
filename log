@@ -1,0 +1,80 @@
+"Module has aliases :1"
+"It has 0"
+; ModuleID ='tests/paper.bc'
+target datalayout = "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128"
+target triple = "x86_64-unknown-linux-gnu"
+
+@_ZStL8__ioinit = internal   , align 1
+@__dso_handle = external   , align 0
+@_ZN7sc_coreL17api_version_checkE = internal   , align 1
+@_ZTVN10__cxxabiv121__vmi_class_type_infoE = external   , align 0
+@_ZTVN10__cxxabiv117__class_type_infoE = external   , align 0
+@.str = private unnamed_addr constant , align 1
+@_ZTVN10__cxxabiv120__si_class_type_infoE = external   , align 0
+@_ZTSN7sc_core9sc_objectE = available_externally  constant , align 0
+@_ZTIN7sc_core9sc_objectE = available_externally unnamed_addr constant , align 0
+@_ZTV2M1 = linkonce_odr unnamed_addr constant , align 0
+@_ZTS2M1 = linkonce_odr  constant , align 0
+@_ZTSN7sc_core9sc_moduleE = available_externally  constant , align 0
+@_ZTSN7sc_core15sc_process_hostE = linkonce_odr  constant , align 0
+@_ZTIN7sc_core15sc_process_hostE = linkonce_odr unnamed_addr constant , align 0
+@_ZTIN7sc_core9sc_moduleE = available_externally unnamed_addr constant , align 0
+@_ZTI2M1 = linkonce_odr unnamed_addr constant , align 0
+@.str8 = private unnamed_addr constant , align 1
+@.str9 = private unnamed_addr constant , align 1
+@.str10 = private unnamed_addr constant , align 1
+@_ZN7sc_core12sc_process_b15m_delete_next_pE = external   , align 0
+@.str11 = private unnamed_addr constant , align 1
+@.str12 = private unnamed_addr constant , align 1
+@__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_decrementEv = private unnamed_addr constant , align 1
+@.str13 = private unnamed_addr constant , align 1
+@__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_incrementEv = private unnamed_addr constant , align 1
+@_ZN7sc_core18sc_curr_simcontextE = external   , align 0
+@_ZN7sc_core25sc_default_global_contextE = external   , align 0
+@llvm.global_ctors = appending   , align 0
+
+declare external void @_ZNSt8ios_base4InitC1Ev(%"class.std::ios_base::Init"*)
+declare external void @_ZNSt8ios_base4InitD1Ev(%"class.std::ios_base::Init"*)
+declare external i32 @__cxa_atexit(TyUnsupported*, i8*, i8*)
+declare external void @_ZN7sc_core20sc_api_version_2_2_0C1Ev(%"class.sc_core::sc_api_version_2_2_0"*)
+declare external i32 @__gxx_personality_v0()
+declare external void @_ZSt9terminatev()
+define external i32 @sc_main(i32 %argc, i8** %argv)
+declare external i32 @atoi(i8*)
+declare external void @_ZN7sc_core14sc_module_nameC1EPKc(%"class.sc_core::sc_module_name"*, i8*)
+declare external void @_ZN7sc_core14sc_module_nameD1Ev(%"class.sc_core::sc_module_name"*)
+declare external void @_ZN7sc_core8sc_startEv()
+define linkonce_odr void @_ZN2M1D1Ev(%"struct.M1"* %this)
+declare external void @_ZdlPv(i8*)
+define linkonce_odr void @_ZN7sc_core8sc_eventD2Ev(%"class.sc_core::sc_event"* %this)
+declare external void @_ZN7sc_core8sc_event6cancelEv(%"class.sc_core::sc_event"*)
+declare external i8* @_Znwm(i64)
+define linkonce_odr void @_ZThn40_N2M1D1Ev(%"struct.M1"* %this)
+declare external void @_ZN7sc_core9sc_moduleD2Ev(%"class.sc_core::sc_module"*)
+declare external void @_ZNK7sc_core9sc_object5printERSo(%"class.sc_core::sc_object"*, %"class.std::basic_ostream"*)
+declare external void @_ZNK7sc_core9sc_object4dumpERSo(%"class.sc_core::sc_object"*, %"class.std::basic_ostream"*)
+declare external void @_ZNK7sc_core9sc_object5traceEPNS_13sc_trace_fileE(%"class.sc_core::sc_object"*, %"class.sc_core::sc_trace_file"*)
+define linkonce_odr i8* @_ZNK7sc_core9sc_module4kindEv(%"class.sc_core::sc_module"* %this)
+declare external %"class.std::vector.10"* @_ZNK7sc_core9sc_module17get_child_objectsEv(%"class.sc_core::sc_module"*)
+define linkonce_odr void @_ZN2M1D0Ev(%"struct.M1"* %this)
+declare external void @_ZN7sc_core9sc_module25before_end_of_elaborationEv(%"class.sc_core::sc_module"*)
+declare external void @_ZN7sc_core9sc_module18end_of_elaborationEv(%"class.sc_core::sc_module"*)
+declare external void @_ZN7sc_core9sc_module19start_of_simulationEv(%"class.sc_core::sc_module"*)
+declare external void @_ZN7sc_core9sc_module17end_of_simulationEv(%"class.sc_core::sc_module"*)
+define linkonce_odr void @_ZThn40_N2M1D0Ev(%"struct.M1"* %this)
+define linkonce_odr void @_ZN2M1C2EN7sc_core14sc_module_nameEbb(%"struct.M1"* %this, %"class.sc_core::sc_module_name"* %name, i1 %x, i1 %y)
+declare external void @_ZN7sc_core9sc_moduleC2Ev(%"class.sc_core::sc_module"*)
+declare external void @_ZN7sc_core13sc_simcontext21create_thread_processEPKcbMNS_15sc_process_hostEFvvEPS3_PKNS_16sc_spawn_optionsE(%"class.sc_core::sc_process_handle"*, %"class.sc_core::sc_simcontext"*, i8*, i1, i64, i64, %"class.sc_core::sc_process_host"*, %"class.sc_core::sc_spawn_options"*)
+define linkonce_odr void @_ZN2M12T1Ev(%"struct.M1"* %this)
+declare external %"class.sc_core::sc_sensitive"* @_ZN7sc_core12sc_sensitivelsENS_17sc_process_handleE(%"class.sc_core::sc_sensitive"*, %"class.sc_core::sc_process_handle"*)
+declare external %"class.sc_core::sc_sensitive_pos"* @_ZN7sc_core16sc_sensitive_poslsENS_17sc_process_handleE(%"class.sc_core::sc_sensitive_pos"*, %"class.sc_core::sc_process_handle"*)
+declare external %"class.sc_core::sc_sensitive_neg"* @_ZN7sc_core16sc_sensitive_neglsENS_17sc_process_handleE(%"class.sc_core::sc_sensitive_neg"*, %"class.sc_core::sc_process_handle"*)
+define linkonce_odr void @_ZN2M12T2Ev(%"struct.M1"* %this)
+declare external void @_ZN7sc_core8sc_event6notifyEv(%"class.sc_core::sc_event"*)
+declare external void @_ZN7sc_core4waitERKNS_7sc_timeEPNS_13sc_simcontextE(%"class.sc_core::sc_time"*, %"class.sc_core::sc_simcontext"*)
+declare external void @_ZN7sc_core7sc_timeC1EdNS_12sc_time_unitEPNS_13sc_simcontextE(%"class.sc_core::sc_time"*, double, i32, %"class.sc_core::sc_simcontext"*)
+declare external void @__assert_fail(i8*, i8*, i32, i8*)
+declare external void @_ZN7sc_core4waitERKNS_8sc_eventEPNS_13sc_simcontextE(%"class.sc_core::sc_event"*, %"class.sc_core::sc_simcontext"*)
+declare external void @_ZN7sc_core13sc_simcontextC1Ev(%"class.sc_core::sc_simcontext"*)
+define internal void @_GLOBAL__I_a()
+
