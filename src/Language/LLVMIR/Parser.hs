@@ -30,24 +30,15 @@ import Foreign.C.Types
 
 type FunctionName = String
 
-{-
-parse :: FilePath -> IO ()
-parse file = do mdl <- readBitcodeFromFile file                         
-                parseModule mdl
-                printDataLayoutModule mdl
-                trg <- getDataLayoutModule mdl
-                print $ littleEndian trg 
--}
-
 parse :: FilePath -> IO LL.Module 
 parse file = do mdl <- readBitcodeFromFile file
                 i <- getModuleIdentifier mdl
                 layout <- getDataLayout mdl
                 target <- getTargetData mdl
---                funs <- getFuncs mdl
+                funs <- getFuncs mdl
 --                gvars <- getGlobalVar mdl
 --                aliases <- getAliases mdl
-                return $ LL.Module i layout target [] [] [] -- aliases 
+                return $ LL.Module i layout target [] funs [] -- aliases 
 
 -- Module Identifier
 getModuleIdentifier :: Module -> IO String
@@ -66,9 +57,9 @@ pTarget =  const LL.MacOs <$> pSomewhere "apple"
           
 getTargetData :: Module -> IO LL.TargetData
 getTargetData mdl = withModule mdl $ \mdlPtr -> do 
-                    -- cs <- FFI.getTarget mdlPtr
-                   --  s <- peekCString cs                            
-                     return $ LL.TargetData "" LL.MacOs -- s $ runParser "parsing target" pTarget s
+                     cs <- FFI.getTarget mdlPtr
+                     s <- peekCString cs                            
+                     return $ LL.TargetData s $ runParser "parsing target" pTarget s
  
 -- Data Layout    
 getDataLayout :: Module -> IO LL.DataLayout
@@ -117,7 +108,8 @@ getGlobal (gname, gval) = do link  <- FFI.getLinkage gval
                                  lllink  = convertLinkage $ FFI.toLinkage link
                              --llival <- getInitVal gval isC
                              return $ LL.GlobalVar gname lllink isC llunadd llalign -- llival llalign
-                      
+
+--} 
 -- Functions
 getFuncs :: Module -> IO LL.Functions
 getFuncs mdl = do funs <- getFunctions mdl
@@ -150,6 +142,7 @@ getInstruction :: (String, Value) -> IO LL.Instruction
 getInstruction (instr, instrv) = getInst instrv
 
 
+{-
 -- Aliases
 getAliases :: Module -> IO LL.Aliases
 getAliases mdl = do aliases <- getAlias mdl

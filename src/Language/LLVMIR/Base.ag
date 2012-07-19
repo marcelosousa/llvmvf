@@ -64,12 +64,12 @@ type IntTyValIdL = [IntTyValId]
 
 data Module 
   | Module
-      id     :: String
-      layout :: DataLayout
-      target :: TargetData
-      gvars  :: Globals
-      funs   :: Functions
-      nmdtys :: NamedTys 
+    id     :: String
+    layout :: DataLayout
+    target :: TargetData
+    gvars  :: Globals
+    funs   :: Functions
+    nmdtys :: NamedTys 
 --          aliases :: Aliases
 --          symbtbl :: {[SymbolTableEntry]}
 --          namedm :: NamedMetadata

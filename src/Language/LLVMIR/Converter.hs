@@ -14,7 +14,7 @@ type Value    = FFI.ValueRef
 type TypeKind = FFI.TypeKind
 
 type Opcode = Int
-{-
+
 convertLinkage :: FFI.Linkage -> LL.Linkage
 convertLinkage FFI.ExternalLinkage                 = LL.ExternalLinkage  
 convertLinkage FFI.AvailableExternallyLinkage      = LL.AvailableExternallyLinkage
@@ -33,7 +33,7 @@ convertLinkage FFI.CommonLinkage                   = LL.CommonLinkage
 convertLinkage FFI.LinkerPrivateLinkage            = LL.LinkerPrivateLinkage           
 convertLinkage FFI.LinkerPrivateWeakLinkage        = LL.LinkerPrivateWeakLinkage       
 convertLinkage FFI.LinkerPrivateWeakDefAutoLinkage = LL.LinkerPrivateWeakDefAutoLinkage
--}
+
 
 {- TODO
 FFI.FunctionTypeKind
@@ -41,7 +41,7 @@ FFI.StructTypeKind
 FFI.MetadataTypeKind 
 FFI.X86_MMXTypeKind
 -}
-{-
+
 getType :: Type -> IO LL.Type
 getType ty = do tyk <- FFI.getTypeKind ty
                 getTypeWithKind ty tyk
@@ -191,4 +191,4 @@ toIntPredicate 38 = LL.IntSGT
 toIntPredicate 39 = LL.IntSGE
 toIntPredicate 40 = LL.IntSLT
 toIntPredicate 41 = LL.IntSLE
---}
+
