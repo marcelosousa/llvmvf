@@ -1,6 +1,6 @@
 "Module has aliases :1"
 "It has 0"
-; ModuleID ='tests/paper.bc'
+; ModuleID ='tests/paper2.bc'
 target datalayout = "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
@@ -39,42 +39,1467 @@ declare external i32 @__cxa_atexit(TyUnsupported*, i8*, i8*)
 declare external void @_ZN7sc_core20sc_api_version_2_2_0C1Ev(%"class.sc_core::sc_api_version_2_2_0"*)
 declare external i32 @__gxx_personality_v0()
 declare external void @_ZSt9terminatev()
-define external i32 @sc_main(i32 %argc, i8** %argv)
+define external i32 @sc_main(i32 %argc, i8** %argv){
+; <label>:bb
+%M1 = alloca %"struct.M1", align 8
+%tmp = alloca %"class.sc_core::sc_module_name", align 8
+%tmp1 = icmp eq i1 , 3
+br i1 , label , label 
+
+; <label>:bb2
+getelementptr
+load
+call
+%tmp6 = icmp ne i1 , 0
+getelementptr
+load
+call
+%tmp10 = icmp ne i1 , 0
+call
+invoke
+
+; <label>:_ZN2M1C1EN7sc_core14sc_module_nameEbb.exit
+call
+invoke
+
+; <label>:bb11
+getelementptr
+store
+getelementptr
+store
+getelementptr
+invoke
+
+; <label>:bb15
+landingpad
+getelementptr
+invoke
+
+; <label>:bb18
+resume
+
+; <label>:bb19
+landingpad
+call
+unreachable
+
+; <label>:_ZN2M1D1Ev.exit
+getelementptr
+call
+br 
+
+; <label>:bb22
+landingpad
+extractvalue
+extractvalue
+invoke
+
+; <label>:bb26
+landingpad
+getelementptr
+store
+getelementptr
+store
+getelementptr
+invoke
+
+; <label>:bb31
+landingpad
+getelementptr
+invoke
+
+; <label>:bb34
+landingpad
+call
+unreachable
+
+; <label>:_ZN2M1D2Ev.exit.i
+extractvalue
+extractvalue
+getelementptr
+invoke
+
+; <label>:bb39
+phi
+ret undef
+
+; <label>:_ZN2M1D1Ev.exit3
+phi
+phi
+insertvalue
+insertvalue
+resume
+
+; <label>:bb42
+landingpad
+br 
+
+; <label>:.body
+call
+unreachable
+
+
+}
 declare external i32 @atoi(i8*)
 declare external void @_ZN7sc_core14sc_module_nameC1EPKc(%"class.sc_core::sc_module_name"*, i8*)
 declare external void @_ZN7sc_core14sc_module_nameD1Ev(%"class.sc_core::sc_module_name"*)
 declare external void @_ZN7sc_core8sc_startEv()
-define linkonce_odr void @_ZN2M1D1Ev(%"struct.M1"* %this)
+define linkonce_odr void @_ZN2M1D1Ev(%"struct.M1"* %this){
+; <label>:bb
+getelementptr
+store
+getelementptr
+store
+getelementptr
+invoke
+
+; <label>:bb3
+landingpad
+getelementptr
+invoke
+
+; <label>:bb6
+resume
+
+; <label>:bb7
+landingpad
+call
+unreachable
+
+; <label>:_ZN2M1D2Ev.exit
+getelementptr
+call
+ret void
+
+
+}
 declare external void @_ZdlPv(i8*)
-define linkonce_odr void @_ZN7sc_core8sc_eventD2Ev(%"class.sc_core::sc_event"* %this)
+define linkonce_odr void @_ZN7sc_core8sc_eventD2Ev(%"class.sc_core::sc_event"* %this){
+; <label>:bb
+invoke
+
+; <label>:bb1
+getelementptr
+load
+%tmp3 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb4
+bitcast
+call
+br 
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_thread_processESaIS2_EED1Ev.exit
+getelementptr
+load
+%tmp8 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb9
+bitcast
+call
+br 
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_thread_processESaIS2_EED1Ev.exit4
+getelementptr
+load
+%tmp13 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb14
+bitcast
+call
+br 
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_method_processESaIS2_EED1Ev.exit
+getelementptr
+load
+%tmp18 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb19
+bitcast
+call
+br 
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_method_processESaIS2_EED1Ev.exit5
+ret void
+
+; <label>:bb21
+landingpad
+getelementptr
+load
+%tmp25 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb26
+bitcast
+call
+br 
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_thread_processESaIS2_EED1Ev.exit6
+getelementptr
+load
+%tmp30 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb31
+bitcast
+call
+br 
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_thread_processESaIS2_EED1Ev.exit7
+getelementptr
+load
+%tmp35 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb36
+bitcast
+call
+br 
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_method_processESaIS2_EED1Ev.exit8
+getelementptr
+load
+%tmp40 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb41
+bitcast
+call
+br 
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_method_processESaIS2_EED1Ev.exit9
+resume
+
+
+}
 declare external void @_ZN7sc_core8sc_event6cancelEv(%"class.sc_core::sc_event"*)
 declare external i8* @_Znwm(i64)
-define linkonce_odr void @_ZThn40_N2M1D1Ev(%"struct.M1"* %this)
+define linkonce_odr void @_ZThn40_N2M1D1Ev(%"struct.M1"* %this){
+; <label>:bb
+getelementptr
+store
+getelementptr
+store
+getelementptr
+bitcast
+invoke
+
+; <label>:bb4
+landingpad
+bitcast
+invoke
+
+; <label>:bb7
+resume
+
+; <label>:bb8
+landingpad
+call
+unreachable
+
+; <label>:_ZN2M1D1Ev.exit
+bitcast
+call
+ret void
+
+
+}
 declare external void @_ZN7sc_core9sc_moduleD2Ev(%"class.sc_core::sc_module"*)
 declare external void @_ZNK7sc_core9sc_object5printERSo(%"class.sc_core::sc_object"*, %"class.std::basic_ostream"*)
 declare external void @_ZNK7sc_core9sc_object4dumpERSo(%"class.sc_core::sc_object"*, %"class.std::basic_ostream"*)
 declare external void @_ZNK7sc_core9sc_object5traceEPNS_13sc_trace_fileE(%"class.sc_core::sc_object"*, %"class.sc_core::sc_trace_file"*)
-define linkonce_odr i8* @_ZNK7sc_core9sc_module4kindEv(%"class.sc_core::sc_module"* %this)
+define linkonce_odr i8* @_ZNK7sc_core9sc_module4kindEv(%"class.sc_core::sc_module"* %this){
+; <label>:bb
+ret undef
+
+
+}
 declare external %"class.std::vector.10"* @_ZNK7sc_core9sc_module17get_child_objectsEv(%"class.sc_core::sc_module"*)
-define linkonce_odr void @_ZN2M1D0Ev(%"struct.M1"* %this)
+define linkonce_odr void @_ZN2M1D0Ev(%"struct.M1"* %this){
+; <label>:bb
+getelementptr
+store
+getelementptr
+store
+getelementptr
+invoke
+
+; <label>:bb3
+landingpad
+getelementptr
+invoke
+
+; <label>:bb6
+landingpad
+call
+unreachable
+
+; <label>:_ZN2M1D2Ev.exit.i
+getelementptr
+invoke
+
+; <label>:_ZN2M1D1Ev.exit
+bitcast
+call
+ret void
+
+; <label>:bb10
+landingpad
+br 
+
+; <label>:.body
+phi
+bitcast
+call
+resume
+
+
+}
 declare external void @_ZN7sc_core9sc_module25before_end_of_elaborationEv(%"class.sc_core::sc_module"*)
 declare external void @_ZN7sc_core9sc_module18end_of_elaborationEv(%"class.sc_core::sc_module"*)
 declare external void @_ZN7sc_core9sc_module19start_of_simulationEv(%"class.sc_core::sc_module"*)
 declare external void @_ZN7sc_core9sc_module17end_of_simulationEv(%"class.sc_core::sc_module"*)
-define linkonce_odr void @_ZThn40_N2M1D0Ev(%"struct.M1"* %this)
-define linkonce_odr void @_ZN2M1C2EN7sc_core14sc_module_nameEbb(%"struct.M1"* %this, %"class.sc_core::sc_module_name"* %name, i1 %x, i1 %y)
+define linkonce_odr void @_ZThn40_N2M1D0Ev(%"struct.M1"* %this){
+; <label>:bb
+getelementptr
+store
+getelementptr
+store
+getelementptr
+bitcast
+invoke
+
+; <label>:bb4
+landingpad
+bitcast
+invoke
+
+; <label>:bb7
+landingpad
+call
+unreachable
+
+; <label>:_ZN2M1D2Ev.exit.i.i
+bitcast
+invoke
+
+; <label>:bb10
+landingpad
+br 
+
+; <label>:.body.i
+phi
+bitcast
+call
+resume
+
+; <label>:_ZN2M1D0Ev.exit
+bitcast
+call
+ret void
+
+
+}
+define linkonce_odr void @_ZN2M1C2EN7sc_core14sc_module_nameEbb(%"struct.M1"* %this, %"class.sc_core::sc_module_name"* %name, i1 %x, i1 %y){
+; <label>:bb
+%T1_handle = alloca %"class.sc_core::sc_process_handle", align 8
+%tmp = alloca %"class.sc_core::sc_process_handle", align 8
+%tmp1 = alloca %"class.sc_core::sc_process_handle", align 8
+%tmp2 = alloca %"class.sc_core::sc_process_handle", align 8
+%T2_handle = alloca %"class.sc_core::sc_process_handle", align 8
+%tmp3 = alloca %"class.sc_core::sc_process_handle", align 8
+%tmp4 = alloca %"class.sc_core::sc_process_handle", align 8
+%tmp5 = alloca %"class.sc_core::sc_process_handle", align 8
+getelementptr
+call
+getelementptr
+store
+getelementptr
+getelementptr
+store
+getelementptr
+getelementptr
+load
+%tmp13 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb14
+invoke
+
+; <label>:.noexc
+bitcast
+invoke
+
+; <label>:bb17
+store
+store
+br 
+
+; <label>:bb18
+landingpad
+call
+br 
+
+; <label>:bb20
+phi
+store
+getelementptr
+store
+getelementptr
+store
+getelementptr
+bitcast
+call
+load
+%tmp27 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb28
+invoke
+
+; <label>:.noexc9
+bitcast
+invoke
+
+; <label>:bb31
+store
+store
+br 
+
+; <label>:bb32
+landingpad
+call
+br 
+
+; <label>:_ZN7sc_core22sc_get_curr_simcontextEv.exit
+phi
+invoke
+
+; <label>:bb35
+getelementptr
+getelementptr
+load
+getelementptr
+store
+%tmp40 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb41
+getelementptr
+load
+%tmp44 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb45
+call
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i
+add
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit
+invoke
+
+; <label>:bb48
+load
+%tmp50 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb51
+getelementptr
+load
+add
+store
+%tmp55 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb56
+load
+%tmp58 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb59
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc12
+load
+br 
+
+; <label>:bb64
+phi
+%tmp66 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb67
+call
+unreachable
+
+; <label>:bb68
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit
+getelementptr
+load
+getelementptr
+store
+%tmp72 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb73
+getelementptr
+load
+%tmp76 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb77
+call
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i13
+add
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit14
+invoke
+
+; <label>:bb80
+load
+%tmp82 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb83
+getelementptr
+load
+add
+store
+%tmp87 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb88
+load
+%tmp90 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb91
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc16
+load
+br 
+
+; <label>:bb96
+phi
+%tmp98 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb99
+call
+unreachable
+
+; <label>:bb100
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit17
+getelementptr
+load
+getelementptr
+store
+%tmp104 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb105
+getelementptr
+load
+%tmp108 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb109
+call
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i18
+add
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit19
+invoke
+
+; <label>:bb112
+load
+%tmp114 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb115
+getelementptr
+load
+add
+store
+%tmp119 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb120
+load
+%tmp122 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb123
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc21
+load
+br 
+
+; <label>:bb128
+phi
+%tmp130 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb131
+call
+unreachable
+
+; <label>:bb132
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit22
+load
+%tmp134 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb135
+getelementptr
+load
+add
+store
+%tmp139 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb140
+load
+%tmp142 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb143
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc24
+load
+br 
+
+; <label>:bb148
+phi
+%tmp150 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb151
+call
+unreachable
+
+; <label>:bb152
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit25
+load
+%tmp154 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb155
+invoke
+
+; <label>:.noexc26
+bitcast
+invoke
+
+; <label>:bb158
+store
+store
+br 
+
+; <label>:bb159
+landingpad
+call
+br 
+
+; <label>:_ZN7sc_core22sc_get_curr_simcontextEv.exit29
+phi
+invoke
+
+; <label>:bb162
+getelementptr
+load
+getelementptr
+store
+%tmp166 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb167
+getelementptr
+load
+%tmp170 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb171
+call
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i30
+add
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit31
+invoke
+
+; <label>:bb174
+load
+%tmp176 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb177
+getelementptr
+load
+add
+store
+%tmp181 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb182
+load
+%tmp184 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb185
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc33
+load
+br 
+
+; <label>:bb190
+phi
+%tmp192 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb193
+call
+unreachable
+
+; <label>:bb194
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit34
+load
+getelementptr
+store
+%tmp197 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb198
+getelementptr
+load
+%tmp201 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb202
+call
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i35
+add
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit36
+invoke
+
+; <label>:bb205
+load
+%tmp207 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb208
+getelementptr
+load
+add
+store
+%tmp212 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb213
+load
+%tmp215 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb216
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc38
+load
+br 
+
+; <label>:bb221
+phi
+%tmp223 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb224
+call
+unreachable
+
+; <label>:bb225
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit39
+load
+getelementptr
+store
+%tmp228 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb229
+getelementptr
+load
+%tmp232 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb233
+call
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i40
+add
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit41
+invoke
+
+; <label>:bb236
+load
+%tmp238 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb239
+getelementptr
+load
+add
+store
+%tmp243 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb244
+load
+%tmp246 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb247
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc43
+load
+br 
+
+; <label>:bb252
+phi
+%tmp254 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb255
+call
+unreachable
+
+; <label>:bb256
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit44
+load
+%tmp258 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb259
+getelementptr
+load
+add
+store
+%tmp263 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb264
+load
+%tmp266 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb267
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc46
+load
+br 
+
+; <label>:bb272
+phi
+%tmp274 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb275
+call
+unreachable
+
+; <label>:bb276
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit47
+getelementptr
+zext
+store
+getelementptr
+zext
+store
+ret void
+
+; <label>:bb281
+landingpad
+br 
+
+; <label>:.body
+phi
+extractvalue
+extractvalue
+br 
+
+; <label>:bb285
+landingpad
+br 
+
+; <label>:.body10
+phi
+extractvalue
+extractvalue
+br 
+
+; <label>:bb289
+landingpad
+extractvalue
+extractvalue
+br 
+
+; <label>:bb293
+landingpad
+extractvalue
+extractvalue
+load
+%tmp298 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb299
+getelementptr
+load
+add
+store
+%tmp303 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb304
+load
+%tmp306 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb307
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc49
+load
+br 
+
+; <label>:bb312
+phi
+%tmp314 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb315
+call
+unreachable
+
+; <label>:bb316
+store
+br 
+
+; <label>:bb317
+landingpad
+extractvalue
+extractvalue
+load
+%tmp322 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb323
+getelementptr
+load
+add
+store
+%tmp327 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb328
+load
+%tmp330 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb331
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc52
+load
+br 
+
+; <label>:bb336
+phi
+%tmp338 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb339
+call
+unreachable
+
+; <label>:bb340
+store
+br 
+
+; <label>:bb341
+landingpad
+extractvalue
+extractvalue
+load
+%tmp346 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb347
+getelementptr
+load
+add
+store
+%tmp351 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb352
+load
+%tmp354 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb355
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc55
+load
+br 
+
+; <label>:bb360
+phi
+%tmp362 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb363
+call
+unreachable
+
+; <label>:bb364
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit50
+phi
+phi
+load
+%tmp366 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb367
+getelementptr
+load
+add
+store
+%tmp371 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb372
+load
+%tmp374 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb375
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc58
+load
+br 
+
+; <label>:bb380
+phi
+%tmp382 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb383
+call
+unreachable
+
+; <label>:bb384
+store
+br 
+
+; <label>:bb385
+landingpad
+extractvalue
+extractvalue
+br 
+
+; <label>:bb389
+landingpad
+extractvalue
+extractvalue
+load
+%tmp394 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb395
+getelementptr
+load
+add
+store
+%tmp399 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb400
+load
+%tmp402 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb403
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc61
+load
+br 
+
+; <label>:bb408
+phi
+%tmp410 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb411
+call
+unreachable
+
+; <label>:bb412
+store
+br 
+
+; <label>:bb413
+landingpad
+extractvalue
+extractvalue
+load
+%tmp418 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb419
+getelementptr
+load
+add
+store
+%tmp423 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb424
+load
+%tmp426 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb427
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc64
+load
+br 
+
+; <label>:bb432
+phi
+%tmp434 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb435
+call
+unreachable
+
+; <label>:bb436
+store
+br 
+
+; <label>:bb437
+landingpad
+extractvalue
+extractvalue
+load
+%tmp442 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb443
+getelementptr
+load
+add
+store
+%tmp447 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb448
+load
+%tmp450 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb451
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc67
+load
+br 
+
+; <label>:bb456
+phi
+%tmp458 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb459
+call
+unreachable
+
+; <label>:bb460
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit62
+phi
+phi
+load
+%tmp462 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb463
+getelementptr
+load
+add
+store
+%tmp467 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:bb468
+load
+%tmp470 = icmp eq i1 , undef
+br i1 , label , label 
+
+; <label>:bb471
+bitcast
+load
+getelementptr
+load
+invoke
+
+; <label>:.noexc70
+load
+br 
+
+; <label>:bb476
+phi
+%tmp478 = icmp eq i1 , 
+br i1 , label , label 
+
+; <label>:bb479
+call
+unreachable
+
+; <label>:bb480
+store
+br 
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit59
+phi
+phi
+invoke
+
+; <label>:_ZN7sc_core8sc_eventD1Ev.exit
+phi
+phi
+invoke
+
+; <label>:bb481
+insertvalue
+insertvalue
+resume
+
+; <label>:bb484
+landingpad
+call
+unreachable
+
+
+}
 declare external void @_ZN7sc_core9sc_moduleC2Ev(%"class.sc_core::sc_module"*)
 declare external void @_ZN7sc_core13sc_simcontext21create_thread_processEPKcbMNS_15sc_process_hostEFvvEPS3_PKNS_16sc_spawn_optionsE(%"class.sc_core::sc_process_handle"*, %"class.sc_core::sc_simcontext"*, i8*, i1, i64, i64, %"class.sc_core::sc_process_host"*, %"class.sc_core::sc_spawn_options"*)
-define linkonce_odr void @_ZN2M12T1Ev(%"struct.M1"* %this)
+define linkonce_odr void @_ZN2M12T1Ev(%"struct.M1"* %this){
+; <label>:bb
+%tmp = alloca %"class.sc_core::sc_time", align 8
+getelementptr
+load
+%tmp3 = icmp eq i1 , 0
+br i1 , label , label 
+
+; <label>:._crit_edge
+getelementptr
+getelementptr
+br 
+
+; <label>:bb4
+getelementptr
+getelementptr
+load
+call
+getelementptr
+store
+br 
+
+; <label>:bb9
+phi
+phi
+bitcast
+call
+load
+call
+load
+call
+call
+store
+ret void
+
+
+}
 declare external %"class.sc_core::sc_sensitive"* @_ZN7sc_core12sc_sensitivelsENS_17sc_process_handleE(%"class.sc_core::sc_sensitive"*, %"class.sc_core::sc_process_handle"*)
 declare external %"class.sc_core::sc_sensitive_pos"* @_ZN7sc_core16sc_sensitive_poslsENS_17sc_process_handleE(%"class.sc_core::sc_sensitive_pos"*, %"class.sc_core::sc_process_handle"*)
 declare external %"class.sc_core::sc_sensitive_neg"* @_ZN7sc_core16sc_sensitive_neglsENS_17sc_process_handleE(%"class.sc_core::sc_sensitive_neg"*, %"class.sc_core::sc_process_handle"*)
-define linkonce_odr void @_ZN2M12T2Ev(%"struct.M1"* %this)
+define linkonce_odr void @_ZN2M12T2Ev(%"struct.M1"* %this){
+; <label>:bb
+%tmp = alloca %"class.sc_core::sc_time", align 8
+getelementptr
+load
+%tmp3 = icmp eq i1 , 0
+getelementptr
+br i1 , label , label 
+
+; <label>:bb4
+store
+getelementptr
+call
+br 
+
+; <label>:._crit_edge
+bitcast
+call
+getelementptr
+load
+call
+load
+call
+call
+store
+ret void
+
+
+}
 declare external void @_ZN7sc_core8sc_event6notifyEv(%"class.sc_core::sc_event"*)
 declare external void @_ZN7sc_core4waitERKNS_7sc_timeEPNS_13sc_simcontextE(%"class.sc_core::sc_time"*, %"class.sc_core::sc_simcontext"*)
 declare external void @_ZN7sc_core7sc_timeC1EdNS_12sc_time_unitEPNS_13sc_simcontextE(%"class.sc_core::sc_time"*, double, i32, %"class.sc_core::sc_simcontext"*)
 declare external void @__assert_fail(i8*, i8*, i32, i8*)
 declare external void @_ZN7sc_core4waitERKNS_8sc_eventEPNS_13sc_simcontextE(%"class.sc_core::sc_event"*, %"class.sc_core::sc_simcontext"*)
 declare external void @_ZN7sc_core13sc_simcontextC1Ev(%"class.sc_core::sc_simcontext"*)
-define internal void @_GLOBAL__I_a()
+define internal void @_GLOBAL__I_a(){
+; <label>:bb
+call
+call
+call
+ret void
+
+
+}
 

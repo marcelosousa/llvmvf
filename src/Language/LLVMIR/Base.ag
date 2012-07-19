@@ -26,7 +26,7 @@ type MLabel = maybe Label
 type MId = maybe Id
 
 type Functions = [Function]
-type GlobalVars = [GlobalVar]
+type Globals = [Global]
 type Identifiers = [Identifier]
 type Arguments = [Argument]
 type Parameters = [Parameter]
@@ -50,7 +50,6 @@ type MAlign = maybe Align
 type MGCName = maybe GCName
 type MModuleAsms = maybe ModuleAsms
 type MSection = maybe Section
-type MNamedTys = maybe NamedTys
 type MValue = maybe Value
 
 type Triplet = (Int, Int, Int)
@@ -64,14 +63,14 @@ type IntTyValId = (Type, Value, Identifier)
 type IntTyValIdL = [IntTyValId]
 
 data Module 
-      | Module
-          id :: String
-          layout :: DataLayout
-          target :: TargetData
-          gvars :: GlobalVars
-          funs  :: Functions
-          aliases :: Aliases
---          namedty :: MNamedTys
+  | Module
+      id     :: String
+      layout :: DataLayout
+      target :: TargetData
+      gvars  :: Globals
+      funs   :: Functions
+      nmdtys :: NamedTys 
+--          aliases :: Aliases
 --          symbtbl :: {[SymbolTableEntry]}
 --          namedm :: NamedMetadata
 --          mdlasm :: MModuleAsms
@@ -100,11 +99,11 @@ data ModuleAsm
       | ModuleAsm asm :: String
       
 data NamedTy 
-      | NamedTy 
+      | NmTy 
           name :: Id
-          ty   :: Type
+--          ty   :: Type
 
-data GlobalVar 
+data Global 
       | GlobalVar 
           name    :: Id
           linkage :: Linkage
@@ -121,6 +120,7 @@ data Function
           linkage :: Linkage
           retty   :: Type
           params  :: Parameters
+          body    :: BasicBlocks 
 --          visibility :: MVisibility
 --          cconv      :: MCConv
 --          uaddr      :: MUnnamedAddr
@@ -129,7 +129,6 @@ data Function
 --          section    :: MSection
 --          optAlign   :: MAlign
 --          gcName     :: MGCName
---          bb         :: BasicBlocks
       | FunctionDecl
           name       :: Id
           linkage    :: Linkage
@@ -147,28 +146,32 @@ data BasicBlock
           label  :: Label
           instrs :: Instructions
 --          tmn    :: Terminator
-
-data Terminator
-      | Ret 
-          v :: MValue
-      | Br  
-          v :: Bool 
-          t :: Identifier 
-          f :: Identifier
-      | UBr 
-          d :: Identifier
-      | Switch 
-          elems :: IntTyValIdL
-      
+     
 data Instruction
       | Instruction s :: String
       | Alloca
           id    :: Identifier
           ty    :: Type
-          align :: Int
+          align :: Align 
 --          num   :: Int
---          align :: Align
-      
+      | Ret 
+          v    :: Value
+      | Br  
+          v :: Value 
+          t :: Value 
+          f :: Value
+      | UBr 
+          d :: Value 
+      | Switch 
+          elems :: IntTyValIdL
+      | ICmp 
+          id   :: Identifier
+          cond :: IntPredicate
+          ty   :: Type
+          op1  :: Value
+          op2  :: Value 
+      | Call
+          
 data Value 
       | Id v :: Identifier
       | Const c :: Constant
@@ -195,6 +198,19 @@ data Constant
       
 data Align
       | Align n :: Int
+
+
+data IntPredicate
+      | IntEQ                       -- ^ equal
+      | IntNE                       -- ^ not equal
+      | IntUGT                      -- ^ unsigned greater than
+      | IntUGE                      -- ^ unsigned greater or equal
+      | IntULT                      -- ^ unsigned less than
+      | IntULE                      -- ^ unsigned less or equal
+      | IntSGT                      -- ^ signed greater than
+      | IntSGE                      -- ^ signed greater or equal
+      | IntSLT                      -- ^ signed less than
+      | IntSLE                      -- ^ signed less or equal
 
 data Section
       | Section s :: String
@@ -303,7 +319,7 @@ data Alias
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
   
-set Every = Module GlobalVar Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction Terminator NamedTy DataLayout Alias Attribute Section Value Identifier Constant TargetData Target Parameter
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction NamedTy DataLayout Alias Attribute Section Value Identifier Constant TargetData Target Parameter IntPredicate
 
 deriving Every: Show
 deriving Every: Eq

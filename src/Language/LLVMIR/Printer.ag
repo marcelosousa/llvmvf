@@ -21,11 +21,15 @@ sem Parameters Types
                   then @hd.pp
                   else @hd.pp <> char ',' <+> @tl.pp
 
-attr Module TargetData DataLayout Functions GlobalVars GlobalVar Linkage Align MValue Value Constant Type TyFloatPoint Function Aliases Alias Parameter
+attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Constant Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate NamedTy NamedTys
   syn pp use {<$>} {P.empty} :: {Doc}
 
 attr Target 
   syn pp :: {Doc}
+
+sem Identifier
+  | Global lhs.pp = char '@' <> text @name.self
+  | Local  lhs.pp = char '%' <> text @name.self 
 
 sem DataLayout
   | DataLayout
@@ -40,20 +44,46 @@ sem Target
   | Linux lhs.pp = text "Linux"
 
 sem Module
-  | Module lhs.pp = text ("; ModuleID ='" ++ @id ++ "'") <$> @layout.pp <$> @target.pp <$> @aliases.pp <$> @gvars.pp <$> @funs.pp 
+  | Module lhs.pp = text ("; ModuleID ='" ++ @id ++ "'") <$> @layout.pp <$> @target.pp <$> @nmdtys.pp <$> @gvars.pp <$> @funs.pp 
 
-sem GlobalVar
+sem Global
   | GlobalVar lhs.pp = text "@" <> text @name.self <+> text "=" <+>  @linkage.pp <+> ppKeyword @isUaddr "unnamed_addr" <+> ppKeyword @isConst "constant" <+> text "," <+> @align.pp -- @ival.pp <> text "," <+> @align.pp 
 
 sem Function
-  | FunctionDef  lhs.pp = text "define"  <+> @linkage.pp <+> @retty.pp <+> char '@' <> text @name.self <> parens @params.pp
+  | FunctionDef  lhs.pp = text "define"  <+> @linkage.pp <+> @retty.pp <+> char '@' <> text @name.self <> parens @params.pp <> char '{' <$> @body.pp <$> char '}'
   | FunctionDecl lhs.pp = text "declare" <+> @linkage.pp <+> @retty.pp <+> char '@' <> text @name.self <> parens @params.pp
 
 sem Parameter
   | Parameter lhs.pp = @ty.pp <> ppPName @var.self
+
+sem BasicBlock
+  | BasicBlock lhs.pp = text "; <label>:" <> text @label.self <$> @instrs.pp
+
+sem Instruction
+  | Instruction lhs.pp = text @s
+  | Ret    lhs.pp = text "ret" <+> @v.pp 
+  | Alloca lhs.pp = @id.pp <+> char '=' <+> text "alloca" <+> @ty.pp <> char ',' <+> @align.pp 
+  | ICmp   lhs.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @ty.pp <+> @op1.pp <> char ',' <+> @op2.pp
+  | UBr    lhs.pp = text "br" <+> @d.pp
+  | Br     lhs.pp = text "br" <+> text "i1" <+> @v.pp <> comma <+> text "label" <+> @t.pp <> comma <+> text "label" <+> @f.pp
  
 sem Alias
   | Alias lhs.pp = text "%" <> text @name.self
+
+sem NamedTy
+  | NmTy lhs.pp = text "%" <> text @name.self
+
+sem IntPredicate
+  | IntEQ  lhs.pp = text "eq" 
+  | IntNE  lhs.pp = text "ne" 
+  | IntUGT lhs.pp = text "ugt" 
+  | IntUGE lhs.pp = text "uge" 
+  | IntULT lhs.pp = text "ult" 
+  | IntULE lhs.pp = text "ule" 
+  | IntSGT lhs.pp = text "sgt" 
+  | IntSGE lhs.pp = text "sge" 
+  | IntSLT lhs.pp = text "slt" 
+  | IntSLE lhs.pp = text "sle" 
 
 sem Linkage
   | ExternalLinkage            lhs.pp = text "external" 
@@ -86,7 +116,10 @@ sem Value
   | Const lhs.pp = @c.pp
 
 sem Constant
-| ArrayC lhs.pp = @ty.pp <+> text "c" <> dquotes (escaped @val)
+  | ArrayC lhs.pp = @ty.pp <+> text "c" <> dquotes (escaped @val)
+  | NullC  lhs.pp = @ty.pp 
+  | UndefC lhs.pp = text "undef"
+  | IntC   lhs.pp = int @v
 
 sem Type
   | TyVoid       lhs.pp = text "void"

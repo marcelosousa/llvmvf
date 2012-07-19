@@ -1,3 +1,4 @@
+{-#LANGUAGE DoAndIfThenElse #-}
 module Language.LLVMIR.Converter where
   
 import qualified LLVM.FFI.Core as FFI
@@ -6,13 +7,14 @@ import LLVM.Core hiding (Value)
 import Foreign.C.String
 
 import qualified Language.LLVMIR as LL
+import Language.LLVMIR.Util
 
 type Type     = FFI.TypeRef
 type Value    = FFI.ValueRef 
 type TypeKind = FFI.TypeKind
 
 type Opcode = Int
-
+{-
 convertLinkage :: FFI.Linkage -> LL.Linkage
 convertLinkage FFI.ExternalLinkage                 = LL.ExternalLinkage  
 convertLinkage FFI.AvailableExternallyLinkage      = LL.AvailableExternallyLinkage
@@ -31,7 +33,7 @@ convertLinkage FFI.CommonLinkage                   = LL.CommonLinkage
 convertLinkage FFI.LinkerPrivateLinkage            = LL.LinkerPrivateLinkage           
 convertLinkage FFI.LinkerPrivateWeakLinkage        = LL.LinkerPrivateWeakLinkage       
 convertLinkage FFI.LinkerPrivateWeakDefAutoLinkage = LL.LinkerPrivateWeakDefAutoLinkage
-
+-}
 
 {- TODO
 FFI.FunctionTypeKind
@@ -39,6 +41,7 @@ FFI.StructTypeKind
 FFI.MetadataTypeKind 
 FFI.X86_MMXTypeKind
 -}
+{-
 getType :: Type -> IO LL.Type
 getType ty = do tyk <- FFI.getTypeKind ty
                 getTypeWithKind ty tyk
@@ -71,73 +74,121 @@ getTypeWithKind ty _  = return LL.TyUnsupported
 
 getInst :: Value -> IO LL.Instruction
 getInst v = do opcode <- FFI.instGetOpcode v
-               getInstruction' v opcode
+               pInstruction v opcode
 
-getInstruction' :: Value -> Opcode -> IO LL.Instruction
---getInstruction' v 26 = do cs <- FFI.getValueName v
---                          n  <- peekCString cs
---                          tyref <- FFI.typeOf v
---                          tk <- FFI.getTypeKind tyref
---                          ty <- getType tyref tk
---                          a  <- FFI.getAlignment v
---                          return $ LL.Alloca (LL.Local n) ty 1 -- (fromIntegral a)
-getInstruction' v _  = do (s,inst) <- getInstrDesc v
-                                   -- sops <- foldM (\s (v,_) -> return $ v ++ " " ++ s) "" ops
-                          return $ LL.Instruction (s ++ "=" ++ show inst)
-{-    
-    t <- FFI.typeOf v >>= typeDesc2
-    -- FIXME: sizeof() does not work for types!
-    --tsize <- FFI.typeOf v -- >>= FFI.sizeOf -- >>= FFI.constIntGetZExtValue >>= return . fromIntegral
-    tsize <- return 1
-    os <- U.getOperands v >>= mapM getArgDesc
-    os0 <- if length os > 0 then return $ os !! 0 else return AE
-    os1 <- if length os > 1 then return $ os !! 1 else return AE
-    t2 <- (if not (null os) && (opcode >= 30 || opcode <= 41)
-            then U.getOperands v >>= return . snd . head >>= FFI.typeOf >>= typeDesc2
-            else return TDVoid)
-    p <- if opcode `elem` [42, 43] then FFI.cmpInstGetPredicate v else return 0
-    let instr =
-            (if opcode >= 8 && opcode <= 25 -- binary arithmetic
-             then IDBinOp (getBinOp opcode) t os0 os1
-             else if opcode >= 30 && opcode <= 41 -- conversion
-                  then (getConvOp opcode) t2 t os0
-                  else case opcode of
-                         { 1 -> if null os then IDRetVoid else IDRet t os0;
-                           2 -> if length os == 1 then IDBrUncond os0 else IDBrCond os0 (os !! 2) os1;
-                           3 -> IDSwitch $ toPairs os;
-                           -- TODO (can skip for now)
-                           -- 4 -> IndirectBr ; 5 -> Invoke ;
-                           6 -> IDUnwind; 7 -> IDUnreachable;
-                           26 -> IDAlloca (getPtrType t) tsize (getImmInt os0);
-                           27 -> IDLoad t os0; 28 -> IDStore t os0 os1;
-                           29 -> IDGetElementPtr t os;
-                           42 -> IDICmp (toIntPredicate p) os0 os1;
-                           43 -> IDFCmp (toFPPredicate p) os0 os1;
-                           44 -> IDPhi t $ toPairs os;
-                           -- FIXME: getelementptr arguments are not handled
-                           45 -> IDCall t (last os) (init os);
-                           46 -> IDSelect t os0 os1;
-                           -- TODO (can skip for now)
-                           -- 47 -> UserOp1 ; 48 -> UserOp2 ; 49 -> VAArg ;
-                           -- 50 -> ExtractElement ; 51 -> InsertElement ; 52 -> ShuffleVector ;
-                           -- 53 -> ExtractValue ; 54 -> InsertValue ;
-                           _ -> IDInvalidOp })
-    return (valueName, instr)
-    --if instr /= InvalidOp then return instr else fail $ "Invalid opcode: " ++ show opcode
-        where getBinOp o = fromList [(8, BOAdd), (9, BOFAdd), (10, BOSub), (11, BOFSub),
-                                     (12, BOMul), (13, BOFMul), (14, BOUDiv), (15, BOSDiv),
-                                     (16, BOFDiv), (17, BOURem), (18, BOSRem), (19, BOFRem),
-                                     (20, BOShL), (21, BOLShR), (22, BOAShR), (23, BOAnd),
-                                     (24, BOOr), (25, BOXor)] ! o
-              getConvOp o = fromList [(30, IDTrunc), (31, IDZExt), (32, IDSExt), (33, IDFPtoUI),
-                                      (34, IDFPtoSI), (35, IDUItoFP), (36, IDSItoFP), (37, IDFPTrunc),
-                                      (38, IDFPExt), (39, IDPtrToInt), (40, IDIntToPtr), (41, IDBitcast)] ! o
-              toPairs xs = zip (stride 2 xs) (stride 2 (drop 1 xs))
-              stride _ [] = []
-              stride n (x:xs) = x : stride n (drop (n-1) xs)
-              getPtrType (TDPtr t) = t
-              getPtrType _ = TDVoid
-              getImmInt (AI i) = i
-              getImmInt _ = 0
+getValue :: (String, Value) -> IO LL.Value
+getValue (n, v) = do isC <- (FFI.isConstant v)
+                     if (cInt2Bool isC)
+                     then getConstantValue v
+                     else return $ LL.Id $ LL.Local n 
 
--}
+getConstantValue :: Value -> IO LL.Value
+getConstantValue v = do ty <- (FFI.typeOf v) >>= getType
+                        case ty of
+                             LL.TyInt _ -> do av <- FFI.constIntGetSExtValue v
+                                              return $ LL.Const $ LL.IntC (fromIntegral av) ty
+                             _          -> do return $ LL.Const $ LL.UndefC 
+
+getICmpOps :: Value -> IO (LL.Value, LL.Value)
+getICmpOps v = do ops <- (getOperands v) >>= mapM getValue
+                  if (length ops == 2)
+                  then return (head ops, last ops)
+                  else error "icmp ops length is != 2"
+
+pInstruction :: Value -> Opcode -> IO LL.Instruction
+pInstruction ival 1  = do n <- FFI.returnInstGetNumSuccessors ival
+                          mv <- FFI.returnInstHasReturnValue ival
+                          if cInt2Bool mv
+                          then return $ LL.Ret $ LL.Const $ LL.UndefC
+                          else return $ LL.Ret $ LL.Const $ LL.NullC LL.TyVoid
+--                          v <- FFI.returnInstGetReturnValue ival
+pInstruction ival 2  = do isCond <- FFI.brInstIsConditional ival
+                          ops    <- (getOperands ival) >>= mapM getValue 
+                          if (cInt2Bool isCond)
+                          then return $ LL.Br (ops!!0) (ops!!1) (ops!!2)
+                          else return $ LL.UBr (ops!!0)
+
+pInstruction ival 3  = return $ LL.Instruction "switch"
+pInstruction ival 4  = return $ LL.Instruction "indirectbr"
+pInstruction ival 5  = return $ LL.Instruction "invoke"
+-- removed 6 due to API changes
+pInstruction ival 7  = return $ LL.Instruction "unreachable"
+-- standard binary operators
+pInstruction ival 8  = return $ LL.Instruction "add"
+pInstruction ival 9  = return $ LL.Instruction "fadd"
+pInstruction ival 10 = return $ LL.Instruction "sub"
+pInstruction ival 11 = return $ LL.Instruction "fsub"
+pInstruction ival 12 = return $ LL.Instruction "mul"
+pInstruction ival 13 = return $ LL.Instruction "fmul"
+pInstruction ival 14 = return $ LL.Instruction "udiv"
+pInstruction ival 15 = return $ LL.Instruction "sdiv"
+pInstruction ival 16 = return $ LL.Instruction "fdiv"
+pInstruction ival 17 = return $ LL.Instruction "urem"
+pInstruction ival 18 = return $ LL.Instruction "srem"
+pInstruction ival 19 = return $ LL.Instruction "frem"
+-- logical operators
+pInstruction ival 20 = return $ LL.Instruction "shl"
+pInstruction ival 21 = return $ LL.Instruction "lshr"
+pInstruction ival 22 = return $ LL.Instruction "ashr"
+pInstruction ival 23 = return $ LL.Instruction "and"
+pInstruction ival 24 = return $ LL.Instruction "or"
+pInstruction ival 25 = return $ LL.Instruction "xor"
+-- memory operators
+pInstruction ival 26 = do ident <- (FFI.getValueName ival) >>= peekCString
+                          ty <- (FFI.allocaGetAllocatedType ival) >>= getType
+                          a  <- FFI.allocaGetAlignment ival
+                          return $ LL.Alloca (LL.Local ident) ty (LL.Align $ fromIntegral a)
+pInstruction ival 27 = return $ LL.Instruction "load"
+pInstruction ival 28 = return $ LL.Instruction "store"
+pInstruction ival 29 = return $ LL.Instruction "getelementptr"
+-- cast operators
+pInstruction ival 30 = return $ LL.Instruction "trunc"
+pInstruction ival 31 = return $ LL.Instruction "zext"
+pInstruction ival 32 = return $ LL.Instruction "sext"
+pInstruction ival 33 = return $ LL.Instruction "FPToUI"
+pInstruction ival 34 = return $ LL.Instruction "FPToSI"
+pInstruction ival 35 = return $ LL.Instruction "UIToFP"
+pInstruction ival 36 = return $ LL.Instruction "SIToFP"
+pInstruction ival 37 = return $ LL.Instruction "FPTrunc"
+pInstruction ival 38 = return $ LL.Instruction "TFext"
+pInstruction ival 39 = return $ LL.Instruction "PtrToInt"
+pInstruction ival 40 = return $ LL.Instruction "IntToPtr"
+pInstruction ival 41 = return $ LL.Instruction "bitcast"
+-- other operators
+pInstruction ival 42 = do ident <- (FFI.getValueName ival) >>= peekCString
+                          cond  <- FFI.cmpInstGetPredicate ival >>= (return . fromEnum)
+                          ty    <- (FFI.typeOf ival) >>= getType
+                          (op1,op2) <- getICmpOps ival 
+                          return $ LL.ICmp (LL.Local ident) (toIntPredicate cond) ty op1 op2
+pInstruction ival 43 = return $ LL.Instruction "fcmp"
+pInstruction ival 44 = return $ LL.Instruction "phi"
+pInstruction ival 45 = return $ LL.Instruction "call"
+pInstruction ival 46 = return $ LL.Instruction "select"
+pInstruction ival 47 = return $ LL.Instruction "userop1"
+pInstruction ival 48 = return $ LL.Instruction "userop2"
+pInstruction ival 49 = return $ LL.Instruction "aarg"
+pInstruction ival 50 = return $ LL.Instruction "extractelement"
+pInstruction ival 51 = return $ LL.Instruction "insertelement"
+pInstruction ival 52 = return $ LL.Instruction "shufflevector"
+pInstruction ival 53 = return $ LL.Instruction "extractvalue"
+pInstruction ival 54 = return $ LL.Instruction "insertvalue"
+-- atomic operators
+pInstruction ival 55 = return $ LL.Instruction "fence"
+pInstruction ival 56 = return $ LL.Instruction "atomiccmpxchg"
+pInstruction ival 57 = return $ LL.Instruction "atomicrmw"
+-- exception handling operators
+pInstruction ival 58 = return $ LL.Instruction "resume"
+pInstruction ival 59 = return $ LL.Instruction "landingpad"
+
+toIntPredicate :: Int -> LL.IntPredicate
+toIntPredicate 32 = LL.IntEQ 
+toIntPredicate 33 = LL.IntNE 
+toIntPredicate 34 = LL.IntUGT
+toIntPredicate 35 = LL.IntUGE
+toIntPredicate 36 = LL.IntULT
+toIntPredicate 37 = LL.IntULE
+toIntPredicate 38 = LL.IntSGT
+toIntPredicate 39 = LL.IntSGE
+toIntPredicate 40 = LL.IntSLT
+toIntPredicate 41 = LL.IntSLE
+--}

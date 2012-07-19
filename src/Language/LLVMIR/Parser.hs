@@ -1,4 +1,5 @@
 {-#LANGUAGE FlexibleContexts #-}
+{-#LANGUAGE DoAndIfThenElse #-}
 -------------------------------------------------------------------------------
 -- Module    :  Language.LLVMIR.Parser
 -- Copyright :  (c) 2012 Marcelo Sousa
@@ -22,6 +23,7 @@ import Text.ParserCombinators.UU.Utils
 import Text.ParserCombinators.UU.BasicInstances
 
 import Language.LLVMIR.Converter
+import Language.LLVMIR.Util
 
 import Foreign.C.String
 import Foreign.C.Types
@@ -42,10 +44,10 @@ parse file = do mdl <- readBitcodeFromFile file
                 i <- getModuleIdentifier mdl
                 layout <- getDataLayout mdl
                 target <- getTargetData mdl
-                funs <- getFuncs mdl
-                gvars <- getGlobalVar mdl
-                aliases <- getAliases mdl
-                return $ LL.Module i layout target gvars funs aliases 
+--                funs <- getFuncs mdl
+--                gvars <- getGlobalVar mdl
+--                aliases <- getAliases mdl
+                return $ LL.Module i layout target [] [] [] -- aliases 
 
 -- Module Identifier
 getModuleIdentifier :: Module -> IO String
@@ -64,9 +66,9 @@ pTarget =  const LL.MacOs <$> pSomewhere "apple"
           
 getTargetData :: Module -> IO LL.TargetData
 getTargetData mdl = withModule mdl $ \mdlPtr -> do 
-                     cs <- FFI.getTarget mdlPtr
-                     s <- peekCString cs                            
-                     return $ LL.TargetData s $ runParser "parsing target" pTarget s
+                    -- cs <- FFI.getTarget mdlPtr
+                   --  s <- peekCString cs                            
+                     return $ LL.TargetData "" LL.MacOs -- s $ runParser "parsing target" pTarget s
  
 -- Data Layout    
 getDataLayout :: Module -> IO LL.DataLayout
@@ -88,8 +90,9 @@ pDataLayout = (:) <$> pElem <*> pList (pSym '-' *> pElem)
 -- pEndianness =  const BigEndian    <$> pToken "E"
 --            <|> const LittleEndian <$> pToken "e"
            
+{-
 -- Global Variables
-getGlobalVar :: Module -> IO LL.GlobalVars
+getGlobalVar :: Module -> IO LL.Globals
 getGlobalVar mdl = do globals <- getGlobalVariables mdl
                       forM globals getGlobal
 
@@ -104,7 +107,7 @@ getInitVal gv isC | isC == False = return $ Nothing
                                       return $ Just $ LL.Const $ LL.ArrayC ty llval 
 
 
-getGlobal :: (String, Value) -> IO LL.GlobalVar
+getGlobal :: (String, Value) -> IO LL.Global
 getGlobal (gname, gval) = do link  <- FFI.getLinkage gval
                              isC   <- isConstant gval
                              align <- FFI.getAlignment gval
@@ -127,25 +130,16 @@ getFunction (fname, fval) = do b <- FFI.isDeclaration fval
                                pars <- getParams fval
                                params <- forM pars getParam
                                let lllink = convertLinkage $ FFI.toLinkage link
-                                  -- paraml = (fromIntegral . FFI.countParams) fval
-                                   f = if cInt2Bool b
-                                       then LL.FunctionDecl fname lllink rty params
-                                       else LL.FunctionDef  fname lllink rty params
-                               return f 
+                               if cInt2Bool b
+                               then return $ LL.FunctionDecl fname lllink rty params
+                               else do bbs <- getBasicBlocks fval
+                                       llbbs <- forM bbs getBasicBlock 
+                                       return $ LL.FunctionDef fname lllink rty params llbbs
 
 getParam :: (String, Value) -> IO LL.Parameter
 getParam (pname, pval) = do ty <- (FFI.typeOf pval) >>= getType 
                             return $ LL.Parameter pname ty
 
-{-
-getFunction :: (String, Value) -> IO LL.Function
-getFunction (fname, fvalue) = do bbs <- getBasicBlocks fvalue
-                                 bbs' <- forM bbs getBasicBlock
-                                 let res = if bbs == []
-                                           then LL.FunctionDecl fname
-                                           else LL.FunctionDef fname bbs'
-                                 return res
--}
 -- Basic Blocks                                 
 getBasicBlock :: (String, Value) -> IO LL.BasicBlock
 getBasicBlock (bbname, bbvalue) = do instr  <- getInstructions bbvalue
@@ -154,8 +148,6 @@ getBasicBlock (bbname, bbvalue) = do instr  <- getInstructions bbvalue
                    
 getInstruction :: (String, Value) -> IO LL.Instruction
 getInstruction (instr, instrv) = getInst instrv
-                                   -- sops <- foldM (\s (v,_) -> return $ v ++ " " ++ s) "" ops
-                                 --   return $ LL.Instruction (s ++ "=" ++ show inst)
 
 
 -- Aliases
@@ -169,14 +161,7 @@ getAliases mdl = do aliases <- getAlias mdl
 getAlias' :: (String, Value) -> IO LL.Alias
 getAlias' (aname, aval) = return $ LL.Alias aname
 
-cUInt2Bool :: CUInt -> Bool
-cUInt2Bool 0 = False
-cUInt2Bool _ = True
-
-cInt2Bool :: CInt -> Bool
-cInt2Bool 0 = False
-cInt2Bool _ = True
-
 isConstant :: Value -> IO Bool
 isConstant v = do ci <- FFI.isGlobalConstant v
 		  return $ cInt2Bool ci
+--}
