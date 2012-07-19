@@ -36,9 +36,9 @@ parse file = do mdl <- readBitcodeFromFile file
                 layout <- getDataLayout mdl
                 target <- getTargetData mdl
                 funs <- getFuncs mdl
---                gvars <- getGlobalVar mdl
+                gvars <- getGlobalVar mdl
 --                aliases <- getAliases mdl
-                return $ LL.Module i layout target [] funs [] -- aliases 
+                return $ LL.Module i layout target gvars funs [] -- aliases 
 
 -- Module Identifier
 getModuleIdentifier :: Module -> IO String
@@ -81,7 +81,7 @@ pDataLayout = (:) <$> pElem <*> pList (pSym '-' *> pElem)
 -- pEndianness =  const BigEndian    <$> pToken "E"
 --            <|> const LittleEndian <$> pToken "e"
            
-{-
+
 -- Global Variables
 getGlobalVar :: Module -> IO LL.Globals
 getGlobalVar mdl = do globals <- getGlobalVariables mdl
@@ -109,7 +109,7 @@ getGlobal (gname, gval) = do link  <- FFI.getLinkage gval
                              --llival <- getInitVal gval isC
                              return $ LL.GlobalVar gname lllink isC llunadd llalign -- llival llalign
 
---} 
+ 
 -- Functions
 getFuncs :: Module -> IO LL.Functions
 getFuncs mdl = do funs <- getFunctions mdl
@@ -153,8 +153,7 @@ getAliases mdl = do aliases <- getAlias mdl
 
 getAlias' :: (String, Value) -> IO LL.Alias
 getAlias' (aname, aval) = return $ LL.Alias aname
-
+-}
 isConstant :: Value -> IO Bool
 isConstant v = do ci <- FFI.isGlobalConstant v
 		  return $ cInt2Bool ci
---}
