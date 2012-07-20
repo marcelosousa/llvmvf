@@ -191,6 +191,7 @@ data Instruction
           ty   :: Type
           v    :: Value
           args :: Values
+      | Unreachable
 
 data Identifier 
       | Global name :: Id -- (functions, global variables) begin with the '@'

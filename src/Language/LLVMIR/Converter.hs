@@ -136,7 +136,7 @@ pInstruction ival 2  = do isCond <- FFI.brInstIsConditional ival
 pInstruction ival 3  = return $ LL.Instruction "switch"
 pInstruction ival 4  = return $ LL.Instruction "indirectbr"
 pInstruction ival 5  = return $ LL.Instruction "invoke"
-pInstruction ival 7  = return $ LL.Instruction "unreachable"
+pInstruction ival 7  = return $ LL.Unreachable
 -- standard binary operators
 pInstruction ival 8  = return $ LL.Instruction "add"
 pInstruction ival 9  = return $ LL.Instruction "fadd"

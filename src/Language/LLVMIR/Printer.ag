@@ -69,6 +69,7 @@ sem Instruction
   | UBr    lhs.pp = text "br" <+> @d.pp
   | Br     lhs.pp = text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
   | Call   lhs.pp = text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
+  | Unreachable lhs.pp = text "unreachable"
 --  | GetElementPtr lhs.pp = text "getelementptr" <+> @v.
  
 sem Alias
