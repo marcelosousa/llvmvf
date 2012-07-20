@@ -8,6 +8,7 @@ import Foreign.C.String
 
 import qualified Language.LLVMIR as LL
 import Language.LLVMIR.Util
+import Debug.Trace
 
 type Type     = FFI.TypeRef
 type Value    = FFI.ValueRef 
@@ -54,7 +55,6 @@ getTypeWithKind ty FFI.X86_FP80TypeKind  = return $ LL.TyFloatPoint LL.Tyx86FP80
 getTypeWithKind ty FFI.FP128TypeKind     = return $ LL.TyFloatPoint LL.TyFP128
 getTypeWithKind ty FFI.PPC_FP128TypeKind = return $ LL.TyFloatPoint LL.TyPPCFP128
 getTypeWithKind ty FFI.LabelTypeKind     = return LL.TyLabel
-getTypeWithKind ty FFI.OpaqueTypeKind    = return LL.TyOpaque
 getTypeWithKind ty FFI.IntegerTypeKind   = do n <- FFI.getIntTypeWidth ty
                                               return $ LL.TyInt $ fromIntegral n
 getTypeWithKind ty FFI.PointerTypeKind   = do et  <- FFI.getElementType ty
@@ -70,7 +70,7 @@ getTypeWithKind ty FFI.VectorTypeKind    = do n   <- FFI.getVectorSize ty
                                               return $ LL.TyVector (fromIntegral n) etd
 getTypeWithKind ty FFI.StructTypeKind    = do s <- (FFI.getStructName ty) >>= peekCString
                                               return $ LL.TyStruct s
-getTypeWithKind ty _  = return LL.TyUnsupported
+getTypeWithKind ty x  = trace (show x) $ return LL.TyUnsupported
 
 getInst :: Value -> IO LL.Instruction
 getInst v = do opcode <- FFI.instGetOpcode v
@@ -78,16 +78,20 @@ getInst v = do opcode <- FFI.instGetOpcode v
 
 getValue :: (String, Value) -> IO LL.Value
 getValue (n, v) = do isC <- (FFI.isConstant v)
-                     if (cInt2Bool isC)
+                     if cInt2Bool isC
                      then getConstantValue v
-                     else return $ LL.Id $ LL.Local n 
+                     else getIdentValue n v 
+
+getIdentValue :: String -> Value -> IO LL.Value
+getIdentValue n v = do ty <- (FFI.typeOf v) >>= getType
+                       return $ LL.Id (LL.Local n) ty
 
 getConstantValue :: Value -> IO LL.Value
 getConstantValue v = do ty <- (FFI.typeOf v) >>= getType
                         case ty of
                              LL.TyInt _ -> do av <- FFI.constIntGetSExtValue v
-                                              return $ LL.Const $ LL.IntC (fromIntegral av) ty
-                             _          -> do return $ LL.Const $ LL.UndefC 
+                                              return $ LL.IntC (fromIntegral av) ty
+                             _          -> do return $ LL.UndefC 
 
 getICmpOps :: Value -> IO (LL.Value, LL.Value)
 getICmpOps v = do ops <- (getOperands v) >>= mapM getValue
@@ -99,9 +103,8 @@ pInstruction :: Value -> Opcode -> IO LL.Instruction
 pInstruction ival 1  = do n <- FFI.returnInstGetNumSuccessors ival
                           mv <- FFI.returnInstHasReturnValue ival
                           if cInt2Bool mv
-                          then return $ LL.Ret $ LL.Const $ LL.UndefC
-                          else return $ LL.Ret $ LL.Const $ LL.NullC LL.TyVoid
---                          v <- FFI.returnInstGetReturnValue ival
+                          then return $ LL.Ret $ LL.UndefC
+                          else return $ LL.Ret $ LL.NullC LL.TyVoid
 pInstruction ival 2  = do isCond <- FFI.brInstIsConditional ival
                           ops    <- (getOperands ival) >>= mapM getValue 
                           if (cInt2Bool isCond)
@@ -139,7 +142,10 @@ pInstruction ival 26 = do ident <- (FFI.getValueName ival) >>= peekCString
                           a  <- FFI.allocaGetAlignment ival
                           return $ LL.Alloca (LL.Local ident) ty (LL.Align $ fromIntegral a)
 pInstruction ival 27 = return $ LL.Instruction "load"
-pInstruction ival 28 = return $ LL.Instruction "store"
+pInstruction ival 28 = do ty <- FFI.typeOf ival >>= getType
+                          ops <- (getOperands ival) >>= mapM getValue
+                          a <- FFI.storeGetAlignment ival
+                          return $ LL.Store ty (ops!!0) (ops!!1) (LL.Align $ fromIntegral a)
 pInstruction ival 29 = return $ LL.Instruction "getelementptr"
 -- cast operators
 pInstruction ival 30 = return $ LL.Instruction "trunc"

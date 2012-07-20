@@ -110,7 +110,7 @@ data Global
           isConst :: Bool
           isUaddr :: Bool 
 --          ty       :: Type 
---          ival    :: MValue
+          ival    :: MValue
 --          section  :: MSection
           align :: Align
 
@@ -154,6 +154,11 @@ data Instruction
           ty    :: Type
           align :: Align 
 --          num   :: Int
+      | Store
+          ty    :: Type
+          v1    :: Value
+          v2    :: Value
+          align :: Align
       | Ret 
           v    :: Value
       | Br  
@@ -171,19 +176,14 @@ data Instruction
           op1  :: Value
           op2  :: Value 
       | Call
-          
-data Value 
-      | Id v :: Identifier
-      | Const c :: Constant
 
 data Identifier 
       | Global name :: Id -- (functions, global variables) begin with the '@'
       | Local  name :: Id -- (register names, types) begin with the '%'
-
--- Constants
--- Metadata node constant missing
--- Poison values
-data Constant
+         
+data Value 
+      | Id v :: Identifier ty :: Type
+--      | Const c :: Constant
       | BoolC v :: Bool
       | IntC  v :: Int ty :: Type
       | FloatC v :: Float ty :: Type
@@ -194,7 +194,6 @@ data Constant
       | NullC ty :: Type
       | UndefC
       | BlockAddr fun :: Identifier label :: Identifier
-
       
 data Align
       | Align n :: Int
@@ -319,7 +318,7 @@ data Alias
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
   
-set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction NamedTy DataLayout Alias Attribute Section Value Identifier Constant TargetData Target Parameter IntPredicate
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction NamedTy DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate
 
 deriving Every: Show
 deriving Every: Eq

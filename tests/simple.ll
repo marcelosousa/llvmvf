@@ -33,3 +33,42 @@ define i32 @main(i32 %argc, i8** %argv) nounwind uwtable {
 }
 
 declare void @__assert_fail(i8*, i8*, i32, i8*) noreturn nounwind
+; ModuleID ='simple.bc'
+target datalayout = "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128"
+target triple = "x86_64-unknown-linux-gnu"
+
+@.str = private unnamed_addr constant , align 1
+@.str1 = private unnamed_addr constant , align 1
+@__PRETTY_FUNCTION__.main = private unnamed_addr constant , align 1
+
+define external TyUnsupported @main(TyUnsupported %argc, opaque %argv){
+; <label>:0x00000000038eb050
+% = alloca TyUnsupported, align 4
+% = alloca TyUnsupported, align 4
+% = alloca opaque, align 8
+%c = alloca TyUnsupported, align 4
+store
+store
+store
+store
+load
+call
+br i1 , label , label 
+
+; <label>:0x00000000038eb510
+br 
+
+; <label>:0x00000000038eb570
+userop2
+unreachable
+
+; <label>:0x00000000038ebe00
+br 
+
+; <label>:0x00000000038ebe60
+ret undef
+
+
+}
+declare external void @__assert_fail(opaque, opaque, TyUnsupported, opaque)
+

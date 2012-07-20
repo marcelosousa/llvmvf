@@ -30,6 +30,10 @@ import Foreign.C.Types
 
 type FunctionName = String
 
+isConstant :: Value -> IO Bool
+isConstant v = do ci <- FFI.isGlobalConstant v 
+                  return $ cInt2Bool ci
+
 parse :: FilePath -> IO LL.Module 
 parse file = do mdl <- readBitcodeFromFile file
                 i <- getModuleIdentifier mdl
@@ -95,7 +99,7 @@ getInitVal gv isC | isC == False = return $ Nothing
                                       ety   <- FFI.constantValueGetElemType cval
                                       llety <- getType ety 
                                       let ty = LL.TyArray (fromEnum num) llety
-                                      return $ Just $ LL.Const $ LL.ArrayC ty llval 
+                                      return $ Just $ LL.ArrayC ty llval 
 
 
 getGlobal :: (String, Value) -> IO LL.Global
@@ -106,8 +110,8 @@ getGlobal (gname, gval) = do link  <- FFI.getLinkage gval
                              let llalign = LL.Align $ fromEnum align
                                  llunadd = cUInt2Bool unadd
                                  lllink  = convertLinkage $ FFI.toLinkage link
-                             --llival <- getInitVal gval isC
-                             return $ LL.GlobalVar gname lllink isC llunadd llalign -- llival llalign
+                             llival <- getInitVal gval isC
+                             return $ LL.GlobalVar gname lllink isC llunadd llival llalign
 
  
 -- Functions
@@ -154,6 +158,3 @@ getAliases mdl = do aliases <- getAlias mdl
 getAlias' :: (String, Value) -> IO LL.Alias
 getAlias' (aname, aval) = return $ LL.Alias aname
 -}
-isConstant :: Value -> IO Bool
-isConstant v = do ci <- FFI.isGlobalConstant v
-		  return $ cInt2Bool ci
