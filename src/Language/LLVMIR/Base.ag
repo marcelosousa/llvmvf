@@ -24,12 +24,14 @@ type Id = (String)
 type Label = (String) 
 type MLabel = maybe Label
 type MId = maybe Id
+type MIdentifier = maybe Identifier
 
 type Functions = [Function]
 type Globals = [Global]
 type Identifiers = [Identifier]
 type Arguments = [Argument]
 type Parameters = [Parameter]
+type Values = [Value]
 type FuncAttrs = [FunAttr]
 type BasicBlocks = [BasicBlock]
 type Instructions = [Instruction]
@@ -180,6 +182,15 @@ data Instruction
           op1  :: Value
           op2  :: Value 
       | Call
+          mres :: MIdentifier
+          ty   :: Type
+          callee :: Identifier 
+          args :: Values 
+      | GetElementPtr
+          mres :: MIdentifier
+          ty   :: Type
+          v    :: Value
+          args :: Values
 
 data Identifier 
       | Global name :: Id -- (functions, global variables) begin with the '@'
@@ -187,7 +198,6 @@ data Identifier
          
 data Value 
       | Id v :: Identifier ty :: Type
---      | Const c :: Constant
       | BoolC v :: Bool
       | IntC  v :: Int ty :: Type
       | FloatC v :: Float ty :: Type
@@ -198,6 +208,7 @@ data Value
       | NullC ty :: Type
       | UndefC
       | BlockAddr fun :: Identifier label :: Identifier
+      | Pointer ty :: Type v :: Value args :: Values
       
 data Align
       | Align n :: Int
@@ -219,7 +230,7 @@ data Section
       | Section s :: String
       
 data Argument
-      | Argument
+      | Argument arg :: Value
 
 data Parameter
       | Parameter 

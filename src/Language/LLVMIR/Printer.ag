@@ -12,10 +12,10 @@ imports
 import UU.PPrint as P
 }
 
-attr Parameters Types
+attr Parameters Types Values
   syn pp :: {Doc}
 
-sem Parameters Types 
+sem Parameters Types Values
   | Nil  lhs.pp = P.empty
   | Cons lhs.pp = if (length @tl.self == 0)
                   then @hd.pp
@@ -68,6 +68,8 @@ sem Instruction
   | ICmp   lhs.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
   | UBr    lhs.pp = text "br" <+> @d.pp
   | Br     lhs.pp = text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
+  | Call   lhs.pp = text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
+--  | GetElementPtr lhs.pp = text "getelementptr" <+> @v.
  
 sem Alias
   | Alias lhs.pp = text "%" <> text @name.self
@@ -119,6 +121,8 @@ sem Value
   | NullC  lhs.pp = @ty.pp 
   | UndefC lhs.pp = text "undef"
   | IntC   lhs.pp = @ty.pp <+> int @v
+  | Pointer lhs.pp = @ty.pp <+> text "getelementptr" <> char '('  <+> @v.pp <> char ',' <+> @args.pp <> char ')'
+  
 
 sem Type
   | TyVoid       lhs.pp = text "void"

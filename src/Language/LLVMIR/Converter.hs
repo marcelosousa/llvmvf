@@ -91,12 +91,28 @@ getIdentValue :: String -> Value -> IO LL.Value
 getIdentValue n v = do ty <- (FFI.typeOf v) >>= getType
                        return $ LL.Id (LL.Local n) ty
 
+getCallArgs :: [(String,Value)] -> IO (LL.Identifier, [LL.Value])
+getCallArgs [] = return (LL.Global "", [])
+getCallArgs l = let x = last l
+                    y = init l
+                in do v <- getIdent $ snd x
+                      a <- mapM getValue y
+                      return (LL.Global v,a)
+
+getElemPtrArgs :: [(String,Value)] -> IO (LL.Value, [LL.Value])
+getElemPtrArgs [] = return (LL.UndefC, [])
+getElemPtrArgs (x:y) = do v <- uncurry getIdentValue x
+                          a <- mapM getValue y
+                          return (v,a)
+
 getConstantValue :: Value -> IO LL.Value
 getConstantValue v = do ty <- (FFI.typeOf v) >>= getType
                         case ty of
-                             LL.TyInt _ -> do av <- FFI.constIntGetSExtValue v
-                                              return $ LL.IntC (fromIntegral av) ty
-                             _          -> do return $ LL.UndefC 
+                             LL.TyInt _     -> do av <- FFI.constIntGetSExtValue v
+                                                  return $ LL.IntC (fromIntegral av) ty
+                             LL.TyPointer _ -> do (struct, args) <- (getOperands v) >>= getElemPtrArgs
+                                                  return $ LL.Pointer ty struct args 
+                             _              -> do return $ LL.UndefC 
 
 getICmpOps :: Value -> IO (LL.Value, LL.Value)
 getICmpOps v = do ops <- (getOperands v) >>= mapM getValue
@@ -180,7 +196,10 @@ pInstruction ival 45 = do ident <- getIdent ival
                           return $ LL.ICmp (LL.Local ident) (toIntPredicate cond) ty op1 op2
 pInstruction ival 46 = return $ LL.Instruction "fcmp"
 pInstruction ival 47 = return $ LL.Instruction "phi"
-pInstruction ival 48 = return $ LL.Instruction "call"
+pInstruction ival 48 = do ident <- getIdent ival
+                          ty <- (FFI.typeOf ival) >>= getType
+                          (callee, args) <- (getOperands ival) >>= getCallArgs
+                          return $ LL.Call Nothing ty callee args
 pInstruction ival 49 = return $ LL.Instruction "select"
 pInstruction ival 50 = return $ LL.Instruction "userop1"
 pInstruction ival 51 = return $ LL.Instruction "userop2"
