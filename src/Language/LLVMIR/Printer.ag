@@ -70,7 +70,25 @@ sem Instruction
   | Br     lhs.pp = text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
   | Call   lhs.pp = text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
   | Unreachable lhs.pp = text "unreachable"
+  | Trunc    lhs.pp = pConvOp @id.pp "trunc"    @v.pp @ty.pp
+  | ZExt     lhs.pp = pConvOp @id.pp "zext"     @v.pp @ty.pp
+  | SExt     lhs.pp = pConvOp @id.pp "sext"     @v.pp @ty.pp
+  | FPToUI   lhs.pp = pConvOp @id.pp "fptoui"   @v.pp @ty.pp
+  | FPToSI   lhs.pp = pConvOp @id.pp "fptosi"   @v.pp @ty.pp
+  | UIToFP   lhs.pp = pConvOp @id.pp "uitofp"   @v.pp @ty.pp
+  | SIToFP   lhs.pp = pConvOp @id.pp "sitofp"   @v.pp @ty.pp
+  | FPTrunc  lhs.pp = pConvOp @id.pp "fptrunc"  @v.pp @ty.pp
+  | FPExt    lhs.pp = pConvOp @id.pp "fpext"    @v.pp @ty.pp
+  | PtrToInt lhs.pp = pConvOp @id.pp "ptrtoint" @v.pp @ty.pp
+  | IntToPtr lhs.pp = pConvOp @id.pp "inttoptr" @v.pp @ty.pp
+  | BitCast  lhs.pp = pConvOp @id.pp "bitcast"  @v.pp @ty.pp
+
 --  | GetElementPtr lhs.pp = text "getelementptr" <+> @v.
+
+{
+pConvOp :: Doc -> String -> Doc -> Doc -> Doc
+pConvOp id c v ty = id <+> char '=' <+> text c <+> v <+> text "to" <+> ty
+}
  
 sem Alias
   | Alias lhs.pp = text "%" <> text @name.self

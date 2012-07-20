@@ -176,18 +176,18 @@ pInstruction ival 30 = return $ LL.Instruction "fence"
 pInstruction ival 31 = return $ LL.Instruction "atomicCmpXchg"
 pInstruction ival 32 = return $ LL.Instruction "atomicRMW"
 -- cast operators
-pInstruction ival 33 = return $ LL.Instruction "trunc"
-pInstruction ival 34 = return $ LL.Instruction "zext"
-pInstruction ival 35 = return $ LL.Instruction "sext"
-pInstruction ival 36 = return $ LL.Instruction "FPToUI"
-pInstruction ival 37 = return $ LL.Instruction "FPToSI"
-pInstruction ival 38 = return $ LL.Instruction "UIToFP"
-pInstruction ival 39 = return $ LL.Instruction "SIToFP"
-pInstruction ival 40 = return $ LL.Instruction "FPTrunc"
-pInstruction ival 41 = return $ LL.Instruction "TFext"
-pInstruction ival 42 = return $ LL.Instruction "PtrToInt"
-pInstruction ival 43 = return $ LL.Instruction "IntToPtr"
-pInstruction ival 44 = return $ LL.Instruction "bitcast"
+pInstruction ival 33 = convOps ival LL.Trunc   
+pInstruction ival 34 = convOps ival LL.ZExt    
+pInstruction ival 35 = convOps ival LL.SExt    
+pInstruction ival 36 = convOps ival LL.FPToUI  
+pInstruction ival 37 = convOps ival LL.FPToSI  
+pInstruction ival 38 = convOps ival LL.UIToFP  
+pInstruction ival 39 = convOps ival LL.SIToFP  
+pInstruction ival 40 = convOps ival LL.FPTrunc 
+pInstruction ival 41 = convOps ival LL.FPExt   
+pInstruction ival 42 = convOps ival LL.PtrToInt
+pInstruction ival 43 = convOps ival LL.IntToPtr
+pInstruction ival 44 = convOps ival LL.BitCast
 -- other operators
 pInstruction ival 45 = do ident <- getIdent ival
                           cond  <- FFI.cmpInstGetPredicate ival >>= (return . fromEnum)
@@ -224,4 +224,11 @@ toIntPredicate 38 = LL.IntSGT
 toIntPredicate 39 = LL.IntSGE
 toIntPredicate 40 = LL.IntSLT
 toIntPredicate 41 = LL.IntSLE
+
+convOps ival c = do ident <- getIdent ival
+                    ty <- (FFI.typeOf ival) >>= getType
+                    ops <- (getOperands ival) >>= mapM getValue
+                    if length ops == 0
+                    then error "'convOps': operand list is empty"
+                    else return $ c (LL.Local ident) (ops!!0) ty
 

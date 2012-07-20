@@ -192,6 +192,19 @@ data Instruction
           v    :: Value
           args :: Values
       | Unreachable
+      | Trunc    id :: Identifier v :: Value ty   :: Type -- Truncate integers
+      | ZExt     id :: Identifier v :: Value ty   :: Type -- Zero extend integers
+      | SExt     id :: Identifier v :: Value ty   :: Type -- Sign extend integers
+      | FPToUI   id :: Identifier v :: Value ty   :: Type -- floating point -> UInt
+      | FPToSI   id :: Identifier v :: Value ty   :: Type -- floating point -> SInt
+      | UIToFP   id :: Identifier v :: Value ty   :: Type -- UInt -> floating point
+      | SIToFP   id :: Identifier v :: Value ty   :: Type -- SInt -> floating point
+      | FPTrunc  id :: Identifier v :: Value ty   :: Type -- Truncate floating point
+      | FPExt    id :: Identifier v :: Value ty   :: Type -- Extend floating point
+      | PtrToInt id :: Identifier v :: Value ty   :: Type -- Pointer -> Integer
+      | IntToPtr id :: Identifier v :: Value ty   :: Type -- Integer -> Pointer
+      | BitCast  id :: Identifier v :: Value ty   :: Type -- Type cast      
+
 
 data Identifier 
       | Global name :: Id -- (functions, global variables) begin with the '@'
