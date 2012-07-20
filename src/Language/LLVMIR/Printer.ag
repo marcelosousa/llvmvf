@@ -63,10 +63,11 @@ sem Instruction
   | Instruction lhs.pp = text @s
   | Ret    lhs.pp = text "ret" <+> @v.pp 
   | Alloca lhs.pp = @id.pp <+> char '=' <+> text "alloca" <+> @ty.pp <> char ',' <+> @align.pp
+  | Load   lhs.pp = @id.pp <+> char '=' <+> text "load"   <+> @v.pp  <> char ',' <+> @align.pp
   | Store  lhs.pp = @ty.pp <+> text "store" <+> @v1.pp <> char ',' <+> @v2.pp <> char ',' <+> @align.pp
-  | ICmp   lhs.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @ty.pp <+> @op1.pp <> char ',' <+> @op2.pp
+  | ICmp   lhs.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
   | UBr    lhs.pp = text "br" <+> @d.pp
-  | Br     lhs.pp = text "br" <+> text "i1" <+> @v.pp <> comma <+> text "label" <+> @t.pp <> comma <+> text "label" <+> @f.pp
+  | Br     lhs.pp = text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
  
 sem Alias
   | Alias lhs.pp = text "%" <> text @name.self

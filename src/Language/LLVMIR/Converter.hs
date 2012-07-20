@@ -74,6 +74,8 @@ getTypeWithKind ty x  = trace (show x) $ return LL.TyUnsupported
 
 getInst :: Value -> IO LL.Instruction
 getInst v = do opcode <- FFI.instGetOpcode v
+               --oname <- (FFI.instGetOpcodeName v) >>= peekCString
+               --print (oname, opcode)
                pInstruction v opcode
 
 getValue :: (String, Value) -> IO LL.Value
@@ -81,6 +83,9 @@ getValue (n, v) = do isC <- (FFI.isConstant v)
                      if cInt2Bool isC
                      then getConstantValue v
                      else getIdentValue n v 
+
+getIdent :: Value -> IO String
+getIdent v = (FFI.getValueName v) >>= peekCString
 
 getIdentValue :: String -> Value -> IO LL.Value
 getIdentValue n v = do ty <- (FFI.typeOf v) >>= getType
@@ -102,19 +107,19 @@ getICmpOps v = do ops <- (getOperands v) >>= mapM getValue
 pInstruction :: Value -> Opcode -> IO LL.Instruction
 pInstruction ival 1  = do n <- FFI.returnInstGetNumSuccessors ival
                           mv <- FFI.returnInstHasReturnValue ival
+                          ops <- (getOperands ival) >>= mapM getValue
                           if cInt2Bool mv
-                          then return $ LL.Ret $ LL.UndefC
+                          then return $ LL.Ret (ops!!0)
                           else return $ LL.Ret $ LL.NullC LL.TyVoid
 pInstruction ival 2  = do isCond <- FFI.brInstIsConditional ival
                           ops    <- (getOperands ival) >>= mapM getValue 
                           if (cInt2Bool isCond)
-                          then return $ LL.Br (ops!!0) (ops!!1) (ops!!2)
+                          then return $ LL.Br (ops!!0) (ops!!2) (ops!!1)
                           else return $ LL.UBr (ops!!0)
 
 pInstruction ival 3  = return $ LL.Instruction "switch"
 pInstruction ival 4  = return $ LL.Instruction "indirectbr"
 pInstruction ival 5  = return $ LL.Instruction "invoke"
--- removed 6 due to API changes
 pInstruction ival 7  = return $ LL.Instruction "unreachable"
 -- standard binary operators
 pInstruction ival 8  = return $ LL.Instruction "add"
@@ -137,53 +142,56 @@ pInstruction ival 23 = return $ LL.Instruction "and"
 pInstruction ival 24 = return $ LL.Instruction "or"
 pInstruction ival 25 = return $ LL.Instruction "xor"
 -- memory operators
-pInstruction ival 26 = do ident <- (FFI.getValueName ival) >>= peekCString
+pInstruction ival 26 = do ident <- getIdent ival
                           ty <- (FFI.allocaGetAllocatedType ival) >>= getType
                           a  <- FFI.allocaGetAlignment ival
                           return $ LL.Alloca (LL.Local ident) ty (LL.Align $ fromIntegral a)
-pInstruction ival 27 = return $ LL.Instruction "load"
+pInstruction ival 27 = do ident <- getIdent ival
+                          ops <- (getOperands ival) >>= mapM getValue 
+                          a <- FFI.loadGetAlignment ival
+                          return $ LL.Load (LL.Local ident) (ops!!0) (LL.Align $ fromIntegral a)
 pInstruction ival 28 = do ty <- FFI.typeOf ival >>= getType
                           ops <- (getOperands ival) >>= mapM getValue
                           a <- FFI.storeGetAlignment ival
                           return $ LL.Store ty (ops!!0) (ops!!1) (LL.Align $ fromIntegral a)
 pInstruction ival 29 = return $ LL.Instruction "getelementptr"
+-- atomic operators
+pInstruction ival 30 = return $ LL.Instruction "fence"
+pInstruction ival 31 = return $ LL.Instruction "atomicCmpXchg"
+pInstruction ival 32 = return $ LL.Instruction "atomicRMW"
 -- cast operators
-pInstruction ival 30 = return $ LL.Instruction "trunc"
-pInstruction ival 31 = return $ LL.Instruction "zext"
-pInstruction ival 32 = return $ LL.Instruction "sext"
-pInstruction ival 33 = return $ LL.Instruction "FPToUI"
-pInstruction ival 34 = return $ LL.Instruction "FPToSI"
-pInstruction ival 35 = return $ LL.Instruction "UIToFP"
-pInstruction ival 36 = return $ LL.Instruction "SIToFP"
-pInstruction ival 37 = return $ LL.Instruction "FPTrunc"
-pInstruction ival 38 = return $ LL.Instruction "TFext"
-pInstruction ival 39 = return $ LL.Instruction "PtrToInt"
-pInstruction ival 40 = return $ LL.Instruction "IntToPtr"
-pInstruction ival 41 = return $ LL.Instruction "bitcast"
+pInstruction ival 33 = return $ LL.Instruction "trunc"
+pInstruction ival 34 = return $ LL.Instruction "zext"
+pInstruction ival 35 = return $ LL.Instruction "sext"
+pInstruction ival 36 = return $ LL.Instruction "FPToUI"
+pInstruction ival 37 = return $ LL.Instruction "FPToSI"
+pInstruction ival 38 = return $ LL.Instruction "UIToFP"
+pInstruction ival 39 = return $ LL.Instruction "SIToFP"
+pInstruction ival 40 = return $ LL.Instruction "FPTrunc"
+pInstruction ival 41 = return $ LL.Instruction "TFext"
+pInstruction ival 42 = return $ LL.Instruction "PtrToInt"
+pInstruction ival 43 = return $ LL.Instruction "IntToPtr"
+pInstruction ival 44 = return $ LL.Instruction "bitcast"
 -- other operators
-pInstruction ival 42 = do ident <- (FFI.getValueName ival) >>= peekCString
+pInstruction ival 45 = do ident <- getIdent ival
                           cond  <- FFI.cmpInstGetPredicate ival >>= (return . fromEnum)
                           ty    <- (FFI.typeOf ival) >>= getType
                           (op1,op2) <- getICmpOps ival 
                           return $ LL.ICmp (LL.Local ident) (toIntPredicate cond) ty op1 op2
-pInstruction ival 43 = return $ LL.Instruction "fcmp"
-pInstruction ival 44 = return $ LL.Instruction "phi"
-pInstruction ival 45 = return $ LL.Instruction "call"
-pInstruction ival 46 = return $ LL.Instruction "select"
-pInstruction ival 47 = return $ LL.Instruction "userop1"
-pInstruction ival 48 = return $ LL.Instruction "userop2"
-pInstruction ival 49 = return $ LL.Instruction "aarg"
-pInstruction ival 50 = return $ LL.Instruction "extractelement"
-pInstruction ival 51 = return $ LL.Instruction "insertelement"
-pInstruction ival 52 = return $ LL.Instruction "shufflevector"
-pInstruction ival 53 = return $ LL.Instruction "extractvalue"
-pInstruction ival 54 = return $ LL.Instruction "insertvalue"
--- atomic operators
-pInstruction ival 55 = return $ LL.Instruction "fence"
-pInstruction ival 56 = return $ LL.Instruction "atomiccmpxchg"
-pInstruction ival 57 = return $ LL.Instruction "atomicrmw"
+pInstruction ival 46 = return $ LL.Instruction "fcmp"
+pInstruction ival 47 = return $ LL.Instruction "phi"
+pInstruction ival 48 = return $ LL.Instruction "call"
+pInstruction ival 49 = return $ LL.Instruction "select"
+pInstruction ival 50 = return $ LL.Instruction "userop1"
+pInstruction ival 51 = return $ LL.Instruction "userop2"
+pInstruction ival 52 = return $ LL.Instruction "aarg"
+pInstruction ival 53 = return $ LL.Instruction "extractelement"
+pInstruction ival 54 = return $ LL.Instruction "insertelement"
+pInstruction ival 55 = return $ LL.Instruction "shufflevector"
+pInstruction ival 56 = return $ LL.Instruction "extractvalue"
+pInstruction ival 57 = return $ LL.Instruction "insertvalue"
 -- exception handling operators
-pInstruction ival 58 = return $ LL.Instruction "resume"
+pInstruction ival 6  = return $ LL.Instruction "resume"
 pInstruction ival 59 = return $ LL.Instruction "landingpad"
 
 toIntPredicate :: Int -> LL.IntPredicate

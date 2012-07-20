@@ -159,6 +159,10 @@ data Instruction
           v1    :: Value
           v2    :: Value
           align :: Align
+      | Load
+          id    :: Identifier
+          v     :: Value 
+          align :: Align
       | Ret 
           v    :: Value
       | Br  
