@@ -175,12 +175,8 @@ data Instruction
           d :: Value 
       | Switch 
           elems :: IntTyValIdL
-      | ICmp 
-          id   :: Identifier
-          cond :: IntPredicate
-          ty   :: Type
-          op1  :: Value
-          op2  :: Value 
+      | ICmp id :: Identifier cond :: IntPredicate ty :: Type op1 :: Value op2 :: Value 
+      | FCmp id :: Identifier cond :: RealPredicate ty :: Type op1 :: Value op2 :: Value 
       | Call
           mres :: MIdentifier
           ty   :: Type
@@ -257,6 +253,24 @@ data IntPredicate
       | IntSGE                      -- ^ signed greater or equal
       | IntSLT                      -- ^ signed less than
       | IntSLE                      -- ^ signed less or equal
+
+data RealPredicate
+      | LLVMRealPredicateFalse -- ^ Always false (always folded) 
+      | LLVMRealOEQ            -- ^ True if ordered and equal 
+      | LLVMRealOGT            -- ^ True if ordered and greater than 
+      | LLVMRealOGE            -- ^ True if ordered and greater than or equal 
+      | LLVMRealOLT            -- ^ True if ordered and less than 
+      | LLVMRealOLE            -- ^ True if ordered and less than or equal 
+      | LLVMRealONE            -- ^ True if ordered and operands are unequal 
+      | LLVMRealORD            -- ^ True if ordered (no nans) 
+      | LLVMRealUNO            -- ^ True if unordered: isnan(X) | isnan(Y) 
+      | LLVMRealUEQ            -- ^ True if unordered or equal 
+      | LLVMRealUGT            -- ^ True if unordered or greater than 
+      | LLVMRealUGE            -- ^ True if unordered, greater than, or equal 
+      | LLVMRealULT            -- ^ True if unordered or less than
+      | LLVMRealULE            -- ^ True if unordered, less than, or equal 
+      | LLVMRealUNE            -- ^ True if unordered or not equal 
+      | LLVMRealPredicateTrue  -- ^ Always true (always folded) 
 
 data Section
       | Section s :: String
@@ -365,7 +379,7 @@ data Alias
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
   
-set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction NamedTy DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction NamedTy DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate
 
 deriving Every: Show
 deriving Every: Eq

@@ -50,7 +50,7 @@ import UU.PPrint as P
 -------------------------------------------------------------------------------
 {-# LINE 52 "src/Language/LLVMIR.hs" #-}
 
-{-# LINE 105 "src/Language/LLVMIR/Printer.ag" #-}
+{-# LINE 106 "src/Language/LLVMIR/Printer.ag" #-}
 
 pConvOp :: Doc -> String -> Doc -> Doc -> Doc
 pConvOp id c v ty = id <+> char '=' <+> text c <+> v <+> text "to" <+> ty
@@ -63,7 +63,7 @@ pBitBinOp ty id c op1 op2 = id <+> char '=' <+> text c <+> ty <+> op1 <> char ',
 
 {-# LINE 65 "src/Language/LLVMIR.hs" #-}
 
-{-# LINE 193 "src/Language/LLVMIR/Printer.ag" #-}
+{-# LINE 212 "src/Language/LLVMIR/Printer.ag" #-}
 
 ppPName :: String -> Doc
 ppPName s = if (take 2 s == "0x")
@@ -116,7 +116,7 @@ sem_Alias_Alias name_ =
          _lhsOself :: Alias
          _nameIself :: Id
          _lhsOpp =
-             ({-# LINE 118 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 119 "src/Language/LLVMIR/Printer.ag" #-}
               text "%" <> text _nameIself
               {-# LINE 122 "src/Language/LLVMIR.hs" #-}
               )
@@ -206,7 +206,7 @@ sem_Align_Align n_ =
     (let _lhsOpp :: Doc
          _lhsOself :: Align
          _lhsOpp =
-             ({-# LINE 155 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 174 "src/Language/LLVMIR/Printer.ag" #-}
               text "align" <+> text (show n_)
               {-# LINE 212 "src/Language/LLVMIR.hs" #-}
               )
@@ -1512,6 +1512,7 @@ data Instruction = AShr (Identifier) (Type) (Value) (Value)
                  | Br (Value) (Value) (Value)
                  | Call (MIdentifier) (Type) (Identifier) (Values)
                  | FAdd (Identifier) (Type) (Value) (Value)
+                 | FCmp (Identifier) (RealPredicate) (Type) (Value) (Value)
                  | FDiv (Identifier) (Type) (Value) (Value)
                  | FMul (Identifier) (Type) (Value) (Value)
                  | FPExt (Identifier) (Value) (Type)
@@ -1566,6 +1567,8 @@ sem_Instruction (Call _mres _ty _callee _args) =
     (sem_Instruction_Call (sem_MIdentifier _mres) (sem_Type _ty) (sem_Identifier _callee) (sem_Values _args))
 sem_Instruction (FAdd _id _ty _op1 _op2) =
     (sem_Instruction_FAdd (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (FCmp _id _cond _ty _op1 _op2) =
+    (sem_Instruction_FCmp (sem_Identifier _id) (sem_RealPredicate _cond) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
 sem_Instruction (FDiv _id _ty _op1 _op2) =
     (sem_Instruction_FDiv (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
 sem_Instruction (FMul _id _ty _op1 _op2) =
@@ -1661,9 +1664,9 @@ sem_Instruction_AShr id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 100 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 101 "src/Language/LLVMIR/Printer.ag" #-}
               pBitBinOp _tyIpp _idIpp "ashr" _op1Ipp _op2Ipp
-              {-# LINE 1667 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1670 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              AShr _idIself _tyIself _op1Iself _op2Iself
@@ -1695,9 +1698,9 @@ sem_Instruction_Add id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 86 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 87 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "add"  _op1Ipp _op2Ipp
-              {-# LINE 1701 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1704 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Add _idIself _tyIself _op1Iself _op2Iself
@@ -1728,7 +1731,7 @@ sem_Instruction_Alloca id_ ty_ align_ =
          _lhsOpp =
              ({-# LINE 65 "src/Language/LLVMIR/Printer.ag" #-}
               _idIpp <+> char '=' <+> text "alloca" <+> _tyIpp <> char ',' <+> _alignIpp
-              {-# LINE 1732 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1735 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Alloca _idIself _tyIself _alignIself
@@ -1758,9 +1761,9 @@ sem_Instruction_And id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 101 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 102 "src/Language/LLVMIR/Printer.ag" #-}
               pBitBinOp _tyIpp _idIpp "and"  _op1Ipp _op2Ipp
-              {-# LINE 1764 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1767 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              And _idIself _tyIself _op1Iself _op2Iself
@@ -1789,9 +1792,9 @@ sem_Instruction_BitCast id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 84 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 85 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "bitcast"  _vIpp _tyIpp
-              {-# LINE 1795 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1798 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              BitCast _idIself _vIself _tyIself
@@ -1818,9 +1821,9 @@ sem_Instruction_Br v_ t_ f_ =
          _fIpp :: Doc
          _fIself :: Value
          _lhsOpp =
-             ({-# LINE 70 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 71 "src/Language/LLVMIR/Printer.ag" #-}
               text "br" <+> _vIpp <> comma <+> _tIpp <> comma <+> _fIpp
-              {-# LINE 1824 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1827 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Br _vIself _tIself _fIself
@@ -1849,9 +1852,9 @@ sem_Instruction_Call mres_ ty_ callee_ args_ =
          _argsIpp :: Doc
          _argsIself :: Values
          _lhsOpp =
-             ({-# LINE 71 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 72 "src/Language/LLVMIR/Printer.ag" #-}
               text "call" <+> _tyIpp <+> _calleeIpp <> char '(' <> _argsIpp <> char ')'
-              {-# LINE 1855 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1858 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Call _mresIself _tyIself _calleeIself _argsIself
@@ -1883,9 +1886,9 @@ sem_Instruction_FAdd id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 87 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 88 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "fadd" _op1Ipp _op2Ipp
-              {-# LINE 1889 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1892 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              FAdd _idIself _tyIself _op1Iself _op2Iself
@@ -1893,6 +1896,45 @@ sem_Instruction_FAdd id_ ty_ op1_ op2_ =
              _self
          ( _idIpp,_idIself) =
              id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOself))
+sem_Instruction_FCmp :: T_Identifier ->
+                        T_RealPredicate ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_FCmp id_ cond_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Instruction
+         _idIpp :: Doc
+         _idIself :: Identifier
+         _condIpp :: Doc
+         _condIself :: RealPredicate
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 69 "src/Language/LLVMIR/Printer.ag" #-}
+              _idIpp <+> char '=' <+> text "icmp"   <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
+              {-# LINE 1929 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             FCmp _idIself _condIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _idIpp,_idIself) =
+             id_
+         ( _condIpp,_condIself) =
+             cond_
          ( _tyIpp,_tyIself) =
              ty_
          ( _op1Ipp,_op1Iself) =
@@ -1917,9 +1959,9 @@ sem_Instruction_FDiv id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 94 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 95 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "fdiv" _op1Ipp _op2Ipp
-              {-# LINE 1923 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1965 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              FDiv _idIself _tyIself _op1Iself _op2Iself
@@ -1951,9 +1993,9 @@ sem_Instruction_FMul id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 91 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 92 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "fmul" _op1Ipp _op2Ipp
-              {-# LINE 1957 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 1999 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              FMul _idIself _tyIself _op1Iself _op2Iself
@@ -1982,9 +2024,9 @@ sem_Instruction_FPExt id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 81 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 82 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "fpext"    _vIpp _tyIpp
-              {-# LINE 1988 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2030 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              FPExt _idIself _vIself _tyIself
@@ -2011,9 +2053,9 @@ sem_Instruction_FPToSI id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 77 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 78 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "fptosi"   _vIpp _tyIpp
-              {-# LINE 2017 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2059 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              FPToSI _idIself _vIself _tyIself
@@ -2040,9 +2082,9 @@ sem_Instruction_FPToUI id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 76 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 77 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "fptoui"   _vIpp _tyIpp
-              {-# LINE 2046 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2088 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              FPToUI _idIself _vIself _tyIself
@@ -2069,9 +2111,9 @@ sem_Instruction_FPTrunc id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 81 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "fptrunc"  _vIpp _tyIpp
-              {-# LINE 2075 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2117 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              FPTrunc _idIself _vIself _tyIself
@@ -2101,9 +2143,9 @@ sem_Instruction_FRem id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 97 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 98 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "frem" _op1Ipp _op2Ipp
-              {-# LINE 2107 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2149 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              FRem _idIself _tyIself _op1Iself _op2Iself
@@ -2135,9 +2177,9 @@ sem_Instruction_FSub id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 89 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 90 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "fsub" _op1Ipp _op2Ipp
-              {-# LINE 2141 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2183 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              FSub _idIself _tyIself _op1Iself _op2Iself
@@ -2169,9 +2211,9 @@ sem_Instruction_GetElementPtr id_ ty_ struct_ idxs_ =
          _idxsIpp :: Doc
          _idxsIself :: Values
          _lhsOpp =
-             ({-# LINE 85 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 86 "src/Language/LLVMIR/Printer.ag" #-}
               _idIpp <+> char '=' <+> text "getelementptr" <+> _structIpp <> char ',' <+> _idxsIpp
-              {-# LINE 2175 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2217 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              GetElementPtr _idIself _tyIself _structIself _idxsIself
@@ -2208,7 +2250,7 @@ sem_Instruction_ICmp id_ cond_ ty_ op1_ op2_ =
          _lhsOpp =
              ({-# LINE 68 "src/Language/LLVMIR/Printer.ag" #-}
               _idIpp <+> char '=' <+> text "icmp"   <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
-              {-# LINE 2212 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2254 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              ICmp _idIself _condIself _tyIself _op1Iself _op2Iself
@@ -2233,7 +2275,7 @@ sem_Instruction_Instruction s_ =
          _lhsOpp =
              ({-# LINE 63 "src/Language/LLVMIR/Printer.ag" #-}
               text s_
-              {-# LINE 2237 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2279 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Instruction s_
@@ -2254,9 +2296,9 @@ sem_Instruction_IntToPtr id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 83 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 84 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "inttoptr" _vIpp _tyIpp
-              {-# LINE 2260 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2302 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntToPtr _idIself _vIself _tyIself
@@ -2286,9 +2328,9 @@ sem_Instruction_LShr id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 99 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 100 "src/Language/LLVMIR/Printer.ag" #-}
               pBitBinOp _tyIpp _idIpp "lshr" _op1Ipp _op2Ipp
-              {-# LINE 2292 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2334 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              LShr _idIself _tyIself _op1Iself _op2Iself
@@ -2319,7 +2361,7 @@ sem_Instruction_Load id_ v_ align_ =
          _lhsOpp =
              ({-# LINE 66 "src/Language/LLVMIR/Printer.ag" #-}
               _idIpp <+> char '=' <+> text "load"   <+> _vIpp  <> char ',' <+> _alignIpp
-              {-# LINE 2323 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2365 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Load _idIself _vIself _alignIself
@@ -2349,9 +2391,9 @@ sem_Instruction_Mul id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 90 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 91 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "mul"  _op1Ipp _op2Ipp
-              {-# LINE 2355 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2397 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Mul _idIself _tyIself _op1Iself _op2Iself
@@ -2383,9 +2425,9 @@ sem_Instruction_Or id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 102 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 103 "src/Language/LLVMIR/Printer.ag" #-}
               pBitBinOp _tyIpp _idIpp "or"   _op1Ipp _op2Ipp
-              {-# LINE 2389 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2431 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Or _idIself _tyIself _op1Iself _op2Iself
@@ -2414,9 +2456,9 @@ sem_Instruction_PtrToInt id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 82 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 83 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "ptrtoint" _vIpp _tyIpp
-              {-# LINE 2420 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2462 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              PtrToInt _idIself _vIself _tyIself
@@ -2439,7 +2481,7 @@ sem_Instruction_Ret v_ =
          _lhsOpp =
              ({-# LINE 64 "src/Language/LLVMIR/Printer.ag" #-}
               text "ret" <+> _vIpp
-              {-# LINE 2443 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2485 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Ret _vIself
@@ -2465,9 +2507,9 @@ sem_Instruction_SDiv id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 93 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 94 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "sdiv" _op1Ipp _op2Ipp
-              {-# LINE 2471 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2513 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              SDiv _idIself _tyIself _op1Iself _op2Iself
@@ -2496,9 +2538,9 @@ sem_Instruction_SExt id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 75 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 76 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "sext"     _vIpp _tyIpp
-              {-# LINE 2502 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2544 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              SExt _idIself _vIself _tyIself
@@ -2525,9 +2567,9 @@ sem_Instruction_SIToFP id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 79 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 80 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "sitofp"   _vIpp _tyIpp
-              {-# LINE 2531 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2573 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              SIToFP _idIself _vIself _tyIself
@@ -2557,9 +2599,9 @@ sem_Instruction_SRem id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 96 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 97 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "srem" _op1Ipp _op2Ipp
-              {-# LINE 2563 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2605 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              SRem _idIself _tyIself _op1Iself _op2Iself
@@ -2591,9 +2633,9 @@ sem_Instruction_Shl id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 98 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 99 "src/Language/LLVMIR/Printer.ag" #-}
               pBitBinOp _tyIpp _idIpp "shl"  _op1Ipp _op2Ipp
-              {-# LINE 2597 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2639 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Shl _idIself _tyIself _op1Iself _op2Iself
@@ -2627,7 +2669,7 @@ sem_Instruction_Store ty_ v1_ v2_ align_ =
          _lhsOpp =
              ({-# LINE 67 "src/Language/LLVMIR/Printer.ag" #-}
               _tyIpp <+> text "store" <+> _v1Ipp <> char ',' <+> _v2Ipp <> char ',' <+> _alignIpp
-              {-# LINE 2631 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2673 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Store _tyIself _v1Iself _v2Iself _alignIself
@@ -2659,9 +2701,9 @@ sem_Instruction_Sub id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 88 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 89 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "sub"  _op1Ipp _op2Ipp
-              {-# LINE 2665 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2707 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Sub _idIself _tyIself _op1Iself _op2Iself
@@ -2685,7 +2727,7 @@ sem_Instruction_Switch elems_ =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 2689 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2731 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Switch _elemsIself
@@ -2708,9 +2750,9 @@ sem_Instruction_Trunc id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 73 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 74 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "trunc"    _vIpp _tyIpp
-              {-# LINE 2714 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2756 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Trunc _idIself _vIself _tyIself
@@ -2731,9 +2773,9 @@ sem_Instruction_UBr d_ =
          _dIpp :: Doc
          _dIself :: Value
          _lhsOpp =
-             ({-# LINE 69 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 70 "src/Language/LLVMIR/Printer.ag" #-}
               text "br" <+> _dIpp
-              {-# LINE 2737 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2779 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              UBr _dIself
@@ -2759,9 +2801,9 @@ sem_Instruction_UDiv id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 92 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 93 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "udiv" _op1Ipp _op2Ipp
-              {-# LINE 2765 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2807 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              UDiv _idIself _tyIself _op1Iself _op2Iself
@@ -2790,9 +2832,9 @@ sem_Instruction_UIToFP id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 78 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 79 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "uitofp"   _vIpp _tyIpp
-              {-# LINE 2796 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2838 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              UIToFP _idIself _vIself _tyIself
@@ -2822,9 +2864,9 @@ sem_Instruction_URem id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 95 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 96 "src/Language/LLVMIR/Printer.ag" #-}
               pBinOp _tyIpp _idIpp "urem" _op1Ipp _op2Ipp
-              {-# LINE 2828 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2870 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              URem _idIself _tyIself _op1Iself _op2Iself
@@ -2844,9 +2886,9 @@ sem_Instruction_Unreachable =
     (let _lhsOpp :: Doc
          _lhsOself :: Instruction
          _lhsOpp =
-             ({-# LINE 72 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 73 "src/Language/LLVMIR/Printer.ag" #-}
               text "unreachable"
-              {-# LINE 2850 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2892 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Unreachable
@@ -2870,9 +2912,9 @@ sem_Instruction_Xor id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOpp =
-             ({-# LINE 103 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 104 "src/Language/LLVMIR/Printer.ag" #-}
               pBitBinOp _tyIpp _idIpp "xor"  _op1Ipp _op2Ipp
-              {-# LINE 2876 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2918 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Xor _idIself _tyIself _op1Iself _op2Iself
@@ -2901,9 +2943,9 @@ sem_Instruction_ZExt id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 74 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 75 "src/Language/LLVMIR/Printer.ag" #-}
               pConvOp _idIpp "zext"     _vIpp _tyIpp
-              {-# LINE 2907 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2949 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              ZExt _idIself _vIself _tyIself
@@ -2946,7 +2988,7 @@ sem_Instructions_Cons hd_ tl_ =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               _hdIpp <$> _tlIpp
-              {-# LINE 2950 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 2992 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -2964,7 +3006,7 @@ sem_Instructions_Nil =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 2968 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3010 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              []
@@ -3021,9 +3063,9 @@ sem_IntPredicate_IntEQ =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 124 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 125 "src/Language/LLVMIR/Printer.ag" #-}
               text "eq"
-              {-# LINE 3027 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3069 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntEQ
@@ -3035,9 +3077,9 @@ sem_IntPredicate_IntNE =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 125 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 126 "src/Language/LLVMIR/Printer.ag" #-}
               text "ne"
-              {-# LINE 3041 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3083 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntNE
@@ -3049,9 +3091,9 @@ sem_IntPredicate_IntSGE =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 131 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 132 "src/Language/LLVMIR/Printer.ag" #-}
               text "sge"
-              {-# LINE 3055 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3097 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntSGE
@@ -3063,9 +3105,9 @@ sem_IntPredicate_IntSGT =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 130 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 131 "src/Language/LLVMIR/Printer.ag" #-}
               text "sgt"
-              {-# LINE 3069 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3111 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntSGT
@@ -3077,9 +3119,9 @@ sem_IntPredicate_IntSLE =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 133 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 134 "src/Language/LLVMIR/Printer.ag" #-}
               text "sle"
-              {-# LINE 3083 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3125 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntSLE
@@ -3091,9 +3133,9 @@ sem_IntPredicate_IntSLT =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 132 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 133 "src/Language/LLVMIR/Printer.ag" #-}
               text "slt"
-              {-# LINE 3097 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3139 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntSLT
@@ -3105,9 +3147,9 @@ sem_IntPredicate_IntUGE =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 127 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 128 "src/Language/LLVMIR/Printer.ag" #-}
               text "uge"
-              {-# LINE 3111 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3153 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntUGE
@@ -3119,9 +3161,9 @@ sem_IntPredicate_IntUGT =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 126 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 127 "src/Language/LLVMIR/Printer.ag" #-}
               text "ugt"
-              {-# LINE 3125 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3167 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntUGT
@@ -3133,9 +3175,9 @@ sem_IntPredicate_IntULE =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 129 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 130 "src/Language/LLVMIR/Printer.ag" #-}
               text "ule"
-              {-# LINE 3139 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3181 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntULE
@@ -3147,9 +3189,9 @@ sem_IntPredicate_IntULT =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 128 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 129 "src/Language/LLVMIR/Printer.ag" #-}
               text "ult"
-              {-# LINE 3153 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3195 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntULT
@@ -3372,9 +3414,9 @@ sem_Linkage_AppendingLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 142 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 161 "src/Language/LLVMIR/Printer.ag" #-}
               text "appending"
-              {-# LINE 3378 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3420 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              AppendingLinkage
@@ -3386,9 +3428,9 @@ sem_Linkage_AvailableExternallyLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 137 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 156 "src/Language/LLVMIR/Printer.ag" #-}
               text "available_externally"
-              {-# LINE 3392 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3434 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              AvailableExternallyLinkage
@@ -3400,9 +3442,9 @@ sem_Linkage_CommonLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 149 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 168 "src/Language/LLVMIR/Printer.ag" #-}
               text "common"
-              {-# LINE 3406 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3448 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              CommonLinkage
@@ -3414,9 +3456,9 @@ sem_Linkage_DLLExportLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 146 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 165 "src/Language/LLVMIR/Printer.ag" #-}
               text "dllexport"
-              {-# LINE 3420 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3462 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              DLLExportLinkage
@@ -3428,9 +3470,9 @@ sem_Linkage_DLLImportLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 145 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 164 "src/Language/LLVMIR/Printer.ag" #-}
               text "dllimport"
-              {-# LINE 3434 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3476 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              DLLImportLinkage
@@ -3442,9 +3484,9 @@ sem_Linkage_ExternalLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 136 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 155 "src/Language/LLVMIR/Printer.ag" #-}
               text "external"
-              {-# LINE 3448 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3490 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              ExternalLinkage
@@ -3456,9 +3498,9 @@ sem_Linkage_ExternalWeakLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 147 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 166 "src/Language/LLVMIR/Printer.ag" #-}
               text "external"
-              {-# LINE 3462 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3504 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              ExternalWeakLinkage
@@ -3470,9 +3512,9 @@ sem_Linkage_GhostLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 148 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 167 "src/Language/LLVMIR/Printer.ag" #-}
               text "ghost"
-              {-# LINE 3476 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3518 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              GhostLinkage
@@ -3484,9 +3526,9 @@ sem_Linkage_InternalLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 143 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 162 "src/Language/LLVMIR/Printer.ag" #-}
               text "internal"
-              {-# LINE 3490 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3532 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              InternalLinkage
@@ -3498,9 +3540,9 @@ sem_Linkage_LinkOnceAnyLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 138 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 157 "src/Language/LLVMIR/Printer.ag" #-}
               text "linkonce"
-              {-# LINE 3504 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3546 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              LinkOnceAnyLinkage
@@ -3512,9 +3554,9 @@ sem_Linkage_LinkOnceODRLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 139 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 158 "src/Language/LLVMIR/Printer.ag" #-}
               text "linkonce_odr"
-              {-# LINE 3518 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3560 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              LinkOnceODRLinkage
@@ -3526,9 +3568,9 @@ sem_Linkage_LinkerPrivateLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 150 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 169 "src/Language/LLVMIR/Printer.ag" #-}
               text "linker_private"
-              {-# LINE 3532 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3574 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              LinkerPrivateLinkage
@@ -3540,9 +3582,9 @@ sem_Linkage_LinkerPrivateWeakDefAutoLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 152 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 171 "src/Language/LLVMIR/Printer.ag" #-}
               text "linker_private_weak_def_auto"
-              {-# LINE 3546 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3588 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              LinkerPrivateWeakDefAutoLinkage
@@ -3554,9 +3596,9 @@ sem_Linkage_LinkerPrivateWeakLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 151 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 170 "src/Language/LLVMIR/Printer.ag" #-}
               text "linker_private_weak"
-              {-# LINE 3560 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3602 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              LinkerPrivateWeakLinkage
@@ -3568,9 +3610,9 @@ sem_Linkage_PrivateLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 144 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 163 "src/Language/LLVMIR/Printer.ag" #-}
               text "private"
-              {-# LINE 3574 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3616 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              PrivateLinkage
@@ -3582,9 +3624,9 @@ sem_Linkage_WeakAnyLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 140 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 159 "src/Language/LLVMIR/Printer.ag" #-}
               text "weak"
-              {-# LINE 3588 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3630 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              WeakAnyLinkage
@@ -3596,9 +3638,9 @@ sem_Linkage_WeakODRLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 141 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 160 "src/Language/LLVMIR/Printer.ag" #-}
               text "weak_odr"
-              {-# LINE 3602 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 3644 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              WeakODRLinkage
@@ -4136,9 +4178,9 @@ sem_MValue_Just just_ =
          _justIpp :: Doc
          _justIself :: Value
          _lhsOpp =
-             ({-# LINE 159 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 178 "src/Language/LLVMIR/Printer.ag" #-}
               _justIpp
-              {-# LINE 4142 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 4184 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Just _justIself
@@ -4152,9 +4194,9 @@ sem_MValue_Nothing =
     (let _lhsOpp :: Doc
          _lhsOself :: MValue
          _lhsOpp =
-             ({-# LINE 158 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 177 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 4158 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 4200 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Nothing
@@ -4283,7 +4325,7 @@ sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
          _lhsOpp =
              ({-# LINE 47 "src/Language/LLVMIR/Printer.ag" #-}
               text ("; ModuleID ='" ++ id_ ++ "'") <$> _layoutIpp <$> _targetIpp <$> _nmdtysIpp <$> _gvarsIpp <$> _funsIpp
-              {-# LINE 4287 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 4329 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Module id_ _layoutIself _targetIself _gvarsIself _funsIself _nmdtysIself
@@ -4392,9 +4434,9 @@ sem_NamedTy_NmTy name_ =
          _lhsOself :: NamedTy
          _nameIself :: Id
          _lhsOpp =
-             ({-# LINE 121 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 122 "src/Language/LLVMIR/Printer.ag" #-}
               text "%" <> text _nameIself
-              {-# LINE 4398 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 4440 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              NmTy _nameIself
@@ -4433,7 +4475,7 @@ sem_NamedTys_Cons hd_ tl_ =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               _hdIpp <$> _tlIpp
-              {-# LINE 4437 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 4479 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -4451,7 +4493,7 @@ sem_NamedTys_Nil =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 4455 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 4497 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              []
@@ -4560,7 +4602,7 @@ sem_Parameter_Parameter var_ ty_ =
          _lhsOpp =
              ({-# LINE 57 "src/Language/LLVMIR/Printer.ag" #-}
               _tyIpp <> ppPName _varIself
-              {-# LINE 4564 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 4606 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Parameter _varIself _tyIself
@@ -4603,7 +4645,7 @@ sem_Parameters_Cons hd_ tl_ =
               if (length _tlIself == 0)
               then _hdIpp
               else _hdIpp <> char ',' <+> _tlIpp
-              {-# LINE 4607 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 4649 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -4621,10 +4663,297 @@ sem_Parameters_Nil =
          _lhsOpp =
              ({-# LINE 19 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 4625 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 4667 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              []
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+-- RealPredicate -----------------------------------------------
+data RealPredicate = LLVMRealOEQ
+                   | LLVMRealOGE
+                   | LLVMRealOGT
+                   | LLVMRealOLE
+                   | LLVMRealOLT
+                   | LLVMRealONE
+                   | LLVMRealORD
+                   | LLVMRealPredicateFalse
+                   | LLVMRealPredicateTrue
+                   | LLVMRealUEQ
+                   | LLVMRealUGE
+                   | LLVMRealUGT
+                   | LLVMRealULE
+                   | LLVMRealULT
+                   | LLVMRealUNE
+                   | LLVMRealUNO
+                   deriving ( Eq,Ord,Show)
+-- cata
+sem_RealPredicate :: RealPredicate ->
+                     T_RealPredicate
+sem_RealPredicate (LLVMRealOEQ) =
+    (sem_RealPredicate_LLVMRealOEQ)
+sem_RealPredicate (LLVMRealOGE) =
+    (sem_RealPredicate_LLVMRealOGE)
+sem_RealPredicate (LLVMRealOGT) =
+    (sem_RealPredicate_LLVMRealOGT)
+sem_RealPredicate (LLVMRealOLE) =
+    (sem_RealPredicate_LLVMRealOLE)
+sem_RealPredicate (LLVMRealOLT) =
+    (sem_RealPredicate_LLVMRealOLT)
+sem_RealPredicate (LLVMRealONE) =
+    (sem_RealPredicate_LLVMRealONE)
+sem_RealPredicate (LLVMRealORD) =
+    (sem_RealPredicate_LLVMRealORD)
+sem_RealPredicate (LLVMRealPredicateFalse) =
+    (sem_RealPredicate_LLVMRealPredicateFalse)
+sem_RealPredicate (LLVMRealPredicateTrue) =
+    (sem_RealPredicate_LLVMRealPredicateTrue)
+sem_RealPredicate (LLVMRealUEQ) =
+    (sem_RealPredicate_LLVMRealUEQ)
+sem_RealPredicate (LLVMRealUGE) =
+    (sem_RealPredicate_LLVMRealUGE)
+sem_RealPredicate (LLVMRealUGT) =
+    (sem_RealPredicate_LLVMRealUGT)
+sem_RealPredicate (LLVMRealULE) =
+    (sem_RealPredicate_LLVMRealULE)
+sem_RealPredicate (LLVMRealULT) =
+    (sem_RealPredicate_LLVMRealULT)
+sem_RealPredicate (LLVMRealUNE) =
+    (sem_RealPredicate_LLVMRealUNE)
+sem_RealPredicate (LLVMRealUNO) =
+    (sem_RealPredicate_LLVMRealUNO)
+-- semantic domain
+type T_RealPredicate = ( Doc,RealPredicate)
+data Inh_RealPredicate = Inh_RealPredicate {}
+data Syn_RealPredicate = Syn_RealPredicate {pp_Syn_RealPredicate :: Doc,self_Syn_RealPredicate :: RealPredicate}
+wrap_RealPredicate :: T_RealPredicate ->
+                      Inh_RealPredicate ->
+                      Syn_RealPredicate
+wrap_RealPredicate sem (Inh_RealPredicate) =
+    (let ( _lhsOpp,_lhsOself) = sem
+     in  (Syn_RealPredicate _lhsOpp _lhsOself))
+sem_RealPredicate_LLVMRealOEQ :: T_RealPredicate
+sem_RealPredicate_LLVMRealOEQ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 138 "src/Language/LLVMIR/Printer.ag" #-}
+              text "oeq"
+              {-# LINE 4744 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealOEQ
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealOGE :: T_RealPredicate
+sem_RealPredicate_LLVMRealOGE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 140 "src/Language/LLVMIR/Printer.ag" #-}
+              text "oge"
+              {-# LINE 4758 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealOGE
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealOGT :: T_RealPredicate
+sem_RealPredicate_LLVMRealOGT =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 139 "src/Language/LLVMIR/Printer.ag" #-}
+              text "ogt"
+              {-# LINE 4772 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealOGT
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealOLE :: T_RealPredicate
+sem_RealPredicate_LLVMRealOLE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 142 "src/Language/LLVMIR/Printer.ag" #-}
+              text "ole"
+              {-# LINE 4786 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealOLE
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealOLT :: T_RealPredicate
+sem_RealPredicate_LLVMRealOLT =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 141 "src/Language/LLVMIR/Printer.ag" #-}
+              text "olt"
+              {-# LINE 4800 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealOLT
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealONE :: T_RealPredicate
+sem_RealPredicate_LLVMRealONE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 143 "src/Language/LLVMIR/Printer.ag" #-}
+              text "one"
+              {-# LINE 4814 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealONE
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealORD :: T_RealPredicate
+sem_RealPredicate_LLVMRealORD =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 144 "src/Language/LLVMIR/Printer.ag" #-}
+              text "ord"
+              {-# LINE 4828 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealORD
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealPredicateFalse :: T_RealPredicate
+sem_RealPredicate_LLVMRealPredicateFalse =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 137 "src/Language/LLVMIR/Printer.ag" #-}
+              text "false"
+              {-# LINE 4842 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealPredicateFalse
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealPredicateTrue :: T_RealPredicate
+sem_RealPredicate_LLVMRealPredicateTrue =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 152 "src/Language/LLVMIR/Printer.ag" #-}
+              text "true"
+              {-# LINE 4856 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealPredicateTrue
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealUEQ :: T_RealPredicate
+sem_RealPredicate_LLVMRealUEQ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 146 "src/Language/LLVMIR/Printer.ag" #-}
+              text "ueq"
+              {-# LINE 4870 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealUEQ
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealUGE :: T_RealPredicate
+sem_RealPredicate_LLVMRealUGE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 148 "src/Language/LLVMIR/Printer.ag" #-}
+              text "uge"
+              {-# LINE 4884 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealUGE
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealUGT :: T_RealPredicate
+sem_RealPredicate_LLVMRealUGT =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 147 "src/Language/LLVMIR/Printer.ag" #-}
+              text "ugt"
+              {-# LINE 4898 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealUGT
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealULE :: T_RealPredicate
+sem_RealPredicate_LLVMRealULE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 150 "src/Language/LLVMIR/Printer.ag" #-}
+              text "ule"
+              {-# LINE 4912 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealULE
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealULT :: T_RealPredicate
+sem_RealPredicate_LLVMRealULT =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 149 "src/Language/LLVMIR/Printer.ag" #-}
+              text "ult"
+              {-# LINE 4926 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealULT
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealUNE :: T_RealPredicate
+sem_RealPredicate_LLVMRealUNE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 151 "src/Language/LLVMIR/Printer.ag" #-}
+              text "une"
+              {-# LINE 4940 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealUNE
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealUNO :: T_RealPredicate
+sem_RealPredicate_LLVMRealUNO =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 145 "src/Language/LLVMIR/Printer.ag" #-}
+              text "uno"
+              {-# LINE 4954 "src/Language/LLVMIR.hs" #-}
+              )
+         _self =
+             LLVMRealUNO
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -4683,7 +5012,7 @@ sem_Target_Linux =
          _lhsOpp =
              ({-# LINE 44 "src/Language/LLVMIR/Printer.ag" #-}
               text "Linux"
-              {-# LINE 4687 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5016 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Linux
@@ -4697,7 +5026,7 @@ sem_Target_MacOs =
          _lhsOpp =
              ({-# LINE 43 "src/Language/LLVMIR/Printer.ag" #-}
               text "MacOs"
-              {-# LINE 4701 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5030 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              MacOs
@@ -4733,7 +5062,7 @@ sem_TargetData_TargetData s_ t_ =
          _lhsOpp =
              ({-# LINE 40 "src/Language/LLVMIR/Printer.ag" #-}
               text "target triple =" <+> dquotes (text s_)
-              {-# LINE 4737 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5066 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TargetData s_ _tIself
@@ -4808,9 +5137,9 @@ sem_TyFloatPoint_TyDouble =
     (let _lhsOpp :: Doc
          _lhsOself :: TyFloatPoint
          _lhsOpp =
-             ({-# LINE 188 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 207 "src/Language/LLVMIR/Printer.ag" #-}
               text "double"
-              {-# LINE 4814 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5143 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyDouble
@@ -4822,9 +5151,9 @@ sem_TyFloatPoint_TyFP128 =
     (let _lhsOpp :: Doc
          _lhsOself :: TyFloatPoint
          _lhsOpp =
-             ({-# LINE 189 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 208 "src/Language/LLVMIR/Printer.ag" #-}
               text "fp128"
-              {-# LINE 4828 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5157 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyFP128
@@ -4836,9 +5165,9 @@ sem_TyFloatPoint_TyFloat =
     (let _lhsOpp :: Doc
          _lhsOself :: TyFloatPoint
          _lhsOpp =
-             ({-# LINE 187 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 206 "src/Language/LLVMIR/Printer.ag" #-}
               text "float"
-              {-# LINE 4842 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5171 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyFloat
@@ -4850,9 +5179,9 @@ sem_TyFloatPoint_TyHalf =
     (let _lhsOpp :: Doc
          _lhsOself :: TyFloatPoint
          _lhsOpp =
-             ({-# LINE 186 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 205 "src/Language/LLVMIR/Printer.ag" #-}
               text "half"
-              {-# LINE 4856 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5185 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyHalf
@@ -4864,9 +5193,9 @@ sem_TyFloatPoint_TyPPCFP128 =
     (let _lhsOpp :: Doc
          _lhsOself :: TyFloatPoint
          _lhsOpp =
-             ({-# LINE 191 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 210 "src/Language/LLVMIR/Printer.ag" #-}
               text "ppc_fp128"
-              {-# LINE 4870 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5199 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyPPCFP128
@@ -4878,9 +5207,9 @@ sem_TyFloatPoint_Tyx86FP80 =
     (let _lhsOpp :: Doc
          _lhsOself :: TyFloatPoint
          _lhsOpp =
-             ({-# LINE 190 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 209 "src/Language/LLVMIR/Printer.ag" #-}
               text "x86_fp80"
-              {-# LINE 4884 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5213 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Tyx86FP80
@@ -4950,9 +5279,9 @@ sem_Type_TyArray numEl_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 178 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 197 "src/Language/LLVMIR/Printer.ag" #-}
               brackets $ int numEl_ <+> char 'x' <+> _tyIpp
-              {-# LINE 4956 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5285 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyArray numEl_ _tyIself
@@ -4969,9 +5298,9 @@ sem_Type_TyFloatPoint p_ =
          _pIpp :: Doc
          _pIself :: TyFloatPoint
          _lhsOpp =
-             ({-# LINE 177 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 196 "src/Language/LLVMIR/Printer.ag" #-}
               _pIpp
-              {-# LINE 4975 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5304 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyFloatPoint _pIself
@@ -4991,9 +5320,9 @@ sem_Type_TyFunction party_ retty_ =
          _rettyIpp :: Doc
          _rettyIself :: Type
          _lhsOpp =
-             ({-# LINE 179 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 198 "src/Language/LLVMIR/Printer.ag" #-}
               text "pp TyFunction TODO"
-              {-# LINE 4997 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5326 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyFunction _partyIself _rettyIself
@@ -5010,9 +5339,9 @@ sem_Type_TyInt p_ =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
          _lhsOpp =
-             ({-# LINE 176 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 195 "src/Language/LLVMIR/Printer.ag" #-}
               char 'i' <> int p_
-              {-# LINE 5016 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5345 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyInt p_
@@ -5024,9 +5353,9 @@ sem_Type_TyLabel =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
          _lhsOpp =
-             ({-# LINE 173 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 192 "src/Language/LLVMIR/Printer.ag" #-}
               text "label"
-              {-# LINE 5030 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5359 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyLabel
@@ -5038,9 +5367,9 @@ sem_Type_TyMetadata =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
          _lhsOpp =
-             ({-# LINE 174 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 193 "src/Language/LLVMIR/Printer.ag" #-}
               text "metadata"
-              {-# LINE 5044 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5373 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyMetadata
@@ -5052,9 +5381,9 @@ sem_Type_TyOpaque =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
          _lhsOpp =
-             ({-# LINE 175 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 194 "src/Language/LLVMIR/Printer.ag" #-}
               text "opaque"
-              {-# LINE 5058 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5387 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyOpaque
@@ -5069,9 +5398,9 @@ sem_Type_TyPointer ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 181 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 200 "src/Language/LLVMIR/Printer.ag" #-}
               _tyIpp <> char '*'
-              {-# LINE 5075 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5404 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyPointer _tyIself
@@ -5086,9 +5415,9 @@ sem_Type_TyStruct name_ =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
          _lhsOpp =
-             ({-# LINE 180 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 199 "src/Language/LLVMIR/Printer.ag" #-}
               char '%' <> dquotes (text name_)
-              {-# LINE 5092 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5421 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyStruct name_
@@ -5100,9 +5429,9 @@ sem_Type_TyUnsupported =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
          _lhsOpp =
-             ({-# LINE 183 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 202 "src/Language/LLVMIR/Printer.ag" #-}
               text "TyUnsupported"
-              {-# LINE 5106 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5435 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyUnsupported
@@ -5118,9 +5447,9 @@ sem_Type_TyVector numEl_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 182 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 201 "src/Language/LLVMIR/Printer.ag" #-}
               char '<' <> int numEl_ <+> char 'x' <+> _tyIpp <> char '>'
-              {-# LINE 5124 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5453 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyVector numEl_ _tyIself
@@ -5134,9 +5463,9 @@ sem_Type_TyVoid =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
          _lhsOpp =
-             ({-# LINE 171 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 190 "src/Language/LLVMIR/Printer.ag" #-}
               text "void"
-              {-# LINE 5140 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5469 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              TyVoid
@@ -5148,9 +5477,9 @@ sem_Type_Tyx86MMX =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
          _lhsOpp =
-             ({-# LINE 172 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 191 "src/Language/LLVMIR/Printer.ag" #-}
               text "x86mmx"
-              {-# LINE 5154 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5483 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Tyx86MMX
@@ -5189,7 +5518,7 @@ sem_Types_Cons hd_ tl_ =
               if (length _tlIself == 0)
               then _hdIpp
               else _hdIpp <> char ',' <+> _tlIpp
-              {-# LINE 5193 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5522 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -5207,7 +5536,7 @@ sem_Types_Nil =
          _lhsOpp =
              ({-# LINE 19 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 5211 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5540 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              []
@@ -5274,9 +5603,9 @@ sem_Value_ArrayC ty_ val_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 163 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 182 "src/Language/LLVMIR/Printer.ag" #-}
               _tyIpp <+> text "c" <> dquotes (escaped val_)
-              {-# LINE 5280 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5609 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              ArrayC _tyIself val_
@@ -5298,7 +5627,7 @@ sem_Value_BlockAddr fun_ label_ =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               _funIpp <$> _labelIpp
-              {-# LINE 5302 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5631 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              BlockAddr _funIself _labelIself
@@ -5317,7 +5646,7 @@ sem_Value_BoolC v_ =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 5321 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5650 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              BoolC v_
@@ -5335,7 +5664,7 @@ sem_Value_FloatC v_ ty_ =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               _tyIpp
-              {-# LINE 5339 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5668 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              FloatC v_ _tyIself
@@ -5355,9 +5684,9 @@ sem_Value_Id v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 162 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 181 "src/Language/LLVMIR/Printer.ag" #-}
               _tyIpp <+> _vIpp
-              {-# LINE 5361 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5690 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Id _vIself _tyIself
@@ -5377,9 +5706,9 @@ sem_Value_IntC v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 166 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 185 "src/Language/LLVMIR/Printer.ag" #-}
               _tyIpp <+> int v_
-              {-# LINE 5383 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5712 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              IntC v_ _tyIself
@@ -5396,9 +5725,9 @@ sem_Value_NullC ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 164 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 183 "src/Language/LLVMIR/Printer.ag" #-}
               _tyIpp
-              {-# LINE 5402 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5731 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              NullC _tyIself
@@ -5421,9 +5750,9 @@ sem_Value_Pointer ty_ v_ args_ =
          _argsIpp :: Doc
          _argsIself :: Values
          _lhsOpp =
-             ({-# LINE 167 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 186 "src/Language/LLVMIR/Printer.ag" #-}
               _tyIpp <+> text "getelementptr" <> char '('  <+> _vIpp <> char ',' <+> _argsIpp <> char ')'
-              {-# LINE 5427 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5756 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              Pointer _tyIself _vIself _argsIself
@@ -5445,7 +5774,7 @@ sem_Value_StructC elems_ =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 5449 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5778 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              StructC _elemsIself
@@ -5459,9 +5788,9 @@ sem_Value_UndefC =
     (let _lhsOpp :: Doc
          _lhsOself :: Value
          _lhsOpp =
-             ({-# LINE 165 "src/Language/LLVMIR/Printer.ag" #-}
+             ({-# LINE 184 "src/Language/LLVMIR/Printer.ag" #-}
               text "undef"
-              {-# LINE 5465 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5794 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              UndefC
@@ -5477,7 +5806,7 @@ sem_Value_VectorC elems_ =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 5481 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5810 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              VectorC _elemsIself
@@ -5496,7 +5825,7 @@ sem_Value_ZeroInitC ty_ =
          _lhsOpp =
              ({-# LINE 25 "src/Language/LLVMIR/Printer.ag" #-}
               _tyIpp
-              {-# LINE 5500 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5829 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              ZeroInitC _tyIself
@@ -5537,7 +5866,7 @@ sem_Values_Cons hd_ tl_ =
               if (length _tlIself == 0)
               then _hdIpp
               else _hdIpp <> char ',' <+> _tlIpp
-              {-# LINE 5541 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5870 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -5555,7 +5884,7 @@ sem_Values_Nil =
          _lhsOpp =
              ({-# LINE 19 "src/Language/LLVMIR/Printer.ag" #-}
               P.empty
-              {-# LINE 5559 "src/Language/LLVMIR.hs" #-}
+              {-# LINE 5888 "src/Language/LLVMIR.hs" #-}
               )
          _self =
              []

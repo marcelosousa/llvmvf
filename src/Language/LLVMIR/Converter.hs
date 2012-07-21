@@ -196,7 +196,11 @@ pInstruction ival 45 = do ident <- getIdent ival
                           ty    <- (FFI.typeOf ival) >>= getType
                           (op1,op2) <- getICmpOps ival 
                           return $ LL.ICmp (LL.Local ident) (toIntPredicate cond) ty op1 op2
-pInstruction ival 46 = return $ LL.Instruction "fcmp"
+pInstruction ival 46 = do ident <- getIdent ival
+                          cond  <- FFI.cmpInstGetPredicate ival >>= (return . fromEnum)
+                          ty    <- (FFI.typeOf ival) >>= getType
+                          (op1,op2) <- getICmpOps ival 
+                          return $ LL.FCmp (LL.Local ident) (toRealPredicate cond) ty op1 op2
 pInstruction ival 47 = return $ LL.Instruction "phi"
 pInstruction ival 48 = do ident <- getIdent ival
                           ty <- (FFI.typeOf ival) >>= getType
@@ -226,6 +230,24 @@ toIntPredicate 38 = LL.IntSGT
 toIntPredicate 39 = LL.IntSGE
 toIntPredicate 40 = LL.IntSLT
 toIntPredicate 41 = LL.IntSLE
+
+toRealPredicate :: Int -> LL.RealPredicate
+toRealPredicate 0 = LL.LLVMRealPredicateFalse
+toRealPredicate 1 = LL.LLVMRealOEQ           
+toRealPredicate 2 = LL.LLVMRealOGT           
+toRealPredicate 3 = LL.LLVMRealOGE           
+toRealPredicate 4 = LL.LLVMRealOLT           
+toRealPredicate 5 = LL.LLVMRealOLE           
+toRealPredicate 6 = LL.LLVMRealONE           
+toRealPredicate 7 = LL.LLVMRealORD           
+toRealPredicate 8 = LL.LLVMRealUNO           
+toRealPredicate 9 = LL.LLVMRealUEQ           
+toRealPredicate 10 = LL.LLVMRealUGT           
+toRealPredicate 11 = LL.LLVMRealUGE           
+toRealPredicate 12 = LL.LLVMRealULT           
+toRealPredicate 13 = LL.LLVMRealULE           
+toRealPredicate 14 = LL.LLVMRealUNE           
+toRealPredicate 15 = LL.LLVMRealPredicateTrue 
 
 convOps :: Value -> (LL.Identifier -> LL.Value -> LL.Type -> b) -> IO b
 convOps ival c = do ident <- getIdent ival

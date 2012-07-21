@@ -21,7 +21,7 @@ sem Parameters Types Values
                   then @hd.pp
                   else @hd.pp <> char ',' <+> @tl.pp
 
-attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate NamedTy NamedTys
+attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTy NamedTys
   syn pp use {<$>} {P.empty} :: {Doc}
 
 attr Target 
@@ -66,6 +66,7 @@ sem Instruction
   | Load   lhs.pp = @id.pp <+> char '=' <+> text "load"   <+> @v.pp  <> char ',' <+> @align.pp
   | Store  lhs.pp = @ty.pp <+> text "store" <+> @v1.pp <> char ',' <+> @v2.pp <> char ',' <+> @align.pp
   | ICmp   lhs.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
+  | FCmp   lhs.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
   | UBr    lhs.pp = text "br" <+> @d.pp
   | Br     lhs.pp = text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
   | Call   lhs.pp = text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
@@ -131,6 +132,24 @@ sem IntPredicate
   | IntSGE lhs.pp = text "sge" 
   | IntSLT lhs.pp = text "slt" 
   | IntSLE lhs.pp = text "sle" 
+
+sem RealPredicate
+  | LLVMRealPredicateFalse lhs.pp = text "false"
+  | LLVMRealOEQ            lhs.pp = text "oeq"
+  | LLVMRealOGT            lhs.pp = text "ogt"
+  | LLVMRealOGE            lhs.pp = text "oge"
+  | LLVMRealOLT            lhs.pp = text "olt"
+  | LLVMRealOLE            lhs.pp = text "ole"
+  | LLVMRealONE            lhs.pp = text "one"
+  | LLVMRealORD            lhs.pp = text "ord"
+  | LLVMRealUNO            lhs.pp = text "uno"
+  | LLVMRealUEQ            lhs.pp = text "ueq"
+  | LLVMRealUGT            lhs.pp = text "ugt"
+  | LLVMRealUGE            lhs.pp = text "uge"
+  | LLVMRealULT            lhs.pp = text "ult"
+  | LLVMRealULE            lhs.pp = text "ule"
+  | LLVMRealUNE            lhs.pp = text "une"
+  | LLVMRealPredicateTrue  lhs.pp = text "true"
 
 sem Linkage
   | ExternalLinkage            lhs.pp = text "external" 
