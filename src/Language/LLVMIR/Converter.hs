@@ -150,12 +150,12 @@ pInstruction ival 17 = binOps ival LL.URem
 pInstruction ival 18 = binOps ival LL.SRem 
 pInstruction ival 19 = binOps ival LL.FRem 
 -- logical operators
-pInstruction ival 20 = return $ LL.Instruction "shl"
-pInstruction ival 21 = return $ LL.Instruction "lshr"
-pInstruction ival 22 = return $ LL.Instruction "ashr"
-pInstruction ival 23 = return $ LL.Instruction "and"
-pInstruction ival 24 = return $ LL.Instruction "or"
-pInstruction ival 25 = return $ LL.Instruction "xor"
+pInstruction ival 20 = bitbinOps ival LL.Shl
+pInstruction ival 21 = bitbinOps ival LL.LShr
+pInstruction ival 22 = bitbinOps ival LL.AShr
+pInstruction ival 23 = bitbinOps ival LL.And 
+pInstruction ival 24 = bitbinOps ival LL.Or  
+pInstruction ival 25 = bitbinOps ival LL.Xor 
 -- memory operators
 pInstruction ival 26 = do ident <- getIdent ival
                           ty <- (FFI.allocaGetAllocatedType ival) >>= getType
@@ -239,6 +239,13 @@ binOps ival c = do ident <- getIdent ival
                    ty <- (FFI.typeOf ival) >>= getType
                    ops <- (getOperands ival) >>= mapM getValue
                    if length ops /= 2
-                   then error "'convOps': operand list is empty"
+                   then error "'binOps': operand list is broken"
                    else return $ c (LL.Local ident) ty (ops!!0) (ops!!1)
+
+bitbinOps ival c = do ident <- getIdent ival
+                      ty <- (FFI.typeOf ival) >>= getType
+                      ops <- (getOperands ival) >>= mapM getValue
+                      if length ops /= 2
+                      then error "'bitbinOps': operand list is broken"
+                      else return $ c (LL.Local ident) ty (ops!!0) (ops!!1)
 

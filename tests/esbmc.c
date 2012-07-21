@@ -16,6 +16,7 @@ int nondet_uint();
 int a[N], i, j=1, x=2;
 
 void *Tx(void *arg){
+  x = x ^ 1<<j;
   if(x>2){
 //    printf("Tx1\n");
     assert(i>=0 && i<N);

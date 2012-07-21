@@ -216,6 +216,13 @@ data Instruction
       | URem id :: Identifier ty :: Type op1 :: Value op2 :: Value
       | SRem id :: Identifier ty :: Type op1 :: Value op2 :: Value
       | FRem id :: Identifier ty :: Type op1 :: Value op2 :: Value
+      -- Bitwise Binary Operations
+      | Shl  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+      | LShr id :: Identifier ty :: Type op1 :: Value op2 :: Value
+      | AShr id :: Identifier ty :: Type op1 :: Value op2 :: Value
+      | And  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+      | Or   id :: Identifier ty :: Type op1 :: Value op2 :: Value
+      | Xor  id :: Identifier ty :: Type op1 :: Value op2 :: Value
 
 data Identifier 
       | Global name :: Id -- (functions, global variables) begin with the '@'

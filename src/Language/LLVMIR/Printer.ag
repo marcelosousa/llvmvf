@@ -95,6 +95,12 @@ sem Instruction
   | URem lhs.pp = pBinOp @ty.pp @id.pp "urem" @op1.pp @op2.pp
   | SRem lhs.pp = pBinOp @ty.pp @id.pp "srem" @op1.pp @op2.pp
   | FRem lhs.pp = pBinOp @ty.pp @id.pp "frem" @op1.pp @op2.pp
+  | Shl  lhs.pp = pBitBinOp @ty.pp @id.pp "shl"  @op1.pp @op2.pp
+  | LShr lhs.pp = pBitBinOp @ty.pp @id.pp "lshr" @op1.pp @op2.pp
+  | AShr lhs.pp = pBitBinOp @ty.pp @id.pp "ashr" @op1.pp @op2.pp
+  | And  lhs.pp = pBitBinOp @ty.pp @id.pp "and"  @op1.pp @op2.pp
+  | Or   lhs.pp = pBitBinOp @ty.pp @id.pp "or"   @op1.pp @op2.pp
+  | Xor  lhs.pp = pBitBinOp @ty.pp @id.pp "xor"  @op1.pp @op2.pp
 
 {
 pConvOp :: Doc -> String -> Doc -> Doc -> Doc
@@ -102,6 +108,9 @@ pConvOp id c v ty = id <+> char '=' <+> text c <+> v <+> text "to" <+> ty
 
 pBinOp :: Doc -> Doc -> String -> Doc -> Doc -> Doc
 pBinOp ty id c op1 op2 = ty <+> id <+> char '=' <+> text c <+> op1 <> char ',' <+> op2
+
+pBitBinOp :: Doc -> Doc -> String -> Doc -> Doc -> Doc
+pBitBinOp ty id c op1 op2 = id <+> char '=' <+> text c <+> ty <+> op1 <> char ',' <+> op2
 
 }
  
