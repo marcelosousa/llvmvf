@@ -90,6 +90,22 @@ getIdentValue :: String -> Value -> IO LL.Value
 getIdentValue n v = do ty <- (FFI.typeOf v) >>= getType
                        return $ LL.Id (LL.Local n) ty
 
+
+getPHIArgs :: Value -> IO [(LL.Value, LL.Value)]
+getPHIArgs ii = do num <- FFI.countIncoming ii
+                   oloop ii 0 num
+  where oloop instr number total = if number >= total 
+                                   then return [] 
+                                   else do rv <- FFI.getIncomingValue instr number
+                                           vn <- getIdent rv
+                                           v  <- getValue(vn,rv)
+                                           rb <- FFI.getIncomingBlock instr number 
+                                           bn <- getIdent rb
+                                           b  <- getValue(bn,rb)
+                                           os <- oloop instr (number + 1) total
+                                           return ((v,b) : os)
+
+-- | Retrieve Arguments to Call Instruction
 getCallArgs :: [(String,Value)] -> IO (LL.Identifier, [LL.Value])
 getCallArgs [] = return (LL.Global "", [])
 getCallArgs l = let x = last l
@@ -235,7 +251,11 @@ getOtherOp FCmp = do ival  <- ask
                      ty    <- liftIO $ (FFI.typeOf ival) >>= getType
                      (op1,op2) <- liftIO $ getICmpOps ival 
                      return $ LL.FCmp (LL.Local ident) (toRealPredicate cond) ty op1 op2
-getOtherOp PHI  = error $ "TODO phi"
+getOtherOp PHI  = do ival  <- ask
+                     ident <- liftIO $ getIdent ival
+                     ty    <- liftIO $ (FFI.typeOf ival) >>= getType
+                     args  <- liftIO $ getPHIArgs ival
+                     return $ LL.PHI (LL.Local ident) ty args
 getOtherOp Call = do ival  <- ask
                      ident <- liftIO $ getIdent ival
                      ty    <- liftIO $ (FFI.typeOf ival) >>= getType

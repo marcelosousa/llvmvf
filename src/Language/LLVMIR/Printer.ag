@@ -12,14 +12,17 @@ imports
 import UU.PPrint as P
 }
 
-attr Parameters Types Values
+attr Parameters Types Values PValues PValue
   syn pp :: {Doc}
 
-sem Parameters Types Values
+sem Parameters Types Values PValues
   | Nil  lhs.pp = P.empty
   | Cons lhs.pp = if (length @tl.self == 0)
                   then @hd.pp
                   else @hd.pp <> char ',' <+> @tl.pp
+
+sem PValue
+  | Tuple lhs.pp = char '[' <+> @x1.pp <> char ',' <+> @x2.pp <+> char ']'
 
 attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTy NamedTys
   syn pp use {<$>} {P.empty} :: {Doc}
@@ -102,7 +105,7 @@ sem Instruction
   | And  lhs.pp = pBitBinOp @ty.pp @id.pp "and"  @op1.pp @op2.pp
   | Or   lhs.pp = pBitBinOp @ty.pp @id.pp "or"   @op1.pp @op2.pp
   | Xor  lhs.pp = pBitBinOp @ty.pp @id.pp "xor"  @op1.pp @op2.pp
-
+  | PHI  lhs.pp = @id.pp <+> char '=' <+> text "phi" <+> @ty.pp <+> @vals.pp
 {
 pConvOp :: Doc -> String -> Doc -> Doc -> Doc
 pConvOp id c v ty = id <+> char '=' <+> text c <+> v <+> text "to" <+> ty

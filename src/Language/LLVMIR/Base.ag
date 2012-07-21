@@ -58,6 +58,8 @@ type Triplet = (Int, Int, Int)
 type MapTyInt = map {Type} Triplet
 type PTyInt = (Type, Int)
 type PTyIntL = [PTyInt]
+type PValue = (Value, Value)
+type PValues = [PValue]
 
 type DLayout = [String]
 
@@ -150,75 +152,77 @@ data BasicBlock
 --          tmn    :: Terminator
      
 data Instruction
-      | Instruction s :: String
-      | Alloca
-          id    :: Identifier
-          ty    :: Type
-          align :: Align 
---          num   :: Int
-      | Store
-          ty    :: Type
-          v1    :: Value
-          v2    :: Value
-          align :: Align
-      | Load
-          id    :: Identifier
-          v     :: Value 
-          align :: Align
-      | Ret 
-          v    :: Value
-      | Br  
-          v :: Value 
-          t :: Value 
-          f :: Value
-      | UBr 
-          d :: Value 
-      | Switch 
-          elems :: IntTyValIdL
-      | ICmp id :: Identifier cond :: IntPredicate ty :: Type op1 :: Value op2 :: Value 
-      | FCmp id :: Identifier cond :: RealPredicate ty :: Type op1 :: Value op2 :: Value 
-      | Call
-          mres :: MIdentifier
-          ty   :: Type
-          callee :: Identifier 
-          args :: Values 
-      | GetElementPtr
-          id     :: Identifier
-          ty     :: Type
-          struct :: Value
-          idxs   :: Values
-      | Unreachable
-      | Trunc    id :: Identifier v :: Value ty   :: Type -- Truncate integers
-      | ZExt     id :: Identifier v :: Value ty   :: Type -- Zero extend integers
-      | SExt     id :: Identifier v :: Value ty   :: Type -- Sign extend integers
-      | FPToUI   id :: Identifier v :: Value ty   :: Type -- floating point -> UInt
-      | FPToSI   id :: Identifier v :: Value ty   :: Type -- floating point -> SInt
-      | UIToFP   id :: Identifier v :: Value ty   :: Type -- UInt -> floating point
-      | SIToFP   id :: Identifier v :: Value ty   :: Type -- SInt -> floating point
-      | FPTrunc  id :: Identifier v :: Value ty   :: Type -- Truncate floating point
-      | FPExt    id :: Identifier v :: Value ty   :: Type -- Extend floating point
-      | PtrToInt id :: Identifier v :: Value ty   :: Type -- Pointer -> Integer
-      | IntToPtr id :: Identifier v :: Value ty   :: Type -- Integer -> Pointer
-      | BitCast  id :: Identifier v :: Value ty   :: Type -- Type cast      
-      | Add  id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | FAdd id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | Sub  id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | FSub id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | Mul  id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | FMul id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | UDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | SDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | FDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | URem id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | SRem id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | FRem id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      -- Bitwise Binary Operations
-      | Shl  id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | LShr id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | AShr id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | And  id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | Or   id :: Identifier ty :: Type op1 :: Value op2 :: Value
-      | Xor  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Instruction s :: String
+  -- Terminators
+  | Ret v :: Value
+  | Br  v :: Value t :: Value f :: Value
+  | UBr d :: Value 
+  | Switch elems :: IntTyValIdL -- TODO
+  | Unreachable
+  -- Standard Binary Operations
+  | Add  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FAdd id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Sub  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FSub id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Mul  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FMul id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | UDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | SDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | URem id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | SRem id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FRem id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  -- Bitwise Binary Operations
+  | Shl  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | LShr id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | AShr id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | And  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Or   id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Xor  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  -- Memory Operations
+  | Alloca
+      id    :: Identifier
+      ty    :: Type
+      align :: Align 
+  | Store
+      ty    :: Type
+      v1    :: Value
+      v2    :: Value
+      align :: Align
+  | Load
+      id    :: Identifier
+      v     :: Value 
+      align :: Align
+  | GetElementPtr
+      id     :: Identifier
+      ty     :: Type
+      struct :: Value
+      idxs   :: Values
+  -- Cast Operations
+  | Trunc    id :: Identifier v :: Value ty   :: Type -- Truncate integers
+  | ZExt     id :: Identifier v :: Value ty   :: Type -- Zero extend integers
+  | SExt     id :: Identifier v :: Value ty   :: Type -- Sign extend integers
+  | FPToUI   id :: Identifier v :: Value ty   :: Type -- floating point -> UInt
+  | FPToSI   id :: Identifier v :: Value ty   :: Type -- floating point -> SInt
+  | UIToFP   id :: Identifier v :: Value ty   :: Type -- UInt -> floating point
+  | SIToFP   id :: Identifier v :: Value ty   :: Type -- SInt -> floating point
+  | FPTrunc  id :: Identifier v :: Value ty   :: Type -- Truncate floating point
+  | FPExt    id :: Identifier v :: Value ty   :: Type -- Extend floating point
+  | PtrToInt id :: Identifier v :: Value ty   :: Type -- Pointer -> Integer
+  | IntToPtr id :: Identifier v :: Value ty   :: Type -- Integer -> Pointer
+  | BitCast  id :: Identifier v :: Value ty   :: Type -- Type cast      
+  -- Other Operations
+  | ICmp id :: Identifier cond :: IntPredicate ty :: Type op1 :: Value op2 :: Value 
+  | FCmp id :: Identifier cond :: RealPredicate ty :: Type op1 :: Value op2 :: Value 
+  | PHI
+      id :: Identifier
+      ty :: Type
+      vals :: PValues
+  | Call
+      mres   :: MIdentifier
+      ty     :: Type
+      callee :: Identifier 
+      args   :: Values 
 
 data Identifier 
       | Global name :: Id -- (functions, global variables) begin with the '@'
