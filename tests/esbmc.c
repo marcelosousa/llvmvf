@@ -39,7 +39,7 @@ void *Ty(void *arg){
 int main(){
   pthread_t id1, id2;
   int arg1=10, arg2=20;
-  i=nondet_uint();
+  i=nondet_uint()+1;
 //  printf("%d\n",i);
   pthread_create(&id1, NULL, Tx, &arg1);
   pthread_create(&id2, NULL, Ty, &arg2);

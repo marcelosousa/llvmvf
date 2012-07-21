@@ -82,12 +82,27 @@ sem Instruction
   | PtrToInt lhs.pp = pConvOp @id.pp "ptrtoint" @v.pp @ty.pp
   | IntToPtr lhs.pp = pConvOp @id.pp "inttoptr" @v.pp @ty.pp
   | BitCast  lhs.pp = pConvOp @id.pp "bitcast"  @v.pp @ty.pp
-
---  | GetElementPtr lhs.pp = text "getelementptr" <+> @v.
+  | GetElementPtr lhs.pp = @id.pp <+> char '=' <+> text "getelementptr" <+> @struct.pp <> char ',' <+> @idxs.pp
+  | Add  lhs.pp = pBinOp @ty.pp @id.pp "add"  @op1.pp @op2.pp
+  | FAdd lhs.pp = pBinOp @ty.pp @id.pp "fadd" @op1.pp @op2.pp
+  | Sub  lhs.pp = pBinOp @ty.pp @id.pp "sub"  @op1.pp @op2.pp
+  | FSub lhs.pp = pBinOp @ty.pp @id.pp "fsub" @op1.pp @op2.pp
+  | Mul  lhs.pp = pBinOp @ty.pp @id.pp "mul"  @op1.pp @op2.pp
+  | FMul lhs.pp = pBinOp @ty.pp @id.pp "fmul" @op1.pp @op2.pp
+  | UDiv lhs.pp = pBinOp @ty.pp @id.pp "udiv" @op1.pp @op2.pp
+  | SDiv lhs.pp = pBinOp @ty.pp @id.pp "sdiv" @op1.pp @op2.pp
+  | FDiv lhs.pp = pBinOp @ty.pp @id.pp "fdiv" @op1.pp @op2.pp
+  | URem lhs.pp = pBinOp @ty.pp @id.pp "urem" @op1.pp @op2.pp
+  | SRem lhs.pp = pBinOp @ty.pp @id.pp "srem" @op1.pp @op2.pp
+  | FRem lhs.pp = pBinOp @ty.pp @id.pp "frem" @op1.pp @op2.pp
 
 {
 pConvOp :: Doc -> String -> Doc -> Doc -> Doc
 pConvOp id c v ty = id <+> char '=' <+> text c <+> v <+> text "to" <+> ty
+
+pBinOp :: Doc -> Doc -> String -> Doc -> Doc -> Doc
+pBinOp ty id c op1 op2 = ty <+> id <+> char '=' <+> text c <+> op1 <> char ',' <+> op2
+
 }
  
 sem Alias

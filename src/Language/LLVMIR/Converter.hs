@@ -132,24 +132,23 @@ pInstruction ival 2  = do isCond <- FFI.brInstIsConditional ival
                           if (cInt2Bool isCond)
                           then return $ LL.Br (ops!!0) (ops!!2) (ops!!1)
                           else return $ LL.UBr (ops!!0)
-
 pInstruction ival 3  = return $ LL.Instruction "switch"
 pInstruction ival 4  = return $ LL.Instruction "indirectbr"
 pInstruction ival 5  = return $ LL.Instruction "invoke"
 pInstruction ival 7  = return $ LL.Unreachable
 -- standard binary operators
-pInstruction ival 8  = return $ LL.Instruction "add"
-pInstruction ival 9  = return $ LL.Instruction "fadd"
-pInstruction ival 10 = return $ LL.Instruction "sub"
-pInstruction ival 11 = return $ LL.Instruction "fsub"
-pInstruction ival 12 = return $ LL.Instruction "mul"
-pInstruction ival 13 = return $ LL.Instruction "fmul"
-pInstruction ival 14 = return $ LL.Instruction "udiv"
-pInstruction ival 15 = return $ LL.Instruction "sdiv"
-pInstruction ival 16 = return $ LL.Instruction "fdiv"
-pInstruction ival 17 = return $ LL.Instruction "urem"
-pInstruction ival 18 = return $ LL.Instruction "srem"
-pInstruction ival 19 = return $ LL.Instruction "frem"
+pInstruction ival 8  = binOps ival LL.Add
+pInstruction ival 9  = binOps ival LL.FAdd 
+pInstruction ival 10 = binOps ival LL.Sub  
+pInstruction ival 11 = binOps ival LL.FSub 
+pInstruction ival 12 = binOps ival LL.Mul  
+pInstruction ival 13 = binOps ival LL.FMul 
+pInstruction ival 14 = binOps ival LL.UDiv 
+pInstruction ival 15 = binOps ival LL.SDiv 
+pInstruction ival 16 = binOps ival LL.FDiv 
+pInstruction ival 17 = binOps ival LL.URem 
+pInstruction ival 18 = binOps ival LL.SRem 
+pInstruction ival 19 = binOps ival LL.FRem 
 -- logical operators
 pInstruction ival 20 = return $ LL.Instruction "shl"
 pInstruction ival 21 = return $ LL.Instruction "lshr"
@@ -170,7 +169,10 @@ pInstruction ival 28 = do ty <- FFI.typeOf ival >>= getType
                           ops <- (getOperands ival) >>= mapM getValue
                           a <- FFI.storeGetAlignment ival
                           return $ LL.Store ty (ops!!0) (ops!!1) (LL.Align $ fromIntegral a)
-pInstruction ival 29 = return $ LL.Instruction "getelementptr"
+pInstruction ival 29 = do ident <- getIdent ival
+                          ty <- FFI.typeOf ival >>= getType
+                          ops <- (getOperands ival) >>= mapM getValue  
+                          return $ LL.GetElementPtr (LL.Local ident) ty (head ops) (tail ops)
 -- atomic operators
 pInstruction ival 30 = return $ LL.Instruction "fence"
 pInstruction ival 31 = return $ LL.Instruction "atomicCmpXchg"
@@ -225,10 +227,18 @@ toIntPredicate 39 = LL.IntSGE
 toIntPredicate 40 = LL.IntSLT
 toIntPredicate 41 = LL.IntSLE
 
+convOps :: Value -> (LL.Identifier -> LL.Value -> LL.Type -> b) -> IO b
 convOps ival c = do ident <- getIdent ival
                     ty <- (FFI.typeOf ival) >>= getType
                     ops <- (getOperands ival) >>= mapM getValue
                     if length ops == 0
                     then error "'convOps': operand list is empty"
                     else return $ c (LL.Local ident) (ops!!0) ty
+
+binOps ival c = do ident <- getIdent ival
+                   ty <- (FFI.typeOf ival) >>= getType
+                   ops <- (getOperands ival) >>= mapM getValue
+                   if length ops /= 2
+                   then error "'convOps': operand list is empty"
+                   else return $ c (LL.Local ident) ty (ops!!0) (ops!!1)
 

@@ -77,15 +77,16 @@ bb:
   store i32 10, i32* %arg1, align 4, !tbaa !0
   store i32 20, i32* %arg2, align 4, !tbaa !0
   %tmp = call i32 (...)* @nondet_uint() nounwind
-  store i32 %tmp, i32* @i, align 4, !tbaa !0
-  %tmp1 = bitcast i32* %arg1 to i8*
-  %tmp2 = call i32 @pthread_create(i64* %id1, %union.pthread_attr_t* null, i8* (i8*)* @Tx, i8* %tmp1) nounwind
-  %tmp3 = bitcast i32* %arg2 to i8*
-  %tmp4 = call i32 @pthread_create(i64* %id2, %union.pthread_attr_t* null, i8* (i8*)* @Ty, i8* %tmp3) nounwind
-  %tmp5 = load i64* %id1, align 8, !tbaa !3
-  %tmp6 = call i32 @pthread_join(i64 %tmp5, i8** null) nounwind
-  %tmp7 = load i64* %id2, align 8, !tbaa !3
-  %tmp8 = call i32 @pthread_join(i64 %tmp7, i8** null) nounwind
+  %tmp1 = add nsw i32 %tmp, 1
+  store i32 %tmp1, i32* @i, align 4, !tbaa !0
+  %tmp2 = bitcast i32* %arg1 to i8*
+  %tmp3 = call i32 @pthread_create(i64* %id1, %union.pthread_attr_t* null, i8* (i8*)* @Tx, i8* %tmp2) nounwind
+  %tmp4 = bitcast i32* %arg2 to i8*
+  %tmp5 = call i32 @pthread_create(i64* %id2, %union.pthread_attr_t* null, i8* (i8*)* @Ty, i8* %tmp4) nounwind
+  %tmp6 = load i64* %id1, align 8, !tbaa !3
+  %tmp7 = call i32 @pthread_join(i64 %tmp6, i8** null) nounwind
+  %tmp8 = load i64* %id2, align 8, !tbaa !3
+  %tmp9 = call i32 @pthread_join(i64 %tmp8, i8** null) nounwind
   ret i32 0
 }
 
