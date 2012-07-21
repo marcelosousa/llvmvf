@@ -8,6 +8,8 @@
 module Language.LLVMIR.Parser where
 
 import Control.Monad(forM_, forM, foldM)
+import Control.Monad.Reader
+
 import System.FilePath
 
 import qualified Language.LLVMIR as LL
@@ -139,11 +141,11 @@ getParam (pname, pval) = do ty <- (FFI.typeOf pval) >>= getType
 -- Basic Blocks                                 
 getBasicBlock :: (String, Value) -> IO LL.BasicBlock
 getBasicBlock (bbname, bbvalue) = do instr  <- getInstructions bbvalue
-                                     instrs <- forM instr getInstruction
+                                     instrs <- forM instr getInst
                                      return $ LL.BasicBlock bbname instrs
                    
-getInstruction :: (String, Value) -> IO LL.Instruction
-getInstruction (instr, instrv) = getInst instrv
+getInst :: (String, Value) -> IO LL.Instruction
+getInst (instr, instrv) = runReaderT getInstruction instrv
 
 
 {-
