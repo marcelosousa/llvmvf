@@ -239,9 +239,48 @@ data Value
       | ZeroInitC ty :: Type
       | NullC ty :: Type
       | UndefC
-      | BlockAddr fun :: Identifier label :: Identifier
+--      | BlockAddr fun :: Identifier label :: Identifier
       | Pointer ty :: Type v :: Value args :: Values
-      
+
+{
+{-
+data Constant
+  | BlockAddr
+  | ConstantAggregateZero
+  | ConstantArray
+  | ConstantDataSequential
+  | ConstantExpr
+  | ConstantFP
+  | ConstantInt
+  | ConstantPointerNull
+  | ConstantStruct
+  | ConstantVector
+  | GlobalValue
+  | UndefValue
+
+data ConstantDataSequential
+  | ConstantDataArray
+  | ConstantDataVector
+
+data GlobalValue
+  | FunctionValue
+  | GlobalAlias
+  | GlobalVariable
+
+data ConstantExpr
+  | BinaryConstantExpr
+  | CompareConstantExpr
+  | ExtractElementConstantExpr
+  | ExtractValueConstantExpr
+  | GetElementPtrConstantExpr
+  | InsertElementConstantExpr
+  | InsertValueConstantExpr
+  | SelectConstantExpr
+  | ShuffleVectorConstantExpr
+  | UnaryConstantExpr
+-}
+}
+ 
 data Align
       | Align n :: Int
 

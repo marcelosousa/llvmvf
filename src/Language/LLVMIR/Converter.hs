@@ -10,6 +10,7 @@ import qualified Language.LLVMIR as LL
 import Language.LLVMIR.Util
 import Language.LLVMIR.Opcode
 import Language.LLVMIR.Predicate
+import Language.LLVMIR.ConstantClass
 
 import Control.Monad.Reader
 
@@ -90,6 +91,59 @@ getIdentValue :: String -> Value -> IO LL.Value
 getIdentValue n v = do ty <- (FFI.typeOf v) >>= getType
                        return $ LL.Id (LL.Local n) ty
 
+-- Constants
+getConstantValue :: Value -> IO LL.Value
+getConstantValue v = do vc <- FFI.getConstantClass v
+                        case toConstantClass vc of
+                             BlockAddr              -> getBlockAddr v
+                             ConstantAggregateZero  -> getConstantAggregateZero v
+                             ConstantArray          -> getConstantArray v
+                             ConstantDataSequential -> getConstantDataSequential v
+                             ConstantExpr           -> getConstantExpr v
+                             ConstantFP             -> getConstantFP v
+                             ConstantInt            -> getConstantInt v 
+                             ConstantPointerNull    -> getConstantPointerNull v
+                             ConstantStruct         -> getConstantStruct v
+                             ConstantVector         -> getConstantVector v
+                             GlobalValue            -> getGlobalValue v
+                             UndefValue             -> return $ LL.UndefC
+
+getBlockAddr :: Value -> IO LL.Value
+getBlockAddr = error "TODO getBlockAddr"
+
+getConstantAggregateZero :: Value -> IO LL.Value
+getConstantAggregateZero = error "TODO getConstantAggregateZero"
+
+getConstantArray :: Value -> IO LL.Value
+getConstantArray = error "TODO getConstantArray"
+
+getConstantDataSequential :: Value -> IO LL.Value
+getConstantDataSequential = error "TODO getConstantDataSequential"
+
+getConstantExpr :: Value -> IO LL.Value
+getConstantExpr v = do ty <- (FFI.typeOf v) >>= getType
+                       (struct, args) <- (getOperands v) >>= getElemPtrArgs
+                       return $ LL.Pointer ty struct args
+
+getConstantFP :: Value -> IO LL.Value
+getConstantFP = error "TODO getConstantFP"
+
+getConstantInt :: Value -> IO LL.Value
+getConstantInt v = do ty <- (FFI.typeOf v) >>= getType
+                      av <- FFI.constIntGetSExtValue v
+                      return $ LL.IntC (fromIntegral av) ty
+
+getConstantPointerNull :: Value -> IO LL.Value
+getConstantPointerNull = error "TODO getConstantPointerNull"
+
+getConstantStruct :: Value -> IO LL.Value
+getConstantStruct = error "TODO getConstantStruct"
+
+getConstantVector :: Value -> IO LL.Value
+getConstantVector = error "TODO getConstantVector"
+
+getGlobalValue :: Value -> IO LL.Value
+getGlobalValue = error "TODO getGlobalValue"
 
 getPHIArgs :: Value -> IO [(LL.Value, LL.Value)]
 getPHIArgs ii = do num <- FFI.countIncoming ii
@@ -119,15 +173,6 @@ getElemPtrArgs [] = return (LL.UndefC, [])
 getElemPtrArgs (x:y) = do v <- uncurry getIdentValue x
                           a <- mapM getValue y
                           return (v,a)
-
-getConstantValue :: Value -> IO LL.Value
-getConstantValue v = do ty <- (FFI.typeOf v) >>= getType
-                        case ty of
-                             LL.TyInt _     -> do av <- FFI.constIntGetSExtValue v
-                                                  return $ LL.IntC (fromIntegral av) ty
-                             LL.TyPointer _ -> do (struct, args) <- (getOperands v) >>= getElemPtrArgs
-                                                  return $ LL.Pointer ty struct args 
-                             _              -> do return $ LL.UndefC 
 
 getICmpOps :: Value -> IO (LL.Value, LL.Value)
 getICmpOps v = do ops <- (getOperands v) >>= mapM getValue
