@@ -11,9 +11,9 @@ import Control.Monad
 import System.Console.CmdArgs
 import System.IO               
 import System.FilePath
-import Language.LLVMIR     (Module)
-import Language.LLVMIR.Parser   (parse)
-import Mutation.Core (mutate)
+import Language.LLVMIR             (Module)
+import Language.LLVMIR.Extractor   (extract)
+import Mutation.Core               (mutate)
 import UU.PPrint 
 
 import Debug.Trace
@@ -27,7 +27,7 @@ instance Default Options where
   def = Parse
 
 runOption :: FilePath -> Options -> IO ()
-runOption bc Parse = do mdl <- parse bc
+runOption bc Parse = do mdl <- extract bc
                         print $ pretty mdl
 runOption bc Mutate = mutate bc
 

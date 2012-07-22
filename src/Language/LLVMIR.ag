@@ -1,6 +1,6 @@
 {
 -------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR
+-- Module    :  Language.LLVMIR.Grammar
 -- Copyright :  (c) 2012 Marcelo Sousa
 -- This AG module imports all AG files used in the project and defines
 -- the main wrap used. 

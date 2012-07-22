@@ -2,14 +2,14 @@ CABAL-CONFIGURE-FLAGS := --user
 CABAL-BUILD-FLAGS :=
 VERSION	:= 0.0.1
 
-BASEAG := src/Language/LLVMIR/Base.ag
-PRINTAG := src/Language/LLVMIR/Printer.ag
-TYPEAG := src/Language/LLVMIR/Type.ag
+BASEAG := src/Language/LLVMIR/Grammar/Base.ag
+PRINTAG := src/Language/LLVMIR/Grammar/Printer.ag
+TYPEAG := src/Language/LLVMIR/Grammar/Type.ag
 
 all : haskell
 
 llvmir : $(PRINTAG) $(BASEAG) $(TYPEAG)
-	uuagc -Hdcfws --self -P src/Language/LLVMIR src/Language/LLVMIR.ag
+	uuagc -Hdcfws --self -P src/Language/LLVMIR/Grammar src/Language/LLVMIR.ag
 
 haskell : llvmir
 	cabal install

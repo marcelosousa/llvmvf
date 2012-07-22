@@ -1,0 +1,437 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Base
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Language.LLVMIR.Grammar.Base}{}{}
+
+imports 
+{
+import Prelude              hiding (sequence)
+import Data.Char            (chr)
+import qualified Data.Map as Data.Map
+import qualified Data.Map as Map
+import Data.Map
+}
+
+-------------------------------------------------------------------------------
+-- Module - LLVM IR Module
+-------------------------------------------------------------------------------
+
+type Id = (String)
+type Label = (String) 
+type MLabel = maybe Label
+type MId = maybe Id
+type MIdentifier = maybe Identifier
+
+type Functions = [Function]
+type Globals = [Global]
+type Identifiers = [Identifier]
+type Arguments = [Argument]
+type Parameters = [Parameter]
+type Values = [Value]
+type FuncAttrs = [FunAttr]
+type BasicBlocks = [BasicBlock]
+type Instructions = [Instruction]
+type Attributes = [Attribute]
+type ModuleAsms = [ModuleAsm]
+type NamedTys = [NamedTy]
+type Aliases = [Alias]
+type Ints = [Int]
+
+type MLinkageTy = maybe Linkage
+type MVisibility = maybe Visibility
+type MCConv = maybe CConv
+type MUnnamedAddr = maybe Bool -- maybe () would be better
+type MConstant = maybe Bool
+type MDefinitionTy = maybe DefinitionTy
+type MAttributes = maybe Attributes
+type MAlign = maybe Align
+type MGCName = maybe GCName
+type MModuleAsms = maybe ModuleAsms
+type MSection = maybe Section
+type MValue = maybe Value
+
+type Triplet = (Int, Int, Int)
+type MapTyInt = map {Type} Triplet
+type PTyInt = (Type, Int)
+type PTyIntL = [PTyInt]
+type PValue = (Value, Value)
+type PValues = [PValue]
+
+type DLayout = [String]
+
+type IntTyValId = (Type, Value, Identifier)
+type IntTyValIdL = [IntTyValId]
+
+data Module 
+  | Module
+    id     :: String
+    layout :: DataLayout
+    target :: TargetData
+    gvars  :: Globals
+    funs   :: Functions
+    nmdtys :: NamedTys 
+--          aliases :: Aliases
+--          symbtbl :: {[SymbolTableEntry]}
+--          namedm :: NamedMetadata
+--          mdlasm :: MModuleAsms
+
+-- data Endianness
+--       | BigEndian
+--       | LittleEndian
+
+data DataLayout
+      | DataLayout 
+          s :: DLayout
+--          endianness :: Endianness
+--          pointerSize :: Int
+--          prefAlignTy :: MapTyInt
+
+data Target
+    | MacOs
+    | Linux
+    
+data TargetData
+    | TargetData
+        s :: String
+        t :: Target
+
+data ModuleAsm
+      | ModuleAsm asm :: String
+      
+data NamedTy 
+      | NmTy 
+          name :: Id
+--          ty   :: Type
+
+data Global 
+      | GlobalVar 
+          name    :: Id
+          linkage :: Linkage
+          isConst :: Bool
+          isUaddr :: Bool 
+--          ty       :: Type 
+          ival    :: MValue
+--          section  :: MSection
+          align :: Align
+
+data Function 
+      | FunctionDef 
+          name    :: Id
+          linkage :: Linkage
+          retty   :: Type
+          params  :: Parameters
+          body    :: BasicBlocks 
+--          visibility :: MVisibility
+--          cconv      :: MCConv
+--          uaddr      :: MUnnamedAddr
+--          paramattr  :: MAttributes
+--          fnAttrs    :: FuncAttrs
+--          section    :: MSection
+--          optAlign   :: MAlign
+--          gcName     :: MGCName
+      | FunctionDecl
+          name       :: Id
+          linkage    :: Linkage
+          retty      :: Type
+          params     :: Parameters
+--          visibility :: MVisibility
+--          cconv      :: MCConv
+--          uaddr      :: MUnnamedAddr
+--          paramattr  :: MAttributes
+--          optAlign   :: MAlign          
+--          gcName     :: MGCName
+          
+data BasicBlock
+      | BasicBlock 
+          label  :: Label
+          instrs :: Instructions
+--          tmn    :: Terminator
+     
+data Instruction
+  | Instruction s :: String
+  -- Terminators
+  | Ret v :: Value
+  | Br  v :: Value t :: Value f :: Value
+  | UBr d :: Value 
+  | Switch elems :: IntTyValIdL -- TODO
+  | Unreachable
+  -- Standard Binary Operations
+  | Add  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FAdd id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Sub  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FSub id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Mul  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FMul id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | UDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | SDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | URem id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | SRem id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FRem id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  -- Bitwise Binary Operations
+  | Shl  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | LShr id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | AShr id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | And  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Or   id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Xor  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  -- Memory Operations
+  | Alloca
+      id    :: Identifier
+      ty    :: Type
+      align :: Align 
+  | Store
+      ty    :: Type
+      v1    :: Value
+      v2    :: Value
+      align :: Align
+  | Load
+      id    :: Identifier
+      v     :: Value 
+      align :: Align
+  | GetElementPtr
+      id     :: Identifier
+      ty     :: Type
+      struct :: Value
+      idxs   :: Values
+  -- Cast Operations
+  | Trunc    id :: Identifier v :: Value ty   :: Type -- Truncate integers
+  | ZExt     id :: Identifier v :: Value ty   :: Type -- Zero extend integers
+  | SExt     id :: Identifier v :: Value ty   :: Type -- Sign extend integers
+  | FPToUI   id :: Identifier v :: Value ty   :: Type -- floating point -> UInt
+  | FPToSI   id :: Identifier v :: Value ty   :: Type -- floating point -> SInt
+  | UIToFP   id :: Identifier v :: Value ty   :: Type -- UInt -> floating point
+  | SIToFP   id :: Identifier v :: Value ty   :: Type -- SInt -> floating point
+  | FPTrunc  id :: Identifier v :: Value ty   :: Type -- Truncate floating point
+  | FPExt    id :: Identifier v :: Value ty   :: Type -- Extend floating point
+  | PtrToInt id :: Identifier v :: Value ty   :: Type -- Pointer -> Integer
+  | IntToPtr id :: Identifier v :: Value ty   :: Type -- Integer -> Pointer
+  | BitCast  id :: Identifier v :: Value ty   :: Type -- Type cast      
+  -- Other Operations
+  | ICmp id :: Identifier cond :: IntPredicate ty :: Type op1 :: Value op2 :: Value 
+  | FCmp id :: Identifier cond :: RealPredicate ty :: Type op1 :: Value op2 :: Value 
+  | PHI
+      id :: Identifier
+      ty :: Type
+      vals :: PValues
+  | Call
+      mres   :: MIdentifier
+      ty     :: Type
+      callee :: Identifier 
+      args   :: Values 
+
+data Identifier 
+  | Global name :: Id -- (functions, global variables) begin with the '@'
+  | Local  name :: Id -- (register names, types) begin with the '%'
+         
+data Value 
+  | Id       v :: Identifier ty :: Type
+  | Constant c :: Constant
+
+data Constant
+  | BlockAddr
+  | ConstantAggregateZero
+  | ConstantArray
+  | ConstantDataSequential cds  :: ConstantDataSequential
+  | ConstantExpr           expr :: Instruction
+  | ConstantFP             fpv  :: Float ty :: Type
+  | ConstantInt            iv   :: Int   ty :: Type
+  | ConstantPointerNull    ty   :: Type
+  | ConstantStruct
+  | ConstantVector          
+  | GlobalValue            gv :: GlobalValue
+  | UndefValue
+
+{
+{-
+BoolC v :: Bool
+      | IntC  v :: Int ty :: Type
+      | FloatC v :: Float ty :: Type
+      | StructC elems :: PTyIntL
+      | ArrayC ty :: Type val :: String -- elems ::  PTyIntL
+      | VectorC elems :: PTyIntL      
+      | ZeroInitC ty :: Type
+      | NullC ty :: Type
+      | UndefC
+--      | BlockAddr fun :: Identifier label :: Identifier
+      | Pointer ty :: Type v :: Value args :: Values
+      | GlobalValue gv :: GlobalValue
+-}
+}
+
+data GlobalValue
+  | FunctionValue  n :: Identifier ty :: Type
+  | GlobalAlias    n :: Identifier ty :: Type
+  | GlobalVariable n :: Identifier ty :: Type
+
+data ConstantDataSequential
+  | ConstantDataArray  
+  | ConstantDataVector
+
+{
+{-
+data ConstantExpr
+  | BinaryConstantExpr
+  | CompareConstantExpr
+  | ExtractElementConstantExpr
+  | ExtractValueConstantExpr
+  | GetElementPtrConstantExpr
+  | InsertElementConstantExpr
+  | InsertValueConstantExpr
+  | SelectConstantExpr
+  | ShuffleVectorConstantExpr
+  | UnaryConstantExpr
+-}
+}
+ 
+data Align
+      | Align n :: Int
+
+
+data IntPredicate
+      | IntEQ                       -- ^ equal
+      | IntNE                       -- ^ not equal
+      | IntUGT                      -- ^ unsigned greater than
+      | IntUGE                      -- ^ unsigned greater or equal
+      | IntULT                      -- ^ unsigned less than
+      | IntULE                      -- ^ unsigned less or equal
+      | IntSGT                      -- ^ signed greater than
+      | IntSGE                      -- ^ signed greater or equal
+      | IntSLT                      -- ^ signed less than
+      | IntSLE                      -- ^ signed less or equal
+
+data RealPredicate
+      | LLVMRealPredicateFalse -- ^ Always false (always folded) 
+      | LLVMRealOEQ            -- ^ True if ordered and equal 
+      | LLVMRealOGT            -- ^ True if ordered and greater than 
+      | LLVMRealOGE            -- ^ True if ordered and greater than or equal 
+      | LLVMRealOLT            -- ^ True if ordered and less than 
+      | LLVMRealOLE            -- ^ True if ordered and less than or equal 
+      | LLVMRealONE            -- ^ True if ordered and operands are unequal 
+      | LLVMRealORD            -- ^ True if ordered (no nans) 
+      | LLVMRealUNO            -- ^ True if unordered: isnan(X) | isnan(Y) 
+      | LLVMRealUEQ            -- ^ True if unordered or equal 
+      | LLVMRealUGT            -- ^ True if unordered or greater than 
+      | LLVMRealUGE            -- ^ True if unordered, greater than, or equal 
+      | LLVMRealULT            -- ^ True if unordered or less than
+      | LLVMRealULE            -- ^ True if unordered, less than, or equal 
+      | LLVMRealUNE            -- ^ True if unordered or not equal 
+      | LLVMRealPredicateTrue  -- ^ Always true (always folded) 
+
+data Section
+      | Section s :: String
+      
+data Argument
+      | Argument arg :: Value
+
+data Parameter
+      | Parameter 
+          var :: Id  -- ^In practice, the name is optional
+          ty  :: Type
+       -- attr :: MAttribute            
+
+--  All Global Variables and Functions have one of the following types of linkage.
+data Linkage
+    | ExternalLinkage     -- ^Externally visible function
+    | AvailableExternallyLinkage
+    | LinkOnceAnyLinkage  -- ^Keep one copy of function when linking (inline)
+    | LinkOnceODRLinkage  -- ^Same, but only replaced by something equivalent.
+    | WeakAnyLinkage      -- ^Keep one copy of named function when linking (weak)
+    | WeakODRLinkage      -- ^Same, but only replaced by something equivalent.
+    | AppendingLinkage    -- ^Special purpose, only applies to global arrays
+    | InternalLinkage     -- ^Rename collisions when linking (static functions)
+    | PrivateLinkage      -- ^Like Internal, but omit from symbol table
+    | DLLImportLinkage    -- ^Function to be imported from DLL
+    | DLLExportLinkage    -- ^Function to be accessible from DLL
+    | ExternalWeakLinkage -- ^ExternalWeak linkage description
+    | GhostLinkage        -- ^Stand-in functions for streaming fns from BC files
+    | CommonLinkage       -- ^Tentative definitions
+    | LinkerPrivateLinkage -- ^Like Private, but linker removes.
+    | LinkerPrivateWeakLinkage -- ^Similar to PrivateLinkage, but the symbol is weak.
+    | LinkerPrivateWeakDefAutoLinkage -- ^Similar to LinkerPrivateWeakLinkage, but its known that the address of the object is not taken.
+
+-- Call Convention
+-- LLVM functions, calls and invokes can all have an optional calling convention specified for the call.
+data CConv 
+      | Ccc    -- The C calling convention
+      | Fastcc -- The fast calling convention
+      | Coldcc -- The cold calling convention
+      | Cc10   -- GHC convention
+      | Cc n :: Int -- Numbered convention
+
+-- All Global Variables and Functions have one of the following visibility styles.
+data Visibility 
+      | Default
+      | Hidden
+      | Protected
+
+-- Parameter Attributes      
+data Attribute
+    | ZExtAttribute
+    | SExtAttribute
+    | NoReturnAttribute
+    | InRegAttribute
+    | StructRetAttribute
+    | NoUnwindAttribute
+    | NoAliasAttribute
+    | ByValAttribute
+    | NestAttribute
+    | ReadNoneAttribute
+    | ReadOnlyAttribute
+    | NoInlineAttribute
+    | AlwaysInlineAttribute
+    | OptimizeForSizeAttribute
+    | StackProtectAttribute
+    | StackProtectReqAttribute
+    | NoCaptureAttribute
+    | NoRedZoneAttribute
+    | NoImplicitFloatAttribute
+    | NakedAttribute
+
+-- Garbage Collector Names   
+data GCName
+      | GCName name :: String
+
+-- Function Attributes
+data FunAttr
+      | AddressSafety
+      | Alignstack n :: Int
+      | Alwaysinline
+      | Nonlazybind
+      | Inlinehint
+      | Naked
+      | Noimplicitfloat
+      | Noinline
+      | Noredzone
+      | Noreturn
+      | Nounwind
+      | Optsize
+      | Readnone
+      | Readonly
+      | ReturnsTwice
+      | Ssp
+      | Sspreq
+      | Uwtable
+                  
+data DefinitionTy
+      | ThreadLocal
+      | ConstantD
+
+data Alias
+      | Alias 
+          name       :: Id
+--          linkage    :: MLinkageTy
+--          visibility :: MVisibility
+--          aliaseeTy  :: Type
+--          aliasee    :: Id
+  
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction NamedTy DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential
+
+deriving Every: Show
+deriving Every: Eq
+deriving Every: Ord
+deriving Linkage: Enum
