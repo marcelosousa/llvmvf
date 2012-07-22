@@ -150,11 +150,14 @@ data BasicBlock
           label  :: Label
           instrs :: Instructions
 --          tmn    :: Terminator
-     
+
+data RetInst
+  | ValueRet v :: Value
+  | VoidRet 
+
 data Instruction
-  | Instruction s :: String
   -- Terminators
-  | Ret v :: Value
+  | Ret r :: RetInst
   | Br  v :: Value t :: Value f :: Value
   | UBr d :: Value 
   | Switch elems :: IntTyValIdL -- TODO
@@ -237,7 +240,7 @@ data Constant
   | ConstantAggregateZero
   | ConstantArray
   | ConstantDataSequential cds  :: ConstantDataSequential
-  | ConstantExpr           expr :: Instruction
+  | ConstantExpr           expr :: ConstantExpr
   | ConstantFP             fpv  :: Float ty :: Type
   | ConstantInt            iv   :: Int   ty :: Type
   | ConstantPointerNull    ty   :: Type
@@ -272,8 +275,6 @@ data ConstantDataSequential
   | ConstantDataArray  
   | ConstantDataVector
 
-{
-{-
 data ConstantExpr
   | BinaryConstantExpr
   | CompareConstantExpr
@@ -285,8 +286,6 @@ data ConstantExpr
   | SelectConstantExpr
   | ShuffleVectorConstantExpr
   | UnaryConstantExpr
--}
-}
  
 data Align
       | Align n :: Int
@@ -429,7 +428,7 @@ data Alias
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
   
-set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction NamedTy DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction NamedTy DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential ConstantExpr RetInst
 
 deriving Every: Show
 deriving Every: Eq

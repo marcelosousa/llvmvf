@@ -50,7 +50,6 @@ toGlobalValueClass = toEnum . fromIntegral
 toConstantDataSequentialClass :: CUInt -> ConstantDataSequentialClass
 toConstantDataSequentialClass = toEnum . fromIntegral 
 
-
 -- Constants
 getConstantValue :: Value -> IO LL.Value
 getConstantValue v = do vc <- FFI.getConstantClass v

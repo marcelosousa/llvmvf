@@ -33,7 +33,6 @@ data Type
     | TyVector
         numEl :: Int
         ty    :: Type
-    | TyUnsupported
 
 data TyFloatPoint
     | TyHalf -- ^ Compatible with i386?
@@ -43,8 +42,8 @@ data TyFloatPoint
     | Tyx86FP80
     | TyPPCFP128
       
-set TypesX = Type TyFloatPoint
+set TypeSet = Type TyFloatPoint
 
-deriving TypesX: Show
-deriving TypesX: Eq
-deriving TypesX: Ord
+deriving TypeSet: Show
+deriving TypeSet: Eq
+deriving TypeSet: Ord

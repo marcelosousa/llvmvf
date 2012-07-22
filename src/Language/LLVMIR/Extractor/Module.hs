@@ -125,7 +125,7 @@ getFuncs mdl = do funs <- getFunctions mdl
 
 getFunction :: (String, Value) -> IO LL.Function
 getFunction (fname, fval) = do b <- FFI.isDeclaration fval
-                               rty  <- typeOf fval
+                               rty  <- (FFI.getFunctionReturnType fval) >>= getType
                                link <- FFI.getLinkage fval
                                pars <- getParams fval
                                params <- forM pars getParam

@@ -10,7 +10,7 @@ import qualified LLVM.FFI.Core as FFI
 
 import qualified Language.LLVMIR as LL
 
-import Language.LLVMIR.Extractor.Constant
+import Language.LLVMIR.Extractor.Constant (getConstantValue)
 import Language.LLVMIR.Extractor.Type
 import Language.LLVMIR.Extractor.Util
 

@@ -79,8 +79,8 @@ getTerminatorOp Ret          = do ival <- ask
                                   mv   <- liftIO $ FFI.returnInstHasReturnValue ival
                                   ops  <- liftIO $ (getOperands ival) >>= mapM getValue
                                   if cInt2Bool mv
-                                  then return $ LL.Ret (ops!!0)
-                                  else return $ LL.Ret $ LL.Constant LL.UndefValue 
+                                  then return $ LL.Ret $ LL.ValueRet (ops!!0)
+                                  else return $ LL.Ret $ LL.VoidRet 
 getTerminatorOp Br           = do ival <- ask
                                   isCond <- liftIO $ FFI.brInstIsConditional ival
                                   ops    <- liftIO $ (getOperands ival) >>= mapM getValue 

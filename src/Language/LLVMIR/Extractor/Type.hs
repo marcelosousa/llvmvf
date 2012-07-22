@@ -5,10 +5,13 @@
 -------------------------------------------------------------------------------
 
 module Language.LLVMIR.Extractor.Type (Type, getType, typeOf) where
-  
-import qualified LLVM.FFI.Core as FFI
 
+import Control.Monad(forM)
 import Foreign.C.String
+import Foreign.Marshal.Array (allocaArray, peekArray)
+
+import qualified LLVM.FFI.Core as FFI
+import LLVM.Core hiding (Value)
 
 import qualified Language.LLVMIR as LL
 import Language.LLVMIR.Extractor.Util
@@ -52,7 +55,15 @@ getTypeWithKind ty FFI.VectorTypeKind    = do n   <- FFI.getVectorSize ty
                                               return $ LL.TyVector (fromIntegral n) etd
 getTypeWithKind ty FFI.StructTypeKind    = do s <- (FFI.getStructName ty) >>= peekCString
                                               return $ LL.TyStruct s
-getTypeWithKind ty x  = trace (show x) $ return LL.TyUnsupported
+getTypeWithKind ty FFI.FunctionTypeKind  = do retty <- (FFI.getReturnType ty) >>= getType
+                                              c     <- FFI.countParamTypes ty
+                                              let n = fromIntegral c
+                                              pars <- allocaArray n $ \ args -> do
+                                                        FFI.getParamTypes ty args
+                                                        peekArray n args
+                                              party <- forM pars getType 
+                                              return $ LL.TyFunction party retty
+getTypeWithKind ty x  = error $ "'getTypeWithKind': Type " ++ (show x) ++ " not suppported" -- trace (show x) $ return LL.TyUnsupported
 
 typeOf :: Value -> IO LL.Type
 typeOf v = (FFI.typeOf v) >>= getType
