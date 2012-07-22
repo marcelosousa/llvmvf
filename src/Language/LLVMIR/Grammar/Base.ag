@@ -280,7 +280,7 @@ data ConstantExpr
   | CompareConstantExpr
   | ExtractElementConstantExpr
   | ExtractValueConstantExpr
-  | GetElementPtrConstantExpr
+  | GetElementPtrConstantExpr struct :: Value idxs :: Values
   | InsertElementConstantExpr
   | InsertValueConstantExpr
   | SelectConstantExpr

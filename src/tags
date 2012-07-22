@@ -32,7 +32,7 @@ Binary	./Language/LLVMIR/Extractor/Opcode.hs	73;"	d
 BinaryConstantExpr	src/Language/LLVMIR.hs	1052;"	d
 BitCast	./Language/LLVMIR/Extractor/Opcode.hs	52;"	d
 BitCast	src/Language/LLVMIR.hs	2110;"	d
-BlockAddr	./Language/LLVMIR/Extractor/Constant.hs	19;"	d
+BlockAddr	./Language/LLVMIR/Extractor/ConstantClass.hs	11;"	d
 BlockAddr	src/Language/LLVMIR.hs	752;"	d
 Br	./Language/LLVMIR/Extractor/Opcode.hs	10;"	d
 Br	src/Language/LLVMIR.hs	2111;"	d
@@ -49,32 +49,32 @@ CommonLinkage	src/Language/LLVMIR.hs	3962;"	d
 CompareConstantExpr	src/Language/LLVMIR.hs	1053;"	d
 Constant	src/Language/LLVMIR.hs	6295;"	d
 Constant	src/Language/LLVMIR.hs	752;"	t
-ConstantAggregateZero	./Language/LLVMIR/Extractor/Constant.hs	20;"	d
+ConstantAggregateZero	./Language/LLVMIR/Extractor/ConstantClass.hs	12;"	d
 ConstantAggregateZero	src/Language/LLVMIR.hs	753;"	d
-ConstantArray	./Language/LLVMIR/Extractor/Constant.hs	21;"	d
+ConstantArray	./Language/LLVMIR/Extractor/ConstantClass.hs	13;"	d
 ConstantArray	src/Language/LLVMIR.hs	754;"	d
-ConstantClass	./Language/LLVMIR/Extractor/Constant.hs	18;"	t
+ConstantClass	./Language/LLVMIR/Extractor/ConstantClass.hs	10;"	t
 ConstantD	src/Language/LLVMIR.hs	1311;"	d
-ConstantDataArray	./Language/LLVMIR/Extractor/Constant.hs	34;"	d
+ConstantDataArray	./Language/LLVMIR/Extractor/ConstantClass.hs	26;"	d
 ConstantDataArray	src/Language/LLVMIR.hs	1003;"	d
-ConstantDataSequential	./Language/LLVMIR/Extractor/Constant.hs	22;"	d
+ConstantDataSequential	./Language/LLVMIR/Extractor/ConstantClass.hs	14;"	d
 ConstantDataSequential	src/Language/LLVMIR.hs	1003;"	t
 ConstantDataSequential	src/Language/LLVMIR.hs	755;"	d
-ConstantDataSequentialClass	./Language/LLVMIR/Extractor/Constant.hs	33;"	t
-ConstantDataVector	./Language/LLVMIR/Extractor/Constant.hs	35;"	d
+ConstantDataSequentialClass	./Language/LLVMIR/Extractor/ConstantClass.hs	25;"	t
+ConstantDataVector	./Language/LLVMIR/Extractor/ConstantClass.hs	27;"	d
 ConstantDataVector	src/Language/LLVMIR.hs	1004;"	d
-ConstantExpr	./Language/LLVMIR/Extractor/Constant.hs	23;"	d
+ConstantExpr	./Language/LLVMIR/Extractor/ConstantClass.hs	15;"	d
 ConstantExpr	src/Language/LLVMIR.hs	1052;"	t
 ConstantExpr	src/Language/LLVMIR.hs	756;"	d
-ConstantFP	./Language/LLVMIR/Extractor/Constant.hs	24;"	d
+ConstantFP	./Language/LLVMIR/Extractor/ConstantClass.hs	16;"	d
 ConstantFP	src/Language/LLVMIR.hs	757;"	d
-ConstantInt	./Language/LLVMIR/Extractor/Constant.hs	25;"	d
+ConstantInt	./Language/LLVMIR/Extractor/ConstantClass.hs	17;"	d
 ConstantInt	src/Language/LLVMIR.hs	758;"	d
-ConstantPointerNull	./Language/LLVMIR/Extractor/Constant.hs	26;"	d
+ConstantPointerNull	./Language/LLVMIR/Extractor/ConstantClass.hs	18;"	d
 ConstantPointerNull	src/Language/LLVMIR.hs	759;"	d
-ConstantStruct	./Language/LLVMIR/Extractor/Constant.hs	27;"	d
+ConstantStruct	./Language/LLVMIR/Extractor/ConstantClass.hs	19;"	d
 ConstantStruct	src/Language/LLVMIR.hs	760;"	d
-ConstantVector	./Language/LLVMIR/Extractor/Constant.hs	28;"	d
+ConstantVector	./Language/LLVMIR/Extractor/ConstantClass.hs	20;"	d
 ConstantVector	src/Language/LLVMIR.hs	761;"	d
 DLLExportLinkage	src/Language/LLVMIR.hs	3963;"	d
 DLLImportLinkage	src/Language/LLVMIR.hs	3964;"	d
@@ -117,7 +117,7 @@ Function	src/Language/LLVMIR.hs	1603;"	t
 FunctionDecl	src/Language/LLVMIR.hs	1603;"	d
 FunctionDef	src/Language/LLVMIR.hs	1604;"	d
 FunctionName	./Language/LLVMIR/Extractor/Module.hs	35;"	t	file:
-FunctionValue	./Language/LLVMIR/Extractor/Constant.hs	39;"	d
+FunctionValue	./Language/LLVMIR/Extractor/ConstantClass.hs	31;"	d
 FunctionValue	src/Language/LLVMIR.hs	1830;"	d
 Functions	src/Language/LLVMIR.hs	1695;"	t
 GCName	src/Language/LLVMIR.hs	1750;"	d
@@ -128,14 +128,14 @@ GetElementPtrConstantExpr	src/Language/LLVMIR.hs	1056;"	d
 GhostLinkage	src/Language/LLVMIR.hs	3967;"	d
 Global	src/Language/LLVMIR.hs	1777;"	t
 Global	src/Language/LLVMIR.hs	2007;"	d
-GlobalAlias	./Language/LLVMIR/Extractor/Constant.hs	40;"	d
+GlobalAlias	./Language/LLVMIR/Extractor/ConstantClass.hs	32;"	d
 GlobalAlias	src/Language/LLVMIR.hs	1831;"	d
-GlobalValue	./Language/LLVMIR/Extractor/Constant.hs	29;"	d
+GlobalValue	./Language/LLVMIR/Extractor/ConstantClass.hs	21;"	d
 GlobalValue	src/Language/LLVMIR.hs	1830;"	t
 GlobalValue	src/Language/LLVMIR.hs	762;"	d
-GlobalValueClass	./Language/LLVMIR/Extractor/Constant.hs	38;"	t
+GlobalValueClass	./Language/LLVMIR/Extractor/ConstantClass.hs	30;"	t
 GlobalVar	src/Language/LLVMIR.hs	1777;"	d
-GlobalVariable	./Language/LLVMIR/Extractor/Constant.hs	41;"	d
+GlobalVariable	./Language/LLVMIR/Extractor/ConstantClass.hs	33;"	d
 GlobalVariable	src/Language/LLVMIR.hs	1832;"	d
 Globals	src/Language/LLVMIR.hs	1926;"	t
 Hidden	src/Language/LLVMIR.hs	6417;"	d
@@ -720,7 +720,7 @@ UIToFP	src/Language/LLVMIR.hs	2144;"	d
 URem	./Language/LLVMIR/Extractor/Opcode.hs	25;"	d
 URem	src/Language/LLVMIR.hs	2145;"	d
 UnaryConstantExpr	src/Language/LLVMIR.hs	1061;"	d
-UndefValue	./Language/LLVMIR/Extractor/Constant.hs	30;"	d
+UndefValue	./Language/LLVMIR/Extractor/ConstantClass.hs	22;"	d
 UndefValue	src/Language/LLVMIR.hs	763;"	d
 Unreachable	./Language/LLVMIR/Extractor/Opcode.hs	15;"	d
 Unreachable	src/Language/LLVMIR.hs	2146;"	d
@@ -751,29 +751,29 @@ escaped	src/Language/LLVMIR/Grammar/Printer.ag	260;"	v
 extract	./Language/LLVMIR/Extractor/Module.hs	42;"	v
 getBasicBlock	./Language/LLVMIR/Extractor/Module.hs	145;"	v	file:
 getBinaryOp	./Language/LLVMIR/Extractor/Instruction.hs	98;"	v
-getBlockAddr	./Language/LLVMIR/Extractor/Constant.hs	72;"	v
+getBlockAddr	./Language/LLVMIR/Extractor/Value.hs	50;"	v
 getCallArgs	./Language/LLVMIR/Extractor/Instruction.hs	41;"	v
 getCastOp	./Language/LLVMIR/Extractor/Instruction.hs	149;"	v
-getConstantAggregateZero	./Language/LLVMIR/Extractor/Constant.hs	75;"	v
-getConstantArray	./Language/LLVMIR/Extractor/Constant.hs	78;"	v
-getConstantDataSequential	./Language/LLVMIR/Extractor/Constant.hs	81;"	v
-getConstantExpr	./Language/LLVMIR/Extractor/Constant.hs	84;"	v
-getConstantFP	./Language/LLVMIR/Extractor/Constant.hs	90;"	v
-getConstantInt	./Language/LLVMIR/Extractor/Constant.hs	93;"	v
-getConstantPointerNull	./Language/LLVMIR/Extractor/Constant.hs	98;"	v
-getConstantStruct	./Language/LLVMIR/Extractor/Constant.hs	101;"	v
-getConstantValue	./Language/LLVMIR/Extractor/Constant.hs	55;"	v
-getConstantVector	./Language/LLVMIR/Extractor/Constant.hs	104;"	v
+getConstantAggregateZero	./Language/LLVMIR/Extractor/Value.hs	53;"	v
+getConstantArray	./Language/LLVMIR/Extractor/Value.hs	56;"	v
+getConstantDataSequential	./Language/LLVMIR/Extractor/Value.hs	59;"	v
+getConstantExpr	./Language/LLVMIR/Extractor/Value.hs	63;"	v
+getConstantFP	./Language/LLVMIR/Extractor/Value.hs	89;"	v
+getConstantInt	./Language/LLVMIR/Extractor/Value.hs	92;"	v
+getConstantPointerNull	./Language/LLVMIR/Extractor/Value.hs	97;"	v
+getConstantStruct	./Language/LLVMIR/Extractor/Value.hs	101;"	v
+getConstantValue	./Language/LLVMIR/Extractor/Value.hs	33;"	v
+getConstantVector	./Language/LLVMIR/Extractor/Value.hs	104;"	v
 getDataLayout	./Language/LLVMIR/Extractor/Module.hs	74;"	v	file:
 getElemPtrArgs	./Language/LLVMIR/Extractor/Instruction.hs	49;"	v
 getFuncs	./Language/LLVMIR/Extractor/Module.hs	123;"	v	file:
 getFunction	./Language/LLVMIR/Extractor/Module.hs	127;"	v	file:
 getGlobal	./Language/LLVMIR/Extractor/Module.hs	110;"	v	file:
-getGlobalValue	./Language/LLVMIR/Extractor/Constant.hs	108;"	v
+getGlobalValue	./Language/LLVMIR/Extractor/Value.hs	108;"	v
 getGlobalVar	./Language/LLVMIR/Extractor/Module.hs	95;"	v	file:
 getICmpOps	./Language/LLVMIR/Extractor/Instruction.hs	55;"	v
 getIdent	./Language/LLVMIR/Extractor/Ident.hs	15;"	v
-getIdentValue	./Language/LLVMIR/Extractor/Value.hs	24;"	v
+getIdentValue	./Language/LLVMIR/Extractor/Value.hs	28;"	v
 getInitVal	./Language/LLVMIR/Extractor/Module.hs	99;"	v	file:
 getInst	./Language/LLVMIR/Extractor/Module.hs	150;"	v	file:
 getInstruction	./Language/LLVMIR/Extractor/Instruction.hs	62;"	v
@@ -787,7 +787,7 @@ getTargetData	./Language/LLVMIR/Extractor/Module.hs	67;"	v	file:
 getTerminatorOp	./Language/LLVMIR/Extractor/Instruction.hs	77;"	v
 getType	./Language/LLVMIR/Extractor/Type.hs	32;"	v
 getTypeWithKind	./Language/LLVMIR/Extractor/Type.hs	36;"	v	file:
-getValue	./Language/LLVMIR/Extractor/Value.hs	18;"	v
+getValue	./Language/LLVMIR/Extractor/Value.hs	22;"	v
 input	Main.hs	35;"	v
 isConstant	./Language/LLVMIR/Extractor/Module.hs	38;"	v	file:
 main	Main.hs	46;"	v
@@ -1270,9 +1270,9 @@ sem_Visibility_Default	src/Language/LLVMIR.hs	6440;"	v
 sem_Visibility_Hidden	src/Language/LLVMIR.hs	6448;"	v
 sem_Visibility_Protected	src/Language/LLVMIR.hs	6456;"	v
 standard	Main.hs	40;"	v
-toConstantClass	./Language/LLVMIR/Extractor/Constant.hs	45;"	v
-toConstantDataSequentialClass	./Language/LLVMIR/Extractor/Constant.hs	51;"	v
-toGlobalValueClass	./Language/LLVMIR/Extractor/Constant.hs	48;"	v
+toConstantClass	./Language/LLVMIR/Extractor/ConstantClass.hs	37;"	v
+toConstantDataSequentialClass	./Language/LLVMIR/Extractor/ConstantClass.hs	43;"	v
+toGlobalValueClass	./Language/LLVMIR/Extractor/ConstantClass.hs	40;"	v
 toIntPredicate	./Language/LLVMIR/Extractor/Predicate.hs	11;"	v
 toOpcode	./Language/LLVMIR/Extractor/Opcode.hs	70;"	v
 toRealPredicate	./Language/LLVMIR/Extractor/Predicate.hs	23;"	v
