@@ -103,7 +103,7 @@ getInitVal gv isC | isC == False = return $ Nothing
                                       ety   <- FFI.constantValueGetElemType cval
                                       llety <- getType ety 
                                       let ty = LL.TyArray (fromEnum num) llety
-                                      return $ Just $ undefined -- LL.ArrayC ty llval 
+                                      return $ Just $ LL.Constant LL.ConstantArray -- undefined -- LL.ArrayC ty llval 
 
 
 getGlobal :: (String, Value) -> IO LL.Global

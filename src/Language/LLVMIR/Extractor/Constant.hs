@@ -14,6 +14,7 @@ import qualified Language.LLVMIR as LL
 import Language.LLVMIR.Extractor.Type
 import Language.LLVMIR.Extractor.Util
 import Language.LLVMIR.Extractor.Ident
+import Language.LLVMIR.Extractor.Opcode
 
 data ConstantClass =
     BlockAddr
@@ -80,8 +81,29 @@ getConstantArray = error "TODO getConstantArray"
 getConstantDataSequential :: Value -> IO LL.Constant
 getConstantDataSequential = error "TODO getConstantDataSequential"
 
+-- TODO: | UnaryConstantExpr
 getConstantExpr :: Value -> IO LL.Constant
-getConstantExpr v = error "TODO getConstantExpr"
+getConstantExpr v = do opcode <- (FFI.getConstOpcode v) >>= (return . fromIntegral)
+                       let op = toOpcode opcode
+                           expr = case opcodeClass opcode of
+                              Terminator -> error $ "'getConstantExpr': Terminator Class" 
+                              Binary     -> LL.BinaryConstantExpr
+                              Logical    -> LL.BinaryConstantExpr 
+                              Memory     -> case op of
+                                GetElementPtr -> LL.GetElementPtrConstantExpr
+                                _             -> error $ "'getConstantExpr': Memory Class" 
+                              Cast       -> error $ "'getConstantExpr': Cast Class"  
+                              Other      -> case op of
+                                ICmp           -> LL.CompareConstantExpr
+                                FCmp           -> LL.CompareConstantExpr
+                                Select         -> LL.SelectConstantExpr
+                                ExtractElement -> LL.ExtractElementConstantExpr
+                                InsertElement  -> LL.InsertElementConstantExpr
+                                ShuffleVector  -> LL.ShuffleVectorConstantExpr
+                                ExtractValue   -> LL.ExtractValueConstantExpr
+                                InsertValue    -> LL.InsertValueConstantExpr 
+                                _              -> error $ "'getConstantExpr': Other Class"
+                       return $ LL.ConstantExpr expr -- $ error "TODO getConstantExpr"
 {-do ty <- (FFI.typeOf v) >>= getType
                        (struct, args) <- (getOperands v) >>= getElemPtrArgs
                        return $ undefined -- LL.Pointer ty struct args
@@ -95,7 +117,8 @@ getConstantInt v = do ty <- typeOf v
                       return $ LL.ConstantInt (fromIntegral av) ty
 
 getConstantPointerNull :: Value -> IO LL.Constant
-getConstantPointerNull = error "TODO getConstantPointerNull"
+getConstantPointerNull v = do ty <- typeOf v
+                              return $ LL.ConstantPointerNull ty 
 
 getConstantStruct :: Value -> IO LL.Constant
 getConstantStruct = error "TODO getConstantStruct"
