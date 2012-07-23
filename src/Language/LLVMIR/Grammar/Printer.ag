@@ -109,6 +109,8 @@ sem Instruction
   | Or   lhs.pp = pBitBinOp @ty.pp @id.pp "or"   @op1.pp @op2.pp
   | Xor  lhs.pp = pBitBinOp @ty.pp @id.pp "xor"  @op1.pp @op2.pp
   | PHI  lhs.pp = @id.pp <+> char '=' <+> text "phi" <+> @ty.pp <+> @vals.pp
+  | Select lhs.pp = @id.pp <+> char '=' <+> @cond.pp <> char ',' <+> @valt.pp <> char ',' <+> @valf.pp
+
 {
 pConvOp :: Doc -> String -> Doc -> Doc -> Doc
 pConvOp id c v ty = id <+> char '=' <+> text c <+> v <+> text "to" <+> ty
@@ -190,13 +192,13 @@ sem Value
 sem Constant
   | BlockAddr              lhs.pp = text "blockaddr" 
   | ConstantAggregateZero  lhs.pp = @ty.pp <+> text "zeroinitializer"
-  | ConstantArray          lhs.pp = text "ConstantArray" 
+  | ConstantArray          lhs.pp = @ty.pp <+> brackets @vals.pp
   | ConstantDataSequential lhs.pp = @cds.pp 
   | ConstantExpr           lhs.pp = @expr.pp
-  | ConstantFP             lhs.pp = @ty.pp <+> float @fpv
+  | ConstantFP             lhs.pp = text "TODO ConstantFP" -- @ty.pp <+> float @fpv
   | ConstantInt            lhs.pp = @ty.pp <+> int   @iv
   | ConstantPointerNull    lhs.pp = @ty.pp <+> text "null"
-  | ConstantStruct         lhs.pp = text "ConstantStruct"
+  | ConstantStruct         lhs.pp = @ty.pp <+> braces @vals.pp
   | ConstantVector         lhs.pp = text "ConstantVector"
   | GlobalValue            lhs.pp = @gv.pp
   | UndefValue             lhs.pp = text "undef"
@@ -216,12 +218,12 @@ sem ConstantExpr
   | CompareConstantExpr        lhs.pp = text "CompareConstantExpr"
   | ExtractElementConstantExpr lhs.pp = text "ExtractElementConstantExpr"
   | ExtractValueConstantExpr   lhs.pp = text "ExtractValueConstantExpr"
-  | GetElementPtrConstantExpr  lhs.pp = text "getelementptr" <+> @struct.pp <> char ',' <+> @idxs.pp 
+  | GetElementPtrConstantExpr  lhs.pp = text "getelementptr" <> parens (@struct.pp <> char ',' <+> @idxs.pp) 
   | InsertElementConstantExpr  lhs.pp = text "InsertElementConstantExpr"
   | InsertValueConstantExpr    lhs.pp = text "InsertValueConstantExpr"
   | SelectConstantExpr         lhs.pp = text "SelectConstantExpr"
   | ShuffleVectorConstantExpr  lhs.pp = text "ShuffleVectorConstantExpr"
-  | UnaryConstantExpr          lhs.pp = text "UnaryConstantExpr"
+  | UnaryConstantExpr          lhs.pp = @ty.pp <+> text @name <+> @val.pp
 
 sem GlobalValue
   | FunctionValue  lhs.pp = @ty.pp <+> @n.pp 

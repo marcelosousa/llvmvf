@@ -226,6 +226,11 @@ data Instruction
       ty     :: Type
       callee :: Identifier 
       args   :: Values 
+  | Select
+      id :: Identifier
+      cond :: Value
+      valt :: Value
+      valf :: Value
 
 data Identifier 
   | Global name :: Id -- (functions, global variables) begin with the '@'
@@ -238,13 +243,13 @@ data Value
 data Constant
   | BlockAddr
   | ConstantAggregateZero  ty   :: Type
-  | ConstantArray
+  | ConstantArray          ty   :: Type  vals :: Values
   | ConstantDataSequential cds  :: ConstantDataSequential
   | ConstantExpr           expr :: ConstantExpr
-  | ConstantFP             fpv  :: Float ty :: Type
+  | ConstantFP             -- fpv  :: Float ty :: Type
   | ConstantInt            iv   :: Int   ty :: Type
   | ConstantPointerNull    ty   :: Type
-  | ConstantStruct
+  | ConstantStruct         ty   :: Type vals :: Values
   | ConstantVector          
   | GlobalValue            gv :: GlobalValue
   | UndefValue
@@ -285,7 +290,7 @@ data ConstantExpr
   | InsertValueConstantExpr
   | SelectConstantExpr
   | ShuffleVectorConstantExpr
-  | UnaryConstantExpr
+  | UnaryConstantExpr         name :: String op :: Int val :: Value ty :: Type
  
 data Align
       | Align n :: Int

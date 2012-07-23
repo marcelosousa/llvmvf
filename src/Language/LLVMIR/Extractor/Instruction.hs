@@ -183,7 +183,12 @@ getOtherOp Call = do ival  <- ask
                      ty    <- liftIO $ (FFI.typeOf ival) >>= getType
                      (callee, args) <- liftIO $ (getOperands ival) >>= getCallArgs
                      return $ LL.Call Nothing ty callee args
-getOtherOp Select         = error $ "TODO select"
+getOtherOp Select         = do ival <- ask
+                               ident <- liftIO $ getIdent ival
+                               cond  <- liftIO $ FFI.selectGetCondition ival  >>= \i -> getValue (ident,i)
+                               valt  <- liftIO $ FFI.selectGetTrueValue ival  >>= \i -> getValue (ident,i)
+                               valf  <- liftIO $ FFI.selectGetFalseValue ival >>= \i -> getValue (ident,i)
+                               return $ LL.Select (LL.Local ident) cond valt valf
 getOtherOp UserOp1        = error $ "TODO userop1"
 getOtherOp UserOp2        = error $ "TODO userop2"
 getOtherOp VAArg          = error $ "TODO aarg"
@@ -198,7 +203,7 @@ getOtherOp LandingPad     = error $ "TODO landingpad"
 --convOps :: (LL.Identifier -> LL.Value -> LL.Type -> b) -> ReaderT Value IO b
 convOps c = do ival  <- ask
                ident <- liftIO $ getIdent ival
-               ty    <- liftIO $ (FFI.typeOf ival) >>= getType
+               ty    <- liftIO $ typeOf ival
                ops   <- liftIO $ (getOperands ival) >>= mapM getValue
                if length ops == 0
                then error "'convOps': operand list is empty"

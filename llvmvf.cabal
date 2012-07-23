@@ -21,4 +21,4 @@ Executable llvmvf
                     , llvm
     Hs-Source-Dirs:   src/
     Extensions: 	  TypeOperators, FlexibleInstances, TypeSynonymInstances, DeriveDataTypeable
-                                                                  
+    ghc-options:     -O3 -rtsopts 

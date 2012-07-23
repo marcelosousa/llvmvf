@@ -874,57 +874,62 @@ bb:
   %tmp = getelementptr inbounds %class.element* %this, i64 0, i32 1
   %tmp1 = load i32* %tmp, align 4, !tbaa !0
   %tmp2 = icmp sgt i32 %tmp1, 0
-  br i1 %tmp2, label %bb3, label %bb9
+  %tmp3 = getelementptr inbounds %class.element* %this, i64 0, i32 2
+  br i1 %tmp2, label %bb4, label %._crit_edge
 
-bb3:                                              ; preds = %bb
-  %tmp4 = alloca %"class.sc_core::sc_time", align 8
-  %tmp5 = bitcast %"class.sc_core::sc_time"* %tmp4 to i8*
-  call void @llvm.lifetime.start(i64 -1, i8* %tmp5)
-  %tmp6 = getelementptr inbounds %class.element* %this, i64 0, i32 0, i32 0, i32 1
-  %tmp7 = load %"class.sc_core::sc_simcontext"** %tmp6, align 8, !tbaa !4
-  call void @_ZN7sc_core7sc_timeC1EdNS_12sc_time_unitEPNS_13sc_simcontextE(%"class.sc_core::sc_time"* %tmp4, double 2.000000e+01, i32 2, %"class.sc_core::sc_simcontext"* %tmp7)
-  %tmp8 = load %"class.sc_core::sc_simcontext"** %tmp6, align 8, !tbaa !4
-  call void @_ZN7sc_core4waitERKNS_7sc_timeEPNS_13sc_simcontextE(%"class.sc_core::sc_time"* %tmp4, %"class.sc_core::sc_simcontext"* %tmp8)
-  call void @llvm.lifetime.end(i64 -1, i8* %tmp5)
+bb4:                                              ; preds = %bb
+  %tmp5 = load i32* %tmp3, align 4, !tbaa !0
+  %tmp6 = icmp sgt i32 %tmp5, 0
+  br i1 %tmp6, label %bb7, label %._crit_edge
+
+bb7:                                              ; preds = %bb4
+  %tmp8 = alloca %"class.sc_core::sc_time", align 8
+  %tmp9 = bitcast %"class.sc_core::sc_time"* %tmp8 to i8*
+  call void @llvm.lifetime.start(i64 -1, i8* %tmp9)
+  %tmp10 = getelementptr inbounds %class.element* %this, i64 0, i32 0, i32 0, i32 1
+  %tmp11 = load %"class.sc_core::sc_simcontext"** %tmp10, align 8, !tbaa !4
+  call void @_ZN7sc_core7sc_timeC1EdNS_12sc_time_unitEPNS_13sc_simcontextE(%"class.sc_core::sc_time"* %tmp8, double 2.000000e+01, i32 2, %"class.sc_core::sc_simcontext"* %tmp11)
+  %tmp12 = load %"class.sc_core::sc_simcontext"** %tmp10, align 8, !tbaa !4
+  call void @_ZN7sc_core4waitERKNS_7sc_timeEPNS_13sc_simcontextE(%"class.sc_core::sc_time"* %tmp8, %"class.sc_core::sc_simcontext"* %tmp12)
+  call void @llvm.lifetime.end(i64 -1, i8* %tmp9)
   %.pre = load i32* %tmp, align 4, !tbaa !0
-  br label %bb9
+  br label %._crit_edge
 
-bb9:                                              ; preds = %bb3, %bb
-  %tmp10 = phi i32 [ %.pre, %bb3 ], [ %tmp1, %bb ]
-  %tmp11 = getelementptr inbounds %class.element* %this, i64 0, i32 2
-  %tmp12 = load i32* %tmp11, align 4, !tbaa !0
-  %tmp13 = add nsw i32 %tmp12, 1
-  %tmp14 = icmp slt i32 %tmp10, %tmp13
-  br i1 %tmp14, label %bb15, label %bb30
+._crit_edge:                                      ; preds = %bb7, %bb4, %bb
+  %tmp13 = phi i32 [ %.pre, %bb7 ], [ %tmp1, %bb4 ], [ %tmp1, %bb ]
+  %tmp14 = load i32* %tmp3, align 4, !tbaa !0
+  %tmp15 = add nsw i32 %tmp14, 1
+  %tmp16 = icmp slt i32 %tmp13, %tmp15
+  br i1 %tmp16, label %bb17, label %bb32
 
-bb15:                                             ; preds = %bb9
-  %tmp16 = getelementptr inbounds %class.element* %this, i64 0, i32 5
-  call void @_ZN7sc_core8sc_event6notifyEv(%"class.sc_core::sc_event"* %tmp16)
-  %tmp17 = getelementptr inbounds %class.element* %this, i64 0, i32 0, i32 0, i32 1
-  %tmp18 = load %"class.sc_core::sc_simcontext"** %tmp17, align 8, !tbaa !4
-  call void @_ZN7sc_core4waitERKNS_8sc_eventEPNS_13sc_simcontextE(%"class.sc_core::sc_event"* %tmp16, %"class.sc_core::sc_simcontext"* %tmp18)
-  %tmp19 = getelementptr inbounds %class.element* %this, i64 0, i32 3
-  %tmp20 = load i32* %tmp19, align 4, !tbaa !0
-  %tmp21 = mul nsw i32 %tmp20, 7
-  %tmp22 = getelementptr inbounds %class.element* %this, i64 0, i32 4
-  br label %bb23
+bb17:                                             ; preds = %._crit_edge
+  %tmp18 = getelementptr inbounds %class.element* %this, i64 0, i32 5
+  call void @_ZN7sc_core8sc_event6notifyEv(%"class.sc_core::sc_event"* %tmp18)
+  %tmp19 = getelementptr inbounds %class.element* %this, i64 0, i32 0, i32 0, i32 1
+  %tmp20 = load %"class.sc_core::sc_simcontext"** %tmp19, align 8, !tbaa !4
+  call void @_ZN7sc_core4waitERKNS_8sc_eventEPNS_13sc_simcontextE(%"class.sc_core::sc_event"* %tmp18, %"class.sc_core::sc_simcontext"* %tmp20)
+  %tmp21 = getelementptr inbounds %class.element* %this, i64 0, i32 3
+  %tmp22 = load i32* %tmp21, align 4, !tbaa !0
+  %tmp23 = mul nsw i32 %tmp22, 7
+  %tmp24 = getelementptr inbounds %class.element* %this, i64 0, i32 4
+  br label %bb25
 
-bb23:                                             ; preds = %bb23, %bb15
-  %storemerge.in = phi i32 [ %tmp21, %bb15 ], [ %tmp28, %bb23 ]
+bb25:                                             ; preds = %bb25, %bb17
+  %storemerge.in = phi i32 [ %tmp23, %bb17 ], [ %tmp30, %bb25 ]
   %storemerge = srem i32 %storemerge.in, 128
-  store i32 %storemerge, i32* %tmp22, align 4
-  %tmp24 = sext i32 %storemerge to i64
-  %tmp25 = getelementptr inbounds [128 x i32]* @table, i64 0, i64 %tmp24
-  %tmp26 = load i32* %tmp25, align 4, !tbaa !0
-  %tmp27 = icmp eq i32 %tmp26, 0
-  %tmp28 = add nsw i32 %storemerge, 1
-  br i1 %tmp27, label %bb29, label %bb23
+  store i32 %storemerge, i32* %tmp24, align 4
+  %tmp26 = sext i32 %storemerge to i64
+  %tmp27 = getelementptr inbounds [128 x i32]* @table, i64 0, i64 %tmp26
+  %tmp28 = load i32* %tmp27, align 4, !tbaa !0
+  %tmp29 = icmp eq i32 %tmp28, 0
+  %tmp30 = add nsw i32 %storemerge, 1
+  br i1 %tmp29, label %bb31, label %bb25
 
-bb29:                                             ; preds = %bb23
-  store i32 %tmp20, i32* %tmp25, align 4, !tbaa !0
-  br label %bb30
+bb31:                                             ; preds = %bb25
+  store i32 %tmp22, i32* %tmp27, align 4, !tbaa !0
+  br label %bb32
 
-bb30:                                             ; preds = %bb29, %bb9
+bb32:                                             ; preds = %bb31, %._crit_edge
   ret void
 }
 

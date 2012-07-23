@@ -48,8 +48,8 @@ extract file = do mdl    <- readBitcodeFromFile file
                   ident  <- getModuleIdentifier mdl
                   layout <- getDataLayout mdl
                   target <- getTargetData mdl
-                  funs   <- getFuncs mdl
                   gvars  <- getGlobalVar mdl
+                  funs   <- getFuncs mdl
 --                  aliases <- getAliases mdl
                   return $ LL.Module ident layout target gvars funs [] -- aliases 
 
@@ -101,7 +101,7 @@ getGlobalVar mdl = do globals <- getGlobalVariables mdl
                       forM globals getGlobal
 
 getInitVal :: Value -> Bool -> IO (Maybe LL.Value)
-getInitVal gv isC | isC == False = return $ Nothing
+getInitVal gv isC | isC == False = return Nothing
                   | otherwise    = do cval <- FFI.getInitializer gv
                                       val  <- getConstantValue cval
                                       return $ Just val
