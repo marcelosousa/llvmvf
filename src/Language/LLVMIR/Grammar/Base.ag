@@ -237,7 +237,7 @@ data Value
 
 data Constant
   | BlockAddr
-  | ConstantAggregateZero
+  | ConstantAggregateZero  ty   :: Type
   | ConstantArray
   | ConstantDataSequential cds  :: ConstantDataSequential
   | ConstantExpr           expr :: ConstantExpr
@@ -272,8 +272,8 @@ data GlobalValue
   | GlobalVariable n :: Identifier ty :: Type
 
 data ConstantDataSequential
-  | ConstantDataArray  
-  | ConstantDataVector
+  | ConstantDataArray  ty :: Type val :: String 
+  | ConstantDataVector ty :: Type val :: String
 
 data ConstantExpr
   | BinaryConstantExpr

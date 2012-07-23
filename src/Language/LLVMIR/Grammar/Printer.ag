@@ -189,9 +189,9 @@ sem Value
 
 sem Constant
   | BlockAddr              lhs.pp = text "blockaddr" 
-  | ConstantAggregateZero  lhs.pp = text "ConstantAggregateZero"
+  | ConstantAggregateZero  lhs.pp = @ty.pp <+> text "zeroinitializer"
   | ConstantArray          lhs.pp = text "ConstantArray" 
-  | ConstantDataSequential lhs.pp = text "ConstantDataSequential" <+> @cds.pp 
+  | ConstantDataSequential lhs.pp = @cds.pp 
   | ConstantExpr           lhs.pp = @expr.pp
   | ConstantFP             lhs.pp = @ty.pp <+> float @fpv
   | ConstantInt            lhs.pp = @ty.pp <+> int   @iv
@@ -208,8 +208,8 @@ sem Constant
 --  | Pointer lhs.pp = @ty.pp <+> text "getelementptr" <> char '('  <+> @v.pp <> char ',' <+> @args.pp <> char ')'
 
 sem ConstantDataSequential
-  | ConstantDataArray          lhs.pp = text "ConstantDataArray"
-  | ConstantDataVector         lhs.pp = text "ConstantDataVector"
+  | ConstantDataArray          lhs.pp = @ty.pp <+> text "c" <> dquotes (escaped @val)
+  | ConstantDataVector         lhs.pp = @ty.pp <+> text "c" <> dquotes (escaped @val)
                                              
 sem ConstantExpr                             
   | BinaryConstantExpr         lhs.pp = text "BinaryConstantExpr"

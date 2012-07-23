@@ -12,6 +12,7 @@ import LLVM.Core hiding (Value)
 import qualified Language.LLVMIR as LL
 
 import Foreign.C.Types
+import Foreign.C.String
 
 import Language.LLVMIR.Extractor.Type
 import Language.LLVMIR.Extractor.Util
@@ -36,7 +37,7 @@ getConstantValue v = do vc <- FFI.getConstantClass v
                              BlockAddr              -> getBlockAddr v
                              ConstantAggregateZero  -> getConstantAggregateZero v
                              ConstantArray          -> getConstantArray v
-                             ConstantDataSequential -> getConstantDataSequential v
+                             ConstantDataSequential -> (getConstantDataSequential v >>= (return . LL.ConstantDataSequential))
                              ConstantExpr           -> getConstantExpr v
                              ConstantFP             -> getConstantFP v
                              ConstantInt            -> getConstantInt v
@@ -51,13 +52,21 @@ getBlockAddr :: Value -> IO LL.Constant
 getBlockAddr = error "TODO getBlockAddr"
 
 getConstantAggregateZero :: Value -> IO LL.Constant
-getConstantAggregateZero = error "TODO getConstantAggregateZero"
+getConstantAggregateZero v = do ty <- typeOf v
+                                return $ LL.ConstantAggregateZero ty 
 
 getConstantArray :: Value -> IO LL.Constant
 getConstantArray = error "TODO getConstantArray"
 
-getConstantDataSequential :: Value -> IO LL.Constant
-getConstantDataSequential = error "TODO getConstantDataSequential"
+getConstantDataSequential :: Value -> IO LL.ConstantDataSequential
+getConstantDataSequential v = do vc  <- FFI.getConstantDataSequentialClass v
+                                 val <- FFI.constantValueGetAsString v >>= peekCString
+                                 num <- FFI.constantValueGetNumElem v >>= (return . fromEnum)
+                                 ety <- FFI.constantValueGetElemType v
+                                 ty' <- getType ety
+                                 case toConstantDataSequentialClass vc of
+                                   ConstantDataArray  -> return $ LL.ConstantDataArray  (LL.TyArray  num ty') val       
+                                   ConstantDataVector -> return $ LL.ConstantDataVector (LL.TyVector num ty') val
 
 -- TODO: | UnaryConstantExpr
 getConstantExpr :: Value -> IO LL.Constant

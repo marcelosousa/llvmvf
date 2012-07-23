@@ -28,6 +28,7 @@ import Language.LLVMIR.Extractor.Instruction
 import Language.LLVMIR.Extractor.Type
 import Language.LLVMIR.Extractor.Util
 import Language.LLVMIR.Extractor.Linkage
+import Language.LLVMIR.Extractor.Value
 
 import Foreign.C.String
 import Foreign.C.Types
@@ -37,6 +38,10 @@ type FunctionName = String
 isConstant :: Value -> IO Bool
 isConstant v = do ci <- FFI.isGlobalConstant v 
                   return $ cInt2Bool ci
+
+hasInitializer :: Value -> IO Bool
+hasInitializer v = do hi <- FFI.hasInitializer v
+                      return $ cInt2Bool hi
 
 extract :: FilePath -> IO LL.Module 
 extract file = do mdl    <- readBitcodeFromFile file
@@ -98,17 +103,12 @@ getGlobalVar mdl = do globals <- getGlobalVariables mdl
 getInitVal :: Value -> Bool -> IO (Maybe LL.Value)
 getInitVal gv isC | isC == False = return $ Nothing
                   | otherwise    = do cval <- FFI.getInitializer gv
-                                      llval <- FFI.constantValueGetAsString cval >>= peekCString
-                                      num   <- FFI.constantValueGetNumElem cval
-                                      ety   <- FFI.constantValueGetElemType cval
-                                      llety <- getType ety 
-                                      let ty = LL.TyArray (fromEnum num) llety
-                                      return $ Just $ LL.Constant LL.ConstantArray -- undefined -- LL.ArrayC ty llval 
-
+                                      val  <- getConstantValue cval
+                                      return $ Just val
 
 getGlobal :: (String, Value) -> IO LL.Global
 getGlobal (gname, gval) = do link  <- FFI.getLinkage gval
-                             isC   <- isConstant gval
+                             isC   <- hasInitializer gval
                              align <- FFI.getAlignment gval
                              unadd <- FFI.hasUnnamedAddr gval
                              let llalign = LL.Align $ fromEnum align
