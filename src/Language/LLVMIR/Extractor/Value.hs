@@ -87,21 +87,21 @@ getConstantExpr v = do opcode <- FFI.constGetOpcode v
                        let op = toOpcode opcode
                            expr = case opcodeClass opcode of
                               Terminator -> error $ "'getConstantExpr': Terminator Class" 
-                              Binary     -> return LL.BinaryConstantExpr
-                              Logical    -> return LL.BinaryConstantExpr 
+                              Binary     -> error $ "'getConstantExpr': TODO Binary" -- return LL.BinaryConstantExpr
+                              Logical    -> error $ "'getConstantExpr': TODO Binary" -- return LL.BinaryConstantExpr 
                               Memory     -> case op of
                                 GetElementPtr -> getElementPtrConstant v
                                 _             -> error $ "'getConstantExpr': Memory Class" 
                               Cast       -> unaryConstantExpr v op  
                               Other      -> case op of
-                                ICmp           -> return LL.CompareConstantExpr
-                                FCmp           -> return LL.CompareConstantExpr
-                                Select         -> return LL.SelectConstantExpr
-                                ExtractElement -> return LL.ExtractElementConstantExpr
-                                InsertElement  -> return LL.InsertElementConstantExpr
-                                ShuffleVector  -> return LL.ShuffleVectorConstantExpr
-                                ExtractValue   -> return LL.ExtractValueConstantExpr
-                                InsertValue    -> return LL.InsertValueConstantExpr 
+                                ICmp           -> error $ "'getConstantExpr': TODO Compare" --return LL.CompareConstantExpr
+                                FCmp           -> error $ "'getConstantExpr': TODO Compare" --return LL.CompareConstantExpr
+                                Select         -> error $ "'getConstantExpr': TODO Select" -- return LL.SelectConstantExpr
+                                ExtractElement -> error $ "'getConstantExpr': TODO ExtractE" -- return LL.ExtractElementConstantExpr
+                                InsertElement  -> error $ "'getConstantExpr': TODO InsertE" -- return LL.InsertElementConstantExpr
+                                ShuffleVector  -> error $ "'getConstantExpr': TODO ShuffleV" -- return LL.ShuffleVectorConstantExpr
+                                ExtractValue   -> error $ "'getConstantExpr': TODO ExtractV" -- return LL.ExtractValueConstantExpr
+                                InsertValue    -> error $ "'getConstantExpr': TODO InsertV" -- return LL.InsertValueConstantExpr 
                                 _              -> error $ "'getConstantExpr': Other Class"
                        expr >>= (return . LL.ConstantExpr) -- $ error "TODO getConstantExpr"
 
