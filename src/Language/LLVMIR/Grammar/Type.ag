@@ -26,8 +26,9 @@ data Type
         party :: Types
         retty :: Type
     | TyStruct
-        name :: String
-      --  tys :: Types
+        name  :: String
+        numEl :: Int
+        tys   :: Types
     | TyPointer
         ty :: Type
     | TyVector

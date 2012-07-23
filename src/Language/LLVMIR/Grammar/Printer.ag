@@ -238,7 +238,7 @@ sem Type
   | TyFloatPoint lhs.pp = @p.pp
   | TyArray      lhs.pp = brackets $ int @numEl <+> char 'x' <+> @ty.pp
   | TyFunction   lhs.pp = parens $ @party.pp <+> text "->" <+> @retty.pp 
-  | TyStruct     lhs.pp = char '%' <> dquotes (text @name) -- char '{' <> @tys.pp <> char '}'
+  | TyStruct     lhs.pp = char '%' <> dquotes (escaped @name) <+> int @numEl <+> braces @tys.pp
   | TyPointer    lhs.pp = @ty.pp <> char '*'
   | TyVector     lhs.pp = char '<' <> int @numEl <+> char 'x' <+> @ty.pp <> char '>'
 

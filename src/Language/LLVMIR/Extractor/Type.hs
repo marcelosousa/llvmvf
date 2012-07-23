@@ -54,10 +54,14 @@ getTypeWithKind ty FFI.VectorTypeKind    = do n   <- FFI.getVectorSize ty
                                               etd <- getType et
                                               return $ LL.TyVector (fromIntegral n) etd
 getTypeWithKind ty FFI.StructTypeKind    = do s <- (FFI.getStructName ty) >>= peekCString
-                                              return $ LL.TyStruct s
+                                              n <- FFI.countStructElementTypes ty >>= (return . fromIntegral)
+                                              pars <- allocaArray n $ \ args -> do
+                                                        FFI.getStructElementTypes ty args
+                                                        peekArray n args
+                                              elems <- forM pars getType 
+                                              return $ LL.TyStruct s n elems
 getTypeWithKind ty FFI.FunctionTypeKind  = do retty <- (FFI.getReturnType ty) >>= getType
-                                              c     <- FFI.countParamTypes ty
-                                              let n = fromIntegral c
+                                              n     <- FFI.countParamTypes ty >>= (return . fromIntegral)
                                               pars <- allocaArray n $ \ args -> do
                                                         FFI.getParamTypes ty args
                                                         peekArray n args
