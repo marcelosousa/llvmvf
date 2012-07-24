@@ -241,7 +241,7 @@ data Constant
   | ConstantArray          ty   :: Type  vals :: Values
   | ConstantDataSequential cds  :: ConstantDataSequential
   | ConstantExpr           expr :: ConstantExpr
-  | ConstantFP             -- fpv  :: Float ty :: Type
+  | ConstantFP             fp   :: ConstantFP
   | ConstantInt            iv   :: Int   ty :: Type
   | ConstantPointerNull    ty   :: Type
   | ConstantStruct         ty   :: Type vals :: Values
@@ -249,22 +249,9 @@ data Constant
   | GlobalValue            gv :: GlobalValue
   | UndefValue
 
-{
-{-
-BoolC v :: Bool
-      | IntC  v :: Int ty :: Type
-      | FloatC v :: Float ty :: Type
-      | StructC elems :: PTyIntL
-      | ArrayC ty :: Type val :: String -- elems ::  PTyIntL
-      | VectorC elems :: PTyIntL      
-      | ZeroInitC ty :: Type
-      | NullC ty :: Type
-      | UndefC
---      | BlockAddr fun :: Identifier label :: Identifier
-      | Pointer ty :: Type v :: Value args :: Values
-      | GlobalValue gv :: GlobalValue
--}
-}
+data ConstantFP
+  | ConstantFPFloat  fpv :: Float ty :: Type
+  | ConstantFPDouble dbv :: Double ty :: Type
 
 data GlobalValue
   | FunctionValue  n :: Identifier ty :: Type
@@ -289,7 +276,6 @@ data ConstantExpr
  
 data Align
       | Align n :: Int
-
 
 data IntPredicate
       | IntEQ                       -- ^ equal
@@ -428,7 +414,7 @@ data Alias
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
   
-set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential ConstantExpr RetInst NamedTypes
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential ConstantExpr ConstantFP RetInst NamedTypes
 
 deriving Every: Show
 deriving Every: Eq

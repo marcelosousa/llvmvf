@@ -43,14 +43,14 @@ getConstantValue v = do vc <- liftIO $ FFI.getConstantClass v
                              BlockAddr              -> getBlockAddr v
                              ConstantAggregateZero  -> getConstantAggregateZero v
                              ConstantArray          -> getConstantArray v
-                             ConstantDataSequential -> getConstantDataSequential v >>= (return . LL.ConstantDataSequential)
+                             ConstantDataSequential -> getConstantDataSequential v >>= return . LL.ConstantDataSequential
                              ConstantExpr           -> getConstantExpr v
-                             ConstantFP             -> getConstantFP v
+                             ConstantFP             -> getConstantFP v >>= return . LL.ConstantFP
                              ConstantInt            -> getConstantInt v
                              ConstantPointerNull    -> getConstantPointerNull v
                              ConstantStruct         -> getConstantStruct v
                              ConstantVector         -> getConstantVector v
-                             GlobalValue            -> getGlobalValue v >>= (return . LL.GlobalValue)
+                             GlobalValue            -> getGlobalValue v >>= return . LL.GlobalValue
                              UndefValue             -> return LL.UndefValue
                         constant >>= return . LL.Constant
 
@@ -84,7 +84,6 @@ getConstantDataSequential v = do vc  <- liftIO $ FFI.getConstantDataSequentialCl
                                    ConstantDataArray  -> return $ LL.ConstantDataArray  (LL.TyArray  num ty') val 
                                    ConstantDataVector -> return $ LL.ConstantDataVector (LL.TyVector num ty') val
 
--- TODO: | UnaryConstantExpr
 getConstantExpr :: Value -> Context IO LL.Constant
 getConstantExpr v = do opcode <- liftIO $ FFI.constGetOpcode v 
                        let op = toOpcode opcode
@@ -129,8 +128,14 @@ getElementPtrConstant :: Value -> Context IO LL.ConstantExpr
 getElementPtrConstant v = do op <- getOperands v >>= mapM getValue
                              return $ LL.GetElementPtrConstantExpr (head op) (tail op)
 
-getConstantFP :: Value -> Context IO LL.Constant
-getConstantFP v = return LL.ConstantFP -- error "TODO getConstantFP"
+getConstantFP :: Value -> Context IO LL.ConstantFP
+getConstantFP v = do vc <- liftIO $ FFI.getConstantFPClass v
+                     ty <- typeOf v
+                     case toConstantFPClass vc of
+                       FloatValue  -> do val <- liftIO $ FFI.getFPValueFloat v >>= return . realToFrac
+                                         return $ LL.ConstantFPFloat val ty 
+                       DoubleValue -> do val <- liftIO $ FFI.getFPValueDouble v >>= return . realToFrac 
+                                         return $ LL.ConstantFPFloat val ty 
 
 getConstantInt :: Value -> Context IO LL.Constant
 getConstantInt v = do ty <- typeOf v 

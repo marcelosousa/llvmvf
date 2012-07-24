@@ -33,6 +33,11 @@ data GlobalValueClass =
   | GlobalVariable
   deriving (Show,Eq,Enum,Ord)
 
+data ConstantFPClass =
+    FloatValue
+  | DoubleValue
+  deriving (Show,Eq,Enum,Ord)
+
 toConstantClass :: CUInt -> ConstantClass
 toConstantClass = toEnum . fromIntegral 
 
@@ -41,4 +46,7 @@ toGlobalValueClass = toEnum . fromIntegral
 
 toConstantDataSequentialClass :: CUInt -> ConstantDataSequentialClass
 toConstantDataSequentialClass = toEnum . fromIntegral 
+
+toConstantFPClass :: CUInt -> ConstantFPClass 
+toConstantFPClass = toEnum . fromIntegral 
 

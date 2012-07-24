@@ -24,7 +24,7 @@ sem Parameters Types Values PValues
 sem PValue
   | Tuple lhs.pp = char '[' <+> @x1.pp <> char ',' <+> @x2.pp <+> char ']'
 
-attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTypes Constant GlobalValue ConstantDataSequential ConstantExpr RetInst
+attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTypes Constant GlobalValue ConstantDataSequential ConstantExpr ConstantFP RetInst
   syn pp use {<$>} {P.empty} :: {Doc}
 
 attr Target 
@@ -196,7 +196,7 @@ sem Constant
   | ConstantArray          lhs.pp = @ty.pp <+> brackets @vals.pp
   | ConstantDataSequential lhs.pp = @cds.pp 
   | ConstantExpr           lhs.pp = @expr.pp
-  | ConstantFP             lhs.pp = text "TODO ConstantFP" -- @ty.pp <+> float @fpv
+  | ConstantFP             lhs.pp = @fp.pp -- text "TODO ConstantFP" -- @ty.pp <+> float @fpv
   | ConstantInt            lhs.pp = @ty.pp <+> int   @iv
   | ConstantPointerNull    lhs.pp = @ty.pp <+> text "null"
   | ConstantStruct         lhs.pp = @ty.pp <+> braces @vals.pp
@@ -204,11 +204,9 @@ sem Constant
   | GlobalValue            lhs.pp = @gv.pp
   | UndefValue             lhs.pp = text "undef"
 
---  | ArrayC lhs.pp = @ty.pp <+> text "c" <> dquotes (escaped @val)
---  | NullC  lhs.pp = @ty.pp 
---  | UndefC lhs.pp = text "undef"
---  | IntC   lhs.pp = @ty.pp <+> int @v
---  | Pointer lhs.pp = @ty.pp <+> text "getelementptr" <> char '('  <+> @v.pp <> char ',' <+> @args.pp <> char ')'
+sem ConstantFP
+  | ConstantFPFloat  lhs.pp = @ty.pp <+> float @fpv
+  | ConstantFPDouble lhs.pp = @ty.pp <+> double @dbv  
 
 sem ConstantDataSequential
   | ConstantDataArray          lhs.pp = @ty.pp <+> text "c" <> dquotes (escaped @val)
