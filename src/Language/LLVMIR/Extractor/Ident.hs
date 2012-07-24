@@ -5,11 +5,14 @@
 
 module Language.LLVMIR.Extractor.Ident where
 
+import Control.Monad.IO.Class (liftIO)
+
 import qualified LLVM.FFI.Core as FFI
 
 import Language.LLVMIR.Extractor.Util
+import Language.LLVMIR.Extractor.Context
 
 import Foreign.C.String
 
-getIdent :: Value -> IO String
-getIdent v = (FFI.getValueName v) >>= peekCString
+getIdent :: Value -> Context IO String
+getIdent v = liftIO $ (FFI.getValueName v) >>= peekCString

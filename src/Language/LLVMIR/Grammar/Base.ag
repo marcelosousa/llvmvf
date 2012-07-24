@@ -37,7 +37,7 @@ type BasicBlocks = [BasicBlock]
 type Instructions = [Instruction]
 type Attributes = [Attribute]
 type ModuleAsms = [ModuleAsm]
-type NamedTys = [NamedTy]
+type NamedTypes   = map {Id} Type
 type Aliases = [Alias]
 type Ints = [Int]
 
@@ -73,7 +73,7 @@ data Module
     target :: TargetData
     gvars  :: Globals
     funs   :: Functions
-    nmdtys :: NamedTys 
+    nmdtys :: NamedTypes 
 --          aliases :: Aliases
 --          symbtbl :: {[SymbolTableEntry]}
 --          namedm :: NamedMetadata
@@ -102,11 +102,6 @@ data TargetData
 data ModuleAsm
       | ModuleAsm asm :: String
       
-data NamedTy 
-      | NmTy 
-          name :: Id
---          ty   :: Type
-
 data Global 
       | GlobalVar 
           name    :: Id
@@ -433,7 +428,7 @@ data Alias
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
   
-set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction NamedTy DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential ConstantExpr RetInst
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential ConstantExpr RetInst NamedTypes
 
 deriving Every: Show
 deriving Every: Eq

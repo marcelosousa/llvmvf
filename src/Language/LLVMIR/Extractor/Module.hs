@@ -1,5 +1,5 @@
 {-#LANGUAGE FlexibleContexts #-}
-{-#LANGUAGE DoAndIfThenElse #-}
+{-#LANGUAGE DoAndIfThenElse, RecordWildCards #-}
 -------------------------------------------------------------------------------
 -- Module    :  Language.LLVMIR.Extractor.Module
 -- Copyright :  (c) 2012 Marcelo Sousa
@@ -9,6 +9,9 @@ module Language.LLVMIR.Extractor.Module (extract) where
 
 import Control.Monad(forM_, forM, foldM)
 import Control.Monad.Reader
+import Control.Monad.Trans.State.Strict
+import Control.Monad.IO.Class
+import qualified Data.Map as Map
 
 import System.FilePath
 
@@ -29,36 +32,42 @@ import Language.LLVMIR.Extractor.Type
 import Language.LLVMIR.Extractor.Util
 import Language.LLVMIR.Extractor.Linkage
 import Language.LLVMIR.Extractor.Value
+import Language.LLVMIR.Extractor.Context
 
 import Foreign.C.String
 import Foreign.C.Types
 
 type FunctionName = String
 
-isConstant :: Value -> IO Bool
-isConstant v = do ci <- FFI.isGlobalConstant v 
+isConstant :: Value -> Context IO Bool
+isConstant v = do ci <- liftIO $ FFI.isGlobalConstant v 
                   return $ cInt2Bool ci
 
-hasInitializer :: Value -> IO Bool
-hasInitializer v = do hi <- FFI.hasInitializer v
+hasInitializer :: Value -> Context IO Bool
+hasInitializer v = do hi <- liftIO $ FFI.hasInitializer v
                       return $ cInt2Bool hi
 
-extract :: FilePath -> IO LL.Module 
-extract file = do mdl    <- readBitcodeFromFile file
-                  ident  <- getModuleIdentifier mdl
-                  layout <- getDataLayout mdl
-                  target <- getTargetData mdl
-                  gvars  <- getGlobalVar mdl
-                  funs   <- getFuncs mdl
---                  aliases <- getAliases mdl
-                  return $ LL.Module ident layout target gvars funs [] -- aliases 
+extract :: FilePath -> IO LL.Module
+extract file = do mdl <- readBitcodeFromFile file
+                  let env = Env mdl Map.empty Nothing
+                  runContext extractModule env
+
+extractModule :: Context IO LL.Module
+extractModule = do ident  <- getModuleIdentifier
+                   layout <- getDataLayout
+                   target <- getTargetData
+                   gvars  <- getGlobalVar
+                   funs   <- getFuns
+                   e@Env{..} <- getEnv
+                   return $ LL.Module ident layout target gvars funs nmdtys
 
 -- Module Identifier
-getModuleIdentifier :: Module -> IO String
-getModuleIdentifier mdl = withModule mdl $ \mdlPtr -> do
+getModuleIdentifier :: Context IO String
+getModuleIdentifier = do e@Env{..} <- getEnv
+                         liftIO $ withModule mdl $ \mdlPtr -> do
                            cs <- FFI.getModuleIdentifier mdlPtr
                            peekCString cs
-
+ 
 -- Target data
 pSomewhere :: String -> Parser String
 pSomewhere x =  pToken x <* pList pAscii
@@ -68,15 +77,17 @@ pTarget :: Parser LL.Target
 pTarget =  const LL.MacOs <$> pSomewhere "apple"
        <|> const LL.Linux <$> pSomewhere "linux"  
           
-getTargetData :: Module -> IO LL.TargetData
-getTargetData mdl = withModule mdl $ \mdlPtr -> do 
+getTargetData :: Context IO LL.TargetData
+getTargetData = do e@Env{..} <- getEnv
+                   liftIO $ withModule mdl $ \mdlPtr -> do 
                      cs <- FFI.getTarget mdlPtr
                      s <- peekCString cs                            
                      return $ LL.TargetData s $ runParser "parsing target" pTarget s
  
 -- Data Layout    
-getDataLayout :: Module -> IO LL.DataLayout
-getDataLayout mdl = withModule mdl $ \mdlPtr -> do 
+getDataLayout :: Context IO LL.DataLayout
+getDataLayout = do e@Env{..} <- getEnv
+                   liftIO $ withModule mdl $ \mdlPtr -> do 
                      cs <- FFI.getDataLayout mdlPtr
                      s <- peekCString cs                            
                      return $ LL.DataLayout $ runParser "error" pDataLayout s
@@ -93,71 +104,61 @@ pDataLayout = (:) <$> pElem <*> pList (pSym '-' *> pElem)
 -- pEndianness :: Parser Endianness
 -- pEndianness =  const BigEndian    <$> pToken "E"
 --            <|> const LittleEndian <$> pToken "e"
-           
 
 -- Global Variables
-getGlobalVar :: Module -> IO LL.Globals
-getGlobalVar mdl = do globals <- getGlobalVariables mdl
-                      forM globals getGlobal
+getGlobalVar :: Context IO LL.Globals
+getGlobalVar = do e@Env{..} <- getEnv
+                  globals   <- liftIO $ getGlobalVariables mdl
+                  forM globals getGlobal
 
-getInitVal :: Value -> Bool -> IO (Maybe LL.Value)
+getInitVal :: Value -> Bool -> Context IO (Maybe LL.Value)
 getInitVal gv isC | isC == False = return Nothing
-                  | otherwise    = do cval <- FFI.getInitializer gv
+                  | otherwise    = do cval <- liftIO $ FFI.getInitializer gv
                                       val  <- getConstantValue cval
                                       return $ Just val
 
-getGlobal :: (String, Value) -> IO LL.Global
-getGlobal (gname, gval) = do link  <- FFI.getLinkage gval
+getGlobal :: (String, Value) -> Context IO LL.Global
+getGlobal (gname, gval) = do link  <- liftIO $ FFI.getLinkage gval
                              isC   <- hasInitializer gval
-                             align <- FFI.getAlignment gval
-                             unadd <- FFI.hasUnnamedAddr gval
+                             align <- liftIO $ FFI.getAlignment gval
+                             unadd <- liftIO $ FFI.hasUnnamedAddr gval
                              let llalign = LL.Align $ fromEnum align
                                  llunadd = cUInt2Bool unadd
                                  lllink  = convertLinkage $ FFI.toLinkage link
                              llival <- getInitVal gval isC
                              return $ LL.GlobalVar gname lllink isC llunadd llival llalign
 
- 
 -- Functions
-getFuncs :: Module -> IO LL.Functions
-getFuncs mdl = do funs <- getFunctions mdl
-                  forM funs getFunction
+getFuns :: Context IO LL.Functions 
+getFuns = do e@Env{..} <- getEnv
+             funs <- liftIO $ getFunctions mdl
+             forM funs getFunction
 
-getFunction :: (String, Value) -> IO LL.Function
-getFunction (fname, fval) = do b <- FFI.isDeclaration fval
-                               rty  <- (FFI.getFunctionReturnType fval) >>= getType
-                               link <- FFI.getLinkage fval
-                               pars <- getParams fval
+getFunction :: (String, Value) -> Context IO LL.Function
+getFunction (fname, fval) = do b    <- liftIO $ FFI.isDeclaration fval
+                               rty  <- (liftIO $ FFI.getFunctionReturnType fval) >>= getType
+                               link <- liftIO $ FFI.getLinkage fval
+                               pars <- liftIO $ getParams fval
                                params <- forM pars getParam
                                let lllink = convertLinkage $ FFI.toLinkage link
                                if cInt2Bool b
                                then return $ LL.FunctionDecl fname lllink rty params
-                               else do bbs <- getBasicBlocks fval
+                               else do bbs <- liftIO $ getBasicBlocks fval
                                        llbbs <- forM bbs getBasicBlock 
                                        return $ LL.FunctionDef fname lllink rty params llbbs
 
-getParam :: (String, Value) -> IO LL.Parameter
-getParam (pname, pval) = do ty <- typeOf pval 
+getParam :: (String, Value) -> Context IO LL.Parameter
+getParam (pname, pval) = do ty <- typeOf pval
                             return $ LL.Parameter pname ty
 
 -- Basic Blocks                                 
-getBasicBlock :: (String, Value) -> IO LL.BasicBlock
-getBasicBlock (bbname, bbvalue) = do instr  <- getInstructions bbvalue
+getBasicBlock :: (String, Value) -> Context IO LL.BasicBlock
+getBasicBlock (bbname, bbvalue) = do instr  <- liftIO $ getInstructions bbvalue
                                      instrs <- forM instr getInst
                                      return $ LL.BasicBlock bbname instrs
                    
-getInst :: (String, Value) -> IO LL.Instruction
-getInst (instr, instrv) = runReaderT getInstruction instrv
+getInst :: (String, Value) -> Context IO LL.Instruction
+getInst (_,instrv) = do e@Env{..} <- getEnv
+                        putEnv $ e {instr = Just instrv}
+                        getInstruction
 
-{-
--- Aliases
-getAliases :: Module -> IO LL.Aliases
-getAliases mdl = do aliases <- getAlias mdl
-                    hasAlias <- FFI.aliasEmpty (fromModule mdl)
-                    print $ "Module has aliases :" ++ (show hasAlias)
-                    print $ "It has " ++ (show $ length aliases)
-                    forM aliases getAlias'
-
-getAlias' :: (String, Value) -> IO LL.Alias
-getAlias' (aname, aval) = return $ LL.Alias aname
--}

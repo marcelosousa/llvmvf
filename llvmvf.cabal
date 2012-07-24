@@ -17,6 +17,7 @@ Executable llvmvf
                     , fgl           >= 5.4.2.3
                     , uulib         >= 0.9.14
                     , cmdargs
+                    , transformers  >= 0.3.0.0
                     , llvm-base
                     , llvm
     Hs-Source-Dirs:   src/

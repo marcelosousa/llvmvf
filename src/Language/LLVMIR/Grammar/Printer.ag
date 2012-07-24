@@ -24,7 +24,7 @@ sem Parameters Types Values PValues
 sem PValue
   | Tuple lhs.pp = char '[' <+> @x1.pp <> char ',' <+> @x2.pp <+> char ']'
 
-attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTy NamedTys Constant GlobalValue ConstantDataSequential ConstantExpr RetInst
+attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTypes Constant GlobalValue ConstantDataSequential ConstantExpr RetInst
   syn pp use {<$>} {P.empty} :: {Doc}
 
 attr Target 
@@ -126,8 +126,9 @@ pBitBinOp ty id c op1 op2 = id <+> char '=' <+> text c <+> ty <+> op1 <> char ',
 sem Alias
   | Alias lhs.pp = text "%" <> text @name.self
 
-sem NamedTy
-  | NmTy lhs.pp = text "%" <> text @name.self
+sem NamedTypes
+  | Nil   lhs.pp = text ""
+  | Entry lhs.pp = text "%" <> text @key <+> char '=' <+> @val.pp <$> @tl.pp
 
 sem IntPredicate
   | IntEQ  lhs.pp = text "eq" 
