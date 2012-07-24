@@ -34,6 +34,7 @@ data Type
     | TyVector
         numEl :: Int
         ty    :: Type
+    | TyUndefined
 
 data TyFloatPoint
     | TyHalf -- ^ Compatible with i386?

@@ -1,4 +1,4 @@
-{-#LANGUAGE DoAndIfThenElse #-}
+{-#LANGUAGE DoAndIfThenElse, RecordWildCards #-}
 -------------------------------------------------------------------------------
 -- Module    :  Language.LLVMIR.Extractor.Type
 -- Copyright :  (c) 2012 Marcelo Sousa
@@ -19,6 +19,8 @@ import qualified Language.LLVMIR as LL
 import Language.LLVMIR.Extractor.Util
 import Language.LLVMIR.Extractor.Context
 
+import qualified Data.Map as Map
+import Data.Maybe
 import Debug.Trace (trace)
 
 {- TODO
@@ -28,6 +30,10 @@ FFI.X86_MMXTypeKind
 
 type Type     = FFI.TypeRef
 type TypeKind = FFI.TypeKind
+
+typeOf :: Value -> Context IO LL.Type
+typeOf v = do ty <- liftIO $ FFI.typeOf v
+              getType ty
 
 getType :: Type -> Context IO LL.Type
 getType ty = do tyk <- liftIO $ FFI.getTypeKind ty
@@ -54,18 +60,9 @@ getTypeWithKind ty FFI.VectorTypeKind    = do n   <- liftIO $ FFI.getVectorSize 
                                               et  <- liftIO $ FFI.getElementType ty
                                               etd <- getType et
                                               return $ LL.TyVector (fromIntegral n) etd
-getTypeWithKind ty FFI.StructTypeKind    = do hnS <- liftIO $ FFI.hasNameStruct ty >>= (return . cInt2Bool) -- * THE ONE TO CHANGE
-                                              c <- liftIO $ FFI.countStructElementTypes ty >>= (return . fromIntegral)
-                                              if hnS 
-                                                 then do n <- liftIO $ FFI.getStructName ty >>= peekCString
-                                                         return $ LL.TyStruct n c []
-                                                 else do pars <- liftIO $ allocaArray c $ \ args -> do
-                                                           FFI.getStructElementTypes ty args
-                                                           peekArray c args
-                                                         elems <- forM pars getType 
-                                                         return $ LL.TyStruct "" c elems
+getTypeWithKind ty FFI.StructTypeKind    = getStructType ty
 getTypeWithKind ty FFI.FunctionTypeKind  = do retty <- (liftIO $ FFI.getReturnType ty) >>= getType
-                                              n     <- liftIO $ FFI.countParamTypes ty >>= (return . fromIntegral)
+                                              n     <- liftIO $ FFI.countParamTypes ty >>= return . fromIntegral
                                               pars <- liftIO $ allocaArray n $ \ args -> do
                                                         FFI.getParamTypes ty args
                                                         peekArray n args
@@ -73,6 +70,39 @@ getTypeWithKind ty FFI.FunctionTypeKind  = do retty <- (liftIO $ FFI.getReturnTy
                                               return $ LL.TyFunction party retty
 getTypeWithKind ty x  = error $ "'getTypeWithKind': Type " ++ (show x) ++ " not suppported" 
 
-typeOf :: Value -> Context IO LL.Type
-typeOf v = do ty <- liftIO $ FFI.typeOf v
-              getType ty
+{-
+getTypeName :: Type -> Context IO (Maybe String)
+getTypeName ty = do tyk <- liftIO $ FFI.getTypeKind ty
+                    getTypeNameWithKind ty tyk
+-}
+
+getTypeNameWithKind :: Type -> TypeKind -> Context IO (Maybe String)
+getTypeNameWithKind ty FFI.StructTypeKind = do hasName <- liftIO $ FFI.hasNameStruct ty >>= return . cInt2Bool
+                                               if hasName
+                                               then liftIO $ FFI.getStructName ty >>= peekCString >>= return . Just
+                                               else return Nothing
+getTypeNameWithKind ty _                  = return Nothing
+
+getStructTypeParams :: Type -> Int -> IO [Type]
+getStructTypeParams ty c = allocaArray c $ \ args -> do
+                             FFI.getStructElementTypes ty args
+                             peekArray c args 
+
+getStructType :: Type -> Context IO LL.Type
+getStructType ty = do e@Env{..} <- getEnv
+                      do c       <- liftIO $ FFI.countStructElementTypes ty >>= return . fromIntegral
+                         hasName <- getTypeNameWithKind ty FFI.StructTypeKind
+                         pars <- liftIO $ getStructTypeParams ty c
+                         case hasName of
+                           Nothing   -> do elems <- forM pars getType 
+                                           return $ LL.TyStruct "" c elems           
+                           Just name -> case Map.lookup name nmdtys of
+                                          Nothing -> do let nmdtys' = Map.insert name LL.TyUndefined nmdtys
+                                                        putEnv e{nmdtys = nmdtys'}
+                                                        pars' <- forM pars getType
+                                                        e'@Env{..} <- getEnv
+                                                        let sTy = LL.TyStruct name c pars'
+                                                            fnmdtys = Map.adjust (const sTy) name nmdtys
+                                                        putEnv e'{nmdtys = fnmdtys}
+                                                        return $ LL.TyStruct name c []  --return sTy
+                                          Just t  -> return $ LL.TyStruct name c []     --return t

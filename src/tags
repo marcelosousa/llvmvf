@@ -47,7 +47,7 @@ Ccc	src/Language/LLVMIR.hs	683;"	d
 Coldcc	src/Language/LLVMIR.hs	684;"	d
 CommonLinkage	src/Language/LLVMIR.hs	4052;"	d
 CompareConstantExpr	src/Language/LLVMIR.hs	1084;"	d
-Constant	src/Language/LLVMIR.hs	6356;"	d
+Constant	src/Language/LLVMIR.hs	6373;"	d
 Constant	src/Language/LLVMIR.hs	752;"	t
 ConstantAggregateZero	./Language/LLVMIR/Extractor/ConstantClass.hs	12;"	d
 ConstantAggregateZero	src/Language/LLVMIR.hs	753;"	d
@@ -83,7 +83,7 @@ DLLImportLinkage	src/Language/LLVMIR.hs	4054;"	d
 DLayout	src/Language/LLVMIR.hs	1290;"	t
 DataLayout	src/Language/LLVMIR.hs	1328;"	d
 DataLayout	src/Language/LLVMIR.hs	1328;"	t
-Default	src/Language/LLVMIR.hs	6477;"	d
+Default	src/Language/LLVMIR.hs	6494;"	d
 DefinitionTy	src/Language/LLVMIR.hs	1364;"	t
 Env	./Language/LLVMIR/Extractor/Context.hs	21;"	d
 Env	./Language/LLVMIR/Extractor/Context.hs	21;"	t
@@ -142,11 +142,11 @@ GlobalVar	src/Language/LLVMIR.hs	1830;"	d
 GlobalVariable	./Language/LLVMIR/Extractor/ConstantClass.hs	33;"	d
 GlobalVariable	src/Language/LLVMIR.hs	1885;"	d
 Globals	src/Language/LLVMIR.hs	1979;"	t
-Hidden	src/Language/LLVMIR.hs	6478;"	d
+Hidden	src/Language/LLVMIR.hs	6495;"	d
 ICmp	./Language/LLVMIR/Extractor/Opcode.hs	53;"	d
 ICmp	src/Language/LLVMIR.hs	2177;"	d
 Id	src/Language/LLVMIR.hs	2034;"	t
-Id	src/Language/LLVMIR.hs	6357;"	d
+Id	src/Language/LLVMIR.hs	6374;"	d
 Identifier	src/Language/LLVMIR.hs	2060;"	t
 Identifiers	src/Language/LLVMIR.hs	2117;"	t
 InRegAttribute	src/Language/LLVMIR.hs	311;"	d
@@ -287,16 +287,16 @@ Inh_Triplet	src/Language/LLVMIR.hs	5903;"	d
 Inh_Triplet	src/Language/LLVMIR.hs	5903;"	t
 Inh_TyFloatPoint	src/Language/LLVMIR.hs	5947;"	d
 Inh_TyFloatPoint	src/Language/LLVMIR.hs	5947;"	t
-Inh_Type	src/Language/LLVMIR.hs	6082;"	d
-Inh_Type	src/Language/LLVMIR.hs	6082;"	t
-Inh_Types	src/Language/LLVMIR.hs	6307;"	d
-Inh_Types	src/Language/LLVMIR.hs	6307;"	t
-Inh_Value	src/Language/LLVMIR.hs	6368;"	d
-Inh_Value	src/Language/LLVMIR.hs	6368;"	t
-Inh_Values	src/Language/LLVMIR.hs	6428;"	d
-Inh_Values	src/Language/LLVMIR.hs	6428;"	t
-Inh_Visibility	src/Language/LLVMIR.hs	6492;"	d
-Inh_Visibility	src/Language/LLVMIR.hs	6492;"	t
+Inh_Type	src/Language/LLVMIR.hs	6085;"	d
+Inh_Type	src/Language/LLVMIR.hs	6085;"	t
+Inh_Types	src/Language/LLVMIR.hs	6324;"	d
+Inh_Types	src/Language/LLVMIR.hs	6324;"	t
+Inh_Value	src/Language/LLVMIR.hs	6385;"	d
+Inh_Value	src/Language/LLVMIR.hs	6385;"	t
+Inh_Values	src/Language/LLVMIR.hs	6445;"	d
+Inh_Values	src/Language/LLVMIR.hs	6445;"	t
+Inh_Visibility	src/Language/LLVMIR.hs	6509;"	d
+Inh_Visibility	src/Language/LLVMIR.hs	6509;"	t
 Inlinehint	src/Language/LLVMIR.hs	1404;"	d
 InsertElement	./Language/LLVMIR/Extractor/Opcode.hs	62;"	d
 InsertElementConstantExpr	src/Language/LLVMIR.hs	1088;"	d
@@ -366,7 +366,7 @@ MIdentifier	src/Language/LLVMIR.hs	4625;"	t
 MLabel	src/Language/LLVMIR.hs	4665;"	t
 MLinkageTy	src/Language/LLVMIR.hs	4704;"	t
 MModuleAsms	src/Language/LLVMIR.hs	4744;"	t
-MPretty	src/Language/LLVMIR/Grammar/Printer.ag	271;"	c
+MPretty	src/Language/LLVMIR/Grammar/Printer.ag	272;"	c
 MSection	src/Language/LLVMIR.hs	4783;"	t
 MUnnamedAddr	src/Language/LLVMIR.hs	4822;"	t
 MValue	src/Language/LLVMIR.hs	4858;"	t
@@ -418,7 +418,7 @@ Parameters	src/Language/LLVMIR.hs	5383;"	t
 Parse	Main.hs	22;"	d
 PrivateLinkage	src/Language/LLVMIR.hs	4064;"	d
 ProgramOptions	Main.hs	34;"	t
-Protected	src/Language/LLVMIR.hs	6479;"	d
+Protected	src/Language/LLVMIR.hs	6496;"	d
 PtrToInt	./Language/LLVMIR/Extractor/Opcode.hs	50;"	d
 PtrToInt	src/Language/LLVMIR.hs	2184;"	d
 ReadNoneAttribute	src/Language/LLVMIR.hs	322;"	d
@@ -596,16 +596,16 @@ Syn_Triplet	src/Language/LLVMIR.hs	5904;"	d
 Syn_Triplet	src/Language/LLVMIR.hs	5904;"	t
 Syn_TyFloatPoint	src/Language/LLVMIR.hs	5948;"	d
 Syn_TyFloatPoint	src/Language/LLVMIR.hs	5948;"	t
-Syn_Type	src/Language/LLVMIR.hs	6083;"	d
-Syn_Type	src/Language/LLVMIR.hs	6083;"	t
-Syn_Types	src/Language/LLVMIR.hs	6308;"	d
-Syn_Types	src/Language/LLVMIR.hs	6308;"	t
-Syn_Value	src/Language/LLVMIR.hs	6369;"	d
-Syn_Value	src/Language/LLVMIR.hs	6369;"	t
-Syn_Values	src/Language/LLVMIR.hs	6429;"	d
-Syn_Values	src/Language/LLVMIR.hs	6429;"	t
-Syn_Visibility	src/Language/LLVMIR.hs	6493;"	d
-Syn_Visibility	src/Language/LLVMIR.hs	6493;"	t
+Syn_Type	src/Language/LLVMIR.hs	6086;"	d
+Syn_Type	src/Language/LLVMIR.hs	6086;"	t
+Syn_Types	src/Language/LLVMIR.hs	6325;"	d
+Syn_Types	src/Language/LLVMIR.hs	6325;"	t
+Syn_Value	src/Language/LLVMIR.hs	6386;"	d
+Syn_Value	src/Language/LLVMIR.hs	6386;"	t
+Syn_Values	src/Language/LLVMIR.hs	6446;"	d
+Syn_Values	src/Language/LLVMIR.hs	6446;"	t
+Syn_Visibility	src/Language/LLVMIR.hs	6510;"	d
+Syn_Visibility	src/Language/LLVMIR.hs	6510;"	t
 T_Alias	src/Language/LLVMIR.hs	121;"	t
 T_Aliases	src/Language/LLVMIR.hs	156;"	t
 T_Align	src/Language/LLVMIR.hs	212;"	t
@@ -674,11 +674,11 @@ T_Target	src/Language/LLVMIR.hs	5819;"	t
 T_TargetData	src/Language/LLVMIR.hs	5865;"	t
 T_Triplet	src/Language/LLVMIR.hs	5902;"	t
 T_TyFloatPoint	src/Language/LLVMIR.hs	5946;"	t
-T_Type	src/Language/LLVMIR.hs	6081;"	t
-T_Types	src/Language/LLVMIR.hs	6306;"	t
-T_Value	src/Language/LLVMIR.hs	6367;"	t
-T_Values	src/Language/LLVMIR.hs	6427;"	t
-T_Visibility	src/Language/LLVMIR.hs	6491;"	t
+T_Type	src/Language/LLVMIR.hs	6084;"	t
+T_Types	src/Language/LLVMIR.hs	6323;"	t
+T_Value	src/Language/LLVMIR.hs	6384;"	t
+T_Values	src/Language/LLVMIR.hs	6444;"	t
+T_Visibility	src/Language/LLVMIR.hs	6508;"	t
 Target	src/Language/LLVMIR.hs	5808;"	t
 TargetData	src/Language/LLVMIR.hs	5857;"	d
 TargetData	src/Language/LLVMIR.hs	5857;"	t
@@ -702,14 +702,15 @@ TyOpaque	src/Language/LLVMIR.hs	6046;"	d
 TyPPCFP128	src/Language/LLVMIR.hs	5927;"	d
 TyPointer	src/Language/LLVMIR.hs	6047;"	d
 TyStruct	src/Language/LLVMIR.hs	6048;"	d
-TyVector	src/Language/LLVMIR.hs	6049;"	d
-TyVoid	src/Language/LLVMIR.hs	6050;"	d
-Type	./Language/LLVMIR/Extractor/Type.hs	29;"	t
+TyUndefined	src/Language/LLVMIR.hs	6049;"	d
+TyVector	src/Language/LLVMIR.hs	6050;"	d
+TyVoid	src/Language/LLVMIR.hs	6051;"	d
+Type	./Language/LLVMIR/Extractor/Type.hs	31;"	t
 Type	src/Language/LLVMIR.hs	6040;"	t
-TypeKind	./Language/LLVMIR/Extractor/Type.hs	30;"	t	file:
-Types	src/Language/LLVMIR.hs	6299;"	t
+TypeKind	./Language/LLVMIR/Extractor/Type.hs	32;"	t	file:
+Types	src/Language/LLVMIR.hs	6316;"	t
 Tyx86FP80	src/Language/LLVMIR.hs	5928;"	d
-Tyx86MMX	src/Language/LLVMIR.hs	6051;"	d
+Tyx86MMX	src/Language/LLVMIR.hs	6052;"	d
 UBr	src/Language/LLVMIR.hs	2196;"	d
 UDiv	./Language/LLVMIR/Extractor/Opcode.hs	22;"	d
 UDiv	src/Language/LLVMIR.hs	2197;"	d
@@ -727,10 +728,10 @@ UserOp2	./Language/LLVMIR/Extractor/Opcode.hs	59;"	d
 Uwtable	src/Language/LLVMIR.hs	1418;"	d
 VAArg	./Language/LLVMIR/Extractor/Opcode.hs	60;"	d
 Value	./Language/LLVMIR/Extractor/Util.hs	13;"	t
-Value	src/Language/LLVMIR.hs	6356;"	t
+Value	src/Language/LLVMIR.hs	6373;"	t
 ValueRet	src/Language/LLVMIR.hs	5727;"	d
-Values	src/Language/LLVMIR.hs	6420;"	t
-Visibility	src/Language/LLVMIR.hs	6477;"	t
+Values	src/Language/LLVMIR.hs	6437;"	t
+Visibility	src/Language/LLVMIR.hs	6494;"	t
 VoidRet	src/Language/LLVMIR.hs	5728;"	d
 WeakAnyLinkage	src/Language/LLVMIR.hs	4065;"	d
 WeakODRLinkage	src/Language/LLVMIR.hs	4066;"	d
@@ -745,7 +746,7 @@ cInt2Bool	./Language/LLVMIR/Extractor/Util.hs	20;"	v
 cUInt2Bool	./Language/LLVMIR/Extractor/Util.hs	16;"	v
 convOps	./Language/LLVMIR/Extractor/Instruction.hs	211;"	v
 convertLinkage	./Language/LLVMIR/Extractor/Linkage.hs	13;"	v
-escaped	src/Language/LLVMIR/Grammar/Printer.ag	263;"	v
+escaped	src/Language/LLVMIR/Grammar/Printer.ag	264;"	v
 extract	./Language/LLVMIR/Extractor/Module.hs	51;"	v
 extractModule	./Language/LLVMIR/Extractor/Module.hs	56;"	v	file:
 getBasicBlock	./Language/LLVMIR/Extractor/Module.hs	156;"	v	file:
@@ -788,10 +789,13 @@ getOperands	./Language/LLVMIR/Extractor/Context.hs	43;"	v
 getOtherOp	./Language/LLVMIR/Extractor/Instruction.hs	171;"	v
 getPHIArgs	./Language/LLVMIR/Extractor/Instruction.hs	29;"	v
 getParam	./Language/LLVMIR/Extractor/Module.hs	151;"	v	file:
+getStructType	./Language/LLVMIR/Extractor/Type.hs	92;"	v	file:
+getStructTypeParams	./Language/LLVMIR/Extractor/Type.hs	87;"	v	file:
 getTargetData	./Language/LLVMIR/Extractor/Module.hs	81;"	v	file:
 getTerminatorOp	./Language/LLVMIR/Extractor/Instruction.hs	84;"	v
-getType	./Language/LLVMIR/Extractor/Type.hs	33;"	v
-getTypeWithKind	./Language/LLVMIR/Extractor/Type.hs	37;"	v
+getType	./Language/LLVMIR/Extractor/Type.hs	39;"	v
+getTypeNameWithKind	./Language/LLVMIR/Extractor/Type.hs	80;"	v	file:
+getTypeWithKind	./Language/LLVMIR/Extractor/Type.hs	43;"	v
 getValue	./Language/LLVMIR/Extractor/Value.hs	30;"	v
 hasInitializer	./Language/LLVMIR/Extractor/Module.hs	47;"	v	file:
 input	Main.hs	35;"	v
@@ -811,8 +815,8 @@ pDataLayout	./Language/LLVMIR/Extractor/Module.hs	102;"	v	file:
 pElem	./Language/LLVMIR/Extractor/Module.hs	99;"	v	file:
 pSomewhere	./Language/LLVMIR/Extractor/Module.hs	73;"	v	file:
 pTarget	./Language/LLVMIR/Extractor/Module.hs	77;"	v	file:
-ppKeyword	src/Language/LLVMIR/Grammar/Printer.ag	268;"	v
-ppPName	src/Language/LLVMIR/Grammar/Printer.ag	258;"	v
+ppKeyword	src/Language/LLVMIR/Grammar/Printer.ag	269;"	v
+ppPName	src/Language/LLVMIR/Grammar/Printer.ag	259;"	v
 pp_Syn_Alias	src/Language/LLVMIR.hs	123;"	v
 pp_Syn_Aliases	src/Language/LLVMIR.hs	158;"	v
 pp_Syn_Align	src/Language/LLVMIR.hs	214;"	v
@@ -844,11 +848,11 @@ pp_Syn_RetInst	src/Language/LLVMIR.hs	5740;"	v
 pp_Syn_Target	src/Language/LLVMIR.hs	5821;"	v
 pp_Syn_TargetData	src/Language/LLVMIR.hs	5867;"	v
 pp_Syn_TyFloatPoint	src/Language/LLVMIR.hs	5948;"	v
-pp_Syn_Type	src/Language/LLVMIR.hs	6083;"	v
-pp_Syn_Types	src/Language/LLVMIR.hs	6308;"	v
-pp_Syn_Value	src/Language/LLVMIR.hs	6369;"	v
-pp_Syn_Values	src/Language/LLVMIR.hs	6429;"	v
-pretty'	src/Language/LLVMIR/Grammar/Printer.ag	272;"	v
+pp_Syn_Type	src/Language/LLVMIR.hs	6086;"	v
+pp_Syn_Types	src/Language/LLVMIR.hs	6325;"	v
+pp_Syn_Value	src/Language/LLVMIR.hs	6386;"	v
+pp_Syn_Values	src/Language/LLVMIR.hs	6446;"	v
+pretty'	src/Language/LLVMIR/Grammar/Printer.ag	273;"	v
 putEnv	./Language/LLVMIR/Extractor/Context.hs	40;"	v
 runContext	./Language/LLVMIR/Extractor/Context.hs	31;"	v
 runOption	Main.hs	30;"	v
@@ -921,11 +925,11 @@ self_Syn_Target	src/Language/LLVMIR.hs	5821;"	v
 self_Syn_TargetData	src/Language/LLVMIR.hs	5867;"	v
 self_Syn_Triplet	src/Language/LLVMIR.hs	5904;"	v
 self_Syn_TyFloatPoint	src/Language/LLVMIR.hs	5948;"	v
-self_Syn_Type	src/Language/LLVMIR.hs	6083;"	v
-self_Syn_Types	src/Language/LLVMIR.hs	6308;"	v
-self_Syn_Value	src/Language/LLVMIR.hs	6369;"	v
-self_Syn_Values	src/Language/LLVMIR.hs	6429;"	v
-self_Syn_Visibility	src/Language/LLVMIR.hs	6493;"	v
+self_Syn_Type	src/Language/LLVMIR.hs	6086;"	v
+self_Syn_Types	src/Language/LLVMIR.hs	6325;"	v
+self_Syn_Value	src/Language/LLVMIR.hs	6386;"	v
+self_Syn_Values	src/Language/LLVMIR.hs	6446;"	v
+self_Syn_Visibility	src/Language/LLVMIR.hs	6510;"	v
 sem_Alias	src/Language/LLVMIR.hs	118;"	v
 sem_Alias_Alias	src/Language/LLVMIR.hs	132;"	v
 sem_Aliases	src/Language/LLVMIR.hs	153;"	v
@@ -1251,32 +1255,33 @@ sem_TyFloatPoint_TyFloat	src/Language/LLVMIR.hs	5984;"	v
 sem_TyFloatPoint_TyHalf	src/Language/LLVMIR.hs	5998;"	v
 sem_TyFloatPoint_TyPPCFP128	src/Language/LLVMIR.hs	6012;"	v
 sem_TyFloatPoint_Tyx86FP80	src/Language/LLVMIR.hs	6026;"	v
-sem_Type	src/Language/LLVMIR.hs	6056;"	v
-sem_Type_TyArray	src/Language/LLVMIR.hs	6093;"	v
-sem_Type_TyFloatPoint	src/Language/LLVMIR.hs	6112;"	v
-sem_Type_TyFunction	src/Language/LLVMIR.hs	6132;"	v
-sem_Type_TyInt	src/Language/LLVMIR.hs	6155;"	v
-sem_Type_TyLabel	src/Language/LLVMIR.hs	6169;"	v
-sem_Type_TyMetadata	src/Language/LLVMIR.hs	6183;"	v
-sem_Type_TyOpaque	src/Language/LLVMIR.hs	6197;"	v
-sem_Type_TyPointer	src/Language/LLVMIR.hs	6212;"	v
-sem_Type_TyStruct	src/Language/LLVMIR.hs	6233;"	v
-sem_Type_TyVector	src/Language/LLVMIR.hs	6253;"	v
-sem_Type_TyVoid	src/Language/LLVMIR.hs	6271;"	v
-sem_Type_Tyx86MMX	src/Language/LLVMIR.hs	6285;"	v
-sem_Types	src/Language/LLVMIR.hs	6303;"	v
-sem_Types_Cons	src/Language/LLVMIR.hs	6318;"	v
-sem_Types_Nil	src/Language/LLVMIR.hs	6342;"	v
-sem_Value	src/Language/LLVMIR.hs	6362;"	v
-sem_Value_Constant	src/Language/LLVMIR.hs	6378;"	v
-sem_Value_Id	src/Language/LLVMIR.hs	6398;"	v
-sem_Values	src/Language/LLVMIR.hs	6424;"	v
-sem_Values_Cons	src/Language/LLVMIR.hs	6439;"	v
-sem_Values_Nil	src/Language/LLVMIR.hs	6463;"	v
-sem_Visibility	src/Language/LLVMIR.hs	6484;"	v
-sem_Visibility_Default	src/Language/LLVMIR.hs	6501;"	v
-sem_Visibility_Hidden	src/Language/LLVMIR.hs	6509;"	v
-sem_Visibility_Protected	src/Language/LLVMIR.hs	6517;"	v
+sem_Type	src/Language/LLVMIR.hs	6057;"	v
+sem_Type_TyArray	src/Language/LLVMIR.hs	6096;"	v
+sem_Type_TyFloatPoint	src/Language/LLVMIR.hs	6115;"	v
+sem_Type_TyFunction	src/Language/LLVMIR.hs	6135;"	v
+sem_Type_TyInt	src/Language/LLVMIR.hs	6158;"	v
+sem_Type_TyLabel	src/Language/LLVMIR.hs	6172;"	v
+sem_Type_TyMetadata	src/Language/LLVMIR.hs	6186;"	v
+sem_Type_TyOpaque	src/Language/LLVMIR.hs	6200;"	v
+sem_Type_TyPointer	src/Language/LLVMIR.hs	6215;"	v
+sem_Type_TyStruct	src/Language/LLVMIR.hs	6236;"	v
+sem_Type_TyUndefined	src/Language/LLVMIR.hs	6254;"	v
+sem_Type_TyVector	src/Language/LLVMIR.hs	6270;"	v
+sem_Type_TyVoid	src/Language/LLVMIR.hs	6288;"	v
+sem_Type_Tyx86MMX	src/Language/LLVMIR.hs	6302;"	v
+sem_Types	src/Language/LLVMIR.hs	6320;"	v
+sem_Types_Cons	src/Language/LLVMIR.hs	6335;"	v
+sem_Types_Nil	src/Language/LLVMIR.hs	6359;"	v
+sem_Value	src/Language/LLVMIR.hs	6379;"	v
+sem_Value_Constant	src/Language/LLVMIR.hs	6395;"	v
+sem_Value_Id	src/Language/LLVMIR.hs	6415;"	v
+sem_Values	src/Language/LLVMIR.hs	6441;"	v
+sem_Values_Cons	src/Language/LLVMIR.hs	6456;"	v
+sem_Values_Nil	src/Language/LLVMIR.hs	6480;"	v
+sem_Visibility	src/Language/LLVMIR.hs	6501;"	v
+sem_Visibility_Default	src/Language/LLVMIR.hs	6518;"	v
+sem_Visibility_Hidden	src/Language/LLVMIR.hs	6526;"	v
+sem_Visibility_Protected	src/Language/LLVMIR.hs	6534;"	v
 standard	Main.hs	40;"	v
 toConstantClass	./Language/LLVMIR/Extractor/ConstantClass.hs	37;"	v
 toConstantDataSequentialClass	./Language/LLVMIR/Extractor/ConstantClass.hs	43;"	v
@@ -1284,7 +1289,7 @@ toGlobalValueClass	./Language/LLVMIR/Extractor/ConstantClass.hs	40;"	v
 toIntPredicate	./Language/LLVMIR/Extractor/Predicate.hs	11;"	v
 toOpcode	./Language/LLVMIR/Extractor/Opcode.hs	70;"	v
 toRealPredicate	./Language/LLVMIR/Extractor/Predicate.hs	23;"	v
-typeOf	./Language/LLVMIR/Extractor/Type.hs	77;"	v
+typeOf	./Language/LLVMIR/Extractor/Type.hs	35;"	v
 typeoutput	Main.hs	36;"	v
 unContext	./Language/LLVMIR/Extractor/Context.hs	27;"	v
 unaryConstantExpr	./Language/LLVMIR/Extractor/Value.hs	121;"	v
@@ -1358,8 +1363,8 @@ wrap_Target	src/Language/LLVMIR.hs	5825;"	v
 wrap_TargetData	src/Language/LLVMIR.hs	5871;"	v
 wrap_Triplet	src/Language/LLVMIR.hs	5908;"	v
 wrap_TyFloatPoint	src/Language/LLVMIR.hs	5952;"	v
-wrap_Type	src/Language/LLVMIR.hs	6087;"	v
-wrap_Types	src/Language/LLVMIR.hs	6312;"	v
-wrap_Value	src/Language/LLVMIR.hs	6373;"	v
-wrap_Values	src/Language/LLVMIR.hs	6433;"	v
-wrap_Visibility	src/Language/LLVMIR.hs	6497;"	v
+wrap_Type	src/Language/LLVMIR.hs	6090;"	v
+wrap_Types	src/Language/LLVMIR.hs	6329;"	v
+wrap_Value	src/Language/LLVMIR.hs	6390;"	v
+wrap_Values	src/Language/LLVMIR.hs	6450;"	v
+wrap_Visibility	src/Language/LLVMIR.hs	6514;"	v

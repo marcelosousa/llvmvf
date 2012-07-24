@@ -47,7 +47,7 @@ sem Target
   | Linux lhs.pp = text "Linux"
 
 sem Module
-  | Module lhs.pp = text ("; ModuleID ='" ++ @id ++ "'") <$> @layout.pp <$> @target.pp <$> @nmdtys.pp <$> @gvars.pp <$> @funs.pp 
+  | Module lhs.pp = text ("; ModuleID ='" ++ @id ++ "'") <$> @layout.pp <$> @target.pp <$> P.empty <$>  @nmdtys.pp <$> @gvars.pp <$> @funs.pp 
 
 sem Global
   | GlobalVar lhs.pp = text "@" <> text @name.self <+> text "=" <+>  @linkage.pp <+> ppKeyword @isUaddr "unnamed_addr" <+> ppKeyword @isConst "constant" <+> text "," <+> @ival.pp <> text "," <+> @align.pp 
@@ -128,7 +128,7 @@ sem Alias
 
 sem NamedTypes
   | Nil   lhs.pp = text ""
-  | Entry lhs.pp = text "%" <> text @key <+> char '=' <+> @val.pp <$> @tl.pp
+  | Entry lhs.pp = @val.pp <$> @tl.pp -- text "%" <> text @key <+> char '=' <+> @val.pp <$> @tl.pp
 
 sem IntPredicate
   | IntEQ  lhs.pp = text "eq" 
@@ -244,6 +244,7 @@ sem Type
   | TyStruct     lhs.pp = char '%' <> dquotes (escaped @name) <+> int @numEl <+> braces @tys.pp
   | TyPointer    lhs.pp = @ty.pp <> char '*'
   | TyVector     lhs.pp = char '<' <> int @numEl <+> char 'x' <+> @ty.pp <> char '>'
+  | TyUndefined  lhs.pp = text "TODO TYPE UNDEFINED"
 
 sem TyFloatPoint
   | TyHalf     lhs.pp = text "half" -- ^ Compatible with i386?
