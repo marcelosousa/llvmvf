@@ -25,6 +25,7 @@ import Language.LLVMIR.Extractor.Value
 import Language.LLVMIR.Extractor.Ident
 import Language.LLVMIR.Extractor.Type
 import Language.LLVMIR.Extractor.Context
+import Language.LLVMIR.Extractor.Atomic
 
 import Control.Monad.IO.Class (liftIO)
 
@@ -155,7 +156,9 @@ getMemoryOp AtomicCmpXchg = error $ "TODO atomicCmpXchg"
 getMemoryOp AtomicRMW     = do ival  <- getInstructionValue
                                ident <- getIdent ival
                                ops   <- getOperands ival >>= mapM getValue
-                               return $ LL.AtomicRMW (LL.Local ident) ops 
+                               op    <- liftIO $ FFI.atomicRMWGetOperation ival >>= return . fromIntegral
+                               ord   <- liftIO $ FFI.atomicRMWGetOrdering ival >>= return . fromIntegral
+                               return $ LL.AtomicRMW (LL.Local ident) ops (toBinOp op) (toAtomicOrdering ord)
 -- error $ "TODO atomicRMW"
 
 -- | Get Cast Instruction
@@ -217,7 +220,7 @@ getOtherOp ExtractValue   = do ival  <- getInstructionValue
                                            FFI.extractValueGetIndices ival args
                                            peekArray n args
                                idxs <- forM idxs' (return . fromIntegral)
-                               return $ LL.ExtractValue (LL.Local ident) (ops!!0) idxs --  error $ "TODO extractvalue"
+                               return $ LL.ExtractValue (LL.Local ident) (ops!!0) idxs 
 getOtherOp InsertValue    = error $ "TODO insertvalue"
 -- exception handling operators
 getOtherOp LandingPad     = error $ "TODO landingpad"

@@ -235,6 +235,8 @@ data Instruction
   | AtomicRMW
       id :: Identifier
       args :: Values
+      op  :: BinOp
+      ord :: AtomicOrdering
  
 data Identifier 
   | Global name :: Id -- (functions, global variables) begin with the '@'
@@ -289,6 +291,29 @@ data CompareConstantExpr
 
 data Align
       | Align n :: Int
+
+data BinOp
+  | OpXchg
+  | OpAdd
+  | OpSub
+  | OpAnd
+  | OpNand
+  | OpOr
+  | OpXor
+  | OpMax
+  | OpMin
+  | OpUMax
+  | OpUMin
+
+data AtomicOrdering
+  | NotAtomic 
+  | Unordered 
+  | Monotonic 
+ -- | // Consume = 3,  // Not specified yet.
+  | Acquire 
+  | Release 
+  | AcquireRelease 
+  | SequentiallyConsistent 
 
 data IntPredicate
       | IntEQ                       -- ^ equal
@@ -427,7 +452,7 @@ data Alias
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
   
-set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential ConstantExpr ConstantFP RetInst NamedTypes CompareConstantExpr
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential ConstantExpr ConstantFP RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering
 
 deriving Every: Show
 deriving Every: Eq
