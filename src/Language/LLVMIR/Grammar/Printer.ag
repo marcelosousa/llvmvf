@@ -12,19 +12,24 @@ imports
 import UU.PPrint as P
 }
 
-attr Parameters Types Values PValues PValue
+attr Parameters Types Values PValues PValue Ints
   syn pp :: {Doc}
 
-sem Parameters Types Values PValues
+sem Parameters Types Values PValues 
   | Nil  lhs.pp = P.empty
   | Cons lhs.pp = if (length @tl.self == 0)
                   then @hd.pp
                   else @hd.pp <> char ',' <+> @tl.pp
 
+sem Ints
+  | Nil lhs.pp = P.empty
+  | Cons lhs.pp = if (length @tl.self == 0)
+                  then int @hd
+                  else int @hd <> char ',' <+> @tl.pp
 sem PValue
   | Tuple lhs.pp = char '[' <+> @x1.pp <> char ',' <+> @x2.pp <+> char ']'
 
-attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTypes Constant GlobalValue ConstantDataSequential ConstantExpr ConstantFP RetInst
+attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTypes Constant GlobalValue ConstantDataSequential ConstantExpr CompareConstantExpr ConstantFP RetInst
   syn pp use {<$>} {P.empty} :: {Doc}
 
 attr Target 
@@ -110,6 +115,8 @@ sem Instruction
   | Xor  lhs.pp = pBitBinOp @ty.pp @id.pp "xor"  @op1.pp @op2.pp
   | PHI  lhs.pp = @id.pp <+> char '=' <+> text "phi" <+> @ty.pp <+> @vals.pp
   | Select lhs.pp = @id.pp <+> char '=' <+> @cond.pp <> char ',' <+> @valt.pp <> char ',' <+> @valf.pp
+  | ExtractValue lhs.pp = @id.pp <+> char '=' <+> text "extractvalue" <+> @aggr.pp <> char ',' <+> @idxs.pp 
+  | AtomicRMW lhs.pp = @id.pp <+> char '=' <+> text "TODO: atomicrmw" <+>  @args.pp  
 
 {
 pConvOp :: Doc -> String -> Doc -> Doc -> Doc
@@ -214,7 +221,7 @@ sem ConstantDataSequential
                                              
 sem ConstantExpr                             
   | BinaryConstantExpr         lhs.pp = text "BinaryConstantExpr"
-  | CompareConstantExpr        lhs.pp = text "CompareConstantExpr"
+  | CompareConstantExpr        lhs.pp = @cmpExpr.pp 
   | ExtractElementConstantExpr lhs.pp = text "ExtractElementConstantExpr"
   | ExtractValueConstantExpr   lhs.pp = text "ExtractValueConstantExpr"
   | GetElementPtrConstantExpr  lhs.pp = text "getelementptr" <> parens (@struct.pp <> char ',' <+> @idxs.pp) 
@@ -223,6 +230,10 @@ sem ConstantExpr
   | SelectConstantExpr         lhs.pp = text "SelectConstantExpr"
   | ShuffleVectorConstantExpr  lhs.pp = text "ShuffleVectorConstantExpr"
   | UnaryConstantExpr          lhs.pp = @ty.pp <+> text @name <+> @val.pp
+
+sem CompareConstantExpr
+  | ICmpExpr   lhs.pp = text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
+  | FCmpExpr   lhs.pp = text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
 
 sem GlobalValue
   | FunctionValue  lhs.pp = @ty.pp <+> @n.pp 

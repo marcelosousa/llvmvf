@@ -9,6 +9,9 @@ module Language.LLVMIR.Extractor.Instruction where
 import qualified LLVM.FFI.Core as FFI
 import LLVM.Core hiding (Value, getOperands)
 
+import Control.Monad(forM) 
+                     
+import Foreign.Marshal.Array (allocaArray, peekArray)
 import Foreign.C.String
 
 import qualified Language.LLVMIR as LL
@@ -149,7 +152,11 @@ getMemoryOp GetElementPtr = do ival  <- getInstructionValue
 -- atomic operators
 getMemoryOp Fence         = error $ "TODO fence"
 getMemoryOp AtomicCmpXchg = error $ "TODO atomicCmpXchg"
-getMemoryOp AtomicRMW     = error $ "TODO atomicRMW"
+getMemoryOp AtomicRMW     = do ival  <- getInstructionValue
+                               ident <- getIdent ival
+                               ops   <- getOperands ival >>= mapM getValue
+                               return $ LL.AtomicRMW (LL.Local ident) ops 
+-- error $ "TODO atomicRMW"
 
 -- | Get Cast Instruction
 getCastOp    :: Opcode -> Context IO LL.Instruction
@@ -199,10 +206,18 @@ getOtherOp Select         = do ival <- getInstructionValue
 getOtherOp UserOp1        = error $ "TODO userop1"
 getOtherOp UserOp2        = error $ "TODO userop2"
 getOtherOp VAArg          = error $ "TODO aarg"
-getOtherOp ExtractElement = error $ "TODO extractelement"
+getOtherOp ExtractElement = error $ "TODO extractelement"                              
 getOtherOp InsertElement  = error $ "TODO insertelement"
 getOtherOp ShuffleVector  = error $ "TODO shufflevector"
-getOtherOp ExtractValue   = error $ "TODO extractvalue"
+getOtherOp ExtractValue   = do ival  <- getInstructionValue
+                               ident <- getIdent ival
+                               ops   <- getOperands ival >>= mapM getValue
+                               n     <- liftIO $ FFI.extractValueGetNumIndices ival >>= return . fromIntegral
+                               idxs' <- liftIO $ allocaArray n $ \ args -> do
+                                           FFI.extractValueGetIndices ival args
+                                           peekArray n args
+                               idxs <- forM idxs' (return . fromIntegral)
+                               return $ LL.ExtractValue (LL.Local ident) (ops!!0) idxs --  error $ "TODO extractvalue"
 getOtherOp InsertValue    = error $ "TODO insertvalue"
 -- exception handling operators
 getOtherOp LandingPad     = error $ "TODO landingpad"

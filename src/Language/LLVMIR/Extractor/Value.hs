@@ -23,6 +23,7 @@ import Language.LLVMIR.Extractor.Util
 import Language.LLVMIR.Extractor.Ident
 import Language.LLVMIR.Extractor.Opcode
 import Language.LLVMIR.Extractor.ConstantClass 
+import Language.LLVMIR.Extractor.Predicate
 
 import Language.LLVMIR.Extractor.Context
 
@@ -96,8 +97,8 @@ getConstantExpr v = do opcode <- liftIO $ FFI.constGetOpcode v
                                 _             -> error $ "'getConstantExpr': Memory Class" 
                               Cast       -> unaryConstantExpr v op  
                               Other      -> case op of
-                                ICmp           -> error $ "'getConstantExpr': TODO Compare" --return LL.CompareConstantExpr
-                                FCmp           -> error $ "'getConstantExpr': TODO Compare" --return LL.CompareConstantExpr
+                                ICmp           -> compareConstantExpr v ICmp >>= return . LL.CompareConstantExpr
+                                FCmp           -> compareConstantExpr v FCmp >>= return . LL.CompareConstantExpr
                                 Select         -> error $ "'getConstantExpr': TODO Select" -- return LL.SelectConstantExpr
                                 ExtractElement -> error $ "'getConstantExpr': TODO ExtractE" -- return LL.ExtractElementConstantExpr
                                 InsertElement  -> error $ "'getConstantExpr': TODO InsertE" -- return LL.InsertElementConstantExpr
@@ -115,6 +116,14 @@ getConstOperands c = do num <- liftIO $ FFI.constGetNumOperands c
                                 os <- oloop instr (number + 1) total
                                 return (o : os)
                         liftIO $ oloop c 0 num
+
+compareConstantExpr :: Value -> Opcode -> Context IO LL.CompareConstantExpr 
+compareConstantExpr v op = do ops <- getOperands v >>= mapM getValue
+                              cond <- liftIO $ FFI.constCompareGetPredicate v >>= (return . fromEnum)
+                              ty <- typeOf v
+                              case op of 
+                                ICmp -> return $ LL.ICmpExpr (toIntPredicate cond) ty (ops!!0) (ops!!1)
+                                FCmp -> return $ LL.FCmpExpr (toRealPredicate cond) ty (ops!!0) (ops!!1)
 
 unaryConstantExpr :: Value -> Opcode -> Context IO LL.ConstantExpr
 unaryConstantExpr v c = do ty  <- typeOf v

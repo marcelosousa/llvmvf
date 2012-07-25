@@ -60,6 +60,8 @@ type PTyInt = (Type, Int)
 type PTyIntL = [PTyInt]
 type PValue = (Value, Value)
 type PValues = [PValue]
+type PValueIdx = (Value, Int)
+type ValueIdxs = [PValueIdx]
 
 type DLayout = [String]
 
@@ -226,7 +228,14 @@ data Instruction
       cond :: Value
       valt :: Value
       valf :: Value
-
+  | ExtractValue
+      id   :: Identifier
+      aggr :: Value
+      idxs :: Ints
+  | AtomicRMW
+      id :: Identifier
+      args :: Values
+ 
 data Identifier 
   | Global name :: Id -- (functions, global variables) begin with the '@'
   | Local  name :: Id -- (register names, types) begin with the '%'
@@ -264,7 +273,7 @@ data ConstantDataSequential
 
 data ConstantExpr
   | BinaryConstantExpr
-  | CompareConstantExpr
+  | CompareConstantExpr       cmpExpr :: CompareConstantExpr 
   | ExtractElementConstantExpr
   | ExtractValueConstantExpr
   | GetElementPtrConstantExpr struct :: Value idxs :: Values
@@ -273,7 +282,11 @@ data ConstantExpr
   | SelectConstantExpr
   | ShuffleVectorConstantExpr
   | UnaryConstantExpr         name :: String op :: Int val :: Value ty :: Type
- 
+
+data CompareConstantExpr
+  | ICmpExpr cond :: IntPredicate ty :: Type op1 :: Value op2 :: Value
+  | FCmpExpr cond :: RealPredicate ty :: Type op1 :: Value op2 :: Value 
+
 data Align
       | Align n :: Int
 
@@ -414,7 +427,7 @@ data Alias
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
   
-set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential ConstantExpr ConstantFP RetInst NamedTypes
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential ConstantExpr ConstantFP RetInst NamedTypes CompareConstantExpr
 
 deriving Every: Show
 deriving Every: Eq
