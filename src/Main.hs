@@ -13,8 +13,11 @@ import System.IO
 import System.FilePath
 import Language.LLVMIR             (Module)
 import Language.LLVMIR.Extractor   (extract)
+import Language.LTL.Base
 import Mutation.Core               (mutate)
 import UU.PPrint 
+
+import Concurrent.Model
 
 import Debug.Trace
 
