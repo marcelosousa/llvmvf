@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, FlexibleInstances, RecordWildCards #-}
+{-# LANGUAGE GADTs, FlexibleInstances, RecordWildCards, KindSignatures, TypeOperators #-}
 -------------------------------------------------------------------------------
 -- Module    :  Language.LTL.Base
 -- Copyright :  (c) 2012 Marcelo Sousa
@@ -6,8 +6,10 @@
 
 module Language.LTL.Base where
 
+import qualified Data.TypeLevel.Bool as Bool
 import Data.Set hiding (size, map)
 import Prelude  hiding ((^))
+import Unsafe.Coerce
 
 -- | Property P
 data P = VP String -- ^ Variables V 
@@ -15,7 +17,8 @@ data P = VP String -- ^ Variables V
        | VF        -- ^ false
   deriving (Show,Eq,Ord,Read)
 
-data G f 
+{-
+data G f
 data F f
 data X f
 data U f g
@@ -27,7 +30,7 @@ data Not g
 type Imp   f g = Or (Not f) g 
 type Equiv f g = And (Imp f g) (Imp g f) 
 
-data LTL f where
+data LTL :: * -> *  where
   V  :: P     -> LTL P
   F  :: LTL g -> LTL (F g)
   G  :: LTL g -> LTL (G g) 
@@ -43,20 +46,39 @@ f ~> g = Or (Not f) g
 
 (<->) :: LTL f -> LTL g -> LTL (Equiv f g)
 f <-> g = And (f ~> g) (g ~> f)
+-}
 
-v :: String -> LTL P
+data LTL :: *  where
+  V  :: P     -> LTL 
+  F  :: LTL -> LTL 
+  G  :: LTL -> LTL 
+  X  :: LTL -> LTL 
+  U  :: LTL -> LTL -> LTL
+  R  :: LTL -> LTL -> LTL 
+  Or :: LTL -> LTL -> LTL  
+  Not :: LTL -> LTL
+  And :: LTL -> LTL -> LTL
+
+(~>) :: LTL -> LTL -> LTL
+f ~> g = Or (Not f) g
+
+(<->) :: LTL -> LTL -> LTL
+f <-> g = And (f ~> g) (g ~> f)
+
+v :: String -> LTL
 v = V . VP
 
+
 -- a -> X b
-pEx :: LTL (Imp P (X P))
+pEx :: LTL -- (Imp P (X P))
 pEx = v "a" ~> X (v "b")
 
 -- example of satefy property - G not (a /\ b)
-safePEx :: LTL (G (Not (And P P)))
+safePEx :: LTL -- (G (Not (And P P)))
 safePEx = G $ Not $ And (v "a") (v "b")
 
 -- liveness property 
-livePEx :: LTL (G (Imp P (F P)))
+livePEx :: LTL -- (G (Imp P (F P)))
 livePEx = G $ (v "a") ~> F (v "b")
 
 -- | State s - Set of V
@@ -126,7 +148,7 @@ size :: Path -> Int
 size (Path p) = length p
 
 -- | Semantics m, pi |- f
-(|-) :: Model -> Path -> LTL f -> Bool
+(|-) :: Model -> Path -> LTL -> Bool
 (|-) m pi (V p)     = let s = pi !~! 0    -- pi(0)
                           c = Compute s m -- 
                       in  evalP c p
@@ -157,5 +179,61 @@ exec f s = let s' = f s
            in  s':exec f s'
 
 -- The LTL formula f holds on a Kripke structure K: K |= f
-(|=) :: KripkeS -> LTL f -> Bool
+(|=) :: KripkeS -> LTL -> Bool
 k |= phi = and $ map (\pi -> (|-) k pi phi) $ iPi k 
+
+
+-- Assume the formula is NNF
+{-
+data LTLS :: * where
+--  GS :: LTL (Not (G g)) -> LTLS (LTL f) -- (LTL (F (Not g)))
+  LTLS :: LTL f -> LTLS
+
+-- Proof that two LTL are equals
+
+data Equal :: * -> * -> * where
+  Eq :: Equal a a
+
+eq :: LTL f -> LTL g -> Maybe (Equal f g)
+eq (V p) (V q) = if p == q
+                 then Just $ Eq 
+                 else Nothing
+{-eq (Not p) (Not q) = case p `eq` q of
+                       Nothing -> Nothing
+                       Just Eq -> Just Eq
+eq (Not (Not p)) q = do case p `eq` q of
+                          Nothing -> Nothing
+                          Just Eq -> Just Eq
+eq (Not (Or g h)) (And (Not g') (Not h')) = do x <- eq g g'
+                                               y <- eq h h'
+                                               return Eq
+eq (Not (And g h)) (Or (Not g') (Not h')) = do x <- eq g g'
+                                               y <- eq h h'
+                                               return Eq
+eq (Not (F g)) (G (Not g')) = do x <- eq g g'
+                                 return Eq
+eq (Not (G g)) (F (Not g')) = do x <- eq g g'
+                                 return Eq
+eq (Not (X g)) (X (Not g')) = do x <- eq g g'
+                                 return Eq-}
+
+
+nnf :: LTL f -> LTLS
+nnf (Not (Not p)) = LTLS p
+nnf (Not (And g h)) = LTLS (Or (Not g) (Not h))
+
+nnf' :: LTLS -> f -> LTL f
+nnf' (LTLS v@(V p)) a = case v `eq` (V a) of
+                        Nothing -> error ".."
+                        Just Eq -> v
+-}
+-- | Negative normal form
+nnf :: LTL -> LTL
+nnf (Not (Not p))   = nnf p -- double negation
+nnf (Not (And f g)) = And (nnf $ Not f) (nnf $ Not g) -- De morgan law
+nnf (Not (Or  f g)) = Or  (nnf $ Not f) (nnf $ Not g) -- De morgan law
+nnf (Not (F g))     = G   (nnf $ Not g) 
+nnf (Not (G g))     = F   (nnf $ Not g)
+nnf (Not (X g))     = X   (nnf $ Not g)
+
+
