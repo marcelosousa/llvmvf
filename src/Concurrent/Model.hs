@@ -1,3 +1,4 @@
+{-#LANGUAGE EmptyDataDecls #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model
 -- Copyright :  (c) 2012 Marcelo Sousa

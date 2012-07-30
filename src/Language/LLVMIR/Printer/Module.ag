@@ -5,11 +5,15 @@
 -------------------------------------------------------------------------------
 }
 
-module {Language.LLVMIR.Printer}{}{}
+module {Language.LLVMIR.Printer.Module}{}{}
+
+include "Base.ag"
+include "Type.ag"
 
 imports 
 {
 import UU.PPrint as P
+import Language.LLVMIR
 }
 
 attr Parameters Types Values PValues PValue Ints
@@ -300,6 +304,7 @@ ppKeyword :: Bool -> String -> Doc
 ppKeyword True s = text s
 ppKeyword _    _ = P.empty
 
+{-
 class MPretty a where
   pretty' :: a -> Doc
 
@@ -310,5 +315,5 @@ instance Pretty Module where
     
 instance Pretty DataLayout where
     pretty d = pp_Syn_DataLayout $ wrap_DataLayout (sem_DataLayout d) $ Inh_DataLayout {}
-
+-}
 }

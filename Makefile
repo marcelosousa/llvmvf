@@ -3,15 +3,22 @@ CABAL-BUILD-FLAGS :=
 VERSION	:= 0.0.1
 
 BASEAG := src/Language/LLVMIR/Grammar/Base.ag
-PRINTAG := src/Language/LLVMIR/Grammar/Printer.ag
+PRINTAG := src/Language/LLVMIR/Printer/Module.ag
 TYPEAG := src/Language/LLVMIR/Grammar/Type.ag
+ENCODEAG := src/Language/LLVMIR/Encoder/Module.ag
 
 all : haskell
 
-llvmir : $(PRINTAG) $(BASEAG) $(TYPEAG)
-	uuagc -Hdcfws --self -P src/Language/LLVMIR/Grammar src/Language/LLVMIR.ag
+base : $(BASEAG) $(TYPEAG)
+	uuagc -Hd --self -P src/Language/LLVMIR/Grammar src/Language/LLVMIR.ag
 
-haskell : llvmir
+printer : base $(PRINTAG) 
+	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(PRINTAG)
+
+encoder : base $(ENCODEAG) 
+	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(ENCODEAG)
+
+haskell : base printer encoder
 	cabal install
 
 #doc : README

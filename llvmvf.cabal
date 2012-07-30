@@ -20,6 +20,7 @@ Executable llvmvf
                     , transformers  >= 0.3.0.0
                     , llvm-base
                     , llvm
+                    , smtlib        == 1.0
     Hs-Source-Dirs:   src/
     Extensions: 	  TypeOperators, FlexibleInstances, TypeSynonymInstances, DeriveDataTypeable
     ghc-options:     -O3 -rtsopts 

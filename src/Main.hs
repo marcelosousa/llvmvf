@@ -13,6 +13,8 @@ import System.IO
 import System.FilePath
 import Language.LLVMIR             (Module)
 import Language.LLVMIR.Extractor   (extract)
+import Language.LLVMIR.Printer
+import Language.LLVMIR.Encoder     (encode)
 import Language.LTL.Base
 import Mutation.Core               (mutate)
 import UU.PPrint 

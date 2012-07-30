@@ -6,7 +6,6 @@
 
 module Language.LTL.Base where
 
-import qualified Data.TypeLevel.Bool as Bool
 import Data.Set hiding (size, map)
 import Prelude  hiding ((^))
 import Unsafe.Coerce
@@ -276,21 +275,23 @@ data PathLasso = PathLasso { k :: Int, l :: Int, unPathLasso :: [State] }
                                                  r2 = or $ map (\n -> (|~) m pi (i+n) g) ns
                                              in  (|~) m pi (i+j) h || r2) js
 
--- | encoding of LTL into SAT
+-- | Propositional Encoding
 -- Assume a symbolic representation of K
 -- s0, .., sk be vector of copies of state variables
 type Bound = Int
 type SAT = PForm 
 type Instant = Int
 
--- Constraints of K
+-- Constraints of K - Model Constraints
 -- I(s0) && T(s0,s1) && ... && T(sk-1, sk)
+-- I(s) = not p
+-- T(s,s') = (s' = s)
 (||~|) m = undefined
 
 -- Looping constraints l in {0, ... , k} : \l -> T(sk,sl)
 (|\\~|) = undefined
 
--- Original encoding of LTL into SAT
+-- | Original encoding of LTL into SAT
 (|\~|) :: Model -> PathLasso -> LTL -> Bound -> Int -> Instant -> SAT
 (|\~|) m pi (V p)     k l i = if p `member` (labelfun m) (pi !~! i)
                               then PP p
@@ -306,7 +307,7 @@ type Instant = Int
 (|\~|) m pi (G g)     k l i = let js = [(min l i)..k]
                               in  foldr PAnd (PP VT) $ map (\j -> (|\~|) m pi g k l j) js 
 
--- Bounded Model Checking
+-- | Bounded Model Checking
 (|~|) :: Model -> PathLasso -> LTL -> Bound -> SAT
 (|~|) m pi phi k = let ls = [0..k]
                    in  (||~|) m `POr` (foldr POr (PP VF) $ map (\l -> (|\\~|) l `PAnd` (|\~|) m pi phi k l 0) ls)
