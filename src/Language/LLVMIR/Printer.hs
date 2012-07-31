@@ -9,11 +9,6 @@ import Language.LLVMIR.Printer.Module
 import Language.LLVMIR
 import UU.PPrint
 
-class MPretty a where
-  pretty' :: a -> Doc
-
---instance Pretty
-
 instance Pretty Module where
     pretty mdl = pp_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
 

@@ -1,4 +1,3 @@
-{-#LANGUAGE EmptyDataDecls #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model
 -- Copyright :  (c) 2012 Marcelo Sousa
@@ -6,34 +5,28 @@
 
 module Concurrent.Model where
 
-import Prelude              hiding (sequence)
-import Data.Char            (chr)
-import qualified Data.Map as Data.Map
-import qualified Data.Map as Map
-import Data.Set
+import Data.IntMap 
 
 import Language.LLVMIR
 
-class CModel t where
+-- Asynchronous (Interleaved) Concurrent Models
+-- At one given time, there only one atomic instruction
+-- being executed. Scheduler specification is required.
+class ACModel t where
   model     :: Module  -> Model t
-  scheduler :: Model t -> Model t
+--  scheduler :: Model t -> Model t
+--  create
+--  constructs
  
-data Model t = Model { mtype  :: t
-                     , mainf  :: Main
-                     , nmdtys :: NamedTypes
+data Model t = Model { nmdtys :: NamedTypes
+                     , gvars  :: Globals
                      , procs  :: Processes
                      } 
+  deriving Show
 
-data Main = Main Function 
+-- data Main = Main Function 
 
 data Process   = Process Function
-type Processes = Set Process
+  deriving Show
 
-data PThread
-
-{-
-bmc :: CModel t => Module -> Concurrent SMTLib2 t
-bmc mdl _ = do i <- model mdl
-    
-                            
--}
+type Processes = IntMap Process

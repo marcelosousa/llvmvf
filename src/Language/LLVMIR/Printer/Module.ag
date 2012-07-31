@@ -138,8 +138,12 @@ sem Alias
   | Alias lhs.pp = text "%" <> text @name.self
 
 sem NamedTypes
-  | Nil   lhs.pp = text ""
-  | Entry lhs.pp = @val.pp <$> @tl.pp -- text "%" <> text @key <+> char '=' <+> @val.pp <$> @tl.pp
+  | Nil   lhs.pp = P.empty
+  | Entry lhs.pp = @val.pp <$> @tl.pp 
+
+sem Functions
+  | Nil   lhs.pp = P.empty
+  | Entry lhs.pp = @val.pp <$> @tl.pp
 
 sem BinOp
   | OpXchg  lhs.pp = text "xchg"

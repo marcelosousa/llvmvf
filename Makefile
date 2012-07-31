@@ -6,11 +6,14 @@ BASEAG := src/Language/LLVMIR/Grammar/Base.ag
 PRINTAG := src/Language/LLVMIR/Printer/Module.ag
 TYPEAG := src/Language/LLVMIR/Grammar/Type.ag
 ENCODEAG := src/Language/LLVMIR/Encoder/Module.ag
+PTHREADAG := src/Concurrent/Model/PThread.ag
 
 all : haskell
 
+ag : base printer encoder pthread
+
 base : $(BASEAG) $(TYPEAG)
-	uuagc -Hd --self -P src/Language/LLVMIR/Grammar src/Language/LLVMIR.ag
+	uuagc -Hd --datarecords --self -P src/Language/LLVMIR/Grammar src/Language/LLVMIR.ag
 
 printer : base $(PRINTAG) 
 	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(PRINTAG)
@@ -18,7 +21,10 @@ printer : base $(PRINTAG)
 encoder : base $(ENCODEAG) 
 	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(ENCODEAG)
 
-haskell : base printer encoder
+pthread : base $(PTHREADAG) 
+	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(PTHREADAG)
+
+haskell : base printer encoder pthread
 	cabal install
 
 #doc : README

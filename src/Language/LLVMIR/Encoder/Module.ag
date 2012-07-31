@@ -11,13 +11,34 @@ include "Base.ag"
 
 imports 
 {
-import Language.SMTLib2
+import Language.SMTLib2.Base
 import Language.LLVMIR
 }
 
-attr Module 
-  syn enc :: {SMod}
+attr Module Globals Functions -- NamedTypes 
+  syn enc use {(++)} {[]} :: {SMod}
 
 sem Module
-  | Module lhs.enc = [] --  text ("; ModuleID ='" ++ @id ++ "'") <$> @layout.pp <$> @target.pp <$> P.empty <$>  @nmdtys.pp <$> @gvars.pp <$> @funs.pp
-  
+  | Module lhs.enc = [ SE (SetOpt (Keyword "interactive-mode") (IdentExpr $ SymIdent $ SimpleSym "true"))
+                     , SE (SetLogic QF_AUFLIA)] ++ @gvars.enc ++ @funs.enc -- ++ @nmdtys.enc 
+
+sem Globals 
+  | Nil  lhs.enc = []
+  | Cons lhs.enc = (@hd.enc):(@tl.enc)
+
+sem Functions
+  | Nil   lhs.enc = []
+  | Entry lhs.enc = (@val.enc):(@tl.enc) 
+
+attr Global Function 
+  syn enc :: {SExpression}
+
+sem Global
+  | GlobalVar lhs.enc = SE $ DeclFun (SimpleSym @name.self) [] (SymSort "") 
+
+sem Function
+  | FunctionDef  lhs.enc = Comment
+  | FunctionDecl lhs.enc = Comment
+
+{
+}

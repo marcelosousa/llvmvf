@@ -15,11 +15,13 @@ import Language.LLVMIR             (Module)
 import Language.LLVMIR.Extractor   (extract)
 import Language.LLVMIR.Printer
 import Language.LLVMIR.Encoder     (encode)
-import Language.LTL.Base
+import qualified Language.LTL.Base as LTL
 import Mutation.Core               (mutate)
 import UU.PPrint 
+import Language.SMTLib2.Printer    (prettyprint)
 
 import Concurrent.Model
+import Concurrent.Model.PThread
 
 import Debug.Trace
 
@@ -33,7 +35,8 @@ instance Default Options where
 
 runOption :: FilePath -> Options -> IO ()
 runOption bc Parse = do mdl <- extract bc
-                        print $ pretty mdl
+                        print $ ((model mdl) :: Model PThread)
+                        -- print $ prettyprint $ encode mdl -- print $ pretty mdl
 runOption bc Mutate = mutate bc
 
 data ProgramOptions = LLVMVF {

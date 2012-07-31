@@ -1,0 +1,87 @@
+optpragmas {
+{-#LANGUAGE EmptyDataDecls, RecordWildCards #-}
+}
+
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.PThread
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.PThread}{}{}
+
+include "Base.ag"
+include "Type.ag"
+
+imports 
+{
+import qualified Data.Map as Map
+import qualified Data.IntMap as IM
+import Data.Maybe 
+
+import Concurrent.Model
+import Language.LLVMIR
+}
+
+-- type ThreadLabel = (Int)
+
+attr Module 
+  syn pmdl :: {Model PThread}
+
+sem Module
+  | Module lhs.pmdl  = Model @nmdtys.self @gvars.self @funs.pmdl
+           funs.mfun = @funs.self
+           funs.counter = 1
+
+attr Functions Function BasicBlocks BasicBlock Instructions Instruction
+  syn pmdl use {`IM.union`} {IM.empty} :: {IM.IntMap Process} 
+  inh mfun    :: {Map.Map String Function}
+  chn counter :: {ThreadLabel}
+
+sem Functions
+  | Nil   lhs.pmdl = IM.empty
+  | Entry lhs.pmdl = if @key == "main"
+                     then @val.pmdl 
+                     else @tl.pmdl
+
+sem Function
+  | FunctionDef  lhs.pmdl = @body.pmdl 
+  | FunctionDecl lhs.pmdl = IM.empty 
+
+sem BasicBlock
+  | BasicBlock lhs.pmdl = @instrs.pmdl
+
+sem Instruction
+  | Call 
+    +pmdl = IM.union (buildProcess @loc.counter (getIdName @callee.self) @args.self @lhs.mfun)
+    loc.counter :: uniqueref counter
+
+{
+type ThreadLabel = Int
+
+nextUnique :: Int -> (Int, Int)
+nextUnique u = (u+1, u)
+
+getIdName :: Identifier -> String
+getIdName (Global n) = n
+getIdName (Local  n) = n
+
+buildProcess :: Int -> String -> Values -> Map.Map String Function -> IM.IntMap Process
+buildProcess c "pthread_create" v m = case v !! 2 of
+                                        Constant (GlobalValue (FunctionValue i _)) -> let vn = getIdName i
+                                                                                          f  = fromMaybe (error "buildProcess 1") $ Map.lookup vn m
+                                                                                      in IM.singleton c $ Process f
+                                        _ -> error "buildProcess 2"  
+buildProcess c _                _ _ = IM.empty
+ 
+-- PThread
+data PThread
+
+-- Asynchronous (Interleaved) Concurrent Models
+-- At one given time, there only one atomic instruction
+-- being executed. Scheduler specification is required.
+instance ACModel PThread where
+  -- model :: Module -> Model PThread
+  model mdl@Module{..} = pmdl_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {} 
+}

@@ -26,7 +26,7 @@ type MLabel = maybe Label
 type MId = maybe Id
 type MIdentifier = maybe Identifier
 
-type Functions = [Function]
+type Functions = map {String} Function
 type Globals = [Global]
 type Identifiers = [Identifier]
 type Arguments = [Argument]
@@ -110,10 +110,10 @@ data Global
           linkage :: Linkage
           isConst :: Bool
           isUaddr :: Bool 
---          ty       :: Type 
+          ty      :: Type 
           ival    :: MValue
+          align   :: Align
 --          section  :: MSection
-          align :: Align
 
 data Function 
       | FunctionDef 
