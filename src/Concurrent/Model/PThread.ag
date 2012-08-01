@@ -91,10 +91,10 @@ buildProcess c _                _ _ = (False, IM.empty)
 -- PThread
 data PThread
 
--- Asynchronous (Interleaved) Concurrent Models
+-- Synchronous (Interleaved) Concurrent Models
 -- At one given time, there only one atomic instruction
 -- being executed. Scheduler specification is required.
-instance ACModel PThread where
+instance SCModel PThread where
   -- model :: Module -> Model PThread
   model mdl@Module{..} = pmdl_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
 

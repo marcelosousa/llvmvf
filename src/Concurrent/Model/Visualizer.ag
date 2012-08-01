@@ -72,17 +72,15 @@ nextUnique u = (u+1, u)
 dotLabel :: Doc -> Doc
 dotLabel d = text "[label=\"" <> d <> text "\"];"
 
-instance (Pretty t, ACModel t) => Pretty (Model t)  where
+instance (Pretty t, SCModel t) => Pretty (Model t)  where
   --pretty :: Model -> Doc
   pretty mdl = text "digraph structs {" </>
                text "bgcolor=transparent;" </>
                text "node [shape=Mrecord];" </>
                text "-1 [label=\"||\", shape=Mdiamond];" </>
-              -- text "init [label=\"init\", shape=circle]" </>
-              -- text "final [label=\"final\", shape=circle, style=filled, fillcolor=gray]" </>
                pretty (mainf mdl) </>
                vsep (Prelude.map pretty (IM.elems $ procs mdl)) </>
-               pretty' (flow mdl) </>
+               pretty' (controlflow mdl) </>
                text "}"
 
 instance Pretty Process where
@@ -92,7 +90,7 @@ instance Pretty Process where
 class Pretty' t where
   pretty' :: t -> Doc
 
-instance Pretty' Flow where
+instance Pretty' ControlFlow where
   pretty' = vsep . (Prelude.map pretty')
 
 instance Pretty' (Int,Int) where

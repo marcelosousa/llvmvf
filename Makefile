@@ -5,14 +5,14 @@ VERSION	:= 0.0.1
 BASEAG := src/Language/LLVMIR/Grammar/Base.ag
 PRINTAG := src/Language/LLVMIR/Printer/Module.ag
 TYPEAG := src/Language/LLVMIR/Grammar/Type.ag
-ENCODEAG := src/Language/LLVMIR/Encoder/Module.ag
+ENCODEAG := src/Concurrent/Model/Encoder/Module.ag
 PTHREADAG := src/Concurrent/Model/PThread.ag
 VISUALCCFG := src/Concurrent/Model/Visualizer.ag
-FLOWAG := src/Concurrent/Model/Analysis/Flow.ag
+CFLOWAG := src/Concurrent/Model/Analysis/ControlFlow.ag
 
 all : haskell
 
-ag : base printer encoder pthread flow ppccfg
+ag : base printer encoder pthread cflow ppccfg
 
 base : $(BASEAG) $(TYPEAG)
 	uuagc -Hd --datarecords --self -P src/Language/LLVMIR/Grammar src/Language/LLVMIR.ag
@@ -26,8 +26,8 @@ encoder : base $(ENCODEAG)
 pthread : base $(PTHREADAG) 
 	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(PTHREADAG)
 
-flow : base $(FLOWAG) 
-	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(FLOWAG)
+cflow : base $(CFLOWAG) 
+	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(CFLOWAG)
 
 ppccfg : base $(VISUALCCFG)
 	uuagc -Hcfws --self -P src/Analysis -P src/Language/LLVMIR/Grammar -P src/Language/LLVMIR/Printer $(VISUALCCFG)

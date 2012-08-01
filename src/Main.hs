@@ -14,7 +14,6 @@ import System.FilePath
 import Language.LLVMIR             (Module)
 import Language.LLVMIR.Extractor   (extract)
 import Language.LLVMIR.Printer
-import Language.LLVMIR.Encoder     (encode)
 import qualified Language.LTL.Base as LTL
 import Mutation.Core               (mutate)
 import UU.PPrint 
@@ -23,6 +22,7 @@ import Language.SMTLib2.Printer    (prettyprint)
 import Concurrent.Model
 import Concurrent.Model.PThread
 import Concurrent.Model.Visualizer
+import Concurrent.Model.Encoder     (encode)
 
 import Debug.Trace
 
