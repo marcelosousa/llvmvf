@@ -7,10 +7,12 @@ PRINTAG := src/Language/LLVMIR/Printer/Module.ag
 TYPEAG := src/Language/LLVMIR/Grammar/Type.ag
 ENCODEAG := src/Language/LLVMIR/Encoder/Module.ag
 PTHREADAG := src/Concurrent/Model/PThread.ag
+VISUALCCFG := src/Concurrent/Model/Visualizer.ag
+FLOWAG := src/Concurrent/Model/Analysis/Flow.ag
 
 all : haskell
 
-ag : base printer encoder pthread
+ag : base printer encoder pthread flow ppccfg
 
 base : $(BASEAG) $(TYPEAG)
 	uuagc -Hd --datarecords --self -P src/Language/LLVMIR/Grammar src/Language/LLVMIR.ag
@@ -24,7 +26,13 @@ encoder : base $(ENCODEAG)
 pthread : base $(PTHREADAG) 
 	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(PTHREADAG)
 
-haskell : base printer encoder pthread
+flow : base $(FLOWAG) 
+	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(FLOWAG)
+
+ppccfg : base $(VISUALCCFG)
+	uuagc -Hcfws --self -P src/Analysis -P src/Language/LLVMIR/Grammar -P src/Language/LLVMIR/Printer $(VISUALCCFG)
+
+haskell : ag
 	cabal install
 
 #doc : README

@@ -68,6 +68,12 @@ getInstructionValue :: Context IO Value
 getInstructionValue = do e@Env{..} <- getEnv
                          return $ fromMaybe (error "'getInstructionValue': No Value") instr
 
+getPC :: Context IO LL.PC
+getPC = do e@Env{..} <- getEnv
+           let opc = pc
+           putEnv $ e {pc = opc + 1}
+           return opc
+
 -- | Get Instruction from a LLVM Value
 getInstruction :: Context IO LL.Instruction
 getInstruction = do v <- getInstructionValue 
@@ -86,23 +92,26 @@ getInstruction = do v <- getInstructionValue
 -- | Get Terminator Instruction
 getTerminatorOp :: Opcode -> Context IO LL.Instruction
 getTerminatorOp Ret          = do ival <- getInstructionValue
+                                  pc   <- getPC
                                   n    <- liftIO $ FFI.returnInstGetNumSuccessors ival
                                   mv   <- liftIO $ FFI.returnInstHasReturnValue ival
                                   ops  <- getOperands ival >>= mapM getValue
                                   if cInt2Bool mv
-                                  then return $ LL.Ret $ LL.ValueRet (ops!!0)
-                                  else return $ LL.Ret $ LL.VoidRet 
+                                  then return $ LL.Ret pc $ LL.ValueRet (ops!!0)
+                                  else return $ LL.Ret pc LL.VoidRet 
 getTerminatorOp Br           = do ival <- getInstructionValue
+                                  pc   <- getPC
                                   isCond <- liftIO $ FFI.brInstIsConditional ival
                                   ops    <- getOperands ival >>= mapM getValue 
                                   if (cInt2Bool isCond)
-                                  then return $ LL.Br (ops!!0) (ops!!2) (ops!!1)
-                                  else return $ LL.UBr (ops!!0)
+                                  then return $ LL.Br  pc (ops!!0) (ops!!2) (ops!!1)
+                                  else return $ LL.UBr pc (ops!!0)
 getTerminatorOp Switch       = error $ "TODO switch"
 getTerminatorOp IndirectBr   = error $ "TODO indirectbr"
 getTerminatorOp Invoke       = error $ "TODO invoke"
 getTerminatorOp Resume       = error $ "TODO resume"
-getTerminatorOp Unreachable  = return $ LL.Unreachable
+getTerminatorOp Unreachable  = do pc <- getPC
+                                  return $ LL.Unreachable pc
 
 -- | Get Standard Binary Instruction
 getBinaryOp  :: Opcode -> Context IO LL.Instruction
@@ -131,34 +140,39 @@ getLogicalOp Xor  = bitbinOps LL.Xor
 -- | Get Memory Instruction
 getMemoryOp  :: Opcode -> Context IO LL.Instruction
 getMemoryOp Alloca = do ival  <- getInstructionValue
+                        pc    <- getPC
                         ident <- getIdent ival
                         ty    <- (liftIO $ FFI.allocaGetAllocatedType ival) >>= getType
                         a     <- liftIO $ FFI.allocaGetAlignment ival
-                        return $ LL.Alloca (LL.Local ident) ty (LL.Align $ fromIntegral a)
+                        return $ LL.Alloca pc (LL.Local ident) ty (LL.Align $ fromIntegral a)
 getMemoryOp Load   = do ival  <- getInstructionValue 
+                        pc    <- getPC
                         ident <- getIdent ival
                         ops   <- getOperands ival >>= mapM getValue
                         a     <- liftIO $ FFI.loadGetAlignment ival
-                        return $ LL.Load (LL.Local ident) (ops!!0) (LL.Align $ fromIntegral a)
+                        return $ LL.Load pc (LL.Local ident) (ops!!0) (LL.Align $ fromIntegral a)
 getMemoryOp Store  = do ival  <- getInstructionValue 
+                        pc    <- getPC
                         ty    <- typeOf ival 
                         ops   <- getOperands ival >>= mapM getValue
                         align <- liftIO $ FFI.storeGetAlignment ival
-                        return $ LL.Store ty (ops!!0) (ops!!1) (LL.Align $ fromIntegral align)
+                        return $ LL.Store pc ty (ops!!0) (ops!!1) (LL.Align $ fromIntegral align)
 getMemoryOp GetElementPtr = do ival  <- getInstructionValue
+                               pc    <- getPC
                                ident <- getIdent ival
                                ty    <- typeOf ival 
                                ops   <- getOperands ival >>= mapM getValue
-                               return $ LL.GetElementPtr (LL.Local ident) ty (head ops) (tail ops)
+                               return $ LL.GetElementPtr pc (LL.Local ident) ty (head ops) (tail ops)
 -- atomic operators
 getMemoryOp Fence         = error $ "TODO fence"
 getMemoryOp AtomicCmpXchg = error $ "TODO atomicCmpXchg"
 getMemoryOp AtomicRMW     = do ival  <- getInstructionValue
+                               pc    <- getPC
                                ident <- getIdent ival
                                ops   <- getOperands ival >>= mapM getValue
                                op    <- liftIO $ FFI.atomicRMWGetOperation ival >>= return . fromIntegral
                                ord   <- liftIO $ FFI.atomicRMWGetOrdering ival >>= return . fromIntegral
-                               return $ LL.AtomicRMW (LL.Local ident) ops (toBinOp op) (toAtomicOrdering ord)
+                               return $ LL.AtomicRMW pc (LL.Local ident) ops (toBinOp op) (toAtomicOrdering ord)
 -- error $ "TODO atomicRMW"
 
 -- | Get Cast Instruction
@@ -179,33 +193,38 @@ getCastOp BitCast  = convOps LL.BitCast
 -- | Get Other Instruction
 getOtherOp   :: Opcode -> Context IO LL.Instruction
 getOtherOp ICmp = do ival  <- getInstructionValue
+                     pc    <- getPC
                      ident <- getIdent ival
                      cond  <- liftIO $ FFI.cmpInstGetPredicate ival >>= (return . fromEnum)
                      ty    <- typeOf ival 
                      (op1,op2) <- getICmpOps ival 
-                     return $ LL.ICmp (LL.Local ident) (toIntPredicate cond) ty op1 op2
+                     return $ LL.ICmp pc (LL.Local ident) (toIntPredicate cond) ty op1 op2
 getOtherOp FCmp = do ival  <- getInstructionValue
+                     pc    <- getPC
                      ident <- getIdent ival
                      cond  <- liftIO $ FFI.cmpInstGetPredicate ival >>= (return . fromEnum)
                      ty    <- typeOf ival 
                      (op1,op2) <- getICmpOps ival 
-                     return $ LL.FCmp (LL.Local ident) (toRealPredicate cond) ty op1 op2
+                     return $ LL.FCmp pc (LL.Local ident) (toRealPredicate cond) ty op1 op2
 getOtherOp PHI  = do ival  <- getInstructionValue
+                     pc    <- getPC
                      ident <- getIdent ival
                      ty    <- typeOf ival 
                      args  <- getPHIArgs ival
-                     return $ LL.PHI (LL.Local ident) ty args
+                     return $ LL.PHI pc (LL.Local ident) ty args
 getOtherOp Call = do ival  <- getInstructionValue
+                     pc    <- getPC
                      ident <- getIdent ival
                      ty    <- typeOf ival 
                      (callee, args) <- getOperands ival >>= getCallArgs
-                     return $ LL.Call Nothing ty callee args
+                     return $ LL.Call pc Nothing ty callee args
 getOtherOp Select         = do ival <- getInstructionValue
+                               pc   <- getPC
                                ident <- getIdent ival
                                cond  <- (liftIO $ FFI.selectGetCondition ival)  >>= \i -> getValue (ident,i)
                                valt  <- (liftIO $ FFI.selectGetTrueValue ival)  >>= \i -> getValue (ident,i)
                                valf  <- (liftIO $ FFI.selectGetFalseValue ival) >>= \i -> getValue (ident,i)
-                               return $ LL.Select (LL.Local ident) cond valt valf
+                               return $ LL.Select pc (LL.Local ident) cond valt valf
 getOtherOp UserOp1        = error $ "TODO userop1"
 getOtherOp UserOp2        = error $ "TODO userop2"
 getOtherOp VAArg          = error $ "TODO aarg"
@@ -213,6 +232,7 @@ getOtherOp ExtractElement = error $ "TODO extractelement"
 getOtherOp InsertElement  = error $ "TODO insertelement"
 getOtherOp ShuffleVector  = error $ "TODO shufflevector"
 getOtherOp ExtractValue   = do ival  <- getInstructionValue
+                               pc    <- getPC
                                ident <- getIdent ival
                                ops   <- getOperands ival >>= mapM getValue
                                n     <- liftIO $ FFI.extractValueGetNumIndices ival >>= return . fromIntegral
@@ -220,34 +240,37 @@ getOtherOp ExtractValue   = do ival  <- getInstructionValue
                                            FFI.extractValueGetIndices ival args
                                            peekArray n args
                                idxs <- forM idxs' (return . fromIntegral)
-                               return $ LL.ExtractValue (LL.Local ident) (ops!!0) idxs 
+                               return $ LL.ExtractValue pc (LL.Local ident) (ops!!0) idxs 
 getOtherOp InsertValue    = error $ "TODO insertvalue"
 -- exception handling operators
 getOtherOp LandingPad     = error $ "TODO landingpad"
 
 --convOps :: (LL.Identifier -> LL.Value -> LL.Type -> b) -> Context IO b
 convOps c = do ival  <- getInstructionValue
+               pc    <- getPC
                ident <- getIdent ival
                ty    <- typeOf ival
                ops   <- getOperands ival >>= mapM getValue
                if length ops == 0
                then error "'convOps': operand list is empty"
-               else return $ c (LL.Local ident) (ops!!0) ty
+               else return $ c pc (LL.Local ident) (ops!!0) ty
 
 --binOps :: (LL.Identifier -> LL.Type -> LL.Value -> b) -> Context IO b
 binOps c = do ival  <- getInstructionValue
+              pc    <- getPC
               ident <- getIdent ival
               ty    <- typeOf ival 
               ops   <- getOperands ival >>= mapM getValue
               if length ops /= 2
               then error "'binOps': operand list is broken"
-              else return $ c (LL.Local ident) ty (ops!!0) (ops!!1)
+              else return $ c pc (LL.Local ident) ty (ops!!0) (ops!!1)
 
 --bitbinOps :: (LL.Identifier -> LL.Type -> LL.Value -> b) -> Context IO b
 bitbinOps c = do ival  <- getInstructionValue
+                 pc    <- getPC
                  ident <- getIdent ival
                  ty    <- typeOf ival 
                  ops   <- getOperands ival >>= mapM getValue
                  if length ops /= 2
                  then error "'bitbinOps': operand list is broken"
-                 else return $ c (LL.Local ident) ty (ops!!0) (ops!!1)
+                 else return $ c pc (LL.Local ident) ty (ops!!0) (ops!!1)

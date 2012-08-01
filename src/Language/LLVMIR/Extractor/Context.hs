@@ -22,6 +22,7 @@ data Env = Env
   { mdl    :: Core.Module
   , nmdtys :: LL.NamedTypes 
   , instr  :: Maybe Value
+  , pc     :: LL.PC
   }
 
 newtype Context m a = Context { unContext :: StateT Env m a }

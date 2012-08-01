@@ -22,6 +22,7 @@ import Language.SMTLib2.Printer    (prettyprint)
 
 import Concurrent.Model
 import Concurrent.Model.PThread
+import Concurrent.Model.Visualizer
 
 import Debug.Trace
 
@@ -35,7 +36,9 @@ instance Default Options where
 
 runOption :: FilePath -> Options -> IO ()
 runOption bc Parse = do mdl <- extract bc
-                        print $ ((model mdl) :: Model PThread)
+                        let mod = (model mdl) :: Model PThread
+                       -- print $ ((model mdl) :: Model PThread)
+                        print $ pretty mod 
                         -- print $ prettyprint $ encode mdl -- print $ pretty mdl
 runOption bc Mutate = mutate bc
 

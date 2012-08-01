@@ -22,28 +22,37 @@ import Data.Maybe
 
 import Concurrent.Model
 import Language.LLVMIR
+import UU.PPrint
 }
-
--- type ThreadLabel = (Int)
 
 attr Module 
   syn pmdl :: {Model PThread}
 
 sem Module
-  | Module lhs.pmdl  = Model @nmdtys.self @gvars.self @funs.pmdl
+  | Module lhs.pmdl  = Model @nmdtys.self @gvars.self @funs.mainf @funs.pmdl
            funs.mfun = @funs.self
            funs.counter = 1
 
+attr Functions
+  syn mainf :: {Process}
+
 attr Functions Function BasicBlocks BasicBlock Instructions Instruction
   syn pmdl use {`IM.union`} {IM.empty} :: {IM.IntMap Process} 
-  inh mfun    :: {Map.Map String Function}
-  chn counter :: {ThreadLabel}
+  inh mfun      :: {Map.Map String Function}
+  chn counter   :: {ThreadLabel}
+
+attr Function BasicBlocks BasicBlock Instructions Instruction Value Identifier Constant ConstantFP Linkage CConv Visibility DefinitionTy Argument Align GCName FunAttr Attribute Section TargetData Target Parameter IntPredicate RealPredicate GlobalValue ConstantDataSequential ConstantExpr RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering Type Types Parameters TyFloatPoint Label Arguments Values Id IntTyValIdL IntTyValId PValues MIdentifier PValue Ints PC 
+  syn annotated :: self 
 
 sem Functions
   | Nil   lhs.pmdl = IM.empty
+          lhs.mainf = error "No Main Function"
   | Entry lhs.pmdl = if @key == "main"
                      then @val.pmdl 
                      else @tl.pmdl
+          lhs.mainf = if @key == "main"
+                      then (Process @key @val.annotated)
+                      else @tl.mainf
 
 sem Function
   | FunctionDef  lhs.pmdl = @body.pmdl 
@@ -54,7 +63,11 @@ sem BasicBlock
 
 sem Instruction
   | Call 
-    +pmdl = IM.union (buildProcess @loc.counter (getIdName @callee.self) @args.self @lhs.mfun)
+    +pmdl = IM.union (snd @loc.proc)
+    lhs.annotated = if fst @loc.proc
+                    then CreateThread @pc.self @args.self
+                    else Call @pc.self @mres.self @ty.self  @callee.self @args.self   
+    loc.proc = buildProcess @loc.counter (getIdName @callee.self) @args.self @lhs.mfun
     loc.counter :: uniqueref counter
 
 {
@@ -67,13 +80,13 @@ getIdName :: Identifier -> String
 getIdName (Global n) = n
 getIdName (Local  n) = n
 
-buildProcess :: Int -> String -> Values -> Map.Map String Function -> IM.IntMap Process
+buildProcess :: Int -> String -> Values -> Map.Map String Function -> (Bool, IM.IntMap Process)
 buildProcess c "pthread_create" v m = case v !! 2 of
                                         Constant (GlobalValue (FunctionValue i _)) -> let vn = getIdName i
                                                                                           f  = fromMaybe (error "buildProcess 1") $ Map.lookup vn m
-                                                                                      in IM.singleton c $ Process f
+                                                                                      in (True, IM.singleton c $ Process vn f)
                                         _ -> error "buildProcess 2"  
-buildProcess c _                _ _ = IM.empty
+buildProcess c _                _ _ = (False, IM.empty)
  
 -- PThread
 data PThread
@@ -83,5 +96,7 @@ data PThread
 -- being executed. Scheduler specification is required.
 instance ACModel PThread where
   -- model :: Module -> Model PThread
-  model mdl@Module{..} = pmdl_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {} 
+  model mdl@Module{..} = pmdl_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
+
+instance Pretty PThread 
 }

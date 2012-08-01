@@ -49,7 +49,7 @@ hasInitializer v = do hi <- liftIO $ FFI.hasInitializer v
 
 extract :: FilePath -> IO LL.Module
 extract file = do mdl <- readBitcodeFromFile file
-                  let env = Env mdl Map.empty Nothing
+                  let env = Env mdl Map.empty Nothing 1
                   runContext extractModule env
 
 extractModule :: Context IO LL.Module

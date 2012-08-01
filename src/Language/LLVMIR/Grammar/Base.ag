@@ -20,6 +20,7 @@ import Data.Map
 -- Module - LLVM IR Module
 -------------------------------------------------------------------------------
 
+type PC = (Int)
 type Id = (String)
 type Label = (String) 
 type MLabel = maybe Label
@@ -154,89 +155,102 @@ data RetInst
 
 data Instruction
   -- Terminators
-  | Ret r :: RetInst
-  | Br  v :: Value t :: Value f :: Value
-  | UBr d :: Value 
-  | Switch elems :: IntTyValIdL -- TODO
-  | Unreachable
+  | Ret pc :: PC r :: RetInst
+  | Br  pc :: PC v :: Value t :: Value f :: Value
+  | UBr pc :: PC d :: Value 
+  | Switch pc :: PC elems :: IntTyValIdL -- TODO
+  | Unreachable pc :: PC
   -- Standard Binary Operations
-  | Add  id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | FAdd id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | Sub  id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | FSub id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | Mul  id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | FMul id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | UDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | SDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | FDiv id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | URem id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | SRem id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | FRem id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Add  pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FAdd pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Sub  pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FSub pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Mul  pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FMul pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | UDiv pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | SDiv pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FDiv pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | URem pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | SRem pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | FRem pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
   -- Bitwise Binary Operations
-  | Shl  id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | LShr id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | AShr id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | And  id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | Or   id :: Identifier ty :: Type op1 :: Value op2 :: Value
-  | Xor  id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Shl  pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | LShr pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | AShr pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | And  pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Or   pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
+  | Xor  pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
   -- Memory Operations
   | Alloca
+      pc    :: PC
       id    :: Identifier
       ty    :: Type
       align :: Align 
   | Store
+      pc    :: PC
       ty    :: Type
       v1    :: Value
       v2    :: Value
       align :: Align
   | Load
+      pc    :: PC
       id    :: Identifier
       v     :: Value 
       align :: Align
   | GetElementPtr
+      pc     :: PC
       id     :: Identifier
       ty     :: Type
       struct :: Value
       idxs   :: Values
   -- Cast Operations
-  | Trunc    id :: Identifier v :: Value ty   :: Type -- Truncate integers
-  | ZExt     id :: Identifier v :: Value ty   :: Type -- Zero extend integers
-  | SExt     id :: Identifier v :: Value ty   :: Type -- Sign extend integers
-  | FPToUI   id :: Identifier v :: Value ty   :: Type -- floating point -> UInt
-  | FPToSI   id :: Identifier v :: Value ty   :: Type -- floating point -> SInt
-  | UIToFP   id :: Identifier v :: Value ty   :: Type -- UInt -> floating point
-  | SIToFP   id :: Identifier v :: Value ty   :: Type -- SInt -> floating point
-  | FPTrunc  id :: Identifier v :: Value ty   :: Type -- Truncate floating point
-  | FPExt    id :: Identifier v :: Value ty   :: Type -- Extend floating point
-  | PtrToInt id :: Identifier v :: Value ty   :: Type -- Pointer -> Integer
-  | IntToPtr id :: Identifier v :: Value ty   :: Type -- Integer -> Pointer
-  | BitCast  id :: Identifier v :: Value ty   :: Type -- Type cast      
+  | Trunc    pc :: PC id :: Identifier v :: Value ty   :: Type -- Truncate integers
+  | ZExt     pc :: PC id :: Identifier v :: Value ty   :: Type -- Zero extend integers
+  | SExt     pc :: PC id :: Identifier v :: Value ty   :: Type -- Sign extend integers
+  | FPToUI   pc :: PC id :: Identifier v :: Value ty   :: Type -- floating point -> UInt
+  | FPToSI   pc :: PC id :: Identifier v :: Value ty   :: Type -- floating point -> SInt
+  | UIToFP   pc :: PC id :: Identifier v :: Value ty   :: Type -- UInt -> floating point
+  | SIToFP   pc :: PC id :: Identifier v :: Value ty   :: Type -- SInt -> floating point
+  | FPTrunc  pc :: PC id :: Identifier v :: Value ty   :: Type -- Truncate floating point
+  | FPExt    pc :: PC id :: Identifier v :: Value ty   :: Type -- Extend floating point
+  | PtrToInt pc :: PC id :: Identifier v :: Value ty   :: Type -- Pointer -> Integer
+  | IntToPtr pc :: PC id :: Identifier v :: Value ty   :: Type -- Integer -> Pointer
+  | BitCast  pc :: PC id :: Identifier v :: Value ty   :: Type -- Type cast      
   -- Other Operations
-  | ICmp id :: Identifier cond :: IntPredicate ty :: Type op1 :: Value op2 :: Value 
-  | FCmp id :: Identifier cond :: RealPredicate ty :: Type op1 :: Value op2 :: Value 
+  | ICmp pc :: PC id :: Identifier cond :: IntPredicate ty :: Type op1 :: Value op2 :: Value 
+  | FCmp pc :: PC id :: Identifier cond :: RealPredicate ty :: Type op1 :: Value op2 :: Value 
   | PHI
+      pc :: PC
       id :: Identifier
       ty :: Type
       vals :: PValues
   | Call
+      pc     :: PC
       mres   :: MIdentifier
       ty     :: Type
       callee :: Identifier 
       args   :: Values 
   | Select
+      pc :: PC
       id :: Identifier
       cond :: Value
       valt :: Value
       valf :: Value
   | ExtractValue
+      pc   :: PC
       id   :: Identifier
       aggr :: Value
       idxs :: Ints
   | AtomicRMW
+      pc :: PC
       id :: Identifier
       args :: Values
       op  :: BinOp
       ord :: AtomicOrdering
+  -- Concurrent Operations
+  | CreateThread
+      pc   :: PC 
+      args :: Values
  
 data Identifier 
   | Global name :: Id -- (functions, global variables) begin with the '@'

@@ -76,51 +76,54 @@ sem RetInst
   | VoidRet  lhs.pp = text "void"
 
 sem Instruction
-  | Ret    lhs.pp = text "ret" <+> @r.pp 
-  | Alloca lhs.pp = @id.pp <+> char '=' <+> text "alloca" <+> @ty.pp <> char ',' <+> @align.pp
-  | Load   lhs.pp = @id.pp <+> char '=' <+> text "load"   <+> @v.pp  <> char ',' <+> @align.pp
-  | Store  lhs.pp = @ty.pp <+> text "store" <+> @v1.pp <> char ',' <+> @v2.pp <> char ',' <+> @align.pp
-  | ICmp   lhs.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
-  | FCmp   lhs.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
-  | UBr    lhs.pp = text "br" <+> @d.pp
-  | Br     lhs.pp = text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
-  | Call   lhs.pp = text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
-  | Unreachable lhs.pp = text "unreachable"
-  | Trunc    lhs.pp = pConvOp @id.pp "trunc"    @v.pp @ty.pp
-  | ZExt     lhs.pp = pConvOp @id.pp "zext"     @v.pp @ty.pp
-  | SExt     lhs.pp = pConvOp @id.pp "sext"     @v.pp @ty.pp
-  | FPToUI   lhs.pp = pConvOp @id.pp "fptoui"   @v.pp @ty.pp
-  | FPToSI   lhs.pp = pConvOp @id.pp "fptosi"   @v.pp @ty.pp
-  | UIToFP   lhs.pp = pConvOp @id.pp "uitofp"   @v.pp @ty.pp
-  | SIToFP   lhs.pp = pConvOp @id.pp "sitofp"   @v.pp @ty.pp
-  | FPTrunc  lhs.pp = pConvOp @id.pp "fptrunc"  @v.pp @ty.pp
-  | FPExt    lhs.pp = pConvOp @id.pp "fpext"    @v.pp @ty.pp
-  | PtrToInt lhs.pp = pConvOp @id.pp "ptrtoint" @v.pp @ty.pp
-  | IntToPtr lhs.pp = pConvOp @id.pp "inttoptr" @v.pp @ty.pp
-  | BitCast  lhs.pp = pConvOp @id.pp "bitcast"  @v.pp @ty.pp
-  | GetElementPtr lhs.pp = @id.pp <+> char '=' <+> text "getelementptr" <+> @struct.pp <> char ',' <+> @idxs.pp
-  | Add  lhs.pp = pBinOp @ty.pp @id.pp "add"  @op1.pp @op2.pp
-  | FAdd lhs.pp = pBinOp @ty.pp @id.pp "fadd" @op1.pp @op2.pp
-  | Sub  lhs.pp = pBinOp @ty.pp @id.pp "sub"  @op1.pp @op2.pp
-  | FSub lhs.pp = pBinOp @ty.pp @id.pp "fsub" @op1.pp @op2.pp
-  | Mul  lhs.pp = pBinOp @ty.pp @id.pp "mul"  @op1.pp @op2.pp
-  | FMul lhs.pp = pBinOp @ty.pp @id.pp "fmul" @op1.pp @op2.pp
-  | UDiv lhs.pp = pBinOp @ty.pp @id.pp "udiv" @op1.pp @op2.pp
-  | SDiv lhs.pp = pBinOp @ty.pp @id.pp "sdiv" @op1.pp @op2.pp
-  | FDiv lhs.pp = pBinOp @ty.pp @id.pp "fdiv" @op1.pp @op2.pp
-  | URem lhs.pp = pBinOp @ty.pp @id.pp "urem" @op1.pp @op2.pp
-  | SRem lhs.pp = pBinOp @ty.pp @id.pp "srem" @op1.pp @op2.pp
-  | FRem lhs.pp = pBinOp @ty.pp @id.pp "frem" @op1.pp @op2.pp
-  | Shl  lhs.pp = pBitBinOp @ty.pp @id.pp "shl"  @op1.pp @op2.pp
-  | LShr lhs.pp = pBitBinOp @ty.pp @id.pp "lshr" @op1.pp @op2.pp
-  | AShr lhs.pp = pBitBinOp @ty.pp @id.pp "ashr" @op1.pp @op2.pp
-  | And  lhs.pp = pBitBinOp @ty.pp @id.pp "and"  @op1.pp @op2.pp
-  | Or   lhs.pp = pBitBinOp @ty.pp @id.pp "or"   @op1.pp @op2.pp
-  | Xor  lhs.pp = pBitBinOp @ty.pp @id.pp "xor"  @op1.pp @op2.pp
-  | PHI  lhs.pp = @id.pp <+> char '=' <+> text "phi" <+> @ty.pp <+> @vals.pp
-  | Select lhs.pp = @id.pp <+> char '=' <+> @cond.pp <> char ',' <+> @valt.pp <> char ',' <+> @valf.pp
-  | ExtractValue lhs.pp = @id.pp <+> char '=' <+> text "extractvalue" <+> @aggr.pp <> char ',' <+> @idxs.pp 
-  | AtomicRMW lhs.pp = @id.pp <+> char '=' <+> text "atomicrmw" <+> @op.pp <+>  @args.pp  <+> @ord.pp
+  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW CreateThread
+           lhs.pp = @pp
+  | Ret    loc.pp = text "ret" <+> @r.pp 
+  | Alloca loc.pp = @id.pp <+> char '=' <+> text "alloca" <+> @ty.pp <> char ',' <+> @align.pp
+  | Load   loc.pp = @id.pp <+> char '=' <+> text "load"   <+> @v.pp  <> char ',' <+> @align.pp
+  | Store  loc.pp = @ty.pp <+> text "store" <+> @v1.pp <> char ',' <+> @v2.pp <> char ',' <+> @align.pp
+  | ICmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
+  | FCmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
+  | UBr    loc.pp = text "br" <+> @d.pp
+  | Br     loc.pp = text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
+  | Call   loc.pp = text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
+  | Unreachable loc.pp = text "unreachable"
+  | Trunc    loc.pp = pConvOp @id.pp "trunc"    @v.pp @ty.pp
+  | ZExt     loc.pp = pConvOp @id.pp "zext"     @v.pp @ty.pp
+  | SExt     loc.pp = pConvOp @id.pp "sext"     @v.pp @ty.pp
+  | FPToUI   loc.pp = pConvOp @id.pp "fptoui"   @v.pp @ty.pp
+  | FPToSI   loc.pp = pConvOp @id.pp "fptosi"   @v.pp @ty.pp
+  | UIToFP   loc.pp = pConvOp @id.pp "uitofp"   @v.pp @ty.pp
+  | SIToFP   loc.pp = pConvOp @id.pp "sitofp"   @v.pp @ty.pp
+  | FPTrunc  loc.pp = pConvOp @id.pp "fptrunc"  @v.pp @ty.pp
+  | FPExt    loc.pp = pConvOp @id.pp "fpext"    @v.pp @ty.pp
+  | PtrToInt loc.pp = pConvOp @id.pp "ptrtoint" @v.pp @ty.pp
+  | IntToPtr loc.pp = pConvOp @id.pp "inttoptr" @v.pp @ty.pp
+  | BitCast  loc.pp = pConvOp @id.pp "bitcast"  @v.pp @ty.pp
+  | GetElementPtr loc.pp = @id.pp <+> char '=' <+> text "getelementptr" <+> @struct.pp <> char ',' <+> @idxs.pp
+  | Add  loc.pp = pBinOp @ty.pp @id.pp "add"  @op1.pp @op2.pp
+  | FAdd loc.pp = pBinOp @ty.pp @id.pp "fadd" @op1.pp @op2.pp
+  | Sub  loc.pp = pBinOp @ty.pp @id.pp "sub"  @op1.pp @op2.pp
+  | FSub loc.pp = pBinOp @ty.pp @id.pp "fsub" @op1.pp @op2.pp
+  | Mul  loc.pp = pBinOp @ty.pp @id.pp "mul"  @op1.pp @op2.pp
+  | FMul loc.pp = pBinOp @ty.pp @id.pp "fmul" @op1.pp @op2.pp
+  | UDiv loc.pp = pBinOp @ty.pp @id.pp "udiv" @op1.pp @op2.pp
+  | SDiv loc.pp = pBinOp @ty.pp @id.pp "sdiv" @op1.pp @op2.pp
+  | FDiv loc.pp = pBinOp @ty.pp @id.pp "fdiv" @op1.pp @op2.pp
+  | URem loc.pp = pBinOp @ty.pp @id.pp "urem" @op1.pp @op2.pp
+  | SRem loc.pp = pBinOp @ty.pp @id.pp "srem" @op1.pp @op2.pp
+  | FRem loc.pp = pBinOp @ty.pp @id.pp "frem" @op1.pp @op2.pp
+  | Shl  loc.pp = pBitBinOp @ty.pp @id.pp "shl"  @op1.pp @op2.pp
+  | LShr loc.pp = pBitBinOp @ty.pp @id.pp "lshr" @op1.pp @op2.pp
+  | AShr loc.pp = pBitBinOp @ty.pp @id.pp "ashr" @op1.pp @op2.pp
+  | And  loc.pp = pBitBinOp @ty.pp @id.pp "and"  @op1.pp @op2.pp
+  | Or   loc.pp = pBitBinOp @ty.pp @id.pp "or"   @op1.pp @op2.pp
+  | Xor  loc.pp = pBitBinOp @ty.pp @id.pp "xor"  @op1.pp @op2.pp
+  | PHI  loc.pp = @id.pp <+> char '=' <+> text "phi" <+> @ty.pp <+> @vals.pp
+  | Select loc.pp = @id.pp <+> char '=' <+> @cond.pp <> char ',' <+> @valt.pp <> char ',' <+> @valf.pp
+  | ExtractValue loc.pp = @id.pp <+> char '=' <+> text "extractvalue" <+> @aggr.pp <> char ',' <+> @idxs.pp
+  | AtomicRMW loc.pp = @id.pp <+> char '=' <+> text "atomicrmw" <+> @op.pp <+>  @args.pp  <+> @ord.pp
+  | CreateThread loc.pp = text "create_thread" <+> parens @args.pp
 
 {
 pConvOp :: Doc -> String -> Doc -> Doc -> Doc
@@ -307,17 +310,4 @@ escaped []        = P.empty
 ppKeyword :: Bool -> String -> Doc
 ppKeyword True s = text s
 ppKeyword _    _ = P.empty
-
-{-
-class MPretty a where
-  pretty' :: a -> Doc
-
---instance Pretty 
-
-instance Pretty Module where
-    pretty mdl = pp_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
-    
-instance Pretty DataLayout where
-    pretty d = pp_Syn_DataLayout $ wrap_DataLayout (sem_DataLayout d) $ Inh_DataLayout {}
--}
 }
