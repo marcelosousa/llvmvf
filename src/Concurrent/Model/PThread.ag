@@ -29,18 +29,19 @@ attr Module
   syn pmdl :: {Model PThread}
 
 sem Module
-  | Module lhs.pmdl  = Model @nmdtys.self @gvars.self @funs.mainf @funs.pmdl
+  | Module lhs.pmdl  = Model @nmdtys.self @gvars.self @funs.mainf @funs.pmdl @funs.decls
            funs.mfun = @funs.self
            funs.counter = 1
 
 attr Functions
   syn mainf :: {Process}
-
+  
 attr Functions Function BasicBlocks BasicBlock Instructions Instruction
-  syn pmdl use {`IM.union`} {IM.empty} :: {IM.IntMap Process} 
+  syn pmdl use {`IM.union`} {IM.empty} :: {IM.IntMap Process}
+  syn decls use {`Map.union`} {Map.empty} :: {Map.Map String Function}
   inh mfun      :: {Map.Map String Function}
   chn counter   :: {ThreadLabel}
-
+  
 attr Function BasicBlocks BasicBlock Instructions Instruction Value Identifier Constant ConstantFP Linkage CConv Visibility DefinitionTy Argument Align GCName FunAttr Attribute Section TargetData Target Parameter IntPredicate RealPredicate GlobalValue ConstantDataSequential ConstantExpr RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering Type Types Parameters TyFloatPoint Label Arguments Values Id IntTyValIdL IntTyValId PValues MIdentifier PValue Ints PC 
   syn annotated :: self 
 
@@ -57,6 +58,7 @@ sem Functions
 sem Function
   | FunctionDef  lhs.pmdl = @body.pmdl 
   | FunctionDecl lhs.pmdl = IM.empty 
+                    +decls = Map.union (Map.singleton @name.self @self)
 
 sem BasicBlock
   | BasicBlock lhs.pmdl = @instrs.pmdl
@@ -96,7 +98,7 @@ data PThread
 -- being executed. Scheduler specification is required.
 instance SCModel PThread where
   -- model :: Module -> Model PThread
-  model mdl@Module{..} = pmdl_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
+  model mdl = pmdl_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
 
 instance Pretty PThread 
 }

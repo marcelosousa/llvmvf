@@ -226,7 +226,7 @@ data Instruction
       vals :: PValues
   | Call
       pc     :: PC
-      mres   :: MIdentifier
+      mres   :: Identifier
       ty     :: Type
       callee :: Identifier 
       args   :: Values 

@@ -86,7 +86,7 @@ sem Instruction
   | FCmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
   | UBr    loc.pp = text "br" <+> @d.pp
   | Br     loc.pp = text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
-  | Call   loc.pp = text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
+  | Call   loc.pp = @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
   | Unreachable loc.pp = text "unreachable"
   | Trunc    loc.pp = pConvOp @id.pp "trunc"    @v.pp @ty.pp
   | ZExt     loc.pp = pConvOp @id.pp "zext"     @v.pp @ty.pp

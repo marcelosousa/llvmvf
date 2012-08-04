@@ -1,3 +1,4 @@
+{-#LANGUAGE EmptyDataDecls #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model
 -- Copyright :  (c) 2012 Marcelo Sousa
@@ -24,7 +25,7 @@ type ControlFlow = [(Int,Int)]
 class SCModel t where
   model       :: Module  -> Model t
   controlflow :: Model t -> ControlFlow
-  controlflow (Model _ _ mainf procs) = cflowfs $ getFs mainf procs 
+  controlflow (Model _ _ mainf procs _) = cflowfs $ getFs mainf procs 
 --  scheduler :: [(State, PCi)] -> TTransition
  
 getFs :: Process -> Processes -> Functions
@@ -39,7 +40,12 @@ data Model t = Model { nmdtys :: NamedTypes
                      , gvars  :: Globals
                      , mainf  :: Process
                      , procs  :: Processes
+                     , decls  :: Declarations
                      } 
+
+data Process = Process { ident :: String, unProc :: Function }
+type Declarations = Map.Map String Function
+type Processes = IM.IntMap Process
 
 -- Mi (1 <= i <= n) - Thread Model (Control + Data Flow)
 -- Vi - Set of local variables of Mi
@@ -126,7 +132,7 @@ tid = undefined
 
 -- A transaction is an uninterrupted sequence of transitions
 -- of a particular thread.
-data Transaction = [TTransition]
+type Transaction = [TTransition]
 
 -- Atomic Transaction
 -- Happens-before
@@ -135,9 +141,7 @@ data Transaction = [TTransition]
 
 -- Printing
 instance Show (Model t) where
-  show (Model nmdtys gvars mainf procs) = show mainf ++ "\n" ++ show procs 
-
-data Process = Process { ident :: String, unProc :: Function }
+  show (Model nmdtys gvars mainf procs decls) = show mainf ++ "\n" ++ show procs ++ "\n" ++ show decls
 
 instance Pretty Function where
     pretty f = pp_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function {}
@@ -145,4 +149,3 @@ instance Pretty Function where
 instance Show Process where
   show (Process i f) = show $ pretty f
 
-type Processes = IM.IntMap Process

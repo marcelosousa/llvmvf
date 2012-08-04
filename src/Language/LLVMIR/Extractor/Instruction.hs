@@ -217,7 +217,7 @@ getOtherOp Call = do ival  <- getInstructionValue
                      ident <- getIdent ival
                      ty    <- typeOf ival 
                      (callee, args) <- getOperands ival >>= getCallArgs
-                     return $ LL.Call pc Nothing ty callee args
+                     return $ LL.Call pc (LL.Local ident) ty callee args
 getOtherOp Select         = do ival <- getInstructionValue
                                pc   <- getPC
                                ident <- getIdent ival

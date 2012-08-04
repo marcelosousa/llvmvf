@@ -22,7 +22,7 @@ import Language.SMTLib2.Printer    (prettyprint)
 import Concurrent.Model
 import Concurrent.Model.PThread
 import Concurrent.Model.Visualizer
-import Concurrent.Model.Encoder     (encode)
+import Concurrent.Model.Encoder     
 
 import Debug.Trace
 
@@ -36,10 +36,12 @@ instance Default Options where
 
 runOption :: FilePath -> Options -> IO ()
 runOption bc Parse = do mdl <- extract bc
-                        let mod = (model mdl) :: Model PThread
-                       -- print $ ((model mdl) :: Model PThread)
-                        print $ pretty mod 
-                        -- print $ prettyprint $ encode mdl -- print $ pretty mdl
+                        let bf  = dropExtension bc
+                            mod = (model mdl) :: Model PThread
+                        writeFile (addExtension bf "llvf")  (show $ pretty mdl)
+                        writeFile (addExtension bf "model") (show $ mod) 
+                        writeFile (addExtension bf "dot")   (show $ pretty mod)
+                        writeFile (addExtension bf "smt2")  (show $ prettyprint $ encode mod)
 runOption bc Mutate = mutate bc
 
 data ProgramOptions = LLVMVF {
