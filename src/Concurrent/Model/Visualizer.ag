@@ -20,6 +20,7 @@ import Data.Maybe
 
 import UU.PPrint as P
 import Concurrent.Model
+import Concurrent.Model.Analysis.ControlFlow (ControlFlow(..))
 import Language.LLVMIR
 }
 
@@ -58,19 +59,19 @@ sem BasicBlock
 
 sem Instruction
   | Ret Alloca Load Store ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW 
-      lhs.ppccfg = int @pc.self <+> dotLabel @pp
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
   | CreateThread
-      lhs.ppccfg = int @pc.self <+> dotLabel (text "create_thread")
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "create_thread")
   | Call
-      lhs.ppccfg = int @pc.self <+> dotLabel (text "call" <+> @callee.pp)
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "call" <+> @callee.pp)
 {
 type ILabel = Int
 
 nextUnique :: Int -> (Int, Int)
 nextUnique u = (u+1, u)
 
-dotLabel :: Doc -> Doc
-dotLabel d = text "[label=\"" <> d <> text "\"];"
+dotLabel :: Int -> Doc -> Doc
+dotLabel i d = text "[label=\"" <> int i <+> d <> text "\"];"
 
 instance (Pretty t, SCModel t) => Pretty (Model t)  where
   --pretty :: Model -> Doc
@@ -91,7 +92,7 @@ class Pretty' t where
   pretty' :: t -> Doc
 
 instance Pretty' ControlFlow where
-  pretty' = vsep . (Prelude.map pretty')
+  pretty' (ControlFlow _ cfg) = vsep $ Prelude.map pretty' $ concat $ Map.elems cfg
 
 instance Pretty' (Int,Int) where
   pretty' (a,b) = int a <+> text "->" <+> int b <> char ';'

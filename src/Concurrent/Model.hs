@@ -12,12 +12,10 @@ import qualified Data.Map as Map
 import Language.LLVMIR
 import Language.LLVMIR.Printer.Module
 
-import Concurrent.Model.Analysis.ControlFlow (cflowfs)
+import Concurrent.Model.Analysis.ControlFlow (cflowfs, ControlFlow(..))
 
 import UU.PPrint
 import Debug.Trace
-
-type ControlFlow = [(Int,Int)]
 
 -- Synchronous (Interleaved) Concurrent Models
 -- At one given time, there only one atomic instruction

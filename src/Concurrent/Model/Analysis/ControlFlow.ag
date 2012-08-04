@@ -19,16 +19,33 @@ import Debug.Trace
 import Language.LLVMIR
 }
 
+{
+type CF = [(Int,Int)]
+
+{-
+data CS = ReadS
+        | WriteS
+        | Wait
+-}
+
+data ControlFlow = ControlFlow { cte :: Map.Map String Int   -- ^ Entry Point for Ti
+                               , cfg :: Map.Map String CF     -- ^ Control Flow for Ti
+                             --  , cgv  :: Map.Map Id ([Int], [Int]) --  ^ Data Flow Points where we use global variables - The pair ([Int],[Int]) is for Read and Write
+                               }
+}
+
 -- Concurrent Control Flow Graph
 attr Function BasicBlocks BasicBlock Instructions Instruction
   chn cpc :: {Int}
 
 attr Functions
   inh bbentrypci :: {Map.Map String (Map.Map String Int)}
-  syn cflow use {++} {[]} :: {ControlFlow}
+  syn cflow use {++} {[]} :: {CF}
+  syn cte   use {`Map.union`} {Map.empty} :: {Map.Map String Int}
+  syn cfg   use {`Map.union`} {Map.empty} :: {Map.Map String CF}
  
 attr Function BasicBlocks BasicBlock Instructions Instruction
-  syn cflow use {++} {[]} :: {ControlFlow}
+  syn cflow use {++} {[]} :: {CF}
   inh bbentrypci :: {Map.Map String Int}
 
 sem Functions
@@ -36,6 +53,8 @@ sem Functions
       lhs.cflow = @loc.cflow ++ @val.cflow ++ @tl.cflow
       val.cpc  = @val.entrypc
       val.bbentrypci = fromMaybe (error "lookup") (Map.lookup @key @lhs.bbentrypci)
+      lhs.cte = Map.insert @key @val.entrypc @tl.cte
+      lhs.cfg = Map.insert @key (@loc.cflow ++ @val.cflow) @tl.cfg
       loc.cflow = if @key /= "main"
                   then [(-1,@val.entrypc)]
                   else []
@@ -120,9 +139,8 @@ sem Instruction
   | Ret
       +exitpcs = (++) [@pc.self]
 {
-type ControlFlow = [(Int,Int)]
-
 cflowfs :: Functions -> ControlFlow
 cflowfs fs = let i = bbentrypc_Syn_Functions$ wrap_Functions (sem_Functions fs) $ Inh_Functions { bbentrypci_Inh_Functions = Map.empty }
-             in cflow_Syn_Functions $ wrap_Functions (sem_Functions fs) $ Inh_Functions { bbentrypci_Inh_Functions = i }
+                 c = wrap_Functions (sem_Functions fs) $ Inh_Functions { bbentrypci_Inh_Functions = i }
+             in ControlFlow (cte_Syn_Functions c) (cfg_Syn_Functions c) 
 }

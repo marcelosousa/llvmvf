@@ -1,3 +1,4 @@
+{-#LANGUAGE RecordWildCards #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Encoder
 -- Copyright :  (c) 2012 Marcelo Sousa
@@ -9,9 +10,12 @@ import Concurrent.Model.Encoder.Model
 import Concurrent.Model
 
 import Language.LLVMIR
+
 import Language.SMTLib2.Base
+import Language.SMTLib2.Builder
 
 import qualified Data.IntMap as IM
+import qualified Data.Map as Map
 
 import Debug.Trace (trace)
  
@@ -26,15 +30,28 @@ import Debug.Trace (trace)
 -- 2. Lock-set and/or lock-acquisition history analysis
 -- 3. Conditional dependency
 --class (SCModel t) => Encode t where
-encode :: Model t -> SMod
-encode (Model tys vars m ts decls) =  preamble vars
-                                   ++ encodeInit tys vars m  
---                                 ++ encodeThreads tys vars ts 
-                                   ++ final
 
-preamble :: Globals -> [SExpression]
-preamble gs = let gsexpr = genc_Syn_Globals $ wrap_Globals (sem_Globals gs) $ Inh_Globals { }
-              in (setlogic QF_AUFBV):gsexpr  
+type GlobalState = (IM.IntMap (PC, Map.Map Id Value), Map.Map Id Value, PC)
+
+encode :: (SCModel t) => Model t -> SMod
+encode m@Model{..} = preamble 
+{- 
+   let s0 = (IM.empty, Map.empty, iCm m)
+       ccfg@ControlFlow{..} =
+   in  preamble
+    ++ encodeGlobals vars
+     encodeMain tys vars m  
+                                   ++ encodeThreads tys vars ts 
+                                   ++ final
+-}
+preamble :: [SExpression]
+preamble = [ setlogic QF_AUFBV
+           , setoption "produce-models"
+           ]
+
+encGlobals :: Globals -> [SExpression]
+encGlobals gs = let gsexpr = genc_Syn_Globals $ wrap_Globals (sem_Globals gs) $ Inh_Globals { }
+                in (setlogic QF_AUFBV):gsexpr  
 
 final :: [SExpression]
 final = [ checksat , exit ]
@@ -42,10 +59,8 @@ final = [ checksat , exit ]
 encodeInit :: NamedTypes -> Globals -> Process -> [SExpression]
 encodeInit tys vars (Process i f) = let syn_fun =  wrap_Function (sem_Function f) $ Inh_Function { tys_Inh_Function = tys, vars_Inh_Function = vars  }
                                     in  trace (show $ locals_Syn_Function syn_fun) $ menc_Syn_Function syn_fun
-encodeThreads = undefined
 
---encode :: SCModel t => Model t -> SMod
---encode (Model tys vars m ts) = preamble ++ encode m 
+-- Having a IntMap PC to check 
+encodeThreads :: NamedTypes -> Globals -> Processes -> [SExpression]
+encodeThreads tys vars m = []
 
---encode :: Module -> SMod
---encode mdl = enc_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}

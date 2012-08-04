@@ -13,6 +13,8 @@ include "Type.ag"
 imports 
 {
 import Language.SMTLib2.Base
+import Language.SMTLib2.Builder
+
 import Language.LLVMIR
 
 import Data.Char
@@ -58,7 +60,7 @@ sem Instruction
                      else [ SE $ DeclFun @mres.ssymbol (fst @ty.sort) (snd @ty.sort) ]
   | BitCast +menc = (++) @loc.enc
             loc.enc  = [ SE $ DeclFun @id.ssymbol (fst @ty.sort) (snd @ty.sort) ] ++ [ eq (IdentExpr $ SymIdent @id.ssymbol) @loc.bc ]
-            loc.bc   = ExtractExpr [ IdentExpr $ IdxIdent (SimpleSym "extract") [getISize @ty.self, 0] , fromJust @v.sexpr ]
+            loc.bc   = ExtractExpr [ IdentExpr $ IdxIdent (SimpleSym "extract") [(getISize @ty.self)-1, 0] , fromJust @v.sexpr ]
 
 {
 eq :: SExpr -> SExpr -> SExpression
