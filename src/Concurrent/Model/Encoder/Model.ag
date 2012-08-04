@@ -1,0 +1,130 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.Model
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Encoder.Model}{}{}
+
+include "Base.ag"
+include "Type.ag"
+
+imports 
+{
+import Language.SMTLib2.Base
+import Language.LLVMIR
+
+import Data.Char
+import Data.Maybe
+import Numeric
+}
+
+-- Global Variables 
+attr Globals Global
+  syn genc use {++} {[]} :: {[SExpression]}
+
+sem Global
+  | GlobalVar
+     +genc = (++) @loc.enc
+     loc.enc  = [ SE $ DeclFun @loc.sym (fst @loc.sort) (snd @loc.sort) ] ++ @loc.ienc 
+     loc.sort = @ty.sort
+     loc.sym = SimpleSym @name
+     loc.ienc = maybe [] (\v -> [eq (IdentExpr $ SymIdent $ @loc.sym) v ]) @ival.sexpr
+
+-- Local Variables
+attr Function BasicBlocks BasicBlock Instructions Instruction Identifier
+  syn locals use {++} {[]} :: {[Id]}
+
+attr Function BasicBlocks BasicBlock Instructions Instruction
+  syn menc   use {++} {[]} :: {[SExpression]}
+  inh tys  :: {NamedTypes}
+  inh vars :: {Globals}
+
+sem Function
+  | FunctionDecl lhs.menc = []
+  | FunctionDef  lhs.menc = @body.menc
+
+sem BasicBlock 
+  | BasicBlock lhs.menc = @instrs.menc
+
+sem Instruction
+  | Alloca +menc    = (++) [ SE $ DeclFun @id.ssymbol (fst @ty.sort) (snd @ty.sort) ]  
+  | Store  +menc = (++) [ eq (fromJust @v1.sexpr) (fromJust @v2.sexpr) ]
+-- TODO
+  | Call   +menc = (++) @loc.rid
+           loc.rid = if getIdent @mres.self == ""
+                     then []
+                     else [ SE $ DeclFun @mres.ssymbol (fst @ty.sort) (snd @ty.sort) ]
+  | BitCast +menc = (++) @loc.enc
+            loc.enc  = [ SE $ DeclFun @id.ssymbol (fst @ty.sort) (snd @ty.sort) ] ++ [ eq (IdentExpr $ SymIdent @id.ssymbol) @loc.bc ]
+            loc.bc   = ExtractExpr [ IdentExpr $ IdxIdent (SimpleSym "extract") [getISize @ty.self, 0] , fromJust @v.sexpr ]
+
+{
+eq :: SExpr -> SExpr -> SExpression
+eq s1 s2 = assert $ FnAppExpr (SymIdent $ SimpleSym "=") [s1, s2]
+
+getIdent :: Identifier -> String
+getIdent (Local s) = s
+getIdent (Global s) = s
+}
+-- Value S Expressions
+attr MValue Value Constant ConstantDataSequential GlobalValue 
+  syn sexpr :: {Maybe SExpr}
+
+sem MValue
+  | Nothing lhs.sexpr = Nothing
+  | Just    lhs.sexpr = @just.sexpr
+ 
+sem Value
+  | Id lhs.sexpr = Just $ IdentExpr $ SymIdent @v.ssymbol
+  | Constant lhs.sexpr = @c.sexpr
+
+sem Constant
+  | ConstantInt            lhs.sexpr = Just $ IdentExpr $ IdxIdent (bv @iv) [getISize @ty.self] 
+  | ConstantDataSequential lhs.sexpr = @cds.sexpr 
+  | GlobalValue            lhs.sexpr = @gv.sexpr
+  | ConstantAggregateZero  lhs.sexpr = Nothing
+ 
+sem GlobalValue
+  | FunctionValue  lhs.sexpr = Just $ IdentExpr $ SymIdent @n.ssymbol 
+  | GlobalAlias    lhs.sexpr = Just $ IdentExpr $ SymIdent @n.ssymbol 
+  | GlobalVariable lhs.sexpr = Just $ IdentExpr $ SymIdent @n.ssymbol 
+
+sem ConstantDataSequential
+  | ConstantDataArray  lhs.sexpr = Nothing
+  | ConstantDataVector lhs.sexpr = Nothing
+
+{
+bv :: Int -> SSymbol
+bv n = SimpleSym $ "bv" ++ show n
+
+getISize :: Type -> Int
+getISize (TyInt p)     = p
+getISize (TyPointer p) = getISize p
+getISize _ = 0
+}
+ 
+-- Sorts
+attr Type
+  syn sort :: {([SSortExpr], SSortExpr)}
+
+sem Type
+  | TyInt    lhs.sort = ([], BitVector @p)
+  | TyArray  lhs.sort = ([], ArraySort (BitVector (getBSize @numEl)) (snd @ty.sort))  
+  | TyVector lhs.sort = ([], ArraySort (BitVector (getBSize @numEl)) (snd @ty.sort))  
+
+{
+getBSize :: Int -> Int
+getBSize n =length $  showIntAtBase 2 intToDigit n ""
+}
+
+-- Identifiers
+attr Identifier
+  syn ssymbol :: {SSymbol}
+
+sem Identifier
+  | Local Global
+     lhs.ssymbol = SimpleSym @name.self
+  | Local
+     +locals = (++) [@name.self]
