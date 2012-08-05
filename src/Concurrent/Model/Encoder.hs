@@ -7,8 +7,8 @@
 module Concurrent.Model.Encoder (encode) where
 
 import Concurrent.Model.Analysis.ControlFlow (ControlFlow(..))
-import Concurrent.Model.Encoder.Model 
-import Concurrent.Model hiding (State)
+import Concurrent.Model.Encoder.Model -- hiding (GlobalState,Transition) 
+import Concurrent.Model               hiding (State)
 
 import Language.LLVMIR
 
@@ -36,7 +36,9 @@ import Control.Monad.State
 -- 3. Conditional dependency
 --class (SCModel t) => Encode t where
 
-type GlobalState = (Map.Map String (PC, Map.Map Id Value), Map.Map Id Value, PC)
+--type GlobalState = (Map.Map String (PC, Map.Map Id Value), Map.Map Id Value, PC)
+
+--type Transition = (PC, Bool, SExpression, GlobalState -> GlobalState, PC) -- (PC, a -> Bool, SExpr -> SExpr, PC)
 
 encode :: (SCModel t) => Model t -> SMod
 encode m@Model{..} = let ccfg@ControlFlow{..} = controlflow m
@@ -61,13 +63,42 @@ final :: [SExpression]
 final = [ checksat , exit ]
 
 encGlobals :: (SCModel t) => Model t -> State GlobalState [SExpression]
-encGlobals m@Model{..} = let gsexpr = genc_Syn_Globals $ wrap_Globals (sem_Globals gvars) $ Inh_Globals { }
-                         in  return gsexpr  
+encGlobals m@Model{..} = do gs <- get
+                            let gw = wrap_Globals (sem_Globals gvars) $ Inh_Globals { gs_Inh_Globals = gs }
+                            put $ gs_Syn_Globals gw
+                            return $ genc_Syn_Globals gw  
 
+encMain :: (SCModel t) => Model t -> ControlFlow -> State GlobalState [SExpression]
+encMain m@Model{..} ccfg@ControlFlow{..} =
+  let ts = ts_Syn_Function $ wrap_Function (sem_Function $ unProc mainf) $ Inh_Function { flow_Inh_Function = fromJust $ Map.lookup "main" cfg} 
+  in apply ts
+
+apply :: [Transition] -> State GlobalState [SExpression]
+apply ts = do s <- get
+              case enabled s ts of
+                []  -> return []
+                [t] -> do sexpr  <- fire t
+                          sexpr' <- apply $ remove t ts
+                          return $ sexpr ++ sexpr'
+                _   -> error "In a deterministic model only one transition can be enabled.."
+
+enabled :: GlobalState -> [Transition] -> [Transition]
+enabled (_, _, pc) = filter (\(pci, g, _, _, _) -> pc == pci && g)   
+
+remove :: Transition -> [Transition] -> [Transition]
+remove (pci, _, _, _, pce) = filter (\(pci0, _,_,_,pce0) -> pci /= pci0 || pce /= pce0 )
+
+fire :: Transition -> State GlobalState [SExpression]
+fire (_,g,sexpr,gsf,pce) = do s <- get
+                              put $ gsf s
+                              return sexpr
+
+{-
 encMain :: (SCModel t) => Model t -> ControlFlow -> State GlobalState [SExpression]
 encMain m@Model{..} ccfg@ControlFlow{..} =
    do let syn_fun =  wrap_Function (sem_Function $ unProc mainf) $ Inh_Function { tys_Inh_Function = nmdtys, vars_Inh_Function = gvars }
       return $ trace (show $ locals_Syn_Function syn_fun) $ menc_Syn_Function syn_fun
+-}
 
 encProcs :: (SCModel t) => Model t -> ControlFlow -> State GlobalState [SExpression]
 encProcs m@Model{..} ccfg@ControlFlow{..} = return []

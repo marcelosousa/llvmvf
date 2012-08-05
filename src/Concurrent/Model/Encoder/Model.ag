@@ -19,20 +19,31 @@ import Language.LLVMIR
 
 import Data.Char
 import Data.Maybe
+import Data.List (find)
+
 import Numeric
 }
 
 -- Global Variables 
 attr Globals Global
   syn genc use {++} {[]} :: {[SExpression]}
-
+  chn gs   :: {GlobalState}
+ 
 sem Global
   | GlobalVar
-     +genc = (++) @loc.enc
-     loc.enc  = [ SE $ DeclFun @loc.sym (fst @loc.sort) (snd @loc.sort) ] ++ @loc.ienc 
-     loc.sort = @ty.sort
-     loc.sym = SimpleSym @name
+     +genc    = (++) @loc.enc
+     loc.enc  = [ declfun @loc.sym @ty.sort ] ++ @loc.ienc 
      loc.ienc = maybe [] (\v -> [eq (IdentExpr $ SymIdent $ @loc.sym) v ]) @ival.sexpr
+     loc.sym  = SimpleSym @name.self
+     lhs.gs   = updateGS @lhs.gs @name.self @ival.self
+
+{
+updateGS :: GlobalState -> Id -> MValue -> GlobalState
+updateGS (m,mi,pc) i v = (m, Map.insert i (fromMaybe (Constant $ UndefValue) v) mi, pc)
+
+type Transition = (PC, Bool, [SExpression], GlobalState -> GlobalState, PC)
+type GlobalState = (Map.Map String (PC, Map.Map Id Value), Map.Map Id Value, PC)
+}
 
 -- Local Variables
 attr Function BasicBlocks BasicBlock Instructions Instruction Identifier
@@ -40,29 +51,50 @@ attr Function BasicBlocks BasicBlock Instructions Instruction Identifier
 
 attr Function BasicBlocks BasicBlock Instructions Instruction
   syn menc   use {++} {[]} :: {[SExpression]}
-  inh tys  :: {NamedTypes}
-  inh vars :: {Globals}
+  syn ts     use {++} {[]} :: {[Transition]}
+  inh flow :: {[(Int,Int)]}
+--  inh tys  :: {NamedTypes}
+--  inh vars :: {Globals}
 
 sem Function
   | FunctionDecl lhs.menc = []
   | FunctionDef  lhs.menc = @body.menc
+                    .ts   = @body.ts
 
 sem BasicBlock 
   | BasicBlock lhs.menc = @instrs.menc
+                  .ts   = @instrs.ts
 
 sem Instruction
-  | Alloca +menc    = (++) [ SE $ DeclFun @id.ssymbol (fst @ty.sort) (snd @ty.sort) ]  
-  | Store  +menc = (++) [ eq (fromJust @v1.sexpr) (fromJust @v2.sexpr) ]
+  | Alloca +menc = (++) @loc.smt
+           +ts   = (++) [(@pc.self, True, @loc.smt, @loc.upst, @loc.npc)]
+           loc.smt  = [ declfun @id.ssymbol @ty.sort ]
+           loc.upst = \(mt, mv, _) -> (mt, mv, @loc.npc) 
+           loc.npc  = nextpc @pc.self @lhs.flow
+  | Store  +menc = (++) @loc.smt
+           +ts   = (++) [(@pc.self, True, @loc.smt, @loc.upst, @loc.npc)]
+           loc.npc = nextpc @pc.self @lhs.flow
+           loc.upst = \(mt, mv, _) -> (mt, mv, @loc.npc) 
+           loc.smt = [ eq (fromJust @v1.sexpr) (fromJust @v2.sexpr) ]
 -- TODO
   | Call   +menc = (++) @loc.rid
            loc.rid = if getIdent @mres.self == ""
                      then []
-                     else [ SE $ DeclFun @mres.ssymbol (fst @ty.sort) (snd @ty.sort) ]
+                     else [ declfun @mres.ssymbol @ty.sort ]
+           +ts   = (++) [(@pc.self, True, @loc.rid, @loc.upst, @loc.npc)]
+           loc.npc = nextpc @pc.self @lhs.flow
+           loc.upst = \(mt, mv, _) -> (mt, mv, @loc.npc) 
   | BitCast +menc = (++) @loc.enc
-            loc.enc  = [ SE $ DeclFun @id.ssymbol (fst @ty.sort) (snd @ty.sort) ] ++ [ eq (IdentExpr $ SymIdent @id.ssymbol) @loc.bc ]
+            loc.enc  = [ declfun @id.ssymbol @ty.sort ] ++ [ eq (IdentExpr $ SymIdent @id.ssymbol) @loc.bc ]
             loc.bc   = ExtractExpr [ IdentExpr $ IdxIdent (SimpleSym "extract") [(getISize @ty.self)-1, 0] , fromJust @v.sexpr ]
-
+            +ts   = (++) [(@pc.self, True, @loc.enc, @loc.upst, @loc.npc)]
+            loc.npc = nextpc @pc.self @lhs.flow
+            loc.upst = \(mt, mv, _) -> (mt, mv, @loc.npc) 
 {
+nextpc :: Int -> [(Int,Int)] -> Int
+nextpc i l = let ls = Prelude.filter (\(p,r) -> p == i && r /= -1) l
+             in  snd $ head ls --  maybe (error "nextpc") snd $ find ((i==) . fst) l
+ 
 eq :: SExpr -> SExpr -> SExpression
 eq s1 s2 = assert $ FnAppExpr (SymIdent $ SimpleSym "=") [s1, s2]
 
@@ -109,12 +141,16 @@ getISize _ = 0
  
 -- Sorts
 attr Type
-  syn sort :: {([SSortExpr], SSortExpr)}
+  syn sort :: {SSortExpr}
 
 sem Type
-  | TyInt    lhs.sort = ([], BitVector @p)
-  | TyArray  lhs.sort = ([], ArraySort (BitVector (getBSize @numEl)) (snd @ty.sort))  
-  | TyVector lhs.sort = ([], ArraySort (BitVector (getBSize @numEl)) (snd @ty.sort))  
+  | TyInt    lhs.sort = BitVector @p
+  | TyArray  lhs.sort = ArraySort (BitVector (getBSize @numEl)) @ty.sort  
+  | TyVector lhs.sort = ArraySort (BitVector (getBSize @numEl)) @ty.sort  
+  | TyVoid Tyx86MMX TyLabel TyMetadata TyOpaque TyFloatPoint TyFunction TyUndefined
+             lhs.sort = error "enc type not supported"
+  | TyStruct  lhs.sort = error "enc type struct not supported"
+  | TyPointer lhs.sort = @ty.sort -- error "enc type pointer not supported"
 
 {
 getBSize :: Int -> Int

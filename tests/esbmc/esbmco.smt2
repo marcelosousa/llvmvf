@@ -20,7 +20,5 @@
 (assert (= tmp i))
 (declare-fun tmp1 () (_ BitVec 8))
 (assert (= tmp1 ((_ extract 7 0) arg1)))
-(declare-fun tmp3 () (_ BitVec 8))
-(assert (= tmp3 ((_ extract 7 0) arg2)))
 (check-sat)
 (exit)

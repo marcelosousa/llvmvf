@@ -92,15 +92,15 @@ isEnabled pci (c,g,u,c') s = c == pci && g s
 -- The interleaving semantics is a model where only one local transition
 -- is scheduled to execute from a state!
 
-update :: PCi -> State -> State
-update pci s = let t = getOneEnable pci s
-               in fire s t
+--update :: PCi -> State -> State
+--update pci s = let t = getOneEnable pci s
+  --             in fire s t
 
 getOneEnable :: PCi -> State -> TTransition
 getOneEnable = undefined 
 
-fire :: State -> TTransition -> State
-fire = undefined 
+--fire :: State -> TTransition -> State
+--fire = undefined 
 
 -- Schedule of P is an interleaving sequence 
 -- of thread transitions 
