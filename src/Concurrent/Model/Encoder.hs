@@ -50,14 +50,17 @@ encode m@Model{..} = let ccfg@ControlFlow{..} = controlflow m
 
 encModel :: (SCModel t) => Model t -> ControlFlow -> State GlobalState SMod
 encModel m ccfg = do eg <- encGlobals m
+                     el <- encLocals  m
                      em <- encMain    m ccfg
                      et <- return [] --  encProcs   m ccfg
-                     return $ preamble ++ eg ++ em ++ et ++ final
+                     return $ preamble ++ eg ++ el ++ em ++ et ++ final
 
 preamble :: [SExpression]
 preamble = [ setlogic QF_AUFBV
            , setoption "produce-models"
            ]
+
+
 
 final :: [SExpression]
 final = [ checksat , exit ]
@@ -68,11 +71,21 @@ encGlobals m@Model{..} = do gs <- get
                             put $ gs_Syn_Globals gw
                             return $ genc_Syn_Globals gw  
 
+encLocals :: (SCModel t) => Model t -> State GlobalState [SExpression]
+encLocals m = do let sym = \s k -> (ssymbol_Syn_Identifier $ wrap_Identifier (sem_Identifier k) $ Inh_Identifier) s
+                     sort = \ty -> sort_Syn_Type $ wrap_Type (sem_Type ty) $ Inh_Type { } 
+                     f = \k mit l -> (Map.foldrWithKey (\s ty l -> (declfun (sym k s)$ sort ty):l ) [] $ Map.filterWithKey (\k _ -> notGlobal k ) mit):l
+                 return $ concat $ Map.foldrWithKey f [] $ dataflow m                
+
+notGlobal :: Identifier -> Bool
+notGlobal (Global _) = False
+notGlobal _          = True
+
 type Transitions = [Transition]
 
 encMain :: (SCModel t) => Model t -> ControlFlow -> State GlobalState [SExpression]
 encMain m@Model{..} ccfg@ControlFlow{..} =
-  let ts = ts_Syn_Function $ wrap_Function (sem_Function $ unProc mainf) $ Inh_Function { flow_Inh_Function = fromJust $ Map.lookup "main" cfg, tname_Inh_Function = ""} 
+  let ts = ts_Syn_Function $ wrap_Function (sem_Function $ unProc mainf) $ Inh_Function { flow_Inh_Function = fromJust $ Map.lookup "main" cfg, tname_Inh_Function = "main"} 
   in apply ts
 
 apply :: Transitions -> State GlobalState [SExpression]

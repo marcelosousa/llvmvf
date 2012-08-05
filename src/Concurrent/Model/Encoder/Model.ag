@@ -85,7 +85,7 @@ sem BasicBlock
 sem Instruction
   | Alloca +menc = (++) @loc.smt
            +ts   = (++) [(@pc.self, True, @loc.upst, @loc.npc)]
-           loc.smt  = [ declfun (@id.ssymbol @lhs.tname) @ty.sort ]
+           loc.smt  = [ ] -- declfun (@id.ssymbol @lhs.tname) @ty.sort ]
            loc.upst = \(mt, mv, _) -> ((mt, mv, @loc.npc), @loc.smt)
            loc.npc  = nextpc @pc.self @lhs.flow
   | Store  +menc = (++) @loc.smt
@@ -95,14 +95,15 @@ sem Instruction
            loc.smt = [ eq (fromJust @v1.sexpr) (fromJust @v2.sexpr) ]
 -- TODO
   | Call   +menc = (++) @loc.rid
-           loc.rid = if getIdent @mres.self == ""
-                     then []
-                     else [ declfun (@mres.ssymbol @lhs.tname) @ty.sort ]
+           loc.rid = [ ] --if getIdent @mres.self == ""
+                   --  then []
+                   --  else [ declfun (@mres.ssymbol @lhs.tname) @ty.sort ]
            +ts   = (++) [(@pc.self, True, @loc.upst, @loc.npc)]
            loc.npc = nextpc @pc.self @lhs.flow
            loc.upst = \(mt, mv, _) -> ((mt, mv, @loc.npc), @loc.rid) 
   | BitCast +menc = (++) @loc.enc
-            loc.enc  = [ declfun (@id.ssymbol @lhs.tname) @ty.sort ] ++ [ eq (IdentExpr $ SymIdent $ @id.ssymbol @lhs.tname) @loc.bc ]
+--            loc.enc  = [ declfun (@id.ssymbol @lhs.tname) @ty.sort ] ++ [ eq (IdentExpr $ SymIdent $ @id.ssymbol @lhs.tname) @loc.bc ]
+            loc.enc = [ eq (IdentExpr $ SymIdent $ @id.ssymbol @lhs.tname) @loc.bc ]
             loc.bc   = ExtractExpr [ IdentExpr $ IdxIdent (SimpleSym "extract") [(getISize @ty.self)-1, 0] , fromJust @v.sexpr ]
             +ts   = (++) [(@pc.self, True, @loc.upst, @loc.npc)]
             loc.npc = nextpc @pc.self @lhs.flow
@@ -112,7 +113,7 @@ sem Instruction
             loc.upst = \(mt, mv, pc) -> ((upmt mt @lhs.tname (@loc.npc, @lhs.tname ++ getIdent @id.self, @v.self), mv, pc), @loc.enc mv)
             loc.enc = \mv -> [ eq (IdentExpr $ SymIdent @loc.nid) (IdentExpr $ SymIdent $ SimpleSym $ getVal @v.self mv) ] 
             loc.nid = @id.ssymbol @lhs.tname 
-            loc.nv  = [ declfun @loc.nid (fromJust @v.sort) ] 
+--            loc.nv  = [ declfun @loc.nid (fromJust @v.sort) ] 
  
 {
 nextpc :: Int -> [(Int,Int)] -> Int
@@ -187,11 +188,15 @@ sem Value
   | Constant lhs.sort = Nothing 
 
 sem Type
-  | TyInt    lhs.sort = BitVector @p
+  | TyInt    lhs.sort = if @p == 1
+                        then SymSort "Bool"
+                        else BitVector @p
   | TyArray  lhs.sort = ArraySort (BitVector (getBSize @numEl)) @ty.sort  
   | TyVector lhs.sort = ArraySort (BitVector (getBSize @numEl)) @ty.sort  
-  | TyVoid Tyx86MMX TyLabel TyMetadata TyOpaque TyFloatPoint TyFunction TyUndefined
+  | TyVoid Tyx86MMX TyMetadata TyOpaque TyFloatPoint TyUndefined
              lhs.sort = error "enc type not supported"
+  | TyFunction lhs.sort = error "enc type function not supported"
+  | TyLabel    lhs.sort = error "enc type label not supported"
   | TyStruct  lhs.sort = error "enc type struct not supported"
   | TyPointer lhs.sort = @ty.sort -- error "enc type pointer not supported"
 

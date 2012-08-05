@@ -54,25 +54,25 @@ sem Instruction
   | Ret
       lhs.dflow = @r.dflow
   | Br  
-      +dflow = Map.union @v.dflow
+      lhs.dflow = @v.dflow
   | Unreachable Switch UBr AtomicRMW
       lhs.dflow = Map.empty
   | Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor ICmp FCmp
-      +dflow = Map.union (Map.insert @id.self @ty.self $ Map.union @op1.dflow @op2.dflow)
+      lhs.dflow = Map.insert @id.self @ty.self $ Map.union @op1.dflow @op2.dflow
   | Alloca GetElementPtr Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast PHI
-      +dflow = Map.insert @id.self @ty.self
+      lhs.dflow = Map.singleton @id.self @ty.self
   | Store
-      +dflow = Map.union (Map.union @v1.dflow @v2.dflow)
+      lhs.dflow = Map.union @v1.dflow @v2.dflow
   | Load
-      +dflow = Map.insert @id.self @v.wtype
+      lhs.dflow = Map.singleton @id.self @v.wtype
   | Call 
-      +dflow = if (getId @mres.self) /= ""
-               then Map.insert @mres.self @ty.self
-               else Map.union Map.empty
+      lhs.dflow = if (getId @mres.self) /= ""
+                  then Map.singleton @mres.self @ty.self
+                  else Map.empty
   | Select
-      +dflow = Map.insert @id.self @cond.wtype
+      lhs.dflow = Map.singleton @id.self @cond.wtype
   | ExtractValue
-      +dflow = Map.insert @id.self @aggr.wtype
+      lhs.dflow = Map.singleton @id.self @aggr.wtype
 
 {
 getId :: Identifier -> Id
@@ -80,14 +80,37 @@ getId (Local s) = s
 getId (Global s) = s
 }
 
-attr Value 
+attr Value Constant ConstantDataSequential GlobalValue
   syn wtype :: {Type}
 
 sem Value
   | Id       +dflow = Map.insert @v.self @ty.self 
           lhs.wtype = @ty.self
   | Constant lhs.dflow = Map.empty
-                .wtype = TyUndefined 
+                .wtype = @c.wtype
+
+sem Constant
+  | BlockAddr              lhs.wtype = TyUndefined 
+  | ConstantAggregateZero  lhs.wtype = @ty.self
+  | ConstantArray          lhs.wtype = @ty.self 
+  | ConstantDataSequential lhs.wtype = @cds.wtype 
+  | ConstantExpr           lhs.wtype = TyUndefined 
+  | ConstantFP             lhs.wtype = TyUndefined
+  | ConstantInt            lhs.wtype = TyInt @iv
+  | ConstantPointerNull    lhs.wtype = @ty.self
+  | ConstantStruct         lhs.wtype = @ty 
+  | ConstantVector         lhs.wtype = TyUndefined
+  | GlobalValue            lhs.wtype = @gv.wtype 
+  | UndefValue             lhs.wtype = TyUndefined
+
+sem ConstantDataSequential
+  | ConstantDataArray  lhs.wtype = @ty.self 
+  | ConstantDataVector lhs.wtype = @ty.self 
+
+sem GlobalValue
+  | FunctionValue  lhs.wtype = @ty.self 
+  | GlobalAlias    lhs.wtype = @ty.self 
+  | GlobalVariable lhs.wtype = @ty.self 
 
 {
 type DataFlow = Map.Map String (Map.Map Identifier Type)
