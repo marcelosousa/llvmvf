@@ -41,7 +41,7 @@ sem Global
 updateGS :: GlobalState -> Id -> MValue -> GlobalState
 updateGS (m,mi,pc) i v = (m, Map.insert i (fromMaybe (Constant $ UndefValue) v) mi, pc)
 
-type Transition = (PC, Bool, [SExpression], GlobalState -> GlobalState, PC)
+type Transition = (PC, Bool, GlobalState -> (GlobalState, [SExpression]), PC) -- SExpr
 type GlobalState = (Map.Map String (PC, Map.Map Id Value), Map.Map Id Value, PC)
 }
 
@@ -49,47 +49,71 @@ type GlobalState = (Map.Map String (PC, Map.Map Id Value), Map.Map Id Value, PC)
 attr Function BasicBlocks BasicBlock Instructions Instruction Identifier
   syn locals use {++} {[]} :: {[Id]}
 
+-- SMT2 Encoding
+attr Functions 
+  inh cflow :: {Map.Map String [(Int,Int)]}
+  syn cts   :: {Map.Map String [Transition]}
+
+attr Function BasicBlocks BasicBlock Instructions Instruction
+  syn cts use {++} {[]} :: {[Transition]}
+ 
 attr Function BasicBlocks BasicBlock Instructions Instruction
   syn menc   use {++} {[]} :: {[SExpression]}
   syn ts     use {++} {[]} :: {[Transition]}
   inh flow :: {[(Int,Int)]}
+  inh tname :: {Id}
 --  inh tys  :: {NamedTypes}
 --  inh vars :: {Globals}
+
+sem Functions
+  | Nil   lhs.cts = Map.empty
+  | Entry val.flow = fromMaybe (error "no flow") $ Map.lookup @key @lhs.cflow 
+          val.tname = @key
+          lhs.cts = Map.insert @key @val.cts @tl.cts
 
 sem Function
   | FunctionDecl lhs.menc = []
   | FunctionDef  lhs.menc = @body.menc
                     .ts   = @body.ts
+                    .cts  = @body.cts
 
 sem BasicBlock 
   | BasicBlock lhs.menc = @instrs.menc
                   .ts   = @instrs.ts
+                  .cts  = @instrs.cts
 
 sem Instruction
   | Alloca +menc = (++) @loc.smt
-           +ts   = (++) [(@pc.self, True, @loc.smt, @loc.upst, @loc.npc)]
-           loc.smt  = [ declfun @id.ssymbol @ty.sort ]
-           loc.upst = \(mt, mv, _) -> (mt, mv, @loc.npc) 
+           +ts   = (++) [(@pc.self, True, @loc.upst, @loc.npc)]
+           loc.smt  = [ declfun (@id.ssymbol @lhs.tname) @ty.sort ]
+           loc.upst = \(mt, mv, _) -> ((mt, mv, @loc.npc), @loc.smt)
            loc.npc  = nextpc @pc.self @lhs.flow
   | Store  +menc = (++) @loc.smt
-           +ts   = (++) [(@pc.self, True, @loc.smt, @loc.upst, @loc.npc)]
+           +ts   = (++) [(@pc.self, True, @loc.upst, @loc.npc)]
            loc.npc = nextpc @pc.self @lhs.flow
-           loc.upst = \(mt, mv, _) -> (mt, mv, @loc.npc) 
+           loc.upst = \(mt, mv, _) -> ((mt, mv, @loc.npc), @loc.smt) 
            loc.smt = [ eq (fromJust @v1.sexpr) (fromJust @v2.sexpr) ]
 -- TODO
   | Call   +menc = (++) @loc.rid
            loc.rid = if getIdent @mres.self == ""
                      then []
-                     else [ declfun @mres.ssymbol @ty.sort ]
-           +ts   = (++) [(@pc.self, True, @loc.rid, @loc.upst, @loc.npc)]
+                     else [ declfun (@mres.ssymbol @lhs.tname) @ty.sort ]
+           +ts   = (++) [(@pc.self, True, @loc.upst, @loc.npc)]
            loc.npc = nextpc @pc.self @lhs.flow
-           loc.upst = \(mt, mv, _) -> (mt, mv, @loc.npc) 
+           loc.upst = \(mt, mv, _) -> ((mt, mv, @loc.npc), @loc.rid) 
   | BitCast +menc = (++) @loc.enc
-            loc.enc  = [ declfun @id.ssymbol @ty.sort ] ++ [ eq (IdentExpr $ SymIdent @id.ssymbol) @loc.bc ]
+            loc.enc  = [ declfun (@id.ssymbol @lhs.tname) @ty.sort ] ++ [ eq (IdentExpr $ SymIdent $ @id.ssymbol @lhs.tname) @loc.bc ]
             loc.bc   = ExtractExpr [ IdentExpr $ IdxIdent (SimpleSym "extract") [(getISize @ty.self)-1, 0] , fromJust @v.sexpr ]
-            +ts   = (++) [(@pc.self, True, @loc.enc, @loc.upst, @loc.npc)]
+            +ts   = (++) [(@pc.self, True, @loc.upst, @loc.npc)]
             loc.npc = nextpc @pc.self @lhs.flow
-            loc.upst = \(mt, mv, _) -> (mt, mv, @loc.npc) 
+            loc.upst = \(mt, mv, _) -> ((mt, mv, @loc.npc), @loc.enc)
+  | Load    +ts   = (++) [(@pc.self, True, @loc.upst, @loc.npc)]
+            loc.npc = nextpc @pc.self @lhs.flow 
+            loc.upst = \(mt, mv, pc) -> ((upmt mt @lhs.tname (@loc.npc, @lhs.tname ++ getIdent @id.self, @v.self), mv, pc), @loc.enc mv)
+            loc.enc = \mv -> [ eq (IdentExpr $ SymIdent @loc.nid) (IdentExpr $ SymIdent $ SimpleSym $ getVal @v.self mv) ] 
+            loc.nid = @id.ssymbol @lhs.tname 
+            loc.nv  = [ declfun @loc.nid (fromJust @v.sort) ] 
+ 
 {
 nextpc :: Int -> [(Int,Int)] -> Int
 nextpc i l = let ls = Prelude.filter (\(p,r) -> p == i && r /= -1) l
@@ -101,17 +125,29 @@ eq s1 s2 = assert $ FnAppExpr (SymIdent $ SimpleSym "=") [s1, s2]
 getIdent :: Identifier -> String
 getIdent (Local s) = s
 getIdent (Global s) = s
+
+upmt :: Map.Map String (PC, Map.Map Id Value) -> String -> (PC, Id, Value) -> Map.Map String (PC, Map.Map Id Value)
+upmt mv i (pc,inv,v) = Map.adjust (\(_,vals) -> (pc, Map.insert inv v vals)) i mv 
+
+getVal :: Value -> Map.Map Id Value -> String
+getVal (Id (Global s) _) m = case Map.lookup s m of
+                             Nothing -> error "not found"
+                             Just (Id (Global s') _) -> s'
+                             Just (Constant _) -> s
+getVal (Id (Local s) _) m = s
+getVal _ _ = error "should be global"
 }
 -- Value S Expressions
 attr MValue Value Constant ConstantDataSequential GlobalValue 
   syn sexpr :: {Maybe SExpr}
+  inh tname :: {Id}
 
 sem MValue
   | Nothing lhs.sexpr = Nothing
   | Just    lhs.sexpr = @just.sexpr
  
 sem Value
-  | Id lhs.sexpr = Just $ IdentExpr $ SymIdent @v.ssymbol
+  | Id lhs.sexpr = Just $ IdentExpr $ SymIdent $ @v.ssymbol @lhs.tname
   | Constant lhs.sexpr = @c.sexpr
 
 sem Constant
@@ -121,9 +157,9 @@ sem Constant
   | ConstantAggregateZero  lhs.sexpr = Nothing
  
 sem GlobalValue
-  | FunctionValue  lhs.sexpr = Just $ IdentExpr $ SymIdent @n.ssymbol 
-  | GlobalAlias    lhs.sexpr = Just $ IdentExpr $ SymIdent @n.ssymbol 
-  | GlobalVariable lhs.sexpr = Just $ IdentExpr $ SymIdent @n.ssymbol 
+  | FunctionValue  lhs.sexpr = Just $ IdentExpr $ SymIdent $ @n.ssymbol @lhs.tname
+  | GlobalAlias    lhs.sexpr = Just $ IdentExpr $ SymIdent $ @n.ssymbol @lhs.tname
+  | GlobalVariable lhs.sexpr = Just $ IdentExpr $ SymIdent $ @n.ssymbol @lhs.tname
 
 sem ConstantDataSequential
   | ConstantDataArray  lhs.sexpr = Nothing
@@ -140,8 +176,15 @@ getISize _ = 0
 }
  
 -- Sorts
-attr Type
+attr Type 
   syn sort :: {SSortExpr}
+
+attr Value
+  syn sort :: {Maybe SSortExpr}
+
+sem Value
+  | Id       lhs.sort = Just $ @ty.sort
+  | Constant lhs.sort = Nothing 
 
 sem Type
   | TyInt    lhs.sort = BitVector @p
@@ -159,10 +202,11 @@ getBSize n =length $  showIntAtBase 2 intToDigit n ""
 
 -- Identifiers
 attr Identifier
-  syn ssymbol :: {SSymbol}
+  syn ssymbol :: {String -> SSymbol}
 
 sem Identifier
-  | Local Global
-     lhs.ssymbol = SimpleSym @name.self
+  | Global
+     lhs.ssymbol = \_ -> SimpleSym @name.self
   | Local
+     lhs.ssymbol = \x -> SimpleSym (x ++ @name.self)
      +locals = (++) [@name.self]

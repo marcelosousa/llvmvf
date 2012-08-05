@@ -51,7 +51,7 @@ encode m@Model{..} = let ccfg@ControlFlow{..} = controlflow m
 encModel :: (SCModel t) => Model t -> ControlFlow -> State GlobalState SMod
 encModel m ccfg = do eg <- encGlobals m
                      em <- encMain    m ccfg
-                     et <- encProcs   m ccfg
+                     et <- return [] --  encProcs   m ccfg
                      return $ preamble ++ eg ++ em ++ et ++ final
 
 preamble :: [SExpression]
@@ -68,12 +68,14 @@ encGlobals m@Model{..} = do gs <- get
                             put $ gs_Syn_Globals gw
                             return $ genc_Syn_Globals gw  
 
+type Transitions = [Transition]
+
 encMain :: (SCModel t) => Model t -> ControlFlow -> State GlobalState [SExpression]
 encMain m@Model{..} ccfg@ControlFlow{..} =
-  let ts = ts_Syn_Function $ wrap_Function (sem_Function $ unProc mainf) $ Inh_Function { flow_Inh_Function = fromJust $ Map.lookup "main" cfg} 
+  let ts = ts_Syn_Function $ wrap_Function (sem_Function $ unProc mainf) $ Inh_Function { flow_Inh_Function = fromJust $ Map.lookup "main" cfg, tname_Inh_Function = ""} 
   in apply ts
 
-apply :: [Transition] -> State GlobalState [SExpression]
+apply :: Transitions -> State GlobalState [SExpression]
 apply ts = do s <- get
               case enabled s ts of
                 []  -> return []
@@ -82,16 +84,17 @@ apply ts = do s <- get
                           return $ sexpr ++ sexpr'
                 _   -> error "In a deterministic model only one transition can be enabled.."
 
-enabled :: GlobalState -> [Transition] -> [Transition]
-enabled (_, _, pc) = filter (\(pci, g, _, _, _) -> pc == pci && g)   
+enabled :: GlobalState -> Transitions -> Transitions
+enabled (_, _, pc) = filter (\(pci, g, _, _) -> pc == pci && g)   
 
-remove :: Transition -> [Transition] -> [Transition]
-remove (pci, _, _, _, pce) = filter (\(pci0, _,_,_,pce0) -> pci /= pci0 || pce /= pce0 )
+remove :: Transition -> Transitions -> Transitions
+remove (pci, _, _, pce) = filter (\(pci0, _,_,pce0) -> pci /= pci0 || pce /= pce0 )
 
 fire :: Transition -> State GlobalState [SExpression]
-fire (_,g,sexpr,gsf,pce) = do s <- get
-                              put $ gsf s
-                              return sexpr
+fire (_,g,gsf,pce) = do s <- get
+                        let (s',sexpr) = gsf s
+                        put s'
+                        return sexpr
 
 {-
 encMain :: (SCModel t) => Model t -> ControlFlow -> State GlobalState [SExpression]
@@ -101,5 +104,26 @@ encMain m@Model{..} ccfg@ControlFlow{..} =
 -}
 
 encProcs :: (SCModel t) => Model t -> ControlFlow -> State GlobalState [SExpression]
-encProcs m@Model{..} ccfg@ControlFlow{..} = return []
+encProcs m@Model{..} ccfg@ControlFlow{..} =
+  let syn_fun = wrap_Functions (sem_Functions $ foldr (\p' r -> Map.insert (ident p') (unProc p') r) Map.empty $ IM.elems procs) $ Inh_Functions { cflow_Inh_Functions = Map.delete "main" cfg}
+  in  capply $ cts_Syn_Functions syn_fun
 
+--type GlobalState = (Map.Map String (PC, Map.Map Id Value), Map.Map Id Value, PC)
+
+capply :: Map.Map String Transitions -> State GlobalState [SExpression]
+capply m = do ts <- cenabled m 
+              sexpr <- cfire ts
+              sexpr' <- capply $ mremove ts m
+              return $ sexpr ++ sexpr'
+
+cenabled :: Map.Map String Transitions -> State GlobalState Transitions
+cenabled m = do (mv,_,_) <- get
+                let mi = Map.keys m
+                    getpc = \k -> fst $ fromJust $ Map.lookup k mv 
+                    gett  = \k -> filter (\(pci,g,_,_) -> pci == getpc k && g ) $ fromJust $ Map.lookup k m
+                return $ concatMap gett mi
+
+cfire :: Transitions -> State GlobalState [SExpression]
+cfire = undefined
+
+mremove = undefined

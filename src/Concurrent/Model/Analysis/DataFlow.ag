@@ -1,0 +1,97 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Analysis.DataFlow
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Analysis.DataFlow}{}{}
+
+include "Base.ag"
+include "Type.ag"
+
+imports{
+import qualified Data.Map as Map
+import qualified Data.IntMap as IM
+import Data.Maybe 
+
+import Debug.Trace
+
+import Language.LLVMIR
+}
+
+-- Simple Data Flow Information
+attr Functions
+  syn dflow :: {Map.Map String (Map.Map Identifier Type)} 
+
+attr Function BasicBlocks BasicBlock Instructions Instruction Value RetInst 
+  syn dflow use {`Map.union`} {Map.empty} :: {Map.Map Identifier Type}
+
+sem Functions
+  | Nil
+      lhs.dflow = Map.empty
+  | Entry
+      lhs.dflow = Map.insert @key @val.dflow @tl.dflow 
+
+sem Function
+  | FunctionDef
+      lhs.dflow = @body.dflow
+ 
+sem BasicBlock
+  | BasicBlock
+      lhs.dflow = @instrs.dflow
+
+sem RetInst
+  | ValueRet 
+      +dflow = Map.union @loc.d
+      loc.d  = case @v.self of
+                 Constant c -> Map.empty
+                 Id vi ty    -> Map.singleton vi ty 
+  | VoidRet
+      lhs.dflow = Map.empty
+
+sem Instruction
+  | Ret
+      lhs.dflow = @r.dflow
+  | Br  
+      +dflow = Map.union @v.dflow
+  | Unreachable Switch UBr AtomicRMW
+      lhs.dflow = Map.empty
+  | Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor ICmp FCmp
+      +dflow = Map.union (Map.insert @id.self @ty.self $ Map.union @op1.dflow @op2.dflow)
+  | Alloca GetElementPtr Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast PHI
+      +dflow = Map.insert @id.self @ty.self
+  | Store
+      +dflow = Map.union (Map.union @v1.dflow @v2.dflow)
+  | Load
+      +dflow = Map.insert @id.self @v.wtype
+  | Call 
+      +dflow = if (getId @mres.self) /= ""
+               then Map.insert @mres.self @ty.self
+               else Map.union Map.empty
+  | Select
+      +dflow = Map.insert @id.self @cond.wtype
+  | ExtractValue
+      +dflow = Map.insert @id.self @aggr.wtype
+
+{
+getId :: Identifier -> Id
+getId (Local s) = s
+getId (Global s) = s
+}
+
+attr Value 
+  syn wtype :: {Type}
+
+sem Value
+  | Id       +dflow = Map.insert @v.self @ty.self 
+          lhs.wtype = @ty.self
+  | Constant lhs.dflow = Map.empty
+                .wtype = TyUndefined 
+
+{
+type DataFlow = Map.Map String (Map.Map Identifier Type)
+
+dflowfs :: Functions -> DataFlow
+dflowfs fs = dflow_Syn_Functions $ wrap_Functions (sem_Functions fs) $ Inh_Functions { }
+}

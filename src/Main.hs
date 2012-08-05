@@ -41,6 +41,7 @@ runOption bc Parse = do mdl <- extract bc
                         writeFile (addExtension bf "llvf")  (show $ pretty mdl)
                         writeFile (addExtension bf "model") (show $ mod) 
                         writeFile (addExtension bf "dot")   (show $ pretty mod)
+                        writeFile (addExtension bf "dfg")   (show $ dataflow mod)
                         writeFile (addExtension bf "smt2")  (show $ prettyprint $ encode mod)
 runOption bc Mutate = mutate bc
 

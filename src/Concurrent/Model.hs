@@ -13,6 +13,7 @@ import Language.LLVMIR
 import Language.LLVMIR.Printer.Module
 
 import Concurrent.Model.Analysis.ControlFlow (cflowfs, ControlFlow(..))
+import Concurrent.Model.Analysis.DataFlow    (dflowfs, DataFlow(..))
 
 import UU.PPrint
 import Debug.Trace
@@ -24,7 +25,8 @@ class SCModel t where
   model       :: Module  -> Model t
   controlflow :: Model t -> ControlFlow
   controlflow (Model _ _ mainf procs _) = cflowfs $ getFs mainf procs 
---  scheduler :: [(State, PCi)] -> TTransition
+  dataflow    :: Model t -> DataFlow
+  dataflow    (Model _ _ mainf procs _) = dflowfs $ getFs mainf procs
  
 getFs :: Process -> Processes -> Functions
 getFs p ps = let pss = IM.elems ps
