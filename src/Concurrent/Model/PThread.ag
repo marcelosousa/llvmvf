@@ -38,7 +38,7 @@ attr Functions
   
 attr Functions Function BasicBlocks BasicBlock Instructions Instruction
   syn pmdl use {`IM.union`} {IM.empty} :: {IM.IntMap Process}
-  syn decls use {`Map.union`} {Map.empty} :: {Map.Map String Function}
+  syn decls use {`Map.union`} {Map.empty} :: {Map.Map String (Type,Parameters)}
   inh mfun      :: {Map.Map String Function}
   chn counter   :: {ThreadLabel}
   
@@ -56,9 +56,10 @@ sem Functions
                       else @tl.mainf
 
 sem Function
-  | FunctionDef  lhs.pmdl = @body.pmdl 
+  | FunctionDef  lhs.pmdl = @body.pmdl
+                 lhs.decls = Map.singleton @name.self (@retty.self, @params.self)
   | FunctionDecl lhs.pmdl = IM.empty 
-                    +decls = Map.union (Map.singleton @name.self @self)
+                    +decls = Map.union (Map.singleton @name.self (@retty.self, @params.self))
 
 sem BasicBlock
   | BasicBlock lhs.pmdl = @instrs.pmdl
@@ -69,7 +70,7 @@ sem Instruction
     lhs.annotated = if fst @loc.proc
                     then CreateThread @pc.self @args.self
                     else Call @pc.self @mres.self @ty.self  @callee.self @args.self   
-    loc.proc = buildProcess @loc.counter (getIdName @callee.self) @args.self @lhs.mfun
+    loc.proc = buildProcess @loc.counter @callee.self @args.self @lhs.mfun
     loc.counter :: uniqueref counter
 
 {

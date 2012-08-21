@@ -228,7 +228,7 @@ data Instruction
       pc     :: PC
       mres   :: Identifier
       ty     :: Type
-      callee :: Identifier 
+      callee :: Id 
       args   :: Values 
   | Select
       pc :: PC

@@ -44,13 +44,13 @@ getPHIArgs ii = do num <- liftIO $ FFI.countIncoming ii
                                            return ((v,b) : os)
 
 -- | Retrieve Arguments to Call Instruction
-getCallArgs :: [(String,Value)] -> Context IO (LL.Identifier, [LL.Value])
+getCallArgs :: [(String,Value)] -> Context IO (LL.Id, [LL.Value])
 getCallArgs [] = error "'getCallArgs': empty list" -- return (LL.Global "", [])
 getCallArgs l = let x = last l
                     y = init l
                 in do v <- getIdent $ snd x
                       a <- mapM getValue y
-                      return (LL.Global v,a)
+                      return (v,a)
 
 getElemPtrArgs :: [(String,Value)] -> Context IO (LL.Value, [LL.Value])
 getElemPtrArgs [] = error "'getElemPtrArgs': empty list" -- return (LL.UndefC, [])

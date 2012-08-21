@@ -1,4 +1,4 @@
-{-#LANGUAGE RecordWildCards #-}
+{-#LANGUAGE RecordWildCards, DoAndIfThenElse #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Encoder
 -- Copyright :  (c) 2012 Marcelo Sousa
@@ -6,9 +6,11 @@
 
 module Concurrent.Model.Encoder (encode) where
 
+import Concurrent.Model                    hiding (State)
+
+import Concurrent.Model.Encoder.Model (encType, encGlobalVars, preEncoder, wrap, sAnd, sOr, sFn, encodeMain)
+import Concurrent.Model.Encoder.Threads (encodeThreads)
 import Concurrent.Model.Analysis.ControlFlow (ControlFlow(..))
-import Concurrent.Model.Encoder.Model -- hiding (GlobalState,Transition) 
-import Concurrent.Model               hiding (State)
 
 import Language.LLVMIR
 
@@ -19,6 +21,7 @@ import qualified Data.IntMap as IM
 import qualified Data.Map as Map
 
 import Data.Maybe
+import Data.List (nub)
 
 import Debug.Trace (trace)
 
@@ -34,109 +37,90 @@ import Control.Monad.State
 -- 1. Persistent/ample set computations.
 -- 2. Lock-set and/or lock-acquisition history analysis
 -- 3. Conditional dependency
---class (SCModel t) => Encode t where
 
---type GlobalState = (Map.Map String (PC, Map.Map Id Value), Map.Map Id Value, PC)
+-- | Wrapper for main encode function. Builds the initial global state and wraps encModel in a State monad.
+encode :: (SCModel t) => Model t -> Int -> SMod
+encode m@Model{..} k = let ccfg@ControlFlow{..} = controlflow m
+                           cme = fromMaybe (error "encode")                  $ Map.lookup "main" cte  -- ^ Set the current PC to the initial pc of main
+                           tvs = Map.map (\pci -> ThreadState pci Map.empty) $ Map.delete "main" cte  -- ^ Set the initial PC for each thread
+                           s0  = GlobalState Map.empty cme Map.empty tvs                              -- ^ Initial state
+                           (smod, sf) = runState (encModel m k) s0                             
+                       in smod --trace (show s0 ++ show sf) $ smod
 
---type Transition = (PC, Bool, SExpression, GlobalState -> GlobalState, PC) -- (PC, a -> Bool, SExpr -> SExpr, PC)
+-- | Main encode function.
+encModel :: (SCModel t) => Model t -> Int -> State GlobalState SMod
+encModel m k = do tyenc <- encNmdTys  m   -- ^ Encode Named Types
+                  gvenc <- encGlobals m   -- ^ Encode Global Variables
+                  menc  <- encFunctions m k  -- ^ Encode Functions
+                  return $ nub $ preamble ++ tyenc ++ gvenc ++ menc ++ final
 
-encode :: (SCModel t) => Model t -> SMod
-encode m@Model{..} = let ccfg@ControlFlow{..} = controlflow m
-                         cme = fromMaybe (error "encode") $ Map.lookup "main" cte
-                         tvs = Map.map (\pci -> (pci, Map.empty)) $ Map.delete "main" cte
-                         s0  = (tvs, Map.empty, cme) :: GlobalState
-                         (smod, sf) = runState (encModel m ccfg) s0
-                     in trace (show s0 ++ show sf) $ smod
-
-encModel :: (SCModel t) => Model t -> ControlFlow -> State GlobalState SMod
-encModel m ccfg = do eg <- encGlobals m
-                     el <- encLocals  m
-                     em <- encMain    m ccfg
-                     et <- return [] --  encProcs   m ccfg
-                     return $ preamble ++ eg ++ el ++ em ++ et ++ final
-
-preamble :: [SExpression]
-preamble = [ setlogic QF_AUFBV
-           , setoption "produce-models"
+-- | Initial part of an smt module
+preamble :: SExpressions
+preamble = [ setlogic QF_AUFBV           -- ^ Closed quantifier-free formulas over the theory of bitvectors and bitvector arrays extended with free sort and function symbols.
+           , setoption "produce-models"  -- ^ To be able to get values if satisfiable
+           , declsort  "Pair" 2          -- ^ Declare the sort Pair
            ]
 
+-- | Final part of an smt module
+final :: SExpressions
+final = [ checksat 
+        , exit 
+        ]
 
+-- | Useful sorts
+usefulsorts :: [((Type,(SSortExpr, SSort)), SExpression)]
+usefulsorts = [ ((TyInt 8,  (SymSort "I8", "I8"))  , defsorti  8)                 -- ^ Define I8 as _ BitVector 8
+              , ((TyInt 32, (SymSort "I32", "I32")), defsorti  32)                -- ^ Define I32 as _ BitVector 32
+              , ((TyInt 64, (SymSort "I64", "I64")), defsorti  64)                -- ^ Define I64 as _ BitVector 64
+              ]
 
-final :: [SExpression]
-final = [ checksat , exit ]
+-- | Encode Named Types
+encNmdTys :: (SCModel t) => Model t -> State GlobalState SExpressions
+encNmdTys m@Model{..} = do gs@GlobalState{..} <- get
+                           let (sts, sexprs) = unzip usefulsorts
+                               defsorts' = Map.union defsorts $ Map.fromList sts
+                               gs'       = gs { defsorts = defsorts' }
+                           put gs'
+                           sexprs0 <- forM (Map.toList nmdtys) encNmdTy
+                           return $ sexprs ++ concat sexprs0
 
-encGlobals :: (SCModel t) => Model t -> State GlobalState [SExpression]
+-- | Encode one named type 
+encNmdTy :: (Id,Type) -> State GlobalState SExpressions
+encNmdTy (i,ty) = do gs@GlobalState{..} <- get
+                     let (defsorts',sexprs, sexpr) = encType ty (Just i) defsorts
+                     put $ gs {defsorts = defsorts'}
+                     return sexprs
+
+-- | Encode Global Variables
+encGlobals :: (SCModel t) => Model t -> State GlobalState SExpressions
 encGlobals m@Model{..} = do gs <- get
-                            let gw = wrap_Globals (sem_Globals gvars) $ Inh_Globals { gs_Inh_Globals = gs }
-                            put $ gs_Syn_Globals gw
-                            return $ genc_Syn_Globals gw  
+                            let (gs', sexprs) = encGlobalVars gvars gs
+                            put gs'
+                            return sexprs
 
-encLocals :: (SCModel t) => Model t -> State GlobalState [SExpression]
-encLocals m = do let sym = \s k -> (ssymbol_Syn_Identifier $ wrap_Identifier (sem_Identifier k) $ Inh_Identifier) s
-                     sort = \ty -> sort_Syn_Type $ wrap_Type (sem_Type ty) $ Inh_Type { } 
-                     f = \k mit l -> (Map.foldrWithKey (\s ty l -> (declfun (sym k s)$ sort ty):l ) [] $ Map.filterWithKey (\k _ -> notGlobal k ) mit):l
-                 return $ concat $ Map.foldrWithKey f [] $ dataflow m                
+-- | Encode Main
+encFunctions :: (SCModel t) => Model t -> Bound -> State GlobalState SExpressions
+encFunctions m@Model{..} k = do gs@GlobalState{..} <- get
+                                let ccfg@ControlFlow {..} = controlflow m 
+                                    fs = getFs mainf procs 
+                                    (s,p)  = preEncoder fs defsorts decls
+                                    se = preEncode p
+                                    (pcs, sexprs)   = encodeMain    (unProc mainf) p decls
+                                    (cpcs, csexprs) = encodeThreads (toFunctions procs)  k p (Map.delete "main" cte) $ Map.delete "main" cfg 
+                       --  trace ("----\n" ++ show p) $
+                       --  trace (show sexprs) $ 
+                                return $ s ++ se ++ pcs ++ [ assert $ wrap sAnd sexprs ] ++ cpcs ++ [ assert csexprs ] 
 
-notGlobal :: Identifier -> Bool
-notGlobal (Global _) = False
-notGlobal _          = True
+preEncode :: PreEncoder -> SExpressions
+preEncode p@PreEncoder{..} = Map.foldrWithKey (\i (t, pcs) se -> (concatMap (\(_,c) -> (declSVar (i ++ show c) t sortEnv):[]) (zip pcs [0..])) ++ se ) [] fStore 
 
-type Transitions = [Transition]
+-- | declSVar declare a new fresh variable 
+declSVar :: Id -> Type -> TypeEnv -> SExpression
+declSVar s ty mt = let ss = SimpleSym s
+                       sexpr = case Map.lookup ty mt of
+                                    Nothing     -> error $ "encodeVar:\n" ++ show ty ++ "\n" ++ show mt
+                                    Just (se,_) -> se
+                   in declfun ss sexpr
 
-encMain :: (SCModel t) => Model t -> ControlFlow -> State GlobalState [SExpression]
-encMain m@Model{..} ccfg@ControlFlow{..} =
-  let ts = ts_Syn_Function $ wrap_Function (sem_Function $ unProc mainf) $ Inh_Function { flow_Inh_Function = fromJust $ Map.lookup "main" cfg, tname_Inh_Function = "main"} 
-  in apply ts
 
-apply :: Transitions -> State GlobalState [SExpression]
-apply ts = do s <- get
-              case enabled s ts of
-                []  -> return []
-                [t] -> do sexpr  <- fire t
-                          sexpr' <- apply $ remove t ts
-                          return $ sexpr ++ sexpr'
-                _   -> error "In a deterministic model only one transition can be enabled.."
-
-enabled :: GlobalState -> Transitions -> Transitions
-enabled (_, _, pc) = filter (\(pci, g, _, _) -> pc == pci && g)   
-
-remove :: Transition -> Transitions -> Transitions
-remove (pci, _, _, pce) = filter (\(pci0, _,_,pce0) -> pci /= pci0 || pce /= pce0 )
-
-fire :: Transition -> State GlobalState [SExpression]
-fire (_,g,gsf,pce) = do s <- get
-                        let (s',sexpr) = gsf s
-                        put s'
-                        return sexpr
-
-{-
-encMain :: (SCModel t) => Model t -> ControlFlow -> State GlobalState [SExpression]
-encMain m@Model{..} ccfg@ControlFlow{..} =
-   do let syn_fun =  wrap_Function (sem_Function $ unProc mainf) $ Inh_Function { tys_Inh_Function = nmdtys, vars_Inh_Function = gvars }
-      return $ trace (show $ locals_Syn_Function syn_fun) $ menc_Syn_Function syn_fun
--}
-
-encProcs :: (SCModel t) => Model t -> ControlFlow -> State GlobalState [SExpression]
-encProcs m@Model{..} ccfg@ControlFlow{..} =
-  let syn_fun = wrap_Functions (sem_Functions $ foldr (\p' r -> Map.insert (ident p') (unProc p') r) Map.empty $ IM.elems procs) $ Inh_Functions { cflow_Inh_Functions = Map.delete "main" cfg}
-  in  capply $ cts_Syn_Functions syn_fun
-
---type GlobalState = (Map.Map String (PC, Map.Map Id Value), Map.Map Id Value, PC)
-
-capply :: Map.Map String Transitions -> State GlobalState [SExpression]
-capply m = do ts <- cenabled m 
-              sexpr <- cfire ts
-              sexpr' <- capply $ mremove ts m
-              return $ sexpr ++ sexpr'
-
-cenabled :: Map.Map String Transitions -> State GlobalState Transitions
-cenabled m = do (mv,_,_) <- get
-                let mi = Map.keys m
-                    getpc = \k -> fst $ fromJust $ Map.lookup k mv 
-                    gett  = \k -> filter (\(pci,g,_,_) -> pci == getpc k && g ) $ fromJust $ Map.lookup k m
-                return $ concatMap gett mi
-
-cfire :: Transitions -> State GlobalState [SExpression]
-cfire = undefined
-
-mremove = undefined
+ 

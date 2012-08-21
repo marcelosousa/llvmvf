@@ -22,7 +22,8 @@ import Language.SMTLib2.Printer    (prettyprint)
 import Concurrent.Model
 import Concurrent.Model.PThread
 import Concurrent.Model.Visualizer
-import Concurrent.Model.Encoder     
+-- import Concurrent.Model.ESEncoder  (esencode)    
+import Concurrent.Model.Encoder    (encode)    
 
 import Debug.Trace
 
@@ -34,20 +35,21 @@ data Options = Parse
 instance Default Options where
   def = Parse
 
-runOption :: FilePath -> Options -> IO ()
-runOption bc Parse = do mdl <- extract bc
-                        let bf  = dropExtension bc
-                            mod = (model mdl) :: Model PThread
-                        writeFile (addExtension bf "llvf")  (show $ pretty mdl)
-                        writeFile (addExtension bf "model") (show $ mod) 
-                        writeFile (addExtension bf "dot")   (show $ pretty mod)
-                        writeFile (addExtension bf "dfg")   (show $ dataflow mod)
-                        writeFile (addExtension bf "smt2")  (show $ prettyprint $ encode mod)
-runOption bc Mutate = mutate bc
+runOption :: FilePath -> Options -> Int -> IO ()
+runOption bc Parse k = do mdl <- extract bc
+                          let bf  = dropExtension bc
+                              mod = (model mdl) :: Model PThread
+                          writeFile (addExtension bf "llvf")  (show $ pretty mdl)
+                          writeFile (addExtension bf "model") (show $ mod) 
+                          writeFile (addExtension bf "dot")   (show $ pretty mod)
+                          writeFile (addExtension bf "dfg")   (show $ dataflow mod)
+                          writeFile (addExtension bf "smt2")  (show $ prettyprint $ encode mod k)
+runOption bc Mutate _ = mutate bc
 
 data ProgramOptions = LLVMVF {
     input  :: FilePath
   , typeoutput :: Options
+  , bound :: Int
 }
   deriving (Show, Data, Typeable)
 
@@ -55,6 +57,7 @@ standard = cmdArgsMode $ LLVMVF
            { 
              input         = (def &= args )
            , typeoutput    = (def &= help "Parse" &= typ "Parse")
+           , bound         = (def &= help "bound" &= opt (1 :: Int))
            } &= summary usage
 
 main = do args <- cmdArgsRun standard
@@ -63,7 +66,8 @@ main = do args <- cmdArgsRun standard
 runllvmvf :: ProgramOptions -> IO ()
 runllvmvf options = do let filename = input options
                            option   = typeoutput options
-                       runOption filename option
+                           k        = bound options
+                       runOption filename option k
                     
 usage :: String
 usage = unlines ["LLVM Verification Framework"]

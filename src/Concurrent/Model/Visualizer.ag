@@ -63,7 +63,7 @@ sem Instruction
   | CreateThread
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "create_thread")
   | Call
-      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "call" <+> @callee.pp)
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "call" <+> text @callee)
 {
 type ILabel = Int
 

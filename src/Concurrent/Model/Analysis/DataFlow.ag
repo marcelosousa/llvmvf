@@ -20,9 +20,15 @@ import Debug.Trace
 import Language.LLVMIR
 }
 
+attr Value Constant ConstantDataSequential GlobalValue Functions BasicBlocks BasicBlock Instructions Instruction RetInst Argument Arguments CompareConstantExpr ConstantExpr IntTyValId MValue PValue PValueIdx Values Global PValues Function
+  chn counter :: {Int}
+
 -- Simple Data Flow Information
 attr Functions
   syn dflow :: {Map.Map String (Map.Map Identifier Type)} 
+
+attr Function BasicBlocks BasicBlock Instructions Instruction Value RetInst Constant ConstantDataSequential GlobalValue
+  inh tname :: {String}
 
 attr Function BasicBlocks BasicBlock Instructions Instruction Value RetInst 
   syn dflow use {`Map.union`} {Map.empty} :: {Map.Map Identifier Type}
@@ -32,6 +38,7 @@ sem Functions
       lhs.dflow = Map.empty
   | Entry
       lhs.dflow = Map.insert @key @val.dflow @tl.dflow 
+      val.tname = @key
 
 sem Function
   | FunctionDef
@@ -62,7 +69,7 @@ sem Instruction
   | Alloca GetElementPtr Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast PHI
       lhs.dflow = Map.singleton @id.self @ty.self
   | Store
-      lhs.dflow = Map.union @v1.dflow @v2.dflow
+      lhs.dflow = Map.union @v1.dflow @v2.dflowz
   | Load
       lhs.dflow = Map.singleton @id.self @v.wtype
   | Call 
@@ -82,11 +89,13 @@ getId (Global s) = s
 
 attr Value Constant ConstantDataSequential GlobalValue
   syn wtype :: {Type}
-
+  syn dflowz use {`Map.union`} {Map.empty} :: {Map.Map Identifier Type}
+ 
 sem Value
   | Id       +dflow = Map.insert @v.self @ty.self 
           lhs.wtype = @ty.self
   | Constant lhs.dflow = Map.empty
+                .dflowz = @c.dflowz
                 .wtype = @c.wtype
 
 sem Constant
@@ -98,9 +107,10 @@ sem Constant
   | ConstantFP             lhs.wtype = TyUndefined
   | ConstantInt            lhs.wtype = TyInt @iv
   | ConstantPointerNull    lhs.wtype = @ty.self
-  | ConstantStruct         lhs.wtype = @ty 
+  | ConstantStruct         lhs.wtype = @ty.self 
   | ConstantVector         lhs.wtype = TyUndefined
-  | GlobalValue            lhs.wtype = @gv.wtype 
+  | GlobalValue            lhs.wtype = @gv.wtype
+                              .dflowz = @gv.dflowz 
   | UndefValue             lhs.wtype = TyUndefined
 
 sem ConstantDataSequential
@@ -110,11 +120,17 @@ sem ConstantDataSequential
 sem GlobalValue
   | FunctionValue  lhs.wtype = @ty.self 
   | GlobalAlias    lhs.wtype = @ty.self 
-  | GlobalVariable lhs.wtype = @ty.self 
-
+  | GlobalVariable lhs.wtype = @ty.self
+                      .dflowz = if @lhs.tname /= "main"
+                                then Map.singleton (Global $ "fresh_" ++ (getId @n.self) ++ show @loc.counter ) @ty.self
+                                else Map.empty 
+                   loc.counter :: uniqueref counter
 {
+nextUnique :: Int -> (Int, Int)
+nextUnique u = (u+1, u)
+
 type DataFlow = Map.Map String (Map.Map Identifier Type)
 
 dflowfs :: Functions -> DataFlow
-dflowfs fs = dflow_Syn_Functions $ wrap_Functions (sem_Functions fs) $ Inh_Functions { }
+dflowfs fs = dflow_Syn_Functions $ wrap_Functions (sem_Functions fs) $ Inh_Functions { counter_Inh_Functions = 0 }
 }

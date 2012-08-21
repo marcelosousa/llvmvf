@@ -12,7 +12,7 @@ style=filled; color=gray;
 32 [label="32 %arg2 = alloca i32, align 4"];
 33 [label="33 void store i32 10, i32* %arg1, align 4"];
 34 [label="34 void store i32 20, i32* %arg2, align 4"];
-35 [label="35 call @nondet_uint"];
+35 [label="35 call nondet_uint"];
 36 [label="36 void store i32 %tmp, i32* @i, align 4"];
 37 [label="37 %tmp1 = bitcast i32* %arg1 to i8*"];
 38 [label="38 create_thread"];
@@ -37,7 +37,7 @@ style=filled; color=gray;
  label = "basic block bb2"; }
 subgraph cluster_Tx3 {
 style=filled; color=gray;
-7 [label="7 call @__assert_fail"];
+7 [label="7 call __assert_fail"];
 8 [label="8 unreachable"];
  label = "basic block bb5"; }
 subgraph cluster_Tx4 {
