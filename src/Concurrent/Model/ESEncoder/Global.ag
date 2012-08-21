@@ -1,0 +1,72 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.ESEncoder.Global
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.ESEncoder.Global}{}{}
+
+imports
+{
+import Control.Applicative ((<$>))
+import Control.Monad       (mplus)
+}
+
+-- Global Variables 
+attr Globals Global
+  syn sexpr                :: {ISExpr}
+  syn sexprs use {++} {[]} :: {SExpressions}
+  chn gs                   :: {GlobalState}
+
+sem Globals
+  | Nil 
+     lhs.sexpr = ISEmpty
+  | Cons
+     lhs.sexpr = sAnd @hd.sexpr @tl.sexpr
+     lhs.sexprs = nub $  @hd.sexprs ++ @tl.sexprs
+  
+sem Global
+  | GlobalVar
+     ty.mts     = defsorts @lhs.gs                 -- Pass to ty the defsorts
+     ty.mn      = Nothing                          -- The type is not a named type
+     ival.mts   = @ty.mts                          -- Pass to ivals the defsorts from ty
+     ival.tn    = ""                               -- No Thread Name
+     lhs.sexprs =  @ty.sexprs ++ @ival.sexprs ++ [ declfun @loc.sym @ty.sort ] 
+     lhs.sexpr  = case @ival.sexpr of 
+                       ISExpr s -> sFn "=" (ISExpr $ IdentExpr $ SymIdent $ @loc.sym) @ival.sexpr
+                       _       -> @ival.sexpr 
+     loc.sym  = SimpleSym @name.self
+     lhs.gs   = let ogs@GlobalState{..} = @lhs.gs
+                    gvals' = maybe gvals (\v -> Map.insert @name.self (Right v) gvals) @ival.self
+                in ogs { defsorts = @ival.mts, gvals = gvals' }   
+
+{
+
+
+sAnd :: ISExpr -> ISExpr -> ISExpr
+sAnd a@(ISExpr _) b@(ISExpr _) = sFn "and" a b
+sAnd ISEmpty      y            = y
+sAnd x            ISEmpty      = x
+sAnd _            _            = error "sAnd"
+
+sOr :: ISExpr -> ISExpr -> ISExpr
+sOr a@(ISExpr _) b@(ISExpr _) = sFn "or" a b
+sOr ISEmpty      y            = y
+sOr x            ISEmpty      = x
+sOr _            _            = error "sOr"
+
+sFn :: String -> ISExpr -> ISExpr -> ISExpr
+sFn f s1 s2 = ISExpr $ FnAppExpr (SymIdent $ SimpleSym f) [fromISExpr s1, fromISExpr s2]
+
+-- | Encode Global Variables
+encGlobalVars :: Globals -> GlobalState -> (GlobalState, SExpressions)
+encGlobalVars gvars gs = let gw = wrap_Globals (sem_Globals gvars) $ Inh_Globals { gs_Inh_Globals = gs }
+                             me  = case sexpr_Syn_Globals gw of
+                                        ISEmpty  -> []
+                                        ISExpr e -> [assert e]
+                                        _        -> error "encGlobalVars" 
+                         in (gs_Syn_Globals gw, sexprs_Syn_Globals gw ++ me)
+
+}
+

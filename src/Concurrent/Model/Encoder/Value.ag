@@ -1,0 +1,293 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.Value
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Encoder.Value}{}{}
+
+-- Value S Expressions
+attr MValue 
+  chn mts    :: {TypeEnv} 
+  syn sexprs :: {SExpressions}
+  syn sexpr  :: {[SExpr]}
+  inh tn     :: {String}             -- Thread Name
+  inh val    :: {Map.Map Id (Type, [PC])}
+    
+sem MValue
+  | Nothing 
+      lhs.sexpr  = [] 
+         .sexprs = []
+  | Just    
+      lhs.sexpr  = @just.sexpr
+         .sexprs = @just.sexprs
+
+attr Values
+  chn mts    :: {TypeEnv}
+  inh val    :: {Map.Map Id (Type, [PC])}
+  inh tn     :: {String}             -- Thread Name
+  syn sexprs use {++} {[]} :: {SExpressions}
+  syn sexpr  use {++} {[]} :: {[SExpr]}
+  syn vtype  use {++} {[]} :: {[Type]}
+
+sem Values
+  | Nil
+      lhs.mts = @lhs.mts
+  | Cons
+      hd.mts  = @lhs.mts
+      tl.mts  = @hd.mts
+      lhs.mts = @tl.mts
+      lhs.vtype = @hd.vtype:(@tl.vtype)
+
+attr Value Constant ConstantFP ConstantDataSequential ConstantExpr GlobalValue CompareConstantExpr 
+  chn mts    :: {TypeEnv}
+  syn sexprs :: {SExpressions}
+  syn sexpr  :: {[SExpr]}
+  inh tn     :: {String}             -- Thread Name
+  inh val    :: {Map.Map Id (Type, [PC])}
+  syn vtype  :: {Type}
+  syn sort   :: {SSortExpr}
+
+attr Value Constant GlobalValue
+  syn isGlobal :: {Bool}
+  syn ident    :: {Maybe String}
+  syn psexpr :: {Int -> [SExpr]}
+
+sem Value
+  | Id 
+      ty.mts     = @lhs.mts
+      ty.mn      = Nothing
+      v.tn       = @lhs.tn
+      lhs.sexpr  = case Map.lookup @v.ident @lhs.val of
+                        Nothing -> [ @v.sexpr ]
+                        Just (t,lp)  -> Prelude.map (\p -> IdentExpr $ SymIdent $ SimpleSym $ @lhs.tn ++ @v.ident ++ show p) [0.. length lp] 
+         .psexpr = \_ -> case Map.lookup @v.ident @lhs.val of
+                              Nothing -> [ ]
+                              Just (t,lp)  -> Prelude.map (\p -> IdentExpr $ SymIdent $ SimpleSym $ "p" ++ @lhs.tn ++ @v.ident ++ show p) [0.. length lp] 
+         .sexprs = @ty.sexprs
+         .mts    = @ty.mts
+         .vtype  = @ty.self
+         .isGlobal = False
+         .ident    = Just @v.ident
+         .sort  = @ty.sort
+
+  | Constant 
+      lhs.sexpr  = @c.sexpr
+         .psexpr = @c.psexpr
+         .sexprs = @c.sexprs
+         .vtype  = @c.vtype
+         .isGlobal = @c.isGlobal
+         .ident  = @c.ident
+         .sort   = @c.sort
+
+sem Constant
+  | BlockAddr ConstantVector UndefValue ConstantArray ConstantStruct ConstantPointerNull ConstantAggregateZero ConstantDataSequential ConstantExpr ConstantFP ConstantInt
+      lhs.isGlobal = False
+         .ident    = Nothing
+         .psexpr = \_ -> []
+  | GlobalValue
+      lhs.isGlobal = @gv.isGlobal
+         .ident    = @gv.ident
+         .psexpr   = @gv.psexpr
+
+sem Constant
+  | BlockAddr ConstantVector UndefValue
+      lhs.sexpr  = [] 
+         .sexprs = []
+         .vtype  = verrormessage
+         
+  | ConstantArray ConstantStruct ConstantPointerNull ConstantAggregateZero
+      ty.mn = Nothing
+      ty.mts = @lhs.mts
+      lhs.vtype = @ty.self
+         .sexpr  = []
+         .sexprs = []
+         .sort = @ty.sort
+
+  | ConstantDataSequential 
+      lhs.sexpr  = @cds.sexpr
+         .sexprs = @cds.sexprs
+         .vtype  = @cds.vtype
+         .sort   = @cds.sort
+
+  | ConstantExpr       
+      lhs.sexpr  = @expr.sexpr
+         .sexprs = @expr.sexprs
+         .vtype  = @expr.vtype
+         .sort   = @expr.sort
+
+  | ConstantFP          
+      lhs.sexpr  = @fp.sexpr
+         .sexprs = @fp.sexprs
+         .vtype  = @fp.vtype
+         .sort   = @fp.sort
+
+ | ConstantInt
+      ty.mn      = Nothing
+      ty.mts     = @lhs.mts
+      lhs.sexpr  = [ IdentExpr $ IdxIdent (bv @iv) [getISize @ty.self] ]
+         .sexprs = [] --  ty :: Type
+         .vtype  = @ty.self
+         .sort  = @ty.sort
+
+  | GlobalValue          
+      lhs.sexpr    = @gv.sexpr
+         .sexprs   = @gv.sexprs
+         .vtype    = @gv.vtype
+         .sort     = @gv.sort
+
+-- TODO
+sem ConstantFP
+  | ConstantFPFloat ConstantFPDouble
+      ty.mn      = Nothing
+      ty.mts     = @lhs.mts
+      lhs.sexpr  = [] 
+         .sexprs = [] 
+         .vtype  = @ty.self
+         .sort  = @ty.sort
+
+sem GlobalValue
+  | FunctionValue  GlobalAlias GlobalVariable 
+      n.tn       = @lhs.tn
+      ty.mn      = Nothing
+      ty.mts     = @lhs.mts
+      loc.sexpr' = case Map.lookup @n.ident @lhs.val of
+                     Nothing -> []
+                     Just (_,l) -> [ IdentExpr $ SymIdent $ SimpleSym $ @n.ident ++ show n | n <- [0..(length l)-1]] 
+      lhs.sexpr  = [ IdentExpr $ SymIdent @n.ssymbol ] ++ @loc.sexpr' 
+         .sexprs = []
+         .psexpr = \i -> let pi = IdentExpr $ SymIdent $ SimpleSym $ "p" ++ @n.ident ++ show i 
+                             z  = IdentExpr $ SymIdent $ SimpleSym $ "l" ++ @n.ident -- IdxIdent (bv 0) [32]
+                         in case Map.lookup @n.ident @lhs.val of
+                              Nothing    -> [ sFn "=" (IdentExpr $ SymIdent $ SimpleSym $ "l" ++ @n.ident) z ]
+                              Just (_,l) -> [ sFn "=" pi z ] ++ Prelude.map (\v -> sFn "=" pi $ IdentExpr $ IdxIdent (bv v) [32]) l 
+         .vtype  = @ty.self
+         .isGlobal = True 
+         .ident = Just @n.ident
+         .sort  = @ty.sort
+
+sem ConstantDataSequential
+  | ConstantDataArray  ConstantDataVector -- ty :: Type val :: String
+      ty.mn      = Nothing
+      ty.mts     = @lhs.mts
+      lhs.sexpr  = []
+         .sexprs = []
+         .vtype  = @ty.self 
+         .sort   = @ty.sort
+  
+-- TODO
+sem ConstantExpr
+  | GetElementPtrConstantExpr
+      struct.mts = @lhs.mts
+      idxs.mts   = @struct.mts
+      lhs.mts    = @idxs.mts
+      struct.tn  = @lhs.tn
+      idxs.tn    = @lhs.tn
+      lhs.vtype  = @struct.vtype
+      loc.idxn   = let x = getIdxN @struct.vtype
+                   in x -- trace (show x ++ " " ++ show @struct.vtype) $ x
+      lhs.sexprs = @struct.sexprs ++ @idxs.sexprs
+      lhs.sexpr  = [ foldr (\(n, s1) s2 -> sFn "select" s2 $ changeN s1 n) (head @struct.sexpr) $ zip @loc.idxn $ init' @idxs.sexpr ] 
+      
+  | BinaryConstantExpr ExtractElementConstantExpr ExtractValueConstantExpr InsertElementConstantExpr InsertValueConstantExpr SelectConstantExpr ShuffleVectorConstantExpr 
+      lhs.sexpr  = verrormessage
+         .sexprs = verrormessage
+         .vtype  = verrormessage
+  
+  | UnaryConstantExpr
+      ty.mn      = Nothing
+      ty.mts     = @lhs.mts
+      lhs.sexpr  = [] 
+         .sexprs = []
+         .vtype  = @ty.self
+         .sort   = @ty.sort
+  
+  | CompareConstantExpr
+      lhs.sexpr  = @cmpExpr.sexpr
+         .sexprs = @cmpExpr.sexprs
+         .vtype  = @cmpExpr.vtype
+         .sort   = @cmpExpr.sort
+
+sem CompareConstantExpr
+  | ICmpExpr FCmpExpr 
+      ty.mn      = Nothing
+      ty.mts     = @lhs.mts
+      lhs.sexpr  = verrormessage
+         .sexprs = verrormessage
+         .vtype  = @ty.self
+         .sort   = @ty.sort
+
+-- Parameter
+attr Parameter
+  chn mts    :: {TypeEnv}
+  syn sexprs :: {SExpressions}
+  syn sexpr  :: {SExpr}
+  inh tn     :: {String}             -- Thread Name
+  syn ident  :: {String}
+
+sem Parameter
+  | Parameter 
+      lhs.sexpr = IdentExpr $ SymIdent @loc.sym
+      loc.sym   = SimpleSym $ @lhs.tn ++ @var.self
+      lhs.ident = @lhs.tn ++ @var.self
+      ty.mts = @lhs.mts
+      ty.mn  = Nothing
+      lhs.sexprs = [ declfun @loc.sym @ty.sort ] ++ @ty.sexprs
+      lhs.mts    = @ty.mts
+ 
+{
+init' :: [a] -> [a]
+init' [] = []
+init' [x] = [x]
+init' [x,y] = [x]
+init' (x:y:ys) = x:(init' (y:ys))
+
+verrormessage = error "value instance not supported"
+
+bv :: Int -> SSymbol
+bv n = SimpleSym $ "bv" ++ show n
+
+changeN :: SExpr -> Int -> SExpr
+changeN (IdentExpr (IdxIdent s _)) n = IdentExpr $ IdxIdent s [n]
+changeN _ _ = error "changeN"
+
+getGValueId :: Value -> Maybe Id
+getGValueId (Id (Global i) _) = Just i
+getGValueId (Constant (GlobalValue (GlobalVariable (Global i) _))) = Just i
+getGValueId _ = Nothing
+
+getValueId :: Value -> Maybe Id
+getValueId (Id (Global i) _) = Just i
+getValueId (Id (Local  i) _) = Just i
+getValueId (Constant (GlobalValue (GlobalVariable (Global i) _))) = Just i
+getValueId _ = Nothing
+
+getParameterId :: Parameter -> String -> Id
+getParameterId (Parameter i _) s = s ++ i
+
+ivalueId :: Valuation -> Id -> Maybe Id
+ivalueId vals i = case Map.lookup i vals of
+                       Nothing        -> Nothing -- error $ "Global var " ++ show i ++ " not found in the env"
+                       Just (Right v) -> Just i
+                       Just (Left  j) -> case ivalueId vals j of
+                                              Nothing -> Just j
+                                              Just h  -> Just h
+
+encValue :: Value -> TypeEnv -> Map.Map Id (Type, [PC]) -> String -> (TypeEnv, SExpressions, [SExpr]) 
+encValue v mts val tn = let vw = wrap_Value (sem_Value v) $ Inh_Value {mts_Inh_Value = mts, tn_Inh_Value = tn, val_Inh_Value = val}
+                        in (mts_Syn_Value vw, sexprs_Syn_Value vw, sexpr_Syn_Value vw)
+
+encParameter :: Parameter -> TypeEnv -> String -> (TypeEnv, SExpressions, SExpr)
+encParameter p mts tn = let pw = wrap_Parameter (sem_Parameter p) $ Inh_Parameter {mts_Inh_Parameter = mts, tn_Inh_Parameter = tn}
+                        in (mts_Syn_Parameter pw, sexprs_Syn_Parameter pw, sexpr_Syn_Parameter pw)
+
+
+getValueType :: Value -> Type 
+getValueType v = vtype_Syn_Value $ wrap_Value (sem_Value v) $ Inh_Value {mts_Inh_Value = undefined, tn_Inh_Value = undefined, val_Inh_Value = undefined}
+
+getFnValueName :: Value -> Id
+getFnValueName (Constant (GlobalValue (FunctionValue (Global n) _))) = n
+getFnValueName _ = error "getFnValueName failed"
+}
+

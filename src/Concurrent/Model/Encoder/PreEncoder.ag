@@ -1,0 +1,100 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.PreEncoder
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Encoder.PreEncoder}{}{}
+
+sem Module
+  | Module
+      funs.fdcl = Map.empty
+      funs.sortEnv = Map.empty
+
+-- PreEncoding
+attr Functions Function BasicBlocks BasicBlock Instructions Instruction
+  inh fdcl     :: {Declarations}
+  chn sortEnv  :: {TypeEnv} 
+  syn argToPar use {`Map.union`} {Map.empty} :: {Map.Map (PC,Int,Value) Id}
+  syn locals   use {`Map.union`} {Map.empty} :: {Map.Map Id Type}
+  syn fStore   use {`Map.union`} {Map.empty} :: {Map.Map Id (Type, [PC])}
+  syn fails    use {++} {[]}                 :: {[PC]}
+  syn declexpres use {++} {[]}               :: {SExpressions} -- Declaration Expressions
+
+sem Functions
+  | Entry 
+      val.tn      = @key
+      val.sortEnv = @lhs.sortEnv
+      tl.sortEnv  = @val.sortEnv
+
+attr Function BasicBlocks BasicBlock Instructions Instruction
+  inh tn :: {Id}
+
+sem Instructions
+  | Nil
+      lhs.fStore = Map.empty
+  | Cons
+      lhs.fStore = Map.unionWith (\(a1,l1) (a2,l2) -> (a1, l1++l2)) @hd.fStore @tl.fStore
+
+sem Instruction
+  | Call
+      mres.tn       = @lhs.tn
+      loc.ty        = getFnRetTy @lhs.fdcl @callee.self
+      mres.sortexpr = fst <$> Map.lookup @loc.ty @lhs.sortEnv
+      lhs.argToPar = foldr (\((Parameter v _,a),i) m -> Map.insert (@pc.self, i, a) v m) Map.empty $ zip (zip (getFnParams @lhs.fdcl @callee.self) @args.self) [0..]
+      lhs.locals   = if @mres.ident  == ""              then Map.empty  else Map.singleton @mres.ident @loc.ty
+      lhs.fails    = if @callee.self == "__assert_fail" then [@pc.self] else []
+      lhs.declexpres = @mres.declexpr
+  | CreateThread
+      loc.thn = getFnValueName $ @args.self !! 2
+      loc.arg = getParameterId ((getFnParams @lhs.fdcl @loc.thn) !! 0) @loc.thn 
+      lhs.declexpres = [ declfun (SimpleSym @loc.arg) (SymSort "I8") ]
+      lhs.argToPar = Map.singleton (@pc.self, 0, @args.self !! 3) @loc.arg 
+  | Load
+      id.tn = @lhs.tn
+      id.sortexpr = Just @v.sort
+      lhs.locals = Map.singleton @id.ident @v.vtype
+      lhs.declexpres = @id.declexpr
+  | Alloca GetElementPtr
+      id.tn       = @lhs.tn
+      id.sortexpr = Just @ty.sort 
+      ty.mts      = @lhs.sortEnv
+      ty.mn       = Nothing
+      lhs.locals  = Map.singleton @id.ident @ty.self
+      lhs.declexpres = @id.declexpr
+  | Store
+      lhs.fStore   = if @v2.isGlobal then Map.singleton (fromJust @v2.ident) (@v2.vtype, [@pc.self]) else Map.empty 
+  | ICmp FCmp
+      id.tn = @lhs.tn
+      id.sortexpr = Just @ty.sort 
+      ty.mts = @lhs.sortEnv
+      ty.mn  = Nothing
+      lhs.locals = Map.singleton @id.ident @ty.self
+      lhs.declexpres = @id.declexpr
+  | Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast
+      id.tn       = @lhs.tn
+      id.sortexpr = Just @ty.sort 
+      ty.mts      = @lhs.sortEnv
+      ty.mn       = Nothing
+      lhs.locals  = Map.singleton @id.ident @ty.self
+      lhs.declexpres = @id.declexpr
+ 
+{
+-- | Get return type 
+getFnRetTy :: Declarations -> Id -> Type
+getFnRetTy dcls i = case Map.lookup i dcls of
+                         Nothing    -> error "Function unknown"
+                         Just (t,_) -> t
+
+getFnParams :: Declarations -> Id -> Parameters
+getFnParams dcls i = case Map.lookup i dcls of
+                          Nothing -> error "getFnParams error"
+                          Just (_,p) -> p
+
+
+preEncoder :: Functions -> TypeEnv -> Declarations -> (SExpressions, PreEncoder)
+preEncoder fs sorte decls = let fw = wrap_Functions (sem_Functions fs) $ Inh_Functions { fdcl_Inh_Functions = decls, sortEnv_Inh_Functions = sorte }
+                            in (declexpres_Syn_Functions fw, PreEncoder (argToPar_Syn_Functions fw) (fStore_Syn_Functions fw) (sortEnv_Syn_Functions fw) (locals_Syn_Functions fw) (fails_Syn_Functions fw))
+
+}

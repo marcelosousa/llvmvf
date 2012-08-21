@@ -1,0 +1,94 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.Function
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Encoder.Function}{}{}
+
+-- Function Encoding
+attr Function BasicBlocks BasicBlock Instructions Instruction
+  syn expr    use {++} {[]} :: {[SExpr]}
+  syn sexpres use {++} {[]} :: {SExpressions}
+  syn latest  use {`Map.union`} {Map.empty} :: {Map.Map Id SExpr}
+  chn pcc    :: {Int}
+  inh prenc  :: {PreEncoder}
+
+sem Function
+  | FunctionDecl
+      lhs.expr = []
+      lhs.latest = Map.empty
+  | FunctionDef
+      lhs.expr = @body.expr
+      lhs.latest = @body.latest
+
+sem BasicBlock
+  | BasicBlock
+      lhs.expr = @instrs.expr 
+      lhs.latest = @instrs.latest
+
+sem Instruction
+  | Alloca Call BitCast CreateThread Store
+      loc.pcval = IdentExpr $ IdxIdent (bv @pc.self) [32] 
+      loc.expr =  sFn "=" (IdentExpr $ SymIdent $ @loc.pcsym) @loc.pcval 
+      loc.pcsort = SymSort "I32"
+      loc.pcsym  = SimpleSym $ "pc" ++ show @loc.pcc
+      loc.pcc :: uniqueref pcc
+
+sem Instruction
+  | Alloca Call BitCast CreateThread 
+      lhs.sexpres = [ declfun @loc.pcsym @loc.pcsort ] 
+    
+sem Instruction
+  | Alloca Call
+      lhs.expr = [ @loc.expr ]
+  | Store
+      loc.val = fStore @lhs.prenc
+      v1.mts = @lhs.sortEnv
+      v1.val = @loc.val
+      v2.mts = @lhs.sortEnv
+      v2.val = @loc.val
+      loc.v1e = head @v1.sexpr
+      lhs.sexpres = if @v2.isGlobal
+                    then let v2i = fromJust @v2.ident
+                         in [ declfun @loc.pcsym @loc.pcsort, declfun (SimpleSym $ "l" ++ v2i ++ show @loc.pcc) @loc.pcsort ]
+                    else [ declfun @loc.pcsym @loc.pcsort ]
+      lhs.expr = if @v2.isGlobal
+                 then let v2i = fromJust @v2.ident
+                      in case Map.lookup v2i @loc.val of
+                              Nothing -> [ sAnd @loc.expr $ sFn "=" (IdentExpr $ SymIdent $ SimpleSym $ fromJust @v2.ident) @loc.v1e ]
+                              Just (_,lp) -> case elemIndex @pc.self lp of
+                                             Nothing -> error "Store encoding"
+                                             Just i  -> let iexpr = sFn "=" (IdentExpr $ SymIdent $ SimpleSym $ fromJust @v2.ident ++ show i) @loc.v1e
+                                                            p = IdentExpr $ IdxIdent (bv @pc.self) [32]
+                                                            xexpr = sFn "=" (IdentExpr $ SymIdent $ SimpleSym $ "l" ++ v2i ++ show @loc.pcc) p
+                                                        in [  @loc.expr `sAnd` iexpr `sAnd` xexpr ]
+                 else case (@v1.sexpr, @v2.sexpr) of
+                      ([e1],[e2]) -> [ sAnd @loc.expr $ sFn "=" e2 e1 ]
+                      _           -> error "Store seq encoding"
+      lhs.latest = if @v2.isGlobal
+                   then let v2i = fromJust @v2.ident
+                        in Map.singleton v2i (IdentExpr $ SymIdent $ SimpleSym $ "l" ++ v2i ++ show @loc.pcc)
+                   else Map.empty
+  | BitCast
+      v.mts = @lhs.sortEnv
+      v.val = fStore @lhs.prenc 
+      loc.sexprv2 = Prelude.map (\e -> ExtractExpr [ IdentExpr $ IdxIdent (SimpleSym "extract") [(getISize @ty.self)-1, 0] , e ]) @v.sexpr
+      lhs.expr = [ wrap sAnd (@loc.expr : Prelude.map (\e -> sFn "=" @id.sexpr e) @loc.sexprv2) ] 
+  | CreateThread
+      lhs.expr = case Map.lookup (@pc.self, 0, @args.self !! 3) (argToPar @lhs.prenc) of
+                      Nothing -> error "CreateThread"
+                      Just i  -> let is    = IdentExpr $ SymIdent $ SimpleSym i
+                                     (_,_,vexprs) = encValue (@args.self !! 3) @lhs.sortEnv (fStore @lhs.prenc) @lhs.tn
+                                 in [ wrap sAnd (@loc.expr : Prelude.map (\ve -> sFn "=" is ve) vexprs) ]
+ 
+{
+nextUnique :: Int -> (Int, Int)
+nextUnique u = (u+1, u)
+
+encodeMain :: Function -> PreEncoder -> Declarations -> (Map.Map Id SExpr, SExpressions, [SExpr])
+encodeMain f pe fdcl = let fw = wrap_Function (sem_Function f) $ Inh_Function { pcc_Inh_Function = 0, tn_Inh_Function = "main", prenc_Inh_Function = pe, sortEnv_Inh_Function = sortEnv pe, fdcl_Inh_Function = fdcl } 
+                  in (latest_Syn_Function fw, sexpres_Syn_Function fw, expr_Syn_Function fw)
+
+}

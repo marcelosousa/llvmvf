@@ -1,0 +1,40 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.Identifier
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Encoder.Identifier}{}{}
+
+-- Identifiers
+attr Identifier
+  inh tn       :: {String}
+  syn ssymbol  :: {SSymbol}
+  syn ident    :: {String}
+  syn sexpr    :: {SExpr}
+  syn declexpr :: {[SExpression]} -- Each identifier is able to generate a SExpression for its declaration.
+  inh sortexpr :: {Maybe SSortExpr}
+ 
+sem Identifier
+  | Global
+     lhs.ssymbol  = @loc.sym
+        .ident    = @name.self
+        .sexpr    = IdentExpr $ SymIdent @loc.sym
+        .declexpr = maybe [] (\se -> [declfun @loc.sym se]) @lhs.sortexpr 
+     loc.sym      = SimpleSym @name.self
+  | Local
+     lhs.ssymbol  = @loc.sym 
+        .ident    = @lhs.tn ++ @name.self
+        .sexpr    = IdentExpr $ SymIdent @loc.sym
+        .declexpr = if @name.self == "" 
+                    then [] 
+                    else maybe [] (\se -> [declfun @loc.sym se]) @lhs.sortexpr
+     loc.sym      = SimpleSym $ @lhs.tn ++ @name.self
+
+{
+
+freshId :: Id -> Id
+freshId x = x ++ "0"
+
+}

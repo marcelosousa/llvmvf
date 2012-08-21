@@ -1,0 +1,200 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.Function
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Encoder.Function}{}{}
+
+-- SMT2 Encoding
+attr Functions 
+  inh ccfg :: {ControlFlow}
+  inh fdcl :: {Declarations}
+  inh cdfg :: {Map.Map String (Map.Map Identifier Type)}
+  syn cts  :: {Map.Map String Transitions}
+
+sem Functions
+  | Nil
+      lhs.cts = Map.empty
+  | Entry 
+      lhs.cts = Map.insert @key @val.ts @tl.cts
+      val.cfg  = fromMaybe (error "no cfg") $ Map.lookup @key $ cfg @lhs.ccfg
+      val.dfg  = fromMaybe (error "no dfg") $ Map.lookup @key @lhs.cdfg
+      val.tn   = @key
+
+-- Function Encoding
+attr Function BasicBlocks BasicBlock Instructions Instruction
+  syn sexpr use {++} {[]} :: {SExpressions} -- SExpressions
+  chn sorte :: {SortEnv}
+  syn valu  :: {Valuation}
+  inh cfg   :: {Map.Map PC [PC]}
+  inh fdcl  :: {Declarations}
+  inh dfg   :: {Map.Map Identifier Type} 
+  inh tn    :: {Id}
+
+sem Function
+  | FunctionDecl lhs.ts = []
+  | FunctionDef  lhs.ts = @body.ts
+
+sem BasicBlock 
+  | BasicBlock lhs.ts = @instrs.ts
+
+-- It would be nice if we didn't have to explicitly invoke uuagc
+sem Instruction
+  | Ret    lhs.ts   = [(@pc.self, False, undefined, undefined)]
+  | UBr    lhs.ts   = [(@pc.self, True, @loc.upst, @loc.npc)]
+           loc.upst = \gs -> (gs, [], ISEmpty) 
+           loc.npc  = case nextpc @pc.self @lhs.cfg of
+                           [x] -> x 
+                           _   -> error "UBr npc"
+  | Br     lhs.ts   = [(@pc.self, True, @loc.upst, @loc.npc)]
+           loc.upst = \gs -> (gs, [], ISEmpty) 
+           loc.npc  = case nextpc @pc.self @lhs.cfg of
+                           [x] -> x 
+                           _   -> error "UBr npc"
+  | Alloca lhs.ts   = [(@pc.self, True, @loc.upst, @loc.npc)]
+           id.tn    = @lhs.tn
+           loc.upst = \gs -> let tw = wrap_Type (sem_Type @ty.self) $ Inh_Type { mn_Inh_Type = Nothing, mts_Inh_Type = defsorts gs }
+                                 pgs = updateSPC gs @lhs.tn @loc.npc 
+                                 gs' = pgs { defsorts = mts_Syn_Type tw }
+                                 tysexprs = sexprs_Syn_Type tw 
+                                 tysort   = sort_Syn_Type   tw
+                             in (gs', tysexprs ++ [ declfun @id.ssymbol tysort ], ISEmpty)  
+           loc.npc  = case nextpc @pc.self @lhs.cfg of
+                           [x] -> x 
+                           _   -> error "Alloca npc"
+  | Load   lhs.ts  = [(@pc.self, True, @loc.upst, @loc.npc)]
+           id.tn   = @lhs.tn
+           loc.upst = \gs@GlobalState{..} -> let (mi,op) = value gvals @v.self
+                                                 tw = wrap_Type (sem_Type $ getValueType op) $ Inh_Type { mn_Inh_Type = Nothing, mts_Inh_Type = defsorts }
+                                                 tysort = sort_Syn_Type tw
+                                                 dexpr = [ declfun @id.ssymbol tysort ]
+                                                 symexpr = ISExpr $ IdentExpr $ SymIdent @id.ssymbol
+                                                 gs' = updateSPC gs @lhs.tn @loc.npc
+                                                 vexpr =  case mi of
+                                                               Nothing -> let (_,_,viexpr) = encValue op defsorts gvals @lhs.tn
+                                                                          in viexpr
+                                                               Just miv -> ISExpr $ IdentExpr $ SymIdent $ SimpleSym miv 
+                                             in (gs', dexpr, sFn "=" symexpr vexpr)
+           loc.npc  = case nextpc @pc.self @lhs.cfg of 
+                           [x] -> x 
+                           _   -> error "load npc"
+  | Store  lhs.ts   = [(@pc.self, True, @loc.upst, @loc.npc)]
+           loc.upst = \gs@GlobalState{..} -> let (mi1,op1) = value gvals @v1.self  -- Get the value 
+                                                 (mi2,op2) = value gvals @v2.self  -- Either Get the value or build a fresh value
+                                                 (mts1, sexprs1, sexpr1) = encValue op1 defsorts gvals @lhs.tn 
+                                             in  case mi2 of
+                                                     Nothing   -> let (mts2, sexprs2, sexpr2) = encValue @v2.self mts1 gvals @lhs.tn
+                                                                      pgs = updateSPC gs @lhs.tn @loc.npc 
+                                                                      gs' = pgs { defsorts = mts2, gvals = upValuation gvals op2 op1} 
+                                                                  in (gs', sexprs1 ++ sexprs2, sFn "=" sexpr2 sexpr1) 
+                                                     Just mi2a -> let mi2a' = freshId mi2a
+                                                                      gvals' = Map.adjust (\_ -> Left mi2a') mi2a $ Map.insert mi2a' (Right op1) $ gvals
+                                                                      tw = wrap_Type (sem_Type $ getValueType @v2.self) $ Inh_Type { mn_Inh_Type = Nothing, mts_Inh_Type = mts1 }
+                                                                      sym = SimpleSym mi2a' 
+                                                                      symexpr = ISExpr $ IdentExpr $ SymIdent sym 
+                                                                      tysexprs = sexprs_Syn_Type tw 
+                                                                      tysort   = sort_Syn_Type   tw
+                                                                      mts2     = mts_Syn_Type    tw
+                                                                      pgs = updateSPC gs @lhs.tn @loc.npc 
+                                                                      gs' = pgs { defsorts = mts2, gvals = gvals'} 
+                                                                  in (gs', sexprs1 ++ tysexprs ++ [ declfun sym tysort ], sFn "=" symexpr sexpr1)  
+           loc.npc  = case nextpc @pc.self @lhs.cfg of
+                           [x] -> x 
+                           _   -> error "Store npc"
+-- TODO
+  | Call   lhs.ts = [(@pc.self, True, @loc.upst, @loc.npc)] -- change this for interprocedural analysis
+           mres.tn = @lhs.tn
+           loc.upst = \gs -> let rty = getFnRetTy @lhs.fdcl @callee.self
+                                 tw  = wrap_Type (sem_Type rty) $ Inh_Type { mn_Inh_Type = Nothing, mts_Inh_Type = defsorts gs }                 
+                                 pgs = updateSPC gs @lhs.tn @loc.npc 
+                                 gs' = pgs { defsorts = mts_Syn_Type tw }
+                                 tysexprs = sexprs_Syn_Type tw 
+                                 tysort   = sort_Syn_Type   tw
+                                 csexprs  = if @mres.ident == ""
+                                            then []
+                                            else [ declfun @mres.ssymbol tysort ]
+                             in (gs', tysexprs ++ csexprs, ISEmpty)  
+           loc.npc  = case nextpc @pc.self @lhs.cfg of -- this assumes only calls for undefined functions
+                           [x] -> x 
+                           _   -> error "call npc"
+  | BitCast lhs.ts = [(@pc.self, True, @loc.upst, @loc.npc)]
+            id.tn  = @lhs.tn 
+            loc.upst = \gs@GlobalState{..} -> let (mid, op) = value gvals @v.self
+                                                  (mts1, sexprs1, sexpr1) = encValue op defsorts gvals @lhs.tn
+                                                  tw  = wrap_Type (sem_Type @ty.self) $ Inh_Type { mn_Inh_Type = Nothing, mts_Inh_Type = mts1 }                 
+                                                  pgs = updateSPC gs @lhs.tn @loc.npc 
+                                                  gs' = pgs { defsorts = mts_Syn_Type tw } -- missing valuation
+                                                  tysort = sort_Syn_Type tw
+                                                  tysexprs = (declfun @id.ssymbol tysort):(sexprs_Syn_Type tw) 
+                                                  sexprv2 = ISExpr $ ExtractExpr [ IdentExpr $ IdxIdent (SimpleSym "extract") [(getISize @ty.self)-1, 0] , fromISExpr $ sexpr1 ]
+                                              in (gs', sexprs1 ++ tysexprs, sFn "=" @id.sexpr sexprv2) 
+            loc.npc  = case nextpc @pc.self @lhs.cfg of 
+                            [x] -> x 
+                            _   -> error "bitcast npc"
+  | CreateThread lhs.ts = [(@pc.self, True, @loc.upst, @loc.npc)]
+                 loc.thn = getFnValueName $ @args.self !! 2
+                 loc.par = getFnParams @lhs.fdcl @loc.thn 
+                 loc.upst = \gs@GlobalState{..} -> let arg = @args.self !! 3
+                                                       (mid, op) = value gvals arg 
+                                                       (mts, sexprs, sexpr)    = encValue op defsorts gvals @lhs.tn
+                                                       (mts', sexprs', sexpr') = encParameter (@loc.par !! 0) mts @loc.thn
+                                                       pgs = updateSPC gs @lhs.tn @loc.npc 
+                                                       gs' = pgs { defsorts = mts' }
+                                                   in (gs', sexprs' ++ sexprs, sFn "=" sexpr' sexpr) 
+                 loc.npc  = case nextpc @pc.self @lhs.cfg of 
+                                 [x] -> x 
+                                 _   -> error "create thread npc"
+                 
+
+{
+nextpc :: PC -> [(PC,PC)] -> [PC]
+nextpc i = snd . unzip . Prelude.filter (\(p,r) -> p == i && r /= -1)
+
+updateSPC :: GlobalState -> String -> PC -> GlobalState
+updateSPC gs@GlobalState{..} n pc = let nti = Map.adjust (\ts@ThreadState{..} -> ts { tipc = pc }) n ti  
+                                    in gs { currentpc = pc, ti = nti }
+                                         
+
+-- | Returns the deep value of a Value
+value :: Valuation -> Value -> (Maybe Id, Value)
+value vals v = case getGValueId v of
+                    Nothing -> (Nothing, v)
+                    Just i  -> (ivalueId vals i, ivalue vals i)
+
+ivalue :: Valuation -> Id -> Value
+ivalue vals i = case Map.lookup i vals of
+                     Nothing        -> error $ "Global var " ++ show i ++ " not found in the env"
+                     Just (Right v) -> v
+                     Just (Left  j) -> ivalue vals j
+
+ivalueId :: Valuation -> Id -> Maybe Id
+ivalueId vals i = case Map.lookup i vals of
+                       Nothing        -> Nothing -- error $ "Global var " ++ show i ++ " not found in the env"
+                       Just (Right v) -> Just i
+                       Just (Left  j) -> case ivalueId vals j of
+                                              Nothing -> Just j
+                                              Just h  -> Just h
+
+upValuation :: Valuation -> Value -> Value -> Valuation
+upValuation vals v1 v2 = case getValueId v1 of
+                              Nothing -> vals -- error "no name"
+                              Just i  -> Map.insert i (Right v2) vals
+
+-- | Get return type 
+getFnRetTy :: Declarations -> Id -> Type
+getFnRetTy dcls i = case Map.lookup i dcls of
+                         Nothing    -> error "Function unknow"
+                         Just (t,_) -> t
+
+getFnParams :: Declarations -> Id -> Parameters
+getFnParams dcls i = case Map.lookup i dcls of
+                          Nothing -> error "getFnParams error"
+                          Just (_,p) -> p
+
+
+encSeqFunction :: String -> Function -> SortEnv -> Valuation -> Map.Map PC [PC] -> Declarations -> (SortEnv, Valuation, SExpressions) 
+encSeqFunction fn f sorte valu cfg decls = undefined 
+
+}

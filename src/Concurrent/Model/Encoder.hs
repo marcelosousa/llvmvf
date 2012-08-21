@@ -105,11 +105,9 @@ encFunctions m@Model{..} k = do gs@GlobalState{..} <- get
                                     fs = getFs mainf procs 
                                     (s,p)  = preEncoder fs defsorts decls
                                     se = preEncode p
-                                    (pcs, sexprs)   = encodeMain    (unProc mainf) p decls
-                                    (cpcs, csexprs) = encodeThreads (toFunctions procs)  k p (Map.delete "main" cte) $ Map.delete "main" cfg 
-                       --  trace ("----\n" ++ show p) $
-                       --  trace (show sexprs) $ 
-                                return $ s ++ se ++ pcs ++ [ assert $ wrap sAnd sexprs ] ++ cpcs ++ [ assert csexprs ] 
+                                    (l, pcs, sexprs) = encodeMain    (unProc mainf) p decls
+                                    (cpcs, csexprs)  = encodeThreads (toFunctions procs)  k p l (Map.delete "main" cte) $ Map.delete "main" cfg 
+                                trace ("----\n" ++ show p ++ "--- ---\n" ++ show l) $ return $ s ++ se ++ pcs ++ [ assert $ wrap sAnd sexprs ] ++ cpcs ++ [ assert csexprs ] 
 
 preEncode :: PreEncoder -> SExpressions
 preEncode p@PreEncoder{..} = Map.foldrWithKey (\i (t, pcs) se -> (concatMap (\(_,c) -> (declSVar (i ++ show c) t sortEnv):[]) (zip pcs [0..])) ++ se ) [] fStore 

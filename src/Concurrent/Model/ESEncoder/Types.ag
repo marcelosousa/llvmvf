@@ -1,0 +1,137 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.ESEncoder.Types
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.ESEncoder.Types}{}{}
+
+-- Sorts
+attr Type 
+  syn sort   :: {SSortExpr}
+  syn sexprs use {++} {[]} :: {SExpressions}
+  chn mts    :: {Map.Map Type SSort}
+  syn sortn  :: {SSort}
+  inh mn     :: {Maybe SSort}
+
+sem Type
+  | TyVoid
+      lhs.sort = errormessage
+         .mts  = errormessage
+         .sortn = errormessage
+  | Tyx86MMX
+      lhs.sort = errormessage
+         .mts  = errormessage
+         .sortn = errormessage
+  | TyLabel
+      lhs.sort = errormessage
+         .mts  = errormessage
+         .sortn = errormessage
+  | TyMetadata
+      lhs.sort = errormessage
+         .mts  = errormessage
+         .sortn = errormessage
+  | TyOpaque
+      lhs.sort = errormessage
+         .mts  = errormessage
+         .sortn = errormessage
+  | TyInt
+      loc.sortn = if @p == 1
+                  then fromMaybe "Bool"           @lhs.mn
+                  else fromMaybe ("I" ++ show @p) @lhs.mn
+      lhs.sortn = @loc.sortn 
+      lhs.sort  = SymSort @loc.sortn
+      lhs.mts   = Map.insert @self @loc.sortn @lhs.mts
+      lhs.sexprs = case Map.lookup @self @lhs.mts of
+                        Nothing -> if @p == 1
+                                   then []
+                                   else [ defsorti @p ]
+                        Just _  -> []
+  | TyFloatPoint
+      lhs.sort = errormessage
+         .mts  = errormessage
+         .sortn = errormessage
+  | TyArray TyVector
+      loc.bsize = getBSize @numEl                                                    -- Get the number of bit required to encode the index
+      loc.sortn = fromMaybe ("Array" ++ show @numEl ++ @ty.sortn) @lhs.mn       -- Name of the sort
+      lhs.sortn = @loc.sortn              
+      ty.mts    = @lhs.mts                                                           -- Pass down the type the Map given
+      lhs.mts   = Map.insert @self @loc.sortn @ty.mts                                -- Add entry to the Map
+      lhs.sort  = SymSort @loc.sortn                                                 -- The sort now becomes the abbreviation
+      loc.sortd = ArraySort (BitVector @loc.bsize) @ty.sort                          -- The actual sort
+      lhs.sexprs = @ty.sexprs ++ [ SE $ DefSort (SimpleSym @loc.sortn) [] $ toSExpr @loc.sortd ] -- Add the ty exprs and also the sort definition
+  | TyFunction
+      lhs.sort = errormessage
+         .mts  = errormessage
+         .sortn = errormessage
+  | TyStruct -- Named Types / Anonymous Structs
+      loc.sortn = fromMaybe @name @lhs.mn -- Get the name
+      lhs.sortn = @loc.sortn
+      loc.tysi  = encTypes @tys.self @lhs.mts  -- Encode types
+      loc.sort  = case @loc.sortn of
+                       "" -> trdu @loc.tysi          -- Anonymous Struct
+                       n  -> SymSort @loc.sortn -- Named Struct
+      lhs.sort  = @loc.sort                    
+      lhs.mts   = case @loc.sortn of
+                       "" -> fstu @loc.tysi
+                       n  -> Map.insert @self n $ fstu @loc.tysi
+      lhs.sexprs = case @loc.sortn of
+                        "" -> sndu @loc.tysi
+                        n  -> sndu @loc.tysi ++ [ SE $ DefSort (SimpleSym @loc.sortn) [] $ toSExpr $ trdu @loc.tysi ] 
+  | TyPointer -- TODO - How to formalize this properly? Right now just using the arg type
+      loc.sortn = fromMaybe @ty.sortn @lhs.mn -- fromMaybe ("Ptr"++ @ty.sortn) @lhs.mn
+      lhs.sortn = @loc.sortn
+      lhs.sort = SymSort @loc.sortn
+      ty.mts   = @lhs.mts
+      lhs.mts  = Map.insert @self @loc.sortn @ty.mts
+      loc.sortd = @ty.sort -- PointerSort @ty.sort
+      lhs.sexprs = @ty.sexprs  -- ++ [ SE $ DefSort (SimpleSym @loc.sortn) [] $ toSExpr @loc.sortd ]
+  | TyUndefined
+      lhs.sort = errormessage
+         .mts  = errormessage
+         .sortn = errormessage
+
+{
+errormessage = error "enc type not supported"
+
+fstu  (a,b,c) = a
+sndu (a,b,c) = b
+trdu (a,b,c) = c
+
+getIdxN :: Type -> [Int]
+getIdxN (TyArray  ne ty) = (getBSize ne):(getIdxN ty)
+getIdxN (TyVector ne ty) = (getBSize ne):(getIdxN ty)
+getIdxN (TyPointer ty)   = getIdxN ty
+getIdxN _ = []
+
+getBSize :: Int -> Int
+getBSize n =length $  showIntAtBase 2 intToDigit n ""
+
+getISize :: Type -> Int
+getISize (TyInt p) = p
+getISize (TyPointer t) = getISize t
+getISize _ = 0
+
+-- TODO - Define a new sort for each element of the struct
+encTypes :: Types -> Map.Map Type SSort -> (Map.Map Type SSort, SExpressions, SSortExpr) 
+encTypes []     _   = error "empty struct"
+encTypes [x]    mts = encType x Nothing mts
+encTypes (x:xs) mts = let (mts', sexprs, sort) = encType x Nothing mts
+                      in  encTypes' (sexprs,sort) xs mts' 
+  where encTypes' (sexprs,ssort) []     mts = (mts, sexprs, ssort)
+        encTypes' (sexprs,ssort) (x:xs) mts = let (mts', sexprs', ssort') = encType x Nothing mts
+                                              in  encTypes' (sexprs ++ sexprs', PairSort ssort ssort') xs mts'
+
+encType :: Type -> Maybe SSort -> Map.Map Type SSort -> (Map.Map Type SSort, SExpressions, SSortExpr)
+encType ty s mts = let tw = wrap_Type (sem_Type ty) $ Inh_Type { mn_Inh_Type = s, mts_Inh_Type = mts }
+                   in case Map.lookup ty mts of
+                           Nothing -> trace (show (mts_Syn_Type tw, sexprs_Syn_Type tw, sort_Syn_Type tw)) $ (mts_Syn_Type tw, sexprs_Syn_Type tw, sort_Syn_Type tw) 
+                           Just tsn  -> case s of
+                                        Nothing -> (mts, [], SymSort tsn)
+                                        Just sn -> if sn == tsn
+                                                   then (mts, [], SymSort sn)
+                                                   else (mts, [ defsort sn tsn ], SymSort sn)
+
+}
+

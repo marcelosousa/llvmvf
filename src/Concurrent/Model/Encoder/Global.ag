@@ -1,0 +1,78 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.Global
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Encoder.Global}{}{}
+
+imports
+{
+import Control.Applicative ((<$>))
+import Control.Monad       (mplus)
+}
+
+-- Global Variables 
+attr Globals 
+  syn sexpr :: {[SExpr]}
+  syn sexprs use {++} {[]} :: {SExpressions}
+  chn gs                   :: {GlobalState}
+
+sem Globals
+  | Nil 
+     lhs.sexpr = []
+  | Cons
+     lhs.sexpr = let l = @hd.sexpr ++ @tl.sexpr
+                 in  if l == [] 
+                     then []
+                     else [ wrap sAnd l ]
+     lhs.sexprs = nub $  @hd.sexprs ++ @tl.sexprs
+  
+attr Global
+  syn sexpr  use {++} {[]} :: {[SExpr]}
+  syn sexprs use {++} {[]} :: {SExpressions}
+  chn gs                   :: {GlobalState}
+
+sem Global
+  | GlobalVar
+     ty.mts     = defsorts @lhs.gs                 -- Pass to ty the defsorts
+     ty.mn      = Nothing                          -- The type is not a named type
+     ival.mts   = @ty.mts                          -- Pass to ivals the defsorts from ty
+     ival.tn    = ""                               -- No Thread Name
+     lhs.sexprs =  @ty.sexprs ++ @ival.sexprs ++ [ declfun @loc.sym @ty.sort , declfun @loc.psym (SymSort "I32") ] 
+     lhs.sexpr  = let v = IdentExpr $ IdxIdent (bv 0) [32] -- true  = IdentExpr $ SymIdent $ SimpleSym $ "true"
+                  in Prelude.map (\ve -> sFn "=" (IdentExpr $ SymIdent $ @loc.sym) ve `sAnd` sFn "=" (IdentExpr $ SymIdent $ @loc.psym) v) @ival.sexpr
+     loc.sym  = SimpleSym @name.self
+     loc.psym = SimpleSym $ "l" ++ @name.self
+     lhs.gs   = let ogs@GlobalState{..} = @lhs.gs
+                    gvals' = maybe gvals (\v -> Map.insert @name.self (Right v) gvals) @ival.self
+                in ogs { defsorts = @ival.mts, gvals = gvals' }   
+
+{
+
+wrap :: (SExpr -> SExpr -> SExpr) -> [SExpr] -> SExpr
+wrap f []     = error "wrap SExprs"
+wrap f [x]    = x
+wrap f (x:xs) = f x $ wrap f xs
+
+sAnd :: SExpr -> SExpr -> SExpr
+sAnd a b = sFn "and" a b
+
+sOr :: SExpr -> SExpr -> SExpr
+sOr a b = sFn "or" a b
+
+sFn :: String -> SExpr -> SExpr -> SExpr
+sFn f s1 s2 = FnAppExpr (SymIdent $ SimpleSym f) [s1, s2]
+
+-- | Encode Global Variables
+encGlobalVars :: Globals -> GlobalState -> (GlobalState, SExpressions)
+encGlobalVars gvars gs = let gw = wrap_Globals (sem_Globals gvars) $ Inh_Globals { gs_Inh_Globals = gs }
+                             me  = case sexpr_Syn_Globals gw of
+                                        []  -> []
+                                        [e] -> [assert e]
+                                        _        -> error "encGlobalVars" 
+                         in (gs_Syn_Globals gw, sexprs_Syn_Globals gw ++ me)
+
+}
+
