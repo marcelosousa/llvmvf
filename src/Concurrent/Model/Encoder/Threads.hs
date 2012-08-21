@@ -69,9 +69,9 @@ encPreds preds            k pc stores (Just x) = case Map.lookup x stores of
 
 encFreshGlobal :: Id -> PC -> Map.Map Id (Type, [PC]) -> SExpr
 encFreshGlobal n pc stores = case Map.lookup n stores of
-                                  Nothing -> error "encFreshGlobal 1"
+                                  Nothing -> error $ "encFreshGlobal 1 " ++ n ++ " " ++ show pc ++ " " ++ show stores
                                   Just (_,lp) -> case elemIndex pc lp of 
-                                                  Nothing -> error "encFreshGlobal 2"
+                                                  Nothing -> error $ "encFreshGlobal 2 " ++  n ++ " " ++ show pc ++ " " ++ show lp
                                                   Just i  -> IdentExpr $ SymIdent $ SimpleSym $ n ++ show i
 
 encodeThreads :: Functions -> Bound -> PreEncoder -> Map.Map Id SExpr -> Map.Map String PC -> Map.Map String CF -> (SExpressions, SExpr)
