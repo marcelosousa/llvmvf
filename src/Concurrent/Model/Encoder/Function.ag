@@ -29,7 +29,7 @@ sem BasicBlock
       lhs.latest = @instrs.latest
 
 sem Instruction
-  | Alloca Call BitCast CreateThread Store
+  | Alloca Call BitCast CreateThread Store MutexInit
       loc.pcval = IdentExpr $ IdxIdent (bv @pc.self) [32] 
       loc.expr =  sFn "=" (IdentExpr $ SymIdent $ @loc.pcsym) @loc.pcval 
       loc.pcsort = SymSort "I32"
@@ -82,6 +82,16 @@ sem Instruction
                       Just i  -> let is    = IdentExpr $ SymIdent $ SimpleSym i
                                      (_,_,vexprs) = encValue (@args.self !! 3) @lhs.sortEnv (fStore @lhs.prenc) @lhs.tn
                                  in [ wrap sAnd (@loc.expr : Prelude.map (\ve -> sFn "=" is ve) vexprs) ]
+  | MutexInit
+      loc.gvid = SimpleSym (fromJust @mutex.ident)
+      loc.gvp  = SimpleSym $ "l" ++ (fromJust @mutex.ident) ++ show @loc.pcc
+      lhs.sexpres = [ declfun @loc.pcsym @loc.pcsort ] -- , declfun @loc.gvp @loc.pcsort ]
+      lhs.expr = let f = IdentExpr $ SymIdent $ SimpleSym "false"
+                     p = IdentExpr $ IdxIdent (bv @pc.self) [32]
+                     xexpr = sFn "=" (IdentExpr $ SymIdent @loc.gvid) f
+                     iexpr = sFn "=" (IdentExpr $ SymIdent @loc.gvp) p
+                 in [ @loc.expr ] -- `sAnd` xexpr `sAnd` iexpr]
+      lhs.latest = Map.empty -- Map.singleton (fromJust @mutex.ident) (IdentExpr $ SymIdent @loc.gvp) 
  
 {
 nextUnique :: Int -> (Int, Int)

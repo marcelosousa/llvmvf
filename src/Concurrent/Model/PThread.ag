@@ -23,6 +23,8 @@ import Data.Maybe
 import Concurrent.Model
 import Language.LLVMIR
 import UU.PPrint
+
+import Debug.Trace (trace)
 }
 
 attr Module 
@@ -37,7 +39,7 @@ attr Functions
   syn mainf :: {Process}
   
 attr Functions Function BasicBlocks BasicBlock Instructions Instruction
-  syn pmdl use {`IM.union`} {IM.empty} :: {IM.IntMap Process}
+  syn pmdl  use {`IM.union`} {IM.empty} :: {IM.IntMap Process}
   syn decls use {`Map.union`} {Map.empty} :: {Map.Map String (Type,Parameters)}
   inh mfun      :: {Map.Map String Function}
   chn counter   :: {ThreadLabel}
@@ -67,9 +69,12 @@ sem BasicBlock
 sem Instruction
   | Call 
     +pmdl = IM.union (snd @loc.proc)
-    lhs.annotated = if fst @loc.proc
-                    then CreateThread @pc.self @args.self
-                    else Call @pc.self @mres.self @ty.self  @callee.self @args.self   
+    lhs.annotated = case @callee.self of
+                         "pthread_create"       -> CreateThread @pc.self @args.self
+                         "pthread_mutex_init"   -> MutexInit    @pc.self @mres.self (@args.self !! 0)
+                         "pthread_mutex_lock"   -> MutexLock    @pc.self @mres.self (@args.self !! 0)
+                         "pthread_mutex_unlock" -> MutexUnlock  @pc.self @mres.self (@args.self !! 0)
+                         x                      -> Call         @pc.self @mres.self @ty.self @callee.self @args.self   
     loc.proc = buildProcess @loc.counter @callee.self @args.self @lhs.mfun
     loc.counter :: uniqueref counter
 
@@ -87,7 +92,8 @@ buildProcess :: Int -> String -> Values -> Map.Map String Function -> (Bool, IM.
 buildProcess c "pthread_create" v m = case v !! 2 of
                                         Constant (GlobalValue (FunctionValue i _)) -> let vn = getIdName i
                                                                                           f  = fromMaybe (error "buildProcess 1") $ Map.lookup vn m
-                                                                                      in (True, IM.singleton c $ Process vn f)
+                                                                                          f' = annotated_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function {}
+                                                                                      in (True, IM.singleton c $ Process vn f')
                                         _ -> error "buildProcess 2"  
 buildProcess c _                _ _ = (False, IM.empty)
  

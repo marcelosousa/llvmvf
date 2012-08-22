@@ -19,6 +19,7 @@ attr Functions Function BasicBlocks BasicBlock Instructions Instruction
   syn argToPar use {`Map.union`} {Map.empty} :: {Map.Map (PC,Int,Value) Id}
   syn locals   use {`Map.union`} {Map.empty} :: {Map.Map Id Type}
   syn fStore   use {`Map.union`} {Map.empty} :: {Map.Map Id (Type, [PC])}
+  syn mutexes  use {++} {[]}                 :: {[Id]}
   syn fails    use {++} {[]}                 :: {[PC]}
   syn declexpres use {++} {[]}               :: {SExpressions} -- Declaration Expressions
 
@@ -68,6 +69,22 @@ sem Instruction
       lhs.declexpres = @id.declexpr
   | Store
       lhs.fStore   = if @v2.isGlobal then Map.singleton (fromJust @v2.ident) (@v2.vtype, [@pc.self]) else Map.empty 
+  | MutexInit
+      lhs.mutexes  = [fromJust @mutex.ident]
+  | Add Sub
+      id.tn = @lhs.tn
+      id.sortexpr = Just @ty.sort 
+      ty.mts = @lhs.sortEnv
+      ty.mn  = Nothing
+      lhs.locals = Map.singleton @id.ident @ty.self
+      lhs.declexpres = @id.declexpr
+  | Or And 
+      id.tn = @lhs.tn
+      id.sortexpr = Just @ty.sort 
+      ty.mts = @lhs.sortEnv
+      ty.mn  = Nothing
+      lhs.locals = Map.singleton @id.ident @ty.self
+      lhs.declexpres = @id.declexpr
   | ICmp FCmp
       id.tn = @lhs.tn
       id.sortexpr = Just @ty.sort 
@@ -98,6 +115,6 @@ getFnParams dcls i = case Map.lookup i dcls of
 
 preEncoder :: Functions -> TypeEnv -> Declarations -> (SExpressions, PreEncoder)
 preEncoder fs sorte decls = let fw = wrap_Functions (sem_Functions fs) $ Inh_Functions { fdcl_Inh_Functions = decls, sortEnv_Inh_Functions = sorte }
-                            in (declexpres_Syn_Functions fw, PreEncoder (argToPar_Syn_Functions fw) (fStore_Syn_Functions fw) (sortEnv_Syn_Functions fw) (locals_Syn_Functions fw) (fails_Syn_Functions fw))
+                            in (declexpres_Syn_Functions fw, PreEncoder (argToPar_Syn_Functions fw) (fStore_Syn_Functions fw) (mutexes_Syn_Functions fw) (sortEnv_Syn_Functions fw) (locals_Syn_Functions fw) (fails_Syn_Functions fw))
 
 }

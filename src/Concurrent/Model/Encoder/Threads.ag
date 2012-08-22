@@ -44,6 +44,7 @@ attr Functions
   inh prenc :: {PreEncoder}
   inh cfg   :: {Map.Map String CF}
   inh cte   :: {Map.Map String PC}
+  inh mutexes :: {[[(SExpr, Maybe SExpr)]]}
   syn ts use {++} {[]} :: {[Map.Map String (SExpr, Maybe SExpr) -> Int -> [(SExpr, Maybe SExpr)] -> SExpr]}
 
 sem Functions
@@ -63,6 +64,7 @@ attr Function BasicBlocks BasicBlock Instructions Instruction
   inh tn    :: {Id}
   inh prenc :: {PreEncoder}
   inh spark :: {Int -> SExpr}
+  inh mutexes :: {[[(SExpr, Maybe SExpr)]]}
 
 attr Function BasicBlocks BasicBlock Instructions Instruction
   syn ts use {++} {[]} :: {[Map.Map String (SExpr, Maybe SExpr) -> Int -> [(SExpr, Maybe SExpr)] -> SExpr]}
@@ -73,7 +75,6 @@ attr Function BasicBlocks BasicBlock Instructions Instruction
 --attr Instruction
 --  syn ts :: {(SExpr, Maybe SExpr) -> SExpr}
 
---   %tmp1 = icmp sgt i32 %tmp, 2
 sem Instruction
   | Load
       v.mts  = sortEnv @lhs.prenc
@@ -102,7 +103,7 @@ sem Instruction
                                          enc  = if @v2.isGlobal
                                                 then let v2i = fromJust @v2.ident
                                                          preds = encPreds le k @pc.self @loc.val $ Just v2i 
-                                                         vexpr = encFreshGlobal v2i @pc.self @loc.val -- IdentExpr $ SymIdent $ SimpleSym v2i
+                                                         vexpr = encFreshGlobal v2i @pc.self @loc.val 
                                                      in wrap sAnd $ (sFn "=" vexpr @loc.v1e):preds 
                                                 else let preds = encPreds le k @pc.self @loc.val Nothing
                                                      in case (@v1.sexpr, @v2.sexpr) of 
@@ -122,7 +123,7 @@ sem Instruction
       op2.val = fStore @lhs.prenc
       op2.mts = sortEnv @lhs.prenc
       op2.tn  = @lhs.tn
-      loc.vse = [ sFn @cond.pred e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
+      loc.vse = [ if @cond.self == IntNE then FnAppExpr (SymIdent $ SimpleSym "not") [ sFn "=" e1 e2 ] else sFn @cond.pred e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
       loc.enc = wrap sOr $ Prelude.map (\se -> sFn "=" @id.sexpr se) @loc.vse 
       loc.ts  = \(pce, npce) k le -> let fpce = sFn "=" pce @loc.pcev
                                          preds  = encPreds le k @pc.self (fStore @lhs.prenc) Nothing
@@ -131,6 +132,31 @@ sem Instruction
                                          Nothing -> @lhs.spark k `sAnd` iexp
                                          Just e  -> let fnpce = if @loc.npcev == [] then error "ICmp instruction" else sFn "=" e $ head @loc.npcev
                                                     in  @lhs.spark k `sAnd` iexp `sAnd` fnpce 
+  | Sub Add Or And
+      id.tn   = @lhs.tn
+      id.sortexpr = Nothing
+      op1.val = fStore @lhs.prenc
+      op1.mts = sortEnv @lhs.prenc
+      op1.tn  = @lhs.tn
+      op2.val = fStore @lhs.prenc
+      op2.mts = sortEnv @lhs.prenc
+      op2.tn  = @lhs.tn
+      loc.enc = wrap sOr $ Prelude.map (\se -> sFn "=" @id.sexpr se) @loc.vse 
+      loc.ts  = \(pce, npce) k le -> let fpce = sFn "=" pce @loc.pcev
+                                         preds  = encPreds le k @pc.self (fStore @lhs.prenc) Nothing
+                                         iexp = wrap sAnd $ fpce:(@loc.enc):preds
+                                     in case npce of
+                                         Nothing -> @lhs.spark k `sAnd` iexp
+                                         Just e  -> let fnpce = if @loc.npcev == [] then error "bin instruction" else sFn "=" e $ head @loc.npcev
+                                                    in  @lhs.spark k `sAnd` iexp `sAnd` fnpce 
+  | Add
+      loc.vse = [ sFn "bvadd" e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
+  | Sub
+      loc.vse = [ sFn "bvsub" e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
+  | Or
+      loc.vse = [ sFn "or" e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
+  | And 
+      loc.vse = [ sFn "and" e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
   | UBr 
       loc.ts = \(pce, npce) k le -> let fpce = sFn "=" pce @loc.pcev
                                         preds  = encPreds le k @pc.self (fStore @lhs.prenc) Nothing
@@ -214,16 +240,67 @@ sem Instruction
                                      preds  = encPreds le k @pc.self (fStore @lhs.prenc) Nothing
                                      iexp = wrap sAnd $ fpce:preds 
                                  in @lhs.spark k `sAnd` iexp `sAnd` (IdentExpr $ SymIdent $ SimpleSym "false")
-       
+  | MutexLock 
+      rv.tn = @lhs.tn
+      rv.sortexpr = Nothing
+      mutex.mts  = sortEnv @lhs.prenc
+      mutex.tn   = @lhs.tn
+      mutex.val  = fStore @lhs.prenc
+      loc.ts = \(pce, npce) k le -> let fpce = sFn "=" pce @loc.pcev
+                                        mid  = fromJust @mutex.ident
+                                        preds  = encPreds le k @pc.self (fStore @lhs.prenc) Nothing -- $ Just $ Left mid
+                                        f = IdentExpr $ SymIdent $ SimpleSym "false"
+                                        enc = sFn "=" (IdentExpr $ SymIdent $ SimpleSym $ mid ++ show k) f
+                                      --  nenc = IdentExpr $ SymIdent $ SimpleSym $ mid ++ show (k+1)
+                                        iexp = wrap sAnd $ fpce:enc:preds      
+                                     in case npce of
+                                         Nothing -> @lhs.spark k `sAnd` iexp
+                                         Just e  -> let fnpce = if @loc.npcev == [] then error "mutexlock instruction" else sFn "=" e $ head @loc.npcev
+                                                    in  @lhs.spark k `sAnd` iexp `sAnd` fnpce 
+      
+  | MutexUnlock 
+      rv.tn = @lhs.tn
+      rv.sortexpr = Nothing
+      mutex.mts  = sortEnv @lhs.prenc
+      mutex.tn   = @lhs.tn
+      mutex.val  = fStore @lhs.prenc
+      loc.ts = \(pce, npce) k le -> let fpce = sFn "=" pce @loc.pcev
+                                        mid  = fromJust @mutex.ident
+                                        preds  = encPreds le k @pc.self (fStore @lhs.prenc) Nothing -- $ Just $ Left mid
+                                        enc = IdentExpr $ SymIdent $ SimpleSym $ mid ++ show k
+                                     --   nenc = IdentExpr $ SymIdent $ SimpleSym $ mid ++ show (k+1)
+                                        iexp = wrap sAnd $ fpce:enc:preds      
+                                     in case npce of
+                                         Nothing -> @lhs.spark k `sAnd` iexp
+                                         Just e  -> let fnpce = if @loc.npcev == [] then error "mutexunlock instruction" else sFn "=" e $ head @loc.npcev
+                                                    in  @lhs.spark k `sAnd` iexp `sAnd` fnpce 
 -- Next pc semantic
 sem Instruction
-  | Load ICmp UBr Br BitCast Call Unreachable Ret SExt GetElementPtr Store
+  | Load ICmp UBr Br BitCast Call Unreachable Ret SExt GetElementPtr Store Add Sub Or And
+      loc.nmt   = \k -> if @lhs.mutexes == []
+                        then []
+                        else let cmut = @lhs.mutexes !! k
+                             in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
+  | MutexLock 
+      loc.nmt = \k -> if @lhs.mutexes == []
+                      then error "Should not happen"
+                      else let cmut = @lhs.mutexes !! k
+                               xx = IdentExpr $ SymIdent $ SimpleSym $ fromJust @mutex.ident ++ show k
+                           in Prelude.foldr (\(x,y) r -> (maybe [] (\yy -> if x == xx then [yy] else [sFn "=" yy x] ) y) ++ r) [] cmut
+  | MutexUnlock 
+      loc.nmt = \k -> if @lhs.mutexes == []
+                      then error "Should not happen"
+                      else let cmut = @lhs.mutexes !! k
+                               xx = IdentExpr $ SymIdent $ SimpleSym $ fromJust @mutex.ident ++ show k
+                               f = IdentExpr $ SymIdent $ SimpleSym "false"
+                           in Prelude.foldr (\(x,y) r -> (maybe [] (\yy -> if x == xx then [sFn "=" yy f] else [sFn "=" yy x] ) y) ++ r) [] cmut
+  | Load ICmp UBr Br BitCast Call Unreachable Ret SExt GetElementPtr Store Add Sub Or MutexLock MutexUnlock And
       loc.npc  = nextpc @pc.self @lhs.cfg
       loc.npcev = Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) @loc.npc
       loc.pcev  = IdentExpr $ IdxIdent (bv @pc.self) [32]
       loc.pts   = \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup @lhs.tn m
                                  m' = Map.elems $ Map.delete @lhs.tn m
-                             in wrap sAnd $ (@loc.ts p k le):(encOFPC m')
+                             in wrap sAnd $ ((@loc.ts p k le):(@loc.nmt k)) ++ (encOFPC m')
       lhs.ts    = [ @loc.pts ]
 
 attr IntPredicate
@@ -253,12 +330,12 @@ encOFPC es               = [wrap sAnd $ Prelude.map (\(x,y) -> sFn "=" (fromJust
 encPreds :: [(SExpr, Maybe SExpr)] -> Bound -> PC -> Map.Map Id (Type, [PC]) -> Maybe Id -> [SExpr]
 encPreds preds            k pc stores Nothing  = Prelude.foldr (\(s1,ms0) r -> (maybe [] (\m -> [sFn "=" m s1]) ms0) ++ r) [] preds
 encPreds preds            k pc stores (Just x) = case Map.lookup x stores of
-                                                      Nothing -> error "encPreds 1"
-                                                      Just (_,lp) -> let pvsym = IdentExpr $ SymIdent $ SimpleSym $ "p" ++ x ++ show k
-                                                                     in Prelude.foldr (\(s1,ms0) r -> if s1 == pvsym 
-                                                                                                      then let v = IdentExpr $ IdxIdent (bv pc) [32]
-                                                                                                           in maybe [] (\m -> [sFn "=" m v]) ms0 ++ r
-                                                                                                      else maybe [] (\m -> [sFn "=" m s1]) ms0 ++ r) [] preds 
+                                                           Nothing -> error "encPreds 1"
+                                                           Just (_,lp) -> let pvsym = IdentExpr $ SymIdent $ SimpleSym $ "p" ++ x ++ show k
+                                                                          in Prelude.foldr (\(s1,ms0) r -> if s1 == pvsym 
+                                                                                                           then let v = IdentExpr $ IdxIdent (bv pc) [32]
+                                                                                                                in maybe [] (\m -> [sFn "=" m v]) ms0 ++ r
+                                                                                                           else maybe [] (\m -> [sFn "=" m s1]) ms0 ++ r) [] preds 
 
 encFreshGlobal :: Id -> PC -> Map.Map Id (Type, [PC]) -> SExpr
 encFreshGlobal n pc stores = case Map.lookup n stores of
@@ -286,11 +363,15 @@ encodeThreads fs k p l ep cfg = let ks = [0..k-1]
                                 -- preddexpr = Prelude.map (\si -> declfun si $ SymSort "Bool") $ concat predi
                                 -- ffalse = IdentExpr $ SymIdent $ SimpleSym "false"
                                 -- predexpr = wrap sAnd $ Prelude.map (\pr -> sFn "=" (IdentExpr $ SymIdent pr) ffalse ) $ head predi
-
+                                    -- Mutexes
+                                    muti = Prelude.map (\ki -> Prelude.map (\m -> SimpleSym $ m ++ show ki) $ mutexes p) ks -- [[Symbol]]
+                                    mutdexpr = Prelude.map (\si -> declfun si $ SymSort "Bool") $ concat muti
+                                    mutexprs = Prelude.map (Prelude.map (IdentExpr . SymIdent)) muti                        -- [[SExpr]] 
+             
                                     spark = if cpcexpr == [] then error "spark" else encSpark $ zip (Map.elems $ head cpcexpr) (Map.elems ep)
-                                    ts = encTs fs sparkexprs (pcprep cpcexpr) (prep' predexprs) p ep cfg
+                                    ts = encTs fs sparkexprs (pcprep cpcexpr) (prep' predexprs) (prep' mutexprs) p ep cfg
                                     phi = encPhi (Prelude.concatMap Map.elems cpcexpr) $ fails p
-                                in (preddexpr ++ cpcdexp ++ sparkdexpr,  sAnd spark $ sAnd predexpr $ sAnd ts phi)
+                                in (preddexpr ++ mutdexpr ++ cpcdexp ++ sparkdexpr,  sAnd spark $ sAnd predexpr $ sAnd ts phi)
 
 initPred :: [(Id,SExpr)] -> Map.Map Id SExpr -> SExpr
 initPred l m = wrap sAnd $ Prelude.map (\(i,s) -> case Map.lookup i m of
@@ -313,11 +394,11 @@ prep [x]    = [(x, Nothing)]
 prep [x,y]  = (x, Just y):prep [y]
 prep (x:y:xs) = (x, Just y):prep (y:xs)
 
-encTs :: Functions -> [SExpr] -> [Map.Map String (SExpr, Maybe SExpr)] -> [[(SExpr, Maybe SExpr)]] -> PreEncoder -> Map.Map String PC -> Map.Map String CF -> SExpr
-encTs fs sparks cpcs prds p ep cfg = let ts = ts_Syn_Functions $ wrap_Functions (sem_Functions fs) $ Inh_Functions { prenc_Inh_Functions = p, cfg_Inh_Functions = cfg, cte_Inh_Functions = ep }
-                                         rexpr = Prelude.map (\(k,(cpc,prd)) -> Prelude.map (\t -> t cpc k prd) ts) $ zip [0..] $ zip cpcs prds -- [[SExpr]]
-                                         iexpr = foldr (\(s,e) r -> (s `sAnd` wrap sOr e):r) [] $ zip sparks rexpr -- [SExpr]
-                                     in wrap sAnd iexpr
+encTs :: Functions -> [SExpr] -> [Map.Map String (SExpr, Maybe SExpr)] -> [[(SExpr, Maybe SExpr)]] -> [[(SExpr, Maybe SExpr)]] -> PreEncoder -> Map.Map String PC -> Map.Map String CF -> SExpr
+encTs fs sparks cpcs prds muts p ep cfg = let ts = ts_Syn_Functions $ wrap_Functions (sem_Functions fs) $ Inh_Functions { prenc_Inh_Functions = p, cfg_Inh_Functions = cfg, cte_Inh_Functions = ep, mutexes_Inh_Functions = muts }
+                                              rexpr = Prelude.map (\(k,(cpc,prd)) -> Prelude.map (\t -> t cpc k prd) ts) $ zip [0..] $ zip cpcs prds -- [[SExpr]]
+                                              iexpr = foldr (\(s,e) r -> (s `sAnd` wrap sOr e):r) [] $ zip sparks rexpr -- [SExpr]
+                                          in wrap sAnd iexpr
 
 encSpark :: [(SExpr,PC)] -> SExpr
 encSpark m = wrap sAnd $ Prelude.map (\(se,pc) -> sFn "=" se $ IdentExpr $ IdxIdent (bv pc) [32]) m

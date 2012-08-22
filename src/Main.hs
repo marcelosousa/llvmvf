@@ -30,6 +30,8 @@ import Debug.Trace
 -- Options 
 data Options = Parse
              | Mutate
+             | Visualize
+             | Extract
   deriving (Show, Data, Typeable)
 
 instance Default Options where
@@ -44,7 +46,14 @@ runOption bc Parse k = do mdl <- extract bc
                           writeFile (addExtension bf "dot")   (show $ pretty mod)
                           writeFile (addExtension bf "dfg")   (show $ dataflow mod)
                           writeFile (addExtension bf "smt2")  (show $ prettyprint $ encode mod k)
-runOption bc Mutate _ = mutate bc
+runOption bc Mutate    _ = mutate bc
+runOption bc Visualize _ = do mdl <- extract bc
+                              let bf = dropExtension bc
+                                  mod = (model mdl) :: Model PThread
+                              writeFile (addExtension bf "dot") (show $ pretty mod)
+runOption bc Extract   _ = do mdl <- extract bc
+                              let bf = dropExtension bc
+                              writeFile (addExtension bf "llvf") (show $ pretty mdl)
 
 data ProgramOptions = LLVMVF {
     input  :: FilePath

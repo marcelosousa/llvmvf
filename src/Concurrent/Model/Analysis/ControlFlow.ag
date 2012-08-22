@@ -67,7 +67,7 @@ sem BasicBlock
       lhs.cflow = tail @instrs.cflow
 
 sem Instruction
-  | Ret Alloca Load Store ICmp FCmp Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW
+  | Ret Alloca Load Store ICmp FCmp Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW MutexInit MutexLock MutexUnlock
       +cflow = (++) [(@lhs.cpc, @pc.self)]
       lhs.cpc = @pc.self
   | CreateThread 
@@ -132,7 +132,7 @@ sem Instructions
      lhs.entrypc = @hd.entrypc
 
 sem Instruction
-  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW CreateThread Switch
+  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW CreateThread Switch MutexInit MutexLock MutexUnlock
      lhs.entrypc = @pc.self
 
 sem Instruction

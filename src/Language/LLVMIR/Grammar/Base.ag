@@ -251,6 +251,18 @@ data Instruction
   | CreateThread
       pc   :: PC 
       args :: Values
+  | MutexInit
+      pc    :: PC
+      rv    :: Identifier
+      mutex :: Value     
+  | MutexLock
+      pc    :: PC
+      rv    :: Identifier
+      mutex :: Value
+  | MutexUnlock
+      pc    :: PC
+      rv    :: Identifier
+      mutex :: Value
  
 data Identifier 
   | Global name :: Id -- (functions, global variables) begin with the '@'

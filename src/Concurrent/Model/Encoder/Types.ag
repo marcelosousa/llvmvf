@@ -75,9 +75,13 @@ sem Type
   | TyStruct -- Named Types / Anonymous Structs
       loc.sortn = fromMaybe @name @lhs.mn -- Get the name
       lhs.sortn = @loc.sortn
-      loc.tysi  = encTypes @tys.self @lhs.mts  -- Encode types
+      loc.tysi  = case @loc.sortn of
+                       "union.pthread_mutex_t"          -> (@lhs.mts, [], SymSort "Bool") 
+                       "struct.__pthread_mutex_s"       -> (@lhs.mts, [], SymSort "Bool") 
+                       "struct.__pthread_internal_list" -> (@lhs.mts, [], SymSort "Bool") 
+                       n -> encTypes @tys.self @lhs.mts  -- Encode types
       loc.sort  = case @loc.sortn of
-                       "" -> trdu @loc.tysi          -- Anonymous Struct
+                       "" -> trdu @loc.tysi     -- Anonymous Struct
                        n  -> SymSort @loc.sortn -- Named Struct
       lhs.sort  = @loc.sort                    
       lhs.mts   = case @loc.sortn of
