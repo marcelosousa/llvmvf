@@ -352,7 +352,8 @@ encodeThreads fs k p l ep cfg = let ks = [0..k-1]
                                     -- Sparkle
                                     sparki  = Prelude.map (\ki -> Map.foldrWithKey (\s _ l -> (SimpleSym $ s ++ show ki) : l) [] cfg) ks
                                     sparkdexpr = Prelude.map (\si -> declfun si $ SymSort "Bool") $ concat sparki
-                                    sparkexprs = Prelude.map (\l -> wrap (sFn "xor") $ Prelude.map (\si -> IdentExpr $ SymIdent si) l) sparki
+                                    sparkexprs = Prelude.map (\l -> sched $ Prelude.map (\si -> IdentExpr $ SymIdent si) l) sparki
+                                  --  sparkexprs = Prelude.map (\l -> wrap (sFn "xor") $ Prelude.map (\si -> IdentExpr $ SymIdent si) l) sparki
                                     -- Predicates
                                     predi = Prelude.map (\ki -> Map.foldrWithKey (\s _ l -> [SimpleSym $ "p" ++ s ++ show ki] ++ l) [] $ fStore p)  ks -- [[SSymbol]]
                                     preddexpr = Prelude.map (\si -> declfun si $ SymSort "I32") $ concat predi                -- [SExpr]
@@ -372,6 +373,12 @@ encodeThreads fs k p l ep cfg = let ks = [0..k-1]
                                     ts = encTs fs sparkexprs (pcprep cpcexpr) (prep' predexprs) (prep' mutexprs) p ep cfg
                                     phi = encPhi (Prelude.concatMap Map.elems cpcexpr) $ fails p
                                 in (preddexpr ++ mutdexpr ++ cpcdexp ++ sparkdexpr,  sAnd spark $ sAnd predexpr $ sAnd ts phi)
+
+sched :: [SExpr] -> SExpr
+sched ps = wrap sOr $ Prelude.map (\p -> xorT p ps) ps
+
+xorT :: SExpr -> [SExpr] -> SExpr
+xorT x xs = wrap sAnd (x:(Prelude.map (\y -> FnAppExpr (SymIdent $ SimpleSym "not") [ y ]) $ Prelude.filter (/=x) xs))
 
 initPred :: [(Id,SExpr)] -> Map.Map Id SExpr -> SExpr
 initPred l m = wrap sAnd $ Prelude.map (\(i,s) -> case Map.lookup i m of

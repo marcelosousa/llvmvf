@@ -42,6 +42,7 @@ toFunctions ps = let pss = IM.elems ps
 
 -- Program P has a set of threads and a set of shared variables
 -- V  - Global variables (gvars)
+-- add scheduler type
 data Model t = Model { nmdtys :: NamedTypes
                      , gvars  :: Globals
                      , mainf  :: Process
