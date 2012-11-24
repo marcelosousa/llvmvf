@@ -4,7 +4,7 @@
 -- Copyright :  (c) 2012 Marcelo Sousa
 -------------------------------------------------------------------------------
 
-module Concurrent.Model.Encoder (encode) where
+module Concurrent.Model.Encoder (encode,encodeSysC) where
 
 import Concurrent.Model                    hiding (State)
 
@@ -47,12 +47,26 @@ encode m@Model{..} k = let ccfg@ControlFlow{..} = controlflow m
                            (smod, sf) = runState (encModel m k) s0                             
                        in smod --trace (show s0 ++ show sf) $ smod
 
+encodeSysC :: (SCModel t) => Model t -> Int -> SMod
+encodeSysC m@Model{..} k = let ccfg@ControlFlow{..} = controlflow m
+                               tvs = Map.map (\pci -> ThreadState pci Map.empty) $ Map.delete "undefined" cte  -- ^ Set the initial PC for each thread
+                               s0  = GlobalState Map.empty (-1) Map.empty tvs                                  -- ^ Initial state
+                               (smod, sf) = runState (encSysCModel m k) s0                             
+                           in smod --trace (show s0 ++ show sf) $ smod
+
 -- | Main encode function.
 encModel :: (SCModel t) => Model t -> Int -> State GlobalState SMod
 encModel m k = do tyenc <- encNmdTys  m   -- ^ Encode Named Types
                   gvenc <- encGlobals m   -- ^ Encode Global Variables
                   menc  <- encFunctions m k  -- ^ Encode Functions
                   return $ nub $ preamble ++ tyenc ++ gvenc ++ menc ++ final
+
+-- | Main encode function.
+encSysCModel :: (SCModel t) => Model t -> Int -> State GlobalState SMod
+encSysCModel m k = do --tyenc <- encNmdTys  m   -- ^ Encode Named Types
+                      --gvenc <- encGlobals m   -- ^ Encode Global Variables
+                      menc  <- encSCFunctions m k  -- ^ Encode Functions
+                      return $ nub $ preamble ++ menc ++ final
 
 -- | Initial part of an smt module
 preamble :: SExpressions
@@ -108,6 +122,18 @@ encFunctions m@Model{..} k = do gs@GlobalState{..} <- get
                                     (l, pcs, sexprs) = encodeMain    (unProc mainf) p decls
                                     (cpcs, csexprs)  = encodeThreads (toFunctions procs)  k p l (Map.delete "main" cte) $ Map.delete "main" cfg 
                                 return $ s ++ se ++ pcs ++ [ assert $ wrap sAnd sexprs ] ++ cpcs ++ [ assert csexprs ] 
+                                --trace ("----\n" ++ show p ++ "--- ---\n" ++ show l) $ return $ s ++ se ++ pcs ++ [ assert $ wrap sAnd sexprs ] ++ cpcs ++ [ assert csexprs ] 
+
+encSCFunctions :: (SCModel t) => Model t -> Bound -> State GlobalState SExpressions
+encSCFunctions m@Model{..} k = do gs@GlobalState{..} <- get
+                                  let ccfg@ControlFlow {..} = controlflow m 
+                                      fs = toFunctions procs 
+                                      (s,p)  = preEncoder fs defsorts decls
+                                      se = preEncode p
+                                      l = Map.empty
+                                      --(l, pcs, sexprs) = encodeMain    (unProc mainf) p decls
+                                      --(cpcs, csexprs)  = encodeThreads (toFunctions procs)  k p l (Map.delete "main" cte) $ Map.delete "main" cfg 
+                                  trace (show $ fails p) $ return $ s ++ se -- ++ cpcs ++ [ assert csexprs ] 
                                 --trace ("----\n" ++ show p ++ "--- ---\n" ++ show l) $ return $ s ++ se ++ pcs ++ [ assert $ wrap sAnd sexprs ] ++ cpcs ++ [ assert csexprs ] 
 
 preEncode :: PreEncoder -> SExpressions

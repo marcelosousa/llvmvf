@@ -1,0 +1,130 @@
+digraph structs {
+bgcolor=transparent;
+node [shape=Mrecord];
+-1 [label="||", shape=Mdiamond];
+subgraph cluster_undefined {
+style=filled; color=lightblue; 
+label = "function undefined"; }
+subgraph cluster_M1T1 {
+style=filled; color=lightblue;
+subgraph cluster_M1T11 {
+style=filled; color=gray;
+467 [label="467 %tmp = alloca %\"class.sc_coresc_time\" 1 \{\}, align 8"];
+468 [label="468 %tmp1 = getelementptr %\"struct.M1\" 4 \{\}* %this, i64 0, i32 2"];
+469 [label="469 %tmp2 = load i8* %tmp1, align 1"];
+470 [label="470 %tmp3 = icmp eq i8 %tmp2, i8 0"];
+471 [label="471 br i1 %tmp3, label %._crit_edge, label %bb4"];
+ label = "basic block bb"; }
+subgraph cluster_M1T12 {
+style=filled; color=gray;
+472 [label="472 %.pre = getelementptr %\"struct.M1\" 4 \{\}* %this, i64 0, i32 0, i32 0, i32 1"];
+473 [label="473 %.pre1 = getelementptr %\"struct.M1\" 4 \{\}* %this, i64 0, i32 3"];
+474 [label="474 br label %bb9"];
+
+label = "basic block ._crit_edge"; }
+subgraph cluster_M1T13 {
+style=filled; color=gray;
+475 [label="475 %tmp5 = getelementptr %\"struct.M1\" 4 \{\}* %this, i64 0, i32 1"];
+476 [label="476 %tmp6 = getelementptr %\"struct.M1\" 4 \{\}* %this, i64 0, i32 0, i32 0, i32 1"];
+477 [label="477 %tmp7 = load %\"class.sc_coresc_simcontext\" 31 \{\}** %tmp6, align 8"];
+478 [label="478 call sc_corewait(sc_coresc_event const&, sc_coresc_simcontext*)"];
+479 [label="479 %tmp8 = getelementptr %\"struct.M1\" 4 \{\}* %this, i64 0, i32 3"];
+480 [label="480 void store i8 0, i8* %tmp8, align 1"];
+481 [label="481 br label %bb9"];
+ label = "basic block bb4"; }
+subgraph cluster_M1T14 {
+style=filled; color=gray;
+482 [label="482 %.pre-phi2 = phi i8* [ i8* %.pre1, label %._crit_edge ], [ i8* %tmp8, label %bb4 ]"];
+483 [label="483 %.pre-phi = phi %\"class.sc_coresc_simcontext\" 31 \{\}** [ %\"class.sc_coresc_simcontext\" 31 \{\}** %.pre, label %._crit_edge ], [ %\"class.sc_coresc_simcontext\" 31 \{\}** %tmp6, label %bb4 ]"];
+484 [label="484 %tmp10 = bitcast %\"class.sc_coresc_time\" 1 \{\}* %tmp to i8*"];
+485 [label="485 call llvm.lifetime.start"];
+486 [label="486 %tmp11 = load %\"class.sc_coresc_simcontext\" 31 \{\}** %.pre-phi, align 8"];
+487 [label="487 call sc_coresc_timesc_time(double, sc_coresc_time_unit, sc_coresc_simcontext*)"];
+488 [label="488 %tmp12 = load %\"class.sc_coresc_simcontext\" 31 \{\}** %.pre-phi, align 8"];
+489 [label="489 call sc_corewait(sc_coresc_time const&, sc_coresc_simcontext*)"];
+490 [label="490 call llvm.lifetime.end"];
+491 [label="491 void store i8 1, i8* %.pre-phi2, align 1"];
+492 [label="492 ret void"];
+ label = "basic block bb9"; }
+ label = "function M1T1"; }
+subgraph cluster_M1T2 {
+style=filled; color=lightblue;
+subgraph cluster_M1T21 {
+style=filled; color=gray;
+493 [label="493 %tmp = alloca %\"class.sc_coresc_time\" 1 \{\}, align 8"];
+494 [label="494 %tmp1 = getelementptr %\"struct.M1\" 4 \{\}* %this, i64 0, i32 3"];
+495 [label="495 %tmp2 = load i8* %tmp1, align 1"];
+496 [label="496 %tmp3 = icmp eq i8 %tmp2, i8 0"];
+497 [label="497 %.pre = getelementptr %\"struct.M1\" 4 \{\}* %this, i64 0, i32 2"];
+498 [label="498 br i1 %tmp3, label %._crit_edge, label %bb4"];
+ label = "basic block bb"; }
+subgraph cluster_M1T22 {
+style=filled; color=gray;
+499 [label="499 void store i8 0, i8* %.pre, align 1"];
+500 [label="500 %tmp5 = getelementptr %\"struct.M1\" 4 \{\}* %this, i64 0, i32 1"];
+501 [label="501 call sc_coresc_eventnotify"];
+502 [label="502 br label %._crit_edge"];
+ label = "basic block bb4"; }
+subgraph cluster_M1T23 {
+style=filled; color=gray;
+503 [label="503 %tmp6 = bitcast %\"class.sc_coresc_time\" 1 \{\}* %tmp to i8*"];
+504 [label="504 call llvm.lifetime.start"];
+505 [label="505 %tmp7 = getelementptr %\"struct.M1\" 4 \{\}* %this, i64 0, i32 0, i32 0, i32 1"];
+506 [label="506 %tmp8 = load %\"class.sc_coresc_simcontext\" 31 \{\}** %tmp7, align 8"];
+507 [label="507 call sc_coresc_timesc_time(double, sc_coresc_time_unit, sc_coresc_simcontext*)"];
+508 [label="508 %tmp9 = load %\"class.sc_coresc_simcontext\" 31 \{\}** %tmp7, align 8"];
+509 [label="509 call sc_corewait(sc_coresc_time const&, sc_coresc_simcontext*)"];
+510 [label="510 call llvm.lifetime.end"];
+511 [label="511 void store i8 1, i8* %.pre, align 1"];
+512 [label="512 ret void"];
+
+label = "basic block ._crit_edge"; }
+ label = "function M1T2"; }
+-1 -> 467;
+467 -> 468;
+468 -> 469;
+469 -> 470;
+470 -> 471;
+471 -> 472;
+471 -> 475;
+472 -> 473;
+473 -> 474;
+474 -> 482;
+475 -> 476;
+476 -> 477;
+477 -> 478;
+478 -> 479;
+479 -> 480;
+480 -> 481;
+481 -> 482;
+482 -> 483;
+483 -> 484;
+484 -> 485;
+485 -> 486;
+486 -> 487;
+487 -> 488;
+488 -> 489;
+489 -> 490;
+490 -> 491;
+491 -> 492;
+-1 -> 493;
+493 -> 494;
+494 -> 495;
+495 -> 496;
+496 -> 497;
+497 -> 498;
+498 -> 503;
+498 -> 499;
+499 -> 500;
+500 -> 501;
+501 -> 502;
+502 -> 503;
+503 -> 504;
+504 -> 505;
+505 -> 506;
+506 -> 507;
+507 -> 508;
+508 -> 509;
+509 -> 510;
+510 -> 511;
+511 -> 512;}

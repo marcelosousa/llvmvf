@@ -21,6 +21,10 @@ Executable llvmvf
                     , llvm-base
                     , llvm
                     , smtlib        == 1.0
+                    , demangler     == 1.0
     Hs-Source-Dirs:   src/
-    Extensions: 	  TypeOperators, FlexibleInstances, TypeSynonymInstances, DeriveDataTypeable
-    ghc-options:     -O3 -rtsopts 
+    include-dirs: include
+    C-Sources:        cbits/demangler.cpp
+    Extensions:       TypeOperators, FlexibleInstances, TypeSynonymInstances, DeriveDataTypeable
+    ghc-options:      -O3 -rtsopts 
+    extra-libraries: stdc++

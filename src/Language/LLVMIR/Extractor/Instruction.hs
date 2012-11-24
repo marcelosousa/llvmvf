@@ -29,6 +29,8 @@ import Language.LLVMIR.Extractor.Atomic
 
 import Control.Monad.IO.Class (liftIO)
 
+import Util.Demangler
+
 getPHIArgs :: Value -> Context IO [(LL.Value, LL.Value)]
 getPHIArgs ii = do num <- liftIO $ FFI.countIncoming ii
                    oloop ii 0 num
@@ -217,7 +219,9 @@ getOtherOp Call = do ival  <- getInstructionValue
                      ident <- getIdent ival
                      ty    <- typeOf ival 
                      (callee, args) <- getOperands ival >>= getCallArgs
-                     return $ LL.Call pc (LL.Local ident) ty callee args
+                     --liftIO $ print callee
+                     callee' <- liftIO $ demangler callee
+                     return $ LL.Call pc (LL.Local ident) ty callee' args
 getOtherOp Select         = do ival <- getInstructionValue
                                pc   <- getPC
                                ident <- getIdent ival
@@ -241,7 +245,18 @@ getOtherOp ExtractValue   = do ival  <- getInstructionValue
                                            peekArray n args
                                idxs <- forM idxs' (return . fromIntegral)
                                return $ LL.ExtractValue pc (LL.Local ident) (ops!!0) idxs 
-getOtherOp InsertValue    = error $ "TODO insertvalue"
+getOtherOp InsertValue    = do ival <- getInstructionValue
+                               pc <- getPC
+                               ident <- getIdent ival
+                               agr   <- (liftIO $ FFI.getAggregateOperand ival) >>= \i -> getValue (ident, i)
+                               ivalue  <- (liftIO $ FFI.getInsertedValueOperand ival) >>= \i -> getValue (ident, i)
+                               n     <- liftIO $ FFI.insertValueGetNumIndices ival >>= return . fromIntegral
+                               idxs' <- liftIO $ allocaArray n $ \ args -> do
+                                           FFI.insertValueGetIndices ival args
+                                           peekArray n args
+                               idxs <- forM idxs' (return . fromIntegral)
+                               return $ LL.InsertValue pc (LL.Local ident) agr ivalue idxs 
+                                  
 -- exception handling operators
 getOtherOp LandingPad     = error $ "TODO landingpad"
 

@@ -21,17 +21,25 @@ import Language.SMTLib2.Printer    (prettyprint)
 
 import Concurrent.Model
 import Concurrent.Model.PThread
+import Concurrent.Model.SystemC
 import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
-import Concurrent.Model.Encoder    (encode)    
+import Concurrent.Model.Encoder    (encode, encodeSysC)    
 
+import Concurrent.SysCModel
+import Concurrent.SysCModel.CIModelFZ
+
+import Util.Demangler
 import Debug.Trace
+
+-- This module needs re-factoring for elegance.
 
 -- Options 
 data Options = Parse
              | Mutate
              | Visualize
              | Extract
+             | SystemC
   deriving (Show, Data, Typeable)
 
 instance Default Options where
@@ -54,6 +62,15 @@ runOption bc Visualize _ = do mdl <- extract bc
 runOption bc Extract   _ = do mdl <- extract bc
                               let bf = dropExtension bc
                               writeFile (addExtension bf "llvf") (show $ pretty mdl)
+runOption bc SystemC   k = do print "SystemC version"
+                              mdl <- extract bc
+                              let bf = dropExtension bc
+                                  mod = (model mdl) :: Model SystemC
+                              writeFile (addExtension bf "llvf")  (show $ pretty mdl)
+                              writeFile (addExtension bf "model") (show $ mod) 
+                              writeFile (addExtension bf "dot")   (show $ pretty mod)
+--                              writeFile (addExtension bf "rawm")  (show $ mdl)
+--                              writeFile (addExtension bf "smt2")  (show $ prettyprint $ encodeSysC mod k)
 
 data ProgramOptions = LLVMVF {
     input  :: FilePath
@@ -69,8 +86,11 @@ standard = cmdArgsMode $ LLVMVF
            , bound         = (def &= help "bound" &= opt (1 :: Int))
            } &= summary usage
 
+main :: IO ()
 main = do args <- cmdArgsRun standard
           runllvmvf args
+
+--writeFile "m1.dot" (show $ pretty $ fst $ convertToModel m1) 
           
 runllvmvf :: ProgramOptions -> IO ()
 runllvmvf options = do let filename = input options

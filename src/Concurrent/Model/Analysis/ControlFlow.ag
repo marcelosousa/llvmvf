@@ -97,7 +97,9 @@ attr Functions
 
 sem Functions
   | Entry 
-      lhs.bbentrypc = Map.insert @key @val.bbentrypc @tl.bbentrypc
+      lhs.bbentrypc = if @key == "sc_main" 
+                      then @tl.bbentrypc
+                      else Map.insert @key @val.bbentrypc @tl.bbentrypc
 
 attr Function BasicBlocks BasicBlock Instructions Instruction
   syn entrypc :: {Int}
@@ -115,7 +117,7 @@ sem Function
 
 sem BasicBlocks
   | Nil
-      lhs.entrypc = error "'entrypc' of an empty bb list"
+      lhs.entrypc = -1 -- error "'entrypc' of an empty bb list"
   | Cons
       lhs.entrypc = @hd.entrypc
 

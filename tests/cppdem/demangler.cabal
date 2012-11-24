@@ -1,0 +1,29 @@
+name:          demangler 
+version:       1.0
+synopsis:      Demangler for C++.
+description:   Demangler for C++.
+author:        Marcelo Sousa 
+maintainer:    Marcelo Sousa 
+stability:     experimental
+cabal-version: >= 1.6
+build-type:    Simple 
+
+flag developer
+  description: operate in developer mode
+  default: False
+
+library
+  build-depends:
+    base >= 3 && < 5
+
+  ghc-options: -Wall
+
+  if flag(developer)
+    ghc-options: -Werror
+
+  exposed-modules:
+      Util.Demangler 
+
+  include-dirs: include
+  C-Sources:
+    cbits/demangler.cpp

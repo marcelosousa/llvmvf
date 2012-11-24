@@ -10,7 +10,7 @@ import qualified Data.IntMap as IM
 import qualified Data.Map as Map
 
 import Language.LLVMIR
-import Language.LLVMIR.Printer.Module
+import Language.LLVMIR.Printer.Module hiding (emptyFunction)
 
 import Language.SMTLib2.Base
 
@@ -51,6 +51,10 @@ data Model t = Model { nmdtys :: NamedTypes
                      } 
 
 data Process = Process { ident :: String, unProc :: Function }
+
+emptyProcess :: Process
+emptyProcess = Process "undefined" emptyFunction
+
 type Declarations = Map.Map String (Type, Parameters) 
 type Processes = IM.IntMap Process
 
@@ -201,8 +205,6 @@ type Transaction = [TTransition]
 -- Happens-before
 
 
-
--- Printing
 instance Show (Model t) where
   show (Model nmdtys gvars mainf procs decls) = show mainf ++ "\n" ++ show procs ++ "\n" ++ show decls
 
@@ -212,3 +214,14 @@ instance Pretty Function where
 instance Show Process where
   show (Process i f) = show $ pretty f
 
+
+-- Printing
+{-instance Show (Model t) where
+  show (Model nmdtys gvars mainf procs decls) = show mainf ++ "\n" ++ show procs ++ "\n" ++ show decls
+
+instance Pretty Function where
+    pretty f = pp_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function {}
+
+instance Show Process where
+  show (Process i f) = show $ pretty f
+-}

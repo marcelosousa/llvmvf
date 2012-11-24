@@ -1,0 +1,908 @@
+; ModuleID ='codesissso.bc'
+target datalayout = "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128"
+target triple = "x86_64-unknown-linux-gnu"
+
+%"class.sc_core::sc_api_version_2_2_0" 1 {i8}
+%"class.sc_core::sc_attr_base" 2 {( -> i32)**, %"class.std::basic_string" 1 {}}
+%"class.sc_core::sc_attr_cltn" 1 {%"class.sc_core::sc_pvector" 1 {}}
+%"class.sc_core::sc_cor" 0 {}
+%"class.sc_core::sc_cor_pkg" 0 {}
+%"class.sc_core::sc_event" 8 {%"class.sc_core::sc_simcontext" 31 {}*, i32, i32, %"class.sc_core::sc_event_timed" 2 {}*, %"class.std::vector.20" 1 {}, %"class.std::vector.20" 1 {}, %"class.std::vector.25" 1 {}, %"class.std::vector.25" 1 {}}
+%"class.sc_core::sc_event_list" 3 {%"class.std::vector.43" 1 {}, i8, i8}
+%"class.sc_core::sc_event_timed" 2 {%"class.sc_core::sc_event" 8 {}*, %"class.sc_core::sc_time" 1 {}}
+%"class.sc_core::sc_export_base" 1 {%"class.sc_core::sc_object" 5 {}}
+%"class.sc_core::sc_export_registry" 2 {%"class.sc_core::sc_simcontext" 31 {}*, %"class.std::vector.0" 1 {}}
+%"class.sc_core::sc_interface" 1 {( -> i32)**}
+%"class.sc_core::sc_method_process" 0 {}
+%"class.sc_core::sc_module" 11 {%"class.sc_core::sc_object" 5 {}, %"class.sc_core::sc_process_host" 1 {}, %"class.sc_core::sc_sensitive" 3 {}, %"class.sc_core::sc_sensitive_pos" 3 {}, %"class.sc_core::sc_sensitive_neg" 3 {}, i8, %"class.std::vector" 1 {}*, i32, %"class.sc_core::sc_name_gen" 0 {}*, %"class.std::vector.10" 1 {}, %"class.sc_core::sc_module_name" 5 {}*}
+%"class.sc_core::sc_module_name" 5 {i8*, %"class.sc_core::sc_module" 11 {}*, %"class.sc_core::sc_module_name" 5 {}*, %"class.sc_core::sc_simcontext" 31 {}*, i8}
+%"class.sc_core::sc_module_registry" 0 {}
+%"class.sc_core::sc_name_gen" 0 {}
+%"class.sc_core::sc_object" 5 {( -> i32)**, %"class.sc_core::sc_simcontext" 31 {}*, i8*, %"class.sc_core::sc_attr_cltn" 1 {}*, %"class.sc_core::sc_object" 5 {}*}
+%"class.sc_core::sc_object_manager" 0 {}
+%"class.sc_core::sc_port_base" 2 {%"class.sc_core::sc_object" 5 {}, %"struct.sc_core::sc_bind_info" 0 {}*}
+%"class.sc_core::sc_port_registry" 2 {%"class.sc_core::sc_simcontext" 31 {}*, %"class.std::vector" 1 {}}
+%"class.sc_core::sc_ppq" 1 {%"class.sc_core::sc_ppq_base" 4 {}}
+%"class.sc_core::sc_ppq_base" 4 {i8**, i32, i32, (i8*, i8* -> i32)*}
+%"class.sc_core::sc_prim_channel" 3 {%"class.sc_core::sc_object" 5 {}, %"class.sc_core::sc_prim_channel_registry" 3 {}*, %"class.sc_core::sc_prim_channel" 3 {}*}
+%"class.sc_core::sc_prim_channel_registry" 3 {%"class.sc_core::sc_simcontext" 31 {}*, %"class.std::vector.5" 1 {}, %"class.sc_core::sc_prim_channel" 3 {}*}
+%"class.sc_core::sc_process_b" 28 {%"class.sc_core::sc_object" 5 {}, i8*, i32, i32, %"class.std::vector.10" 1 {}, i8, i8, %"class.sc_core::sc_event" 8 {}*, i32, %"class.sc_core::sc_event_list" 3 {}*, %"class.sc_core::sc_process_b" 28 {}*, i8, %"class.sc_core::sc_report" 9 {}*, %"class.sc_core::sc_name_gen" 0 {}*, i32, i32, i8, %"class.sc_core::sc_reset" 2 {}*, %"class.sc_core::sc_process_b" 28 {}*, %"class.sc_core::sc_process_host" 1 {}*, %"" 2 {i64, i64}, %"class.std::vector.43" 1 {}, %"class.sc_core::sc_event" 8 {}*, i32, i8, %"class.sc_core::sc_event" 8 {}*, i32, i8}
+%"class.sc_core::sc_process_handle" 1 {%"class.sc_core::sc_process_b" 28 {}*}
+%"class.sc_core::sc_process_host" 1 {( -> i32)**}
+%"class.sc_core::sc_process_table" 0 {}
+%"class.sc_core::sc_pvector" 1 {%"class.std::vector.35" 1 {}}
+%"class.sc_core::sc_report" 9 {%"class.std::exception" 1 {}, i32, %"struct.sc_core::sc_msg_def" 10 {}*, i8*, i8*, i32, %"class.sc_core::sc_time" 1 {}*, %"class.sc_core::sc_object" 5 {}*, i8*}
+%"class.sc_core::sc_reset" 2 {%"class.sc_core::sc_signal_in_if.48" 1 {}*, %"class.std::vector.49" 1 {}}
+%"class.sc_core::sc_runnable" 0 {}
+%"class.sc_core::sc_sensitive" 3 {%"class.sc_core::sc_module" 11 {}*, i32, %"class.sc_core::sc_process_b" 28 {}*}
+%"class.sc_core::sc_sensitive_neg" 3 {%"class.sc_core::sc_module" 11 {}*, i32, %"class.sc_core::sc_process_b" 28 {}*}
+%"class.sc_core::sc_sensitive_pos" 3 {%"class.sc_core::sc_module" 11 {}*, i32, %"class.sc_core::sc_process_b" 28 {}*}
+%"class.sc_core::sc_signal_in_if.48" 1 {%"class.sc_core::sc_interface" 1 {}}
+%"class.sc_core::sc_simcontext" 31 {%"class.sc_core::sc_object_manager" 0 {}*, %"class.sc_core::sc_module_registry" 0 {}*, %"class.sc_core::sc_port_registry" 2 {}*, %"class.sc_core::sc_export_registry" 2 {}*, %"class.sc_core::sc_prim_channel_registry" 3 {}*, %"class.sc_core::sc_name_gen" 0 {}*, %"class.sc_core::sc_process_table" 0 {}*, %"struct.sc_core::sc_curr_proc_info" 2 {}, %"class.sc_core::sc_object" 5 {}*, i8, i32, %"class.std::vector.10" 1 {}, %"class.std::vector.15" 1 {}, %"class.sc_core::sc_ppq" 1 {}*, %"class.std::vector.30" 1 {}, i8, %"class.sc_core::sc_runnable" 0 {}*, %"struct.sc_core::sc_time_params" 5 {}*, %"class.sc_core::sc_time" 1 {}, i64, i8, i8, i8, i32, i8, i8, i8, i8, %"class.sc_core::sc_event" 8 {}*, %"class.sc_core::sc_cor_pkg" 0 {}*, %"class.sc_core::sc_cor" 0 {}*}
+%"class.sc_core::sc_spawn_options" 0 {}
+%"class.sc_core::sc_thread_process" 0 {}
+%"class.sc_core::sc_time" 1 {i64}
+%"class.sc_core::sc_trace_file" 4 {( -> i32)**, i8, double, i8}
+%"class.std::basic_ios" 8 {%"class.std::ios_base" 12 {}, %"class.std::basic_ostream" 2 {}*, i8, i8, %"class.std::basic_streambuf" 8 {}*, %"class.std::ctype" 10 {}*, %"class.std::num_put" 1 {}*, %"class.std::num_get" 1 {}*}
+%"class.std::basic_ostream" 2 {( -> i32)**, %"class.std::basic_ios" 8 {}}
+%"class.std::basic_streambuf" 8 {( -> i32)**, i8*, i8*, i8*, i8*, i8*, i8*, %"class.std::locale" 1 {}}
+%"class.std::basic_string" 1 {%"struct.std::basic_string<char, std::char_traits<char>, std::allocator<char> >::_Alloc_hider" 1 {}}
+%"class.std::ctype" 10 {%"class.std::locale::facet" 2 {}, %"struct.__locale_struct" 5 {}*, i8, i32*, i32*, i16*, i8, [256 x i8], [256 x i8], i8}
+%"class.std::exception" 1 {( -> i32)**}
+%"class.std::ios_base" 12 {( -> i32)**, i64, i64, i32, i32, i32, %"struct.std::ios_base::_Callback_list" 4 {}*, %"struct.std::ios_base::_Words" 2 {}, [8 x %"struct.std::ios_base::_Words" 2 {}], i32, %"struct.std::ios_base::_Words" 2 {}*, %"class.std::locale" 1 {}}
+%"class.std::ios_base::Init" 1 {i8}
+%"class.std::locale" 1 {%"class.std::locale::_Impl" 5 {}*}
+%"class.std::locale::_Impl" 5 {i32, %"class.std::locale::facet" 2 {}**, i64, %"class.std::locale::facet" 2 {}**, i8**}
+%"class.std::locale::facet" 2 {( -> i32)**, i32}
+%"class.std::num_get" 1 {%"class.std::locale::facet" 2 {}}
+%"class.std::num_put" 1 {%"class.std::locale::facet" 2 {}}
+%"class.std::vector" 1 {%"struct.std::_Vector_base" 1 {}}
+%"class.std::vector.0" 1 {%"struct.std::_Vector_base.1" 1 {}}
+%"class.std::vector.10" 1 {%"struct.std::_Vector_base.11" 1 {}}
+%"class.std::vector.15" 1 {%"struct.std::_Vector_base.16" 1 {}}
+%"class.std::vector.20" 1 {%"struct.std::_Vector_base.21" 1 {}}
+%"class.std::vector.25" 1 {%"struct.std::_Vector_base.26" 1 {}}
+%"class.std::vector.30" 1 {%"struct.std::_Vector_base.31" 1 {}}
+%"class.std::vector.35" 1 {%"struct.std::_Vector_base.36" 1 {}}
+%"class.std::vector.43" 1 {%"struct.std::_Vector_base.44" 1 {}}
+%"class.std::vector.49" 1 {%"struct.std::_Vector_base.50" 1 {}}
+%"class.std::vector.5" 1 {%"struct.std::_Vector_base.6" 1 {}}
+%"struct.M1" 4 {%"class.sc_core::sc_module" 11 {}, %"class.sc_core::sc_event" 8 {}, i8, i8}
+%"struct.__locale_data" 0 {}
+%"struct.__locale_struct" 5 {[13 x %"struct.__locale_data" 0 {}*], i16*, i32*, i32*, [13 x i8*]}
+%"struct.sc_core::sc_bind_info" 0 {}
+%"struct.sc_core::sc_curr_proc_info" 2 {%"class.sc_core::sc_process_b" 28 {}*, i32}
+%"struct.sc_core::sc_msg_def" 10 {i8*, i32, [4 x i32], i32, [4 x i32], i32, i32, [4 x i32], i8*, i32}
+%"struct.sc_core::sc_time_params" 5 {double, i8, i8, i64, i8}
+%"struct.std::_Vector_base" 1 {%"struct.std::_Vector_base<sc_core::sc_port_base *, std::allocator<sc_core::sc_port_base *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base.1" 1 {%"struct.std::_Vector_base<sc_core::sc_export_base *, std::allocator<sc_core::sc_export_base *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base.11" 1 {%"struct.std::_Vector_base<sc_core::sc_object *, std::allocator<sc_core::sc_object *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base.16" 1 {%"struct.std::_Vector_base<sc_core::sc_event *, std::allocator<sc_core::sc_event *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base.21" 1 {%"struct.std::_Vector_base<sc_core::sc_method_process *, std::allocator<sc_core::sc_method_process *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base.26" 1 {%"struct.std::_Vector_base<sc_core::sc_thread_process *, std::allocator<sc_core::sc_thread_process *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base.31" 1 {%"struct.std::_Vector_base<sc_core::sc_trace_file *, std::allocator<sc_core::sc_trace_file *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base.36" 1 {%"struct.std::_Vector_base<sc_core::sc_attr_base *, std::allocator<sc_core::sc_attr_base *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base.44" 1 {%"struct.std::_Vector_base<const sc_core::sc_event *, std::allocator<const sc_core::sc_event *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base.50" 1 {%"struct.std::_Vector_base<sc_core::sc_process_b *, std::allocator<sc_core::sc_process_b *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base.6" 1 {%"struct.std::_Vector_base<sc_core::sc_prim_channel *, std::allocator<sc_core::sc_prim_channel *> >::_Vector_impl" 3 {}}
+%"struct.std::_Vector_base<const sc_core::sc_event *, std::allocator<const sc_core::sc_event *> >::_Vector_impl" 3 {%"class.sc_core::sc_event" 8 {}**, %"class.sc_core::sc_event" 8 {}**, %"class.sc_core::sc_event" 8 {}**}
+%"struct.std::_Vector_base<sc_core::sc_attr_base *, std::allocator<sc_core::sc_attr_base *> >::_Vector_impl" 3 {%"class.sc_core::sc_attr_base" 2 {}**, %"class.sc_core::sc_attr_base" 2 {}**, %"class.sc_core::sc_attr_base" 2 {}**}
+%"struct.std::_Vector_base<sc_core::sc_event *, std::allocator<sc_core::sc_event *> >::_Vector_impl" 3 {%"class.sc_core::sc_event" 8 {}**, %"class.sc_core::sc_event" 8 {}**, %"class.sc_core::sc_event" 8 {}**}
+%"struct.std::_Vector_base<sc_core::sc_export_base *, std::allocator<sc_core::sc_export_base *> >::_Vector_impl" 3 {%"class.sc_core::sc_export_base" 1 {}**, %"class.sc_core::sc_export_base" 1 {}**, %"class.sc_core::sc_export_base" 1 {}**}
+%"struct.std::_Vector_base<sc_core::sc_method_process *, std::allocator<sc_core::sc_method_process *> >::_Vector_impl" 3 {%"class.sc_core::sc_method_process" 0 {}**, %"class.sc_core::sc_method_process" 0 {}**, %"class.sc_core::sc_method_process" 0 {}**}
+%"struct.std::_Vector_base<sc_core::sc_object *, std::allocator<sc_core::sc_object *> >::_Vector_impl" 3 {%"class.sc_core::sc_object" 5 {}**, %"class.sc_core::sc_object" 5 {}**, %"class.sc_core::sc_object" 5 {}**}
+%"struct.std::_Vector_base<sc_core::sc_port_base *, std::allocator<sc_core::sc_port_base *> >::_Vector_impl" 3 {%"class.sc_core::sc_port_base" 2 {}**, %"class.sc_core::sc_port_base" 2 {}**, %"class.sc_core::sc_port_base" 2 {}**}
+%"struct.std::_Vector_base<sc_core::sc_prim_channel *, std::allocator<sc_core::sc_prim_channel *> >::_Vector_impl" 3 {%"class.sc_core::sc_prim_channel" 3 {}**, %"class.sc_core::sc_prim_channel" 3 {}**, %"class.sc_core::sc_prim_channel" 3 {}**}
+%"struct.std::_Vector_base<sc_core::sc_process_b *, std::allocator<sc_core::sc_process_b *> >::_Vector_impl" 3 {%"class.sc_core::sc_process_b" 28 {}**, %"class.sc_core::sc_process_b" 28 {}**, %"class.sc_core::sc_process_b" 28 {}**}
+%"struct.std::_Vector_base<sc_core::sc_thread_process *, std::allocator<sc_core::sc_thread_process *> >::_Vector_impl" 3 {%"class.sc_core::sc_thread_process" 0 {}**, %"class.sc_core::sc_thread_process" 0 {}**, %"class.sc_core::sc_thread_process" 0 {}**}
+%"struct.std::_Vector_base<sc_core::sc_trace_file *, std::allocator<sc_core::sc_trace_file *> >::_Vector_impl" 3 {%"class.sc_core::sc_trace_file" 4 {}**, %"class.sc_core::sc_trace_file" 4 {}**, %"class.sc_core::sc_trace_file" 4 {}**}
+%"struct.std::basic_string<char, std::char_traits<char>, std::allocator<char> >::_Alloc_hider" 1 {i8*}
+%"struct.std::ios_base::_Callback_list" 4 {%"struct.std::ios_base::_Callback_list" 4 {}*, (i32, %"class.std::ios_base" 12 {}*, i32 -> void)*, i32, i32}
+%"struct.std::ios_base::_Words" 2 {i8*, i64}
+
+@_ZStL8__ioinit = internal  constant , %"class.std::ios_base::Init" 1 {} zeroinitializer, align 1
+@__dso_handle = external   , , align 0
+@_ZN7sc_coreL17api_version_checkE = internal  constant , %"class.sc_core::sc_api_version_2_2_0" 1 {} zeroinitializer, align 1
+@_ZTVN10__cxxabiv121__vmi_class_type_infoE = external   , , align 0
+@_ZTVN10__cxxabiv117__class_type_infoE = external   , , align 0
+@.str = private unnamed_addr constant , [3 x i8] c"M1", align 1
+@_ZTVN10__cxxabiv120__si_class_type_infoE = external   , , align 0
+@_ZTSN7sc_core9sc_objectE = available_externally  constant , [21 x i8] c"N7sc_core9sc_objectE", align 0
+@_ZTIN7sc_core9sc_objectE = available_externally unnamed_addr constant , %"" 2 {i8*, i8*} {i8* BitCast getelementptr(i8** @_ZTVN10__cxxabiv117__class_type_infoE, i64 2), getelementptr([21 x i8]* @_ZTSN7sc_core9sc_objectE, i32 0, i32 0)}, align 0
+@_ZTV2M1 = linkonce_odr unnamed_addr constant , [17 x i8*] [i8* null, i8* BitCast %"" 3 {i8*, i8*, i8*}* @_ZTI2M1, i8* BitCast (%"class.sc_core::sc_object" 5 {}*, %"class.std::basic_ostream" 2 {}* -> void)* @_ZNK7sc_core9sc_object5printERSo, i8* BitCast (%"class.sc_core::sc_object" 5 {}*, %"class.std::basic_ostream" 2 {}* -> void)* @_ZNK7sc_core9sc_object4dumpERSo, i8* BitCast (%"class.sc_core::sc_object" 5 {}*, %"class.sc_core::sc_trace_file" 4 {}* -> void)* @_ZNK7sc_core9sc_object5traceEPNS_13sc_trace_fileE, i8* BitCast (%"class.sc_core::sc_module" 11 {}* -> i8*)* @_ZNK7sc_core9sc_module4kindEv, i8* BitCast (%"class.sc_core::sc_module" 11 {}* -> %"class.std::vector.10" 1 {}*)* @_ZNK7sc_core9sc_module17get_child_objectsEv, i8* BitCast (%"struct.M1" 4 {}* -> void)* @_ZN2M1D1Ev, i8* BitCast (%"struct.M1" 4 {}* -> void)* @_ZN2M1D0Ev, i8* BitCast (%"class.sc_core::sc_module" 11 {}* -> void)* @_ZN7sc_core9sc_module25before_end_of_elaborationEv, i8* BitCast (%"class.sc_core::sc_module" 11 {}* -> void)* @_ZN7sc_core9sc_module18end_of_elaborationEv, i8* BitCast (%"class.sc_core::sc_module" 11 {}* -> void)* @_ZN7sc_core9sc_module19start_of_simulationEv, i8* BitCast (%"class.sc_core::sc_module" 11 {}* -> void)* @_ZN7sc_core9sc_module17end_of_simulationEv, i8* IntToPtr i64 -40, i8* BitCast %"" 3 {i8*, i8*, i8*}* @_ZTI2M1, i8* BitCast (%"struct.M1" 4 {}* -> void)* @_ZThn40_N2M1D1Ev, i8* BitCast (%"struct.M1" 4 {}* -> void)* @_ZThn40_N2M1D0Ev], align 0
+@_ZTS2M1 = linkonce_odr  constant , [4 x i8] c"2M1", align 0
+@_ZTSN7sc_core9sc_moduleE = available_externally  constant , [21 x i8] c"N7sc_core9sc_moduleE", align 0
+@_ZTSN7sc_core15sc_process_hostE = linkonce_odr  constant , [28 x i8] c"N7sc_core15sc_process_hostE", align 0
+@_ZTIN7sc_core15sc_process_hostE = linkonce_odr unnamed_addr constant , %"" 2 {i8*, i8*} {i8* BitCast getelementptr(i8** @_ZTVN10__cxxabiv117__class_type_infoE, i64 2), getelementptr([28 x i8]* @_ZTSN7sc_core15sc_process_hostE, i32 0, i32 0)}, align 0
+@_ZTIN7sc_core9sc_moduleE = available_externally unnamed_addr constant , %"" 8 {i8*, i8*, i32, i32, i8*, i64, i8*, i64} {i8* BitCast getelementptr(i8** @_ZTVN10__cxxabiv121__vmi_class_type_infoE, i64 2), getelementptr([21 x i8]* @_ZTSN7sc_core9sc_moduleE, i32 0, i32 0), i32 0, i32 2, i8* BitCast %"" 2 {i8*, i8*}* @_ZTIN7sc_core9sc_objectE, i64 2, i8* BitCast %"" 2 {i8*, i8*}* @_ZTIN7sc_core15sc_process_hostE, i64 10242}, align 0
+@_ZTI2M1 = linkonce_odr unnamed_addr constant , %"" 3 {i8*, i8*, i8*} {i8* BitCast getelementptr(i8** @_ZTVN10__cxxabiv120__si_class_type_infoE, i64 2), getelementptr([4 x i8]* @_ZTS2M1, i32 0, i32 0), i8* BitCast %"" 8 {i8*, i8*, i32, i32, i8*, i64, i8*, i64}* @_ZTIN7sc_core9sc_moduleE}, align 0
+@.str8 = private unnamed_addr constant , [10 x i8] c"sc_module", align 1
+@.str9 = private unnamed_addr constant , [3 x i8] c"T1", align 1
+@.str10 = private unnamed_addr constant , [3 x i8] c"T2", align 1
+@_ZN7sc_core12sc_process_b15m_delete_next_pE = external   , , align 0
+@.str11 = private unnamed_addr constant , [24 x i8] c"m_delete_next_p != this", align 1
+@.str12 = private unnamed_addr constant , [44 x i8] c"/usr/local/include/sysc/kernel/sc_process.h", align 1
+@__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_decrementEv = private unnamed_addr constant , [50 x i8] c"void sc_core::sc_process_b::reference_decrement()", align 1
+@.str13 = private unnamed_addr constant , [20 x i8] c"m_references_n != 0", align 1
+@__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_incrementEv = private unnamed_addr constant , [50 x i8] c"void sc_core::sc_process_b::reference_increment()", align 1
+@_ZN7sc_core18sc_curr_simcontextE = external   , , align 0
+@_ZN7sc_core25sc_default_global_contextE = external   , , align 0
+@llvm.global_ctors = appending  constant , [1 x %"" 2 {i32, ( -> void)*}] [%"" 2 {i32, ( -> void)*} {i32 65535, ( -> void)* @_GLOBAL__I_a}], align 0
+
+define linkonce_odr void @M1::M1(sc_core::sc_module_name, bool, bool)(%"struct.M1" 4 {}* %this, %"class.sc_core::sc_module_name" 5 {}* %name, i1 %x, i1 %y){
+; <label>:bb
+%T1_handle = alloca %"class.sc_core::sc_process_handle" 1 {}, align 8
+%tmp = alloca %"class.sc_core::sc_process_handle" 1 {}, align 8
+%tmp1 = alloca %"class.sc_core::sc_process_handle" 1 {}, align 8
+%tmp2 = alloca %"class.sc_core::sc_process_handle" 1 {}, align 8
+%T2_handle = alloca %"class.sc_core::sc_process_handle" 1 {}, align 8
+%tmp3 = alloca %"class.sc_core::sc_process_handle" 1 {}, align 8
+%tmp4 = alloca %"class.sc_core::sc_process_handle" 1 {}, align 8
+%tmp5 = alloca %"class.sc_core::sc_process_handle" 1 {}, align 8
+%tmp6 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0
+% = call void @sc_core::sc_module::sc_module()(%"class.sc_core::sc_module" 11 {}* %tmp6)
+%tmp7 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0, i32 0, i32 0
+void store ( -> i32)** BitCast getelementptr([17 x i8*]* @_ZTV2M1, i64 0, i64 2), ( -> i32)*** %tmp7, align 8
+%tmp8 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0, i32 1
+%tmp9 = getelementptr %"class.sc_core::sc_process_host" 1 {}* %tmp8, i64 0, i32 0
+void store ( -> i32)** BitCast getelementptr([17 x i8*]* @_ZTV2M1, i64 0, i64 15), ( -> i32)*** %tmp9, align 8
+%tmp10 = load %"class.sc_core::sc_simcontext" 31 {}** @_ZN7sc_core18sc_curr_simcontextE, align 8
+%tmp11 = icmp eq %"class.sc_core::sc_simcontext" 31 {}* %tmp10, %"class.sc_core::sc_simcontext" 31 {}* null
+br i1 %tmp11, label %.noexc, label %bb14
+
+; <label>:.noexc
+%tmp12 = call i8* @operator new(unsigned long)(i64 248)
+%tmp13 = bitcast i8* %tmp12 to %"class.sc_core::sc_simcontext" 31 {}*
+% = call void @sc_core::sc_simcontext::sc_simcontext()(%"class.sc_core::sc_simcontext" 31 {}* %tmp13)
+void store %"class.sc_core::sc_simcontext" 31 {}* %tmp13, %"class.sc_core::sc_simcontext" 31 {}** @_ZN7sc_core25sc_default_global_contextE, align 8
+void store %"class.sc_core::sc_simcontext" 31 {}* %tmp13, %"class.sc_core::sc_simcontext" 31 {}** @_ZN7sc_core18sc_curr_simcontextE, align 8
+br label %bb14
+
+; <label>:bb14
+%tmp15 = phi %"class.sc_core::sc_simcontext" 31 {}* [ %"class.sc_core::sc_simcontext" 31 {}* %tmp13, label %.noexc ], [ %"class.sc_core::sc_simcontext" 31 {}* %tmp10, label %bb ]
+%tmp16 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 1, i32 0
+void store %"class.sc_core::sc_simcontext" 31 {}* %tmp15, %"class.sc_core::sc_simcontext" 31 {}** %tmp16, align 8
+%tmp17 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 1, i32 1
+void store i32 0, i32* %tmp17, align 4
+%tmp18 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 1, i32 2
+void store i32 -1, i32* %tmp18, align 4
+%tmp19 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 1, i32 3
+%tmp20 = bitcast %"class.sc_core::sc_event_timed" 2 {}** %tmp19 to i8*
+% = call void @llvm.memset.p0i8.i64(i8* %tmp20, i8 0, i64 104, i32 8, i1 0)
+%tmp21 = load %"class.sc_core::sc_simcontext" 31 {}** @_ZN7sc_core18sc_curr_simcontextE, align 8
+%tmp22 = icmp eq %"class.sc_core::sc_simcontext" 31 {}* %tmp21, %"class.sc_core::sc_simcontext" 31 {}* null
+br i1 %tmp22, label %.noexc9, label %_ZN7sc_core22sc_get_curr_simcontextEv.exit
+
+; <label>:.noexc9
+%tmp23 = call i8* @operator new(unsigned long)(i64 248)
+%tmp24 = bitcast i8* %tmp23 to %"class.sc_core::sc_simcontext" 31 {}*
+% = call void @sc_core::sc_simcontext::sc_simcontext()(%"class.sc_core::sc_simcontext" 31 {}* %tmp24)
+void store %"class.sc_core::sc_simcontext" 31 {}* %tmp24, %"class.sc_core::sc_simcontext" 31 {}** @_ZN7sc_core25sc_default_global_contextE, align 8
+void store %"class.sc_core::sc_simcontext" 31 {}* %tmp24, %"class.sc_core::sc_simcontext" 31 {}** @_ZN7sc_core18sc_curr_simcontextE, align 8
+br label %_ZN7sc_core22sc_get_curr_simcontextEv.exit
+
+; <label>:_ZN7sc_core22sc_get_curr_simcontextEv.exit
+%tmp25 = phi %"class.sc_core::sc_simcontext" 31 {}* [ %"class.sc_core::sc_simcontext" 31 {}* %tmp24, label %.noexc9 ], [ %"class.sc_core::sc_simcontext" 31 {}* %tmp21, label %bb14 ]
+% = call void @sc_core::sc_simcontext::create_thread_process(char const*, bool, void (sc_core::sc_process_host::*)(), sc_core::sc_process_host*, sc_core::sc_spawn_options const*)(%"class.sc_core::sc_process_handle" 1 {}* %T1_handle, %"class.sc_core::sc_simcontext" 31 {}* %tmp25, getelementptr([3 x i8]* @.str9, i64 0, i64 0), i1 0, i64 PtrToInt (%"struct.M1" 4 {}* -> void)* @_ZN2M12T1Ev, i64 -40, %"class.sc_core::sc_process_host" 1 {}* %tmp8, %"class.sc_core::sc_spawn_options" 0 {}* null)
+%tmp26 = getelementptr %"class.sc_core::sc_process_handle" 1 {}* %T1_handle, i64 0, i32 0
+%tmp27 = load %"class.sc_core::sc_process_b" 28 {}** %tmp26, align 8
+%tmp28 = getelementptr %"class.sc_core::sc_process_handle" 1 {}* %tmp, i64 0, i32 0
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp27, %"class.sc_core::sc_process_b" 28 {}** %tmp28, align 8
+%tmp29 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp27, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp29, label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit, label %bb30
+
+; <label>:bb30
+%tmp31 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp27, i64 0, i32 15
+%tmp32 = load i32* %tmp31, align 4
+%tmp33 = icmp eq i32 %tmp32, i32 0
+br i1 %tmp33, label %bb34, label %_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i
+
+; <label>:bb34
+% = call void @__assert_fail(getelementptr([20 x i8]* @.str13, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 481, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_incrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i
+i32 %tmp35 = add i32 %tmp32, i32 1
+void store i32 %tmp35, i32* %tmp31, align 4
+br label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit
+%tmp36 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0, i32 2
+%tmp37 = call %"class.sc_core::sc_sensitive" 3 {}* @sc_core::sc_sensitive::operator<<(sc_core::sc_process_handle)(%"class.sc_core::sc_sensitive" 3 {}* %tmp36, %"class.sc_core::sc_process_handle" 1 {}* %tmp)
+%tmp38 = load %"class.sc_core::sc_process_b" 28 {}** %tmp28, align 8
+%tmp39 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp38, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp39, label %_ZN7sc_core17sc_process_handleD1Ev.exit, label %bb40
+
+; <label>:bb40
+%tmp41 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp38, i64 0, i32 15
+%tmp42 = load i32* %tmp41, align 4
+i32 %tmp43 = add i32 %tmp42, i32 -1
+void store i32 %tmp43, i32* %tmp41, align 4
+%tmp44 = icmp eq i32 %tmp43, i32 0
+br i1 %tmp44, label %bb45, label %_ZN7sc_core17sc_process_handleD1Ev.exit
+
+; <label>:bb45
+%tmp46 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+%tmp47 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp46, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp47, label %bb52, label %.noexc12
+
+; <label>:.noexc12
+%tmp48 = bitcast %"class.sc_core::sc_process_b" 28 {}* %tmp46 to (%"class.sc_core::sc_process_b" 28 {}* -> void)***
+%tmp49 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)*** %tmp48, align 8
+%tmp50 = getelementptr (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp49, i64 6
+%tmp51 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp50, align 8
+% = call void @tmp51(%"class.sc_core::sc_process_b" 28 {}* %tmp46)
+%.pre.i.i.i = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %bb52
+
+; <label>:bb52
+%tmp53 = phi %"class.sc_core::sc_process_b" 28 {}* [ %"class.sc_core::sc_process_b" 28 {}* null, label %bb45 ], [ %"class.sc_core::sc_process_b" 28 {}* %.pre.i.i.i, label %.noexc12 ]
+%tmp54 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp53, %"class.sc_core::sc_process_b" 28 {}* %tmp38
+br i1 %tmp54, label %bb55, label %bb56
+
+; <label>:bb55
+% = call void @__assert_fail(getelementptr([24 x i8]* @.str11, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 467, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_decrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:bb56
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp38, %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %_ZN7sc_core17sc_process_handleD1Ev.exit
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit
+%tmp57 = load %"class.sc_core::sc_process_b" 28 {}** %tmp26, align 8
+%tmp58 = getelementptr %"class.sc_core::sc_process_handle" 1 {}* %tmp1, i64 0, i32 0
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp57, %"class.sc_core::sc_process_b" 28 {}** %tmp58, align 8
+%tmp59 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp57, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp59, label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit14, label %bb60
+
+; <label>:bb60
+%tmp61 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp57, i64 0, i32 15
+%tmp62 = load i32* %tmp61, align 4
+%tmp63 = icmp eq i32 %tmp62, i32 0
+br i1 %tmp63, label %bb64, label %_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i13
+
+; <label>:bb64
+% = call void @__assert_fail(getelementptr([20 x i8]* @.str13, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 481, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_incrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i13
+i32 %tmp65 = add i32 %tmp62, i32 1
+void store i32 %tmp65, i32* %tmp61, align 4
+br label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit14
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit14
+%tmp66 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0, i32 3
+%tmp67 = call %"class.sc_core::sc_sensitive_pos" 3 {}* @sc_core::sc_sensitive_pos::operator<<(sc_core::sc_process_handle)(%"class.sc_core::sc_sensitive_pos" 3 {}* %tmp66, %"class.sc_core::sc_process_handle" 1 {}* %tmp1)
+%tmp68 = load %"class.sc_core::sc_process_b" 28 {}** %tmp58, align 8
+%tmp69 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp68, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp69, label %_ZN7sc_core17sc_process_handleD1Ev.exit17, label %bb70
+
+; <label>:bb70
+%tmp71 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp68, i64 0, i32 15
+%tmp72 = load i32* %tmp71, align 4
+i32 %tmp73 = add i32 %tmp72, i32 -1
+void store i32 %tmp73, i32* %tmp71, align 4
+%tmp74 = icmp eq i32 %tmp73, i32 0
+br i1 %tmp74, label %bb75, label %_ZN7sc_core17sc_process_handleD1Ev.exit17
+
+; <label>:bb75
+%tmp76 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+%tmp77 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp76, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp77, label %bb82, label %.noexc16
+
+; <label>:.noexc16
+%tmp78 = bitcast %"class.sc_core::sc_process_b" 28 {}* %tmp76 to (%"class.sc_core::sc_process_b" 28 {}* -> void)***
+%tmp79 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)*** %tmp78, align 8
+%tmp80 = getelementptr (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp79, i64 6
+%tmp81 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp80, align 8
+% = call void @tmp81(%"class.sc_core::sc_process_b" 28 {}* %tmp76)
+%.pre.i.i.i15 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %bb82
+
+; <label>:bb82
+%tmp83 = phi %"class.sc_core::sc_process_b" 28 {}* [ %"class.sc_core::sc_process_b" 28 {}* null, label %bb75 ], [ %"class.sc_core::sc_process_b" 28 {}* %.pre.i.i.i15, label %.noexc16 ]
+%tmp84 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp83, %"class.sc_core::sc_process_b" 28 {}* %tmp68
+br i1 %tmp84, label %bb85, label %bb86
+
+; <label>:bb85
+% = call void @__assert_fail(getelementptr([24 x i8]* @.str11, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 467, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_decrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:bb86
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp68, %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %_ZN7sc_core17sc_process_handleD1Ev.exit17
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit17
+%tmp87 = load %"class.sc_core::sc_process_b" 28 {}** %tmp26, align 8
+%tmp88 = getelementptr %"class.sc_core::sc_process_handle" 1 {}* %tmp2, i64 0, i32 0
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp87, %"class.sc_core::sc_process_b" 28 {}** %tmp88, align 8
+%tmp89 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp87, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp89, label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit19, label %bb90
+
+; <label>:bb90
+%tmp91 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp87, i64 0, i32 15
+%tmp92 = load i32* %tmp91, align 4
+%tmp93 = icmp eq i32 %tmp92, i32 0
+br i1 %tmp93, label %bb94, label %_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i18
+
+; <label>:bb94
+% = call void @__assert_fail(getelementptr([20 x i8]* @.str13, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 481, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_incrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i18
+i32 %tmp95 = add i32 %tmp92, i32 1
+void store i32 %tmp95, i32* %tmp91, align 4
+br label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit19
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit19
+%tmp96 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0, i32 4
+%tmp97 = call %"class.sc_core::sc_sensitive_neg" 3 {}* @sc_core::sc_sensitive_neg::operator<<(sc_core::sc_process_handle)(%"class.sc_core::sc_sensitive_neg" 3 {}* %tmp96, %"class.sc_core::sc_process_handle" 1 {}* %tmp2)
+%tmp98 = load %"class.sc_core::sc_process_b" 28 {}** %tmp88, align 8
+%tmp99 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp98, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp99, label %_ZN7sc_core17sc_process_handleD1Ev.exit22, label %bb100
+
+; <label>:bb100
+%tmp101 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp98, i64 0, i32 15
+%tmp102 = load i32* %tmp101, align 4
+i32 %tmp103 = add i32 %tmp102, i32 -1
+void store i32 %tmp103, i32* %tmp101, align 4
+%tmp104 = icmp eq i32 %tmp103, i32 0
+br i1 %tmp104, label %bb105, label %_ZN7sc_core17sc_process_handleD1Ev.exit22
+
+; <label>:bb105
+%tmp106 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+%tmp107 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp106, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp107, label %bb112, label %.noexc21
+
+; <label>:.noexc21
+%tmp108 = bitcast %"class.sc_core::sc_process_b" 28 {}* %tmp106 to (%"class.sc_core::sc_process_b" 28 {}* -> void)***
+%tmp109 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)*** %tmp108, align 8
+%tmp110 = getelementptr (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp109, i64 6
+%tmp111 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp110, align 8
+% = call void @tmp111(%"class.sc_core::sc_process_b" 28 {}* %tmp106)
+%.pre.i.i.i20 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %bb112
+
+; <label>:bb112
+%tmp113 = phi %"class.sc_core::sc_process_b" 28 {}* [ %"class.sc_core::sc_process_b" 28 {}* null, label %bb105 ], [ %"class.sc_core::sc_process_b" 28 {}* %.pre.i.i.i20, label %.noexc21 ]
+%tmp114 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp113, %"class.sc_core::sc_process_b" 28 {}* %tmp98
+br i1 %tmp114, label %bb115, label %bb116
+
+; <label>:bb115
+% = call void @__assert_fail(getelementptr([24 x i8]* @.str11, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 467, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_decrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:bb116
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp98, %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %_ZN7sc_core17sc_process_handleD1Ev.exit22
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit22
+%tmp117 = load %"class.sc_core::sc_process_b" 28 {}** %tmp26, align 8
+%tmp118 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp117, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp118, label %_ZN7sc_core17sc_process_handleD1Ev.exit25, label %bb119
+
+; <label>:bb119
+%tmp120 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp117, i64 0, i32 15
+%tmp121 = load i32* %tmp120, align 4
+i32 %tmp122 = add i32 %tmp121, i32 -1
+void store i32 %tmp122, i32* %tmp120, align 4
+%tmp123 = icmp eq i32 %tmp122, i32 0
+br i1 %tmp123, label %bb124, label %_ZN7sc_core17sc_process_handleD1Ev.exit25
+
+; <label>:bb124
+%tmp125 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+%tmp126 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp125, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp126, label %bb131, label %.noexc24
+
+; <label>:.noexc24
+%tmp127 = bitcast %"class.sc_core::sc_process_b" 28 {}* %tmp125 to (%"class.sc_core::sc_process_b" 28 {}* -> void)***
+%tmp128 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)*** %tmp127, align 8
+%tmp129 = getelementptr (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp128, i64 6
+%tmp130 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp129, align 8
+% = call void @tmp130(%"class.sc_core::sc_process_b" 28 {}* %tmp125)
+%.pre.i.i.i23 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %bb131
+
+; <label>:bb131
+%tmp132 = phi %"class.sc_core::sc_process_b" 28 {}* [ %"class.sc_core::sc_process_b" 28 {}* null, label %bb124 ], [ %"class.sc_core::sc_process_b" 28 {}* %.pre.i.i.i23, label %.noexc24 ]
+%tmp133 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp132, %"class.sc_core::sc_process_b" 28 {}* %tmp117
+br i1 %tmp133, label %bb134, label %bb135
+
+; <label>:bb134
+% = call void @__assert_fail(getelementptr([24 x i8]* @.str11, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 467, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_decrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:bb135
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp117, %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %_ZN7sc_core17sc_process_handleD1Ev.exit25
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit25
+%tmp136 = load %"class.sc_core::sc_simcontext" 31 {}** @_ZN7sc_core18sc_curr_simcontextE, align 8
+%tmp137 = icmp eq %"class.sc_core::sc_simcontext" 31 {}* %tmp136, %"class.sc_core::sc_simcontext" 31 {}* null
+br i1 %tmp137, label %.noexc26, label %_ZN7sc_core22sc_get_curr_simcontextEv.exit29
+
+; <label>:.noexc26
+%tmp138 = call i8* @operator new(unsigned long)(i64 248)
+%tmp139 = bitcast i8* %tmp138 to %"class.sc_core::sc_simcontext" 31 {}*
+% = call void @sc_core::sc_simcontext::sc_simcontext()(%"class.sc_core::sc_simcontext" 31 {}* %tmp139)
+void store %"class.sc_core::sc_simcontext" 31 {}* %tmp139, %"class.sc_core::sc_simcontext" 31 {}** @_ZN7sc_core25sc_default_global_contextE, align 8
+void store %"class.sc_core::sc_simcontext" 31 {}* %tmp139, %"class.sc_core::sc_simcontext" 31 {}** @_ZN7sc_core18sc_curr_simcontextE, align 8
+br label %_ZN7sc_core22sc_get_curr_simcontextEv.exit29
+
+; <label>:_ZN7sc_core22sc_get_curr_simcontextEv.exit29
+%tmp140 = phi %"class.sc_core::sc_simcontext" 31 {}* [ %"class.sc_core::sc_simcontext" 31 {}* %tmp139, label %.noexc26 ], [ %"class.sc_core::sc_simcontext" 31 {}* %tmp136, label %_ZN7sc_core17sc_process_handleD1Ev.exit25 ]
+% = call void @sc_core::sc_simcontext::create_thread_process(char const*, bool, void (sc_core::sc_process_host::*)(), sc_core::sc_process_host*, sc_core::sc_spawn_options const*)(%"class.sc_core::sc_process_handle" 1 {}* %T2_handle, %"class.sc_core::sc_simcontext" 31 {}* %tmp140, getelementptr([3 x i8]* @.str10, i64 0, i64 0), i1 0, i64 PtrToInt (%"struct.M1" 4 {}* -> void)* @_ZN2M12T2Ev, i64 -40, %"class.sc_core::sc_process_host" 1 {}* %tmp8, %"class.sc_core::sc_spawn_options" 0 {}* null)
+%tmp141 = getelementptr %"class.sc_core::sc_process_handle" 1 {}* %T2_handle, i64 0, i32 0
+%tmp142 = load %"class.sc_core::sc_process_b" 28 {}** %tmp141, align 8
+%tmp143 = getelementptr %"class.sc_core::sc_process_handle" 1 {}* %tmp3, i64 0, i32 0
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp142, %"class.sc_core::sc_process_b" 28 {}** %tmp143, align 8
+%tmp144 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp142, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp144, label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit31, label %bb145
+
+; <label>:bb145
+%tmp146 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp142, i64 0, i32 15
+%tmp147 = load i32* %tmp146, align 4
+%tmp148 = icmp eq i32 %tmp147, i32 0
+br i1 %tmp148, label %bb149, label %_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i30
+
+; <label>:bb149
+% = call void @__assert_fail(getelementptr([20 x i8]* @.str13, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 481, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_incrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i30
+i32 %tmp150 = add i32 %tmp147, i32 1
+void store i32 %tmp150, i32* %tmp146, align 4
+br label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit31
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit31
+%tmp151 = call %"class.sc_core::sc_sensitive" 3 {}* @sc_core::sc_sensitive::operator<<(sc_core::sc_process_handle)(%"class.sc_core::sc_sensitive" 3 {}* %tmp36, %"class.sc_core::sc_process_handle" 1 {}* %tmp3)
+%tmp152 = load %"class.sc_core::sc_process_b" 28 {}** %tmp143, align 8
+%tmp153 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp152, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp153, label %_ZN7sc_core17sc_process_handleD1Ev.exit34, label %bb154
+
+; <label>:bb154
+%tmp155 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp152, i64 0, i32 15
+%tmp156 = load i32* %tmp155, align 4
+i32 %tmp157 = add i32 %tmp156, i32 -1
+void store i32 %tmp157, i32* %tmp155, align 4
+%tmp158 = icmp eq i32 %tmp157, i32 0
+br i1 %tmp158, label %bb159, label %_ZN7sc_core17sc_process_handleD1Ev.exit34
+
+; <label>:bb159
+%tmp160 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+%tmp161 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp160, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp161, label %bb166, label %.noexc33
+
+; <label>:.noexc33
+%tmp162 = bitcast %"class.sc_core::sc_process_b" 28 {}* %tmp160 to (%"class.sc_core::sc_process_b" 28 {}* -> void)***
+%tmp163 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)*** %tmp162, align 8
+%tmp164 = getelementptr (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp163, i64 6
+%tmp165 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp164, align 8
+% = call void @tmp165(%"class.sc_core::sc_process_b" 28 {}* %tmp160)
+%.pre.i.i.i32 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %bb166
+
+; <label>:bb166
+%tmp167 = phi %"class.sc_core::sc_process_b" 28 {}* [ %"class.sc_core::sc_process_b" 28 {}* null, label %bb159 ], [ %"class.sc_core::sc_process_b" 28 {}* %.pre.i.i.i32, label %.noexc33 ]
+%tmp168 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp167, %"class.sc_core::sc_process_b" 28 {}* %tmp152
+br i1 %tmp168, label %bb169, label %bb170
+
+; <label>:bb169
+% = call void @__assert_fail(getelementptr([24 x i8]* @.str11, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 467, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_decrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:bb170
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp152, %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %_ZN7sc_core17sc_process_handleD1Ev.exit34
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit34
+%tmp171 = load %"class.sc_core::sc_process_b" 28 {}** %tmp141, align 8
+%tmp172 = getelementptr %"class.sc_core::sc_process_handle" 1 {}* %tmp4, i64 0, i32 0
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp171, %"class.sc_core::sc_process_b" 28 {}** %tmp172, align 8
+%tmp173 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp171, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp173, label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit36, label %bb174
+
+; <label>:bb174
+%tmp175 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp171, i64 0, i32 15
+%tmp176 = load i32* %tmp175, align 4
+%tmp177 = icmp eq i32 %tmp176, i32 0
+br i1 %tmp177, label %bb178, label %_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i35
+
+; <label>:bb178
+% = call void @__assert_fail(getelementptr([20 x i8]* @.str13, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 481, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_incrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i35
+i32 %tmp179 = add i32 %tmp176, i32 1
+void store i32 %tmp179, i32* %tmp175, align 4
+br label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit36
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit36
+%tmp180 = call %"class.sc_core::sc_sensitive_pos" 3 {}* @sc_core::sc_sensitive_pos::operator<<(sc_core::sc_process_handle)(%"class.sc_core::sc_sensitive_pos" 3 {}* %tmp66, %"class.sc_core::sc_process_handle" 1 {}* %tmp4)
+%tmp181 = load %"class.sc_core::sc_process_b" 28 {}** %tmp172, align 8
+%tmp182 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp181, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp182, label %_ZN7sc_core17sc_process_handleD1Ev.exit39, label %bb183
+
+; <label>:bb183
+%tmp184 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp181, i64 0, i32 15
+%tmp185 = load i32* %tmp184, align 4
+i32 %tmp186 = add i32 %tmp185, i32 -1
+void store i32 %tmp186, i32* %tmp184, align 4
+%tmp187 = icmp eq i32 %tmp186, i32 0
+br i1 %tmp187, label %bb188, label %_ZN7sc_core17sc_process_handleD1Ev.exit39
+
+; <label>:bb188
+%tmp189 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+%tmp190 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp189, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp190, label %bb195, label %.noexc38
+
+; <label>:.noexc38
+%tmp191 = bitcast %"class.sc_core::sc_process_b" 28 {}* %tmp189 to (%"class.sc_core::sc_process_b" 28 {}* -> void)***
+%tmp192 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)*** %tmp191, align 8
+%tmp193 = getelementptr (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp192, i64 6
+%tmp194 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp193, align 8
+% = call void @tmp194(%"class.sc_core::sc_process_b" 28 {}* %tmp189)
+%.pre.i.i.i37 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %bb195
+
+; <label>:bb195
+%tmp196 = phi %"class.sc_core::sc_process_b" 28 {}* [ %"class.sc_core::sc_process_b" 28 {}* null, label %bb188 ], [ %"class.sc_core::sc_process_b" 28 {}* %.pre.i.i.i37, label %.noexc38 ]
+%tmp197 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp196, %"class.sc_core::sc_process_b" 28 {}* %tmp181
+br i1 %tmp197, label %bb198, label %bb199
+
+; <label>:bb198
+% = call void @__assert_fail(getelementptr([24 x i8]* @.str11, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 467, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_decrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:bb199
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp181, %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %_ZN7sc_core17sc_process_handleD1Ev.exit39
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit39
+%tmp200 = load %"class.sc_core::sc_process_b" 28 {}** %tmp141, align 8
+%tmp201 = getelementptr %"class.sc_core::sc_process_handle" 1 {}* %tmp5, i64 0, i32 0
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp200, %"class.sc_core::sc_process_b" 28 {}** %tmp201, align 8
+%tmp202 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp200, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp202, label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit41, label %bb203
+
+; <label>:bb203
+%tmp204 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp200, i64 0, i32 15
+%tmp205 = load i32* %tmp204, align 4
+%tmp206 = icmp eq i32 %tmp205, i32 0
+br i1 %tmp206, label %bb207, label %_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i40
+
+; <label>:bb207
+% = call void @__assert_fail(getelementptr([20 x i8]* @.str13, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 481, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_incrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:_ZN7sc_core12sc_process_b19reference_incrementEv.exit.i.i40
+i32 %tmp208 = add i32 %tmp205, i32 1
+void store i32 %tmp208, i32* %tmp204, align 4
+br label %_ZN7sc_core17sc_process_handleC1ERKS0_.exit41
+
+; <label>:_ZN7sc_core17sc_process_handleC1ERKS0_.exit41
+%tmp209 = call %"class.sc_core::sc_sensitive_neg" 3 {}* @sc_core::sc_sensitive_neg::operator<<(sc_core::sc_process_handle)(%"class.sc_core::sc_sensitive_neg" 3 {}* %tmp96, %"class.sc_core::sc_process_handle" 1 {}* %tmp5)
+%tmp210 = load %"class.sc_core::sc_process_b" 28 {}** %tmp201, align 8
+%tmp211 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp210, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp211, label %_ZN7sc_core17sc_process_handleD1Ev.exit44, label %bb212
+
+; <label>:bb212
+%tmp213 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp210, i64 0, i32 15
+%tmp214 = load i32* %tmp213, align 4
+i32 %tmp215 = add i32 %tmp214, i32 -1
+void store i32 %tmp215, i32* %tmp213, align 4
+%tmp216 = icmp eq i32 %tmp215, i32 0
+br i1 %tmp216, label %bb217, label %_ZN7sc_core17sc_process_handleD1Ev.exit44
+
+; <label>:bb217
+%tmp218 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+%tmp219 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp218, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp219, label %bb224, label %.noexc43
+
+; <label>:.noexc43
+%tmp220 = bitcast %"class.sc_core::sc_process_b" 28 {}* %tmp218 to (%"class.sc_core::sc_process_b" 28 {}* -> void)***
+%tmp221 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)*** %tmp220, align 8
+%tmp222 = getelementptr (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp221, i64 6
+%tmp223 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp222, align 8
+% = call void @tmp223(%"class.sc_core::sc_process_b" 28 {}* %tmp218)
+%.pre.i.i.i42 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %bb224
+
+; <label>:bb224
+%tmp225 = phi %"class.sc_core::sc_process_b" 28 {}* [ %"class.sc_core::sc_process_b" 28 {}* null, label %bb217 ], [ %"class.sc_core::sc_process_b" 28 {}* %.pre.i.i.i42, label %.noexc43 ]
+%tmp226 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp225, %"class.sc_core::sc_process_b" 28 {}* %tmp210
+br i1 %tmp226, label %bb227, label %bb228
+
+; <label>:bb227
+% = call void @__assert_fail(getelementptr([24 x i8]* @.str11, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 467, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_decrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:bb228
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp210, %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %_ZN7sc_core17sc_process_handleD1Ev.exit44
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit44
+%tmp229 = load %"class.sc_core::sc_process_b" 28 {}** %tmp141, align 8
+%tmp230 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp229, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp230, label %_ZN7sc_core17sc_process_handleD1Ev.exit47, label %bb231
+
+; <label>:bb231
+%tmp232 = getelementptr %"class.sc_core::sc_process_b" 28 {}* %tmp229, i64 0, i32 15
+%tmp233 = load i32* %tmp232, align 4
+i32 %tmp234 = add i32 %tmp233, i32 -1
+void store i32 %tmp234, i32* %tmp232, align 4
+%tmp235 = icmp eq i32 %tmp234, i32 0
+br i1 %tmp235, label %bb236, label %_ZN7sc_core17sc_process_handleD1Ev.exit47
+
+; <label>:bb236
+%tmp237 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+%tmp238 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp237, %"class.sc_core::sc_process_b" 28 {}* null
+br i1 %tmp238, label %bb243, label %.noexc46
+
+; <label>:.noexc46
+%tmp239 = bitcast %"class.sc_core::sc_process_b" 28 {}* %tmp237 to (%"class.sc_core::sc_process_b" 28 {}* -> void)***
+%tmp240 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)*** %tmp239, align 8
+%tmp241 = getelementptr (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp240, i64 6
+%tmp242 = load (%"class.sc_core::sc_process_b" 28 {}* -> void)** %tmp241, align 8
+% = call void @tmp242(%"class.sc_core::sc_process_b" 28 {}* %tmp237)
+%.pre.i.i.i45 = load %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %bb243
+
+; <label>:bb243
+%tmp244 = phi %"class.sc_core::sc_process_b" 28 {}* [ %"class.sc_core::sc_process_b" 28 {}* null, label %bb236 ], [ %"class.sc_core::sc_process_b" 28 {}* %.pre.i.i.i45, label %.noexc46 ]
+%tmp245 = icmp eq %"class.sc_core::sc_process_b" 28 {}* %tmp244, %"class.sc_core::sc_process_b" 28 {}* %tmp229
+br i1 %tmp245, label %bb246, label %bb247
+
+; <label>:bb246
+% = call void @__assert_fail(getelementptr([24 x i8]* @.str11, i64 0, i64 0), getelementptr([44 x i8]* @.str12, i64 0, i64 0), i32 467, getelementptr([50 x i8]* @__PRETTY_FUNCTION__._ZN7sc_core12sc_process_b19reference_decrementEv, i64 0, i64 0))
+unreachable
+
+; <label>:bb247
+void store %"class.sc_core::sc_process_b" 28 {}* %tmp229, %"class.sc_core::sc_process_b" 28 {}** @_ZN7sc_core12sc_process_b15m_delete_next_pE, align 8
+br label %_ZN7sc_core17sc_process_handleD1Ev.exit47
+
+; <label>:_ZN7sc_core17sc_process_handleD1Ev.exit47
+%tmp248 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 2
+%tmp249 = zext i1 %x to i8
+void store i8 %tmp249, i8* %tmp248, align 1
+%tmp250 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 3
+%tmp251 = zext i1 %y to i8
+void store i8 %tmp251, i8* %tmp250, align 1
+ret void
+
+
+}
+define linkonce_odr void @M1::T1()(%"struct.M1" 4 {}* %this){
+; <label>:bb
+%tmp = alloca %"class.sc_core::sc_time" 1 {}, align 8
+%tmp1 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 2
+%tmp2 = load i8* %tmp1, align 1
+%tmp3 = icmp eq i8 %tmp2, i8 0
+br i1 %tmp3, label %._crit_edge, label %bb4
+
+; <label>:._crit_edge
+%.pre = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0, i32 0, i32 1
+%.pre1 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 3
+br label %bb9
+
+; <label>:bb4
+%tmp5 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 1
+%tmp6 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0, i32 0, i32 1
+%tmp7 = load %"class.sc_core::sc_simcontext" 31 {}** %tmp6, align 8
+% = call void @sc_core::wait(sc_core::sc_event const&, sc_core::sc_simcontext*)(%"class.sc_core::sc_event" 8 {}* %tmp5, %"class.sc_core::sc_simcontext" 31 {}* %tmp7)
+%tmp8 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 3
+void store i8 0, i8* %tmp8, align 1
+br label %bb9
+
+; <label>:bb9
+%.pre-phi2 = phi i8* [ i8* %.pre1, label %._crit_edge ], [ i8* %tmp8, label %bb4 ]
+%.pre-phi = phi %"class.sc_core::sc_simcontext" 31 {}** [ %"class.sc_core::sc_simcontext" 31 {}** %.pre, label %._crit_edge ], [ %"class.sc_core::sc_simcontext" 31 {}** %tmp6, label %bb4 ]
+%tmp10 = bitcast %"class.sc_core::sc_time" 1 {}* %tmp to i8*
+% = call void @llvm.lifetime.start(i64 -1, i8* %tmp10)
+%tmp11 = load %"class.sc_core::sc_simcontext" 31 {}** %.pre-phi, align 8
+% = call void @sc_core::sc_time::sc_time(double, sc_core::sc_time_unit, sc_core::sc_simcontext*)(%"class.sc_core::sc_time" 1 {}* %tmp, double 10.0, i32 2, %"class.sc_core::sc_simcontext" 31 {}* %tmp11)
+%tmp12 = load %"class.sc_core::sc_simcontext" 31 {}** %.pre-phi, align 8
+% = call void @sc_core::wait(sc_core::sc_time const&, sc_core::sc_simcontext*)(%"class.sc_core::sc_time" 1 {}* %tmp, %"class.sc_core::sc_simcontext" 31 {}* %tmp12)
+% = call void @llvm.lifetime.end(i64 -1, i8* %tmp10)
+void store i8 1, i8* %.pre-phi2, align 1
+ret void
+
+
+}
+define linkonce_odr void @M1::T2()(%"struct.M1" 4 {}* %this){
+; <label>:bb
+%tmp = alloca %"class.sc_core::sc_time" 1 {}, align 8
+%tmp1 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 3
+%tmp2 = load i8* %tmp1, align 1
+%tmp3 = icmp eq i8 %tmp2, i8 0
+%.pre = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 2
+br i1 %tmp3, label %._crit_edge, label %bb4
+
+; <label>:bb4
+void store i8 0, i8* %.pre, align 1
+%tmp5 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 1
+% = call void @sc_core::sc_event::notify()(%"class.sc_core::sc_event" 8 {}* %tmp5)
+br label %._crit_edge
+
+; <label>:._crit_edge
+%tmp6 = bitcast %"class.sc_core::sc_time" 1 {}* %tmp to i8*
+% = call void @llvm.lifetime.start(i64 -1, i8* %tmp6)
+%tmp7 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0, i32 0, i32 1
+%tmp8 = load %"class.sc_core::sc_simcontext" 31 {}** %tmp7, align 8
+% = call void @sc_core::sc_time::sc_time(double, sc_core::sc_time_unit, sc_core::sc_simcontext*)(%"class.sc_core::sc_time" 1 {}* %tmp, double 10.0, i32 2, %"class.sc_core::sc_simcontext" 31 {}* %tmp8)
+%tmp9 = load %"class.sc_core::sc_simcontext" 31 {}** %tmp7, align 8
+% = call void @sc_core::wait(sc_core::sc_time const&, sc_core::sc_simcontext*)(%"class.sc_core::sc_time" 1 {}* %tmp, %"class.sc_core::sc_simcontext" 31 {}* %tmp9)
+% = call void @llvm.lifetime.end(i64 -1, i8* %tmp6)
+void store i8 1, i8* %.pre, align 1
+ret void
+
+
+}
+define linkonce_odr void @M1::~M1()(%"struct.M1" 4 {}* %this){
+; <label>:_ZN2M1D2Ev.exit.i
+%tmp = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0, i32 0, i32 0
+void store ( -> i32)** BitCast getelementptr([17 x i8*]* @_ZTV2M1, i64 0, i64 2), ( -> i32)*** %tmp, align 8
+%tmp1 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0, i32 1, i32 0
+void store ( -> i32)** BitCast getelementptr([17 x i8*]* @_ZTV2M1, i64 0, i64 15), ( -> i32)*** %tmp1, align 8
+%tmp2 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 1
+% = call void @sc_core::sc_event::~sc_event()(%"class.sc_core::sc_event" 8 {}* %tmp2)
+%tmp3 = getelementptr %"struct.M1" 4 {}* %this, i64 0, i32 0
+% = call void @sc_core::sc_module::~sc_module()(%"class.sc_core::sc_module" 11 {}* %tmp3)
+%tmp4 = bitcast %"struct.M1" 4 {}* %this to i8*
+% = call void @operator delete(void*)(i8* %tmp4)
+ret void
+
+
+}
+declare external void @__assert_fail(i8*, i8*, i32, i8*)
+declare external i32 @__cxa_atexit((i8* -> void)*, i8*, i8*)
+declare external i32 @__gxx_personality_v0()
+declare external i32 @atoi(i8*)
+define internal void @global constructors keyed to a(){
+; <label>:bb
+% = call void @std::ios_base::Init::Init()(%"class.std::ios_base::Init" 1 {}* @_ZStL8__ioinit)
+%tmp = call i32 @__cxa_atexit((i8* -> void)* BitCast (%"class.std::ios_base::Init" 1 {}* -> void)* @_ZNSt8ios_base4InitD1Ev, getelementptr(%"class.std::ios_base::Init" 1 {}* @_ZStL8__ioinit, i64 0, i32 0), i8* @__dso_handle)
+% = call void @sc_core::sc_api_version_2_2_0::sc_api_version_2_2_0()(%"class.sc_core::sc_api_version_2_2_0" 1 {}* @_ZN7sc_coreL17api_version_checkE)
+ret void
+
+
+}
+define linkonce_odr void @non-virtual thunk to M1::~M1()(%"struct.M1" 4 {}* %this){
+; <label>:_ZN2M1D2Ev.exit.i.i
+%tmp = getelementptr %"struct.M1" 4 {}* %this, i64 -1, i32 1, i32 6, i32 0, i32 0, i32 2
+void store %"class.sc_core::sc_thread_process" 0 {}** BitCast getelementptr([17 x i8*]* @_ZTV2M1, i64 0, i64 2), %"class.sc_core::sc_thread_process" 0 {}*** %tmp, align 8
+%tmp1 = getelementptr %"class.sc_core::sc_thread_process" 0 {}*** %tmp, i64 5
+void store %"class.sc_core::sc_thread_process" 0 {}** BitCast getelementptr([17 x i8*]* @_ZTV2M1, i64 0, i64 15), %"class.sc_core::sc_thread_process" 0 {}*** %tmp1, align 8
+%tmp2 = getelementptr %"class.sc_core::sc_thread_process" 0 {}*** %tmp, i64 23
+%tmp3 = bitcast %"class.sc_core::sc_thread_process" 0 {}*** %tmp2 to %"class.sc_core::sc_event" 8 {}*
+% = call void @sc_core::sc_event::~sc_event()(%"class.sc_core::sc_event" 8 {}* %tmp3)
+%tmp4 = bitcast %"class.sc_core::sc_thread_process" 0 {}*** %tmp to %"class.sc_core::sc_module" 11 {}*
+% = call void @sc_core::sc_module::~sc_module()(%"class.sc_core::sc_module" 11 {}* %tmp4)
+%tmp5 = bitcast %"class.sc_core::sc_thread_process" 0 {}*** %tmp to i8*
+% = call void @operator delete(void*)(i8* %tmp5)
+ret void
+
+
+}
+declare external void @operator delete(void*)(i8*)
+declare external i8* @operator new(unsigned long)(i64)
+declare external void @sc_core::sc_api_version_2_2_0::sc_api_version_2_2_0()(%"class.sc_core::sc_api_version_2_2_0" 1 {}*)
+declare external void @sc_core::sc_event::cancel()(%"class.sc_core::sc_event" 8 {}*)
+declare external void @sc_core::sc_event::notify()(%"class.sc_core::sc_event" 8 {}*)
+define linkonce_odr void @sc_core::sc_event::~sc_event()(%"class.sc_core::sc_event" 8 {}* %this){
+; <label>:bb
+% = call void @sc_core::sc_event::cancel()(%"class.sc_core::sc_event" 8 {}* %this)
+%tmp = getelementptr %"class.sc_core::sc_event" 8 {}* %this, i64 0, i32 7, i32 0, i32 0, i32 0
+%tmp1 = load %"class.sc_core::sc_thread_process" 0 {}*** %tmp, align 8
+%tmp2 = icmp eq %"class.sc_core::sc_thread_process" 0 {}** %tmp1, %"class.sc_core::sc_thread_process" 0 {}** null
+br i1 %tmp2, label %_ZNSt6vectorIPN7sc_core17sc_thread_processESaIS2_EED1Ev.exit, label %bb3
+
+; <label>:bb3
+%tmp4 = bitcast %"class.sc_core::sc_thread_process" 0 {}** %tmp1 to i8*
+% = call void @operator delete(void*)(i8* %tmp4)
+br label %_ZNSt6vectorIPN7sc_core17sc_thread_processESaIS2_EED1Ev.exit
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_thread_processESaIS2_EED1Ev.exit
+%tmp5 = getelementptr %"class.sc_core::sc_event" 8 {}* %this, i64 0, i32 6, i32 0, i32 0, i32 0
+%tmp6 = load %"class.sc_core::sc_thread_process" 0 {}*** %tmp5, align 8
+%tmp7 = icmp eq %"class.sc_core::sc_thread_process" 0 {}** %tmp6, %"class.sc_core::sc_thread_process" 0 {}** null
+br i1 %tmp7, label %_ZNSt6vectorIPN7sc_core17sc_thread_processESaIS2_EED1Ev.exit4, label %bb8
+
+; <label>:bb8
+%tmp9 = bitcast %"class.sc_core::sc_thread_process" 0 {}** %tmp6 to i8*
+% = call void @operator delete(void*)(i8* %tmp9)
+br label %_ZNSt6vectorIPN7sc_core17sc_thread_processESaIS2_EED1Ev.exit4
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_thread_processESaIS2_EED1Ev.exit4
+%tmp10 = getelementptr %"class.sc_core::sc_event" 8 {}* %this, i64 0, i32 5, i32 0, i32 0, i32 0
+%tmp11 = load %"class.sc_core::sc_method_process" 0 {}*** %tmp10, align 8
+%tmp12 = icmp eq %"class.sc_core::sc_method_process" 0 {}** %tmp11, %"class.sc_core::sc_method_process" 0 {}** null
+br i1 %tmp12, label %_ZNSt6vectorIPN7sc_core17sc_method_processESaIS2_EED1Ev.exit, label %bb13
+
+; <label>:bb13
+%tmp14 = bitcast %"class.sc_core::sc_method_process" 0 {}** %tmp11 to i8*
+% = call void @operator delete(void*)(i8* %tmp14)
+br label %_ZNSt6vectorIPN7sc_core17sc_method_processESaIS2_EED1Ev.exit
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_method_processESaIS2_EED1Ev.exit
+%tmp15 = getelementptr %"class.sc_core::sc_event" 8 {}* %this, i64 0, i32 4, i32 0, i32 0, i32 0
+%tmp16 = load %"class.sc_core::sc_method_process" 0 {}*** %tmp15, align 8
+%tmp17 = icmp eq %"class.sc_core::sc_method_process" 0 {}** %tmp16, %"class.sc_core::sc_method_process" 0 {}** null
+br i1 %tmp17, label %_ZNSt6vectorIPN7sc_core17sc_method_processESaIS2_EED1Ev.exit5, label %bb18
+
+; <label>:bb18
+%tmp19 = bitcast %"class.sc_core::sc_method_process" 0 {}** %tmp16 to i8*
+% = call void @operator delete(void*)(i8* %tmp19)
+br label %_ZNSt6vectorIPN7sc_core17sc_method_processESaIS2_EED1Ev.exit5
+
+; <label>:_ZNSt6vectorIPN7sc_core17sc_method_processESaIS2_EED1Ev.exit5
+ret void
+
+
+}
+declare external void @sc_core::sc_module::before_end_of_elaboration()(%"class.sc_core::sc_module" 11 {}*)
+declare external void @sc_core::sc_module::end_of_elaboration()(%"class.sc_core::sc_module" 11 {}*)
+declare external void @sc_core::sc_module::end_of_simulation()(%"class.sc_core::sc_module" 11 {}*)
+declare external %"class.std::vector.10" 1 {}* @sc_core::sc_module::get_child_objects() const(%"class.sc_core::sc_module" 11 {}*)
+define linkonce_odr i8* @sc_core::sc_module::kind() const(%"class.sc_core::sc_module" 11 {}* %this){
+; <label>:bb
+ret getelementptr([10 x i8]* @.str8, i64 0, i64 0)
+
+
+}
+declare external void @sc_core::sc_module::sc_module()(%"class.sc_core::sc_module" 11 {}*)
+declare external void @sc_core::sc_module::start_of_simulation()(%"class.sc_core::sc_module" 11 {}*)
+declare external void @sc_core::sc_module::~sc_module()(%"class.sc_core::sc_module" 11 {}*)
+declare external void @sc_core::sc_module_name::sc_module_name(char const*)(%"class.sc_core::sc_module_name" 5 {}*, i8*)
+declare external void @sc_core::sc_module_name::~sc_module_name()(%"class.sc_core::sc_module_name" 5 {}*)
+declare external void @sc_core::sc_object::dump(std::ostream&) const(%"class.sc_core::sc_object" 5 {}*, %"class.std::basic_ostream" 2 {}*)
+declare external void @sc_core::sc_object::print(std::ostream&) const(%"class.sc_core::sc_object" 5 {}*, %"class.std::basic_ostream" 2 {}*)
+declare external void @sc_core::sc_object::trace(sc_core::sc_trace_file*) const(%"class.sc_core::sc_object" 5 {}*, %"class.sc_core::sc_trace_file" 4 {}*)
+declare external %"class.sc_core::sc_sensitive" 3 {}* @sc_core::sc_sensitive::operator<<(sc_core::sc_process_handle)(%"class.sc_core::sc_sensitive" 3 {}*, %"class.sc_core::sc_process_handle" 1 {}*)
+declare external %"class.sc_core::sc_sensitive_neg" 3 {}* @sc_core::sc_sensitive_neg::operator<<(sc_core::sc_process_handle)(%"class.sc_core::sc_sensitive_neg" 3 {}*, %"class.sc_core::sc_process_handle" 1 {}*)
+declare external %"class.sc_core::sc_sensitive_pos" 3 {}* @sc_core::sc_sensitive_pos::operator<<(sc_core::sc_process_handle)(%"class.sc_core::sc_sensitive_pos" 3 {}*, %"class.sc_core::sc_process_handle" 1 {}*)
+declare external void @sc_core::sc_simcontext::create_thread_process(char const*, bool, void (sc_core::sc_process_host::*)(), sc_core::sc_process_host*, sc_core::sc_spawn_options const*)(%"class.sc_core::sc_process_handle" 1 {}*, %"class.sc_core::sc_simcontext" 31 {}*, i8*, i1, i64, i64, %"class.sc_core::sc_process_host" 1 {}*, %"class.sc_core::sc_spawn_options" 0 {}*)
+declare external void @sc_core::sc_simcontext::sc_simcontext()(%"class.sc_core::sc_simcontext" 31 {}*)
+declare external void @sc_core::sc_start()()
+declare external void @sc_core::sc_time::sc_time(double, sc_core::sc_time_unit, sc_core::sc_simcontext*)(%"class.sc_core::sc_time" 1 {}*, double, i32, %"class.sc_core::sc_simcontext" 31 {}*)
+declare external void @sc_core::wait(sc_core::sc_event const&, sc_core::sc_simcontext*)(%"class.sc_core::sc_event" 8 {}*, %"class.sc_core::sc_simcontext" 31 {}*)
+declare external void @sc_core::wait(sc_core::sc_time const&, sc_core::sc_simcontext*)(%"class.sc_core::sc_time" 1 {}*, %"class.sc_core::sc_simcontext" 31 {}*)
+define external i32 @sc_main(i32 %argc, i8** %argv){
+; <label>:bb
+%tmp = icmp eq i32 %argc, i32 3
+br i1 %tmp, label %_ZN2M1C1EN7sc_core14sc_module_nameEbb.exit, label %bb14
+
+; <label>:_ZN2M1C1EN7sc_core14sc_module_nameEbb.exit
+%M1 = alloca %"struct.M1" 4 {}, align 8
+%tmp1 = alloca %"class.sc_core::sc_module_name" 5 {}, align 8
+%tmp2 = getelementptr i8** %argv, i64 1
+%tmp3 = load i8** %tmp2, align 8
+%tmp4 = call i32 @atoi(i8* %tmp3)
+%tmp5 = icmp ne i32 %tmp4, i32 0
+%tmp6 = getelementptr i8** %argv, i64 2
+%tmp7 = load i8** %tmp6, align 8
+%tmp8 = call i32 @atoi(i8* %tmp7)
+%tmp9 = icmp ne i32 %tmp8, i32 0
+% = call void @sc_core::sc_module_name::sc_module_name(char const*)(%"class.sc_core::sc_module_name" 5 {}* %tmp1, getelementptr([3 x i8]* @.str, i64 0, i64 0))
+% = call void @M1::M1(sc_core::sc_module_name, bool, bool)(%"struct.M1" 4 {}* %M1, undef, i1 %tmp5, i1 %tmp9)
+% = call void @sc_core::sc_module_name::~sc_module_name()(%"class.sc_core::sc_module_name" 5 {}* %tmp1)
+% = call void @sc_core::sc_start()()
+%tmp10 = getelementptr %"struct.M1" 4 {}* %M1, i64 0, i32 0, i32 0, i32 0
+void store ( -> i32)** BitCast getelementptr([17 x i8*]* @_ZTV2M1, i64 0, i64 2), ( -> i32)*** %tmp10, align 8
+%tmp11 = getelementptr %"struct.M1" 4 {}* %M1, i64 0, i32 0, i32 1, i32 0
+void store ( -> i32)** BitCast getelementptr([17 x i8*]* @_ZTV2M1, i64 0, i64 15), ( -> i32)*** %tmp11, align 8
+%tmp12 = getelementptr %"struct.M1" 4 {}* %M1, i64 0, i32 1
+% = call void @sc_core::sc_event::~sc_event()(%"class.sc_core::sc_event" 8 {}* %tmp12)
+%tmp13 = getelementptr %"struct.M1" 4 {}* %M1, i64 0, i32 0
+% = call void @sc_core::sc_module::~sc_module()(%"class.sc_core::sc_module" 11 {}* %tmp13)
+br label %bb14
+
+; <label>:bb14
+%.0 = phi i32 [ i32 0, label %_ZN2M1C1EN7sc_core14sc_module_nameEbb.exit ], [ i32 -1, label %bb ]
+ret i32 %.0
+
+
+}
+declare external void @std::ios_base::Init::Init()(%"class.std::ios_base::Init" 1 {}*)
+declare external void @std::ios_base::Init::~Init()(%"class.std::ios_base::Init" 1 {}*)
+declare external void @std::terminate()()

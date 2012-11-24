@@ -142,6 +142,11 @@ data Function
 --          paramattr  :: MAttributes
 --          optAlign   :: MAlign          
 --          gcName     :: MGCName
+
+{
+emptyFunction :: Function
+emptyFunction = FunctionDef "undefined" ExternalLinkage TyVoid [] []
+}
           
 data BasicBlock
       | BasicBlock 
@@ -241,6 +246,12 @@ data Instruction
       id   :: Identifier
       aggr :: Value
       idxs :: Ints
+  | InsertValue
+      pc   :: PC
+      id   :: Identifier
+      aggr :: Value
+      ival  :: Value
+      idxs :: Ints
   | AtomicRMW
       pc :: PC
       id :: Identifier
@@ -263,6 +274,15 @@ data Instruction
       pc    :: PC
       rv    :: Identifier
       mutex :: Value
+  | WaitEvent
+      pc    :: PC
+      event :: Int
+  | NotifyEvent
+      pc    :: PC
+      event :: Int
+  | WaitTime
+      pc    :: PC
+      time  :: Value
  
 data Identifier 
   | Global name :: Id -- (functions, global variables) begin with the '@'

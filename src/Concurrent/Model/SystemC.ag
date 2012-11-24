@@ -25,58 +25,57 @@ import Language.LLVMIR
 import UU.PPrint
 
 import Debug.Trace (trace)
+
+import Util.Demangler
+import System.IO.Unsafe
+import Concurrent.SysCModel
 }
 
 attr Module 
-  syn pmdl :: {Model SystemC}
+  syn smdl :: {Model SystemC}
 
 sem Module
-  | Module lhs.pmdl  = Model @nmdtys.self @gvars.self @funs.mainf @funs.pmdl @funs.decls
-           funs.mfun = @funs.self
-           funs.counter = 1
+  | Module lhs.smdl  = Model @nmdtys.self @gvars.self emptyProcess (toIM @funs.smdl) @funs.decls
+--           funs.mfun = @funs.self
+--           funs.counter = 1
 
 attr Functions
-  syn mainf :: {Process}
-  
-attr Functions Function BasicBlocks BasicBlock Instructions Instruction
-  syn pmdl  use {`IM.union`} {IM.empty} :: {IM.IntMap Process}
+  syn scmain :: {Process}
+  syn smdl use {++} {[]} :: {[Process]}
+
+{
+toIM :: [Process] -> IM.IntMap Process
+toIM l = IM.fromList $ zip [0..length l] l
+}
+ 
+attr Functions Function 
   syn decls use {`Map.union`} {Map.empty} :: {Map.Map String (Type,Parameters)}
-  inh mfun      :: {Map.Map String Function}
-  chn counter   :: {ThreadLabel}
+--  inh mfun      :: {Map.Map String Function}
+--  chn counter   :: {ThreadLabel}
   
 attr Function BasicBlocks BasicBlock Instructions Instruction Value Identifier Constant ConstantFP Linkage CConv Visibility DefinitionTy Argument Align GCName FunAttr Attribute Section TargetData Target Parameter IntPredicate RealPredicate GlobalValue ConstantDataSequential ConstantExpr RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering Type Types Parameters TyFloatPoint Label Arguments Values Id IntTyValIdL IntTyValId PValues MIdentifier PValue Ints PC 
   syn annotated :: self 
 
 sem Functions
-  | Nil   lhs.pmdl = IM.empty
-          lhs.mainf = error "No Main Function"
-  | Entry lhs.pmdl = if @key == "main"
-                     then @val.pmdl 
-                     else @tl.pmdl
-          lhs.mainf = if @key == "main"
-                      then (Process @key @val.annotated)
-                      else @tl.mainf
+  | Nil   lhs.scmain = error "No SC_Main Function"
+  | Entry lhs.scmain = if @key == "sc_main"
+                       then Process @key @val.annotated
+                       else @tl.scmain
+          lhs.smdl   = trace @key $ if @key == "Initiator::thread_process()" -- || @key == "M1::T2()"
+                       then (Process @key @val.annotated):(@tl.smdl) 
+                       else @tl.smdl
 
 sem Function
-  | FunctionDef  lhs.pmdl = @body.pmdl
-                 lhs.decls = Map.singleton @name.self (@retty.self, @params.self)
-  | FunctionDecl lhs.pmdl = IM.empty 
-                    +decls = Map.union (Map.singleton @name.self (@retty.self, @params.self))
-
-sem BasicBlock
-  | BasicBlock lhs.pmdl = @instrs.pmdl
+  | FunctionDef  +decls = Map.union (Map.singleton @name.self (@retty.self, @params.self))
+  | FunctionDecl +decls = Map.union (Map.singleton @name.self (@retty.self, @params.self))
 
 sem Instruction
   | Call 
-    +pmdl = IM.union (snd @loc.proc)
     lhs.annotated = case @callee.self of
-                         "pthread_create"       -> CreateThread @pc.self @args.self
-                         "pthread_mutex_init"   -> MutexInit    @pc.self @mres.self (@args.self !! 0)
-                         "pthread_mutex_lock"   -> MutexLock    @pc.self @mres.self (@args.self !! 0)
-                         "pthread_mutex_unlock" -> MutexUnlock  @pc.self @mres.self (@args.self !! 0)
+                         "sc_core::wait(sc_core::sc_event const&, sc_core::sc_simcontext*)" -> WaitEvent @pc.self 0
+                         "sc_core::sc_event::notify()" -> NotifyEvent @pc.self 0
+                         "sc_core::wait(sc_core::sc_time const&, sc_core::sc_simcontext*)"  -> WaitTime  @pc.self (@args.self !! 0)
                          x                      -> Call         @pc.self @mres.self @ty.self @callee.self @args.self   
-    loc.proc = buildProcess @loc.counter @callee.self @args.self @lhs.mfun
-    loc.counter :: uniqueref counter
 
 {
 type ThreadLabel = Int
@@ -108,4 +107,20 @@ instance SCModel SystemC where
   model mdl = smdl_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
 
 instance Pretty SystemC
+
+convertSysC :: SysModel -> [(Model SystemC, MVars)]
+convertSysC (SysC l) = Prelude.map convertToModel l
+
+convertToModel :: ScMod -> (Model SystemC, MVars)
+convertToModel (ScMod i vars prcs) = let smdl = Model Map.empty [] emptyProcess (toProcesses prcs) Map.empty
+                                     in (smdl, vars) 
+
+toProcesses :: MProcs -> Processes
+toProcesses (Procs p) = IM.map toProcess p 
+
+toProcess :: ScProc -> Process
+toProcess (ScMethod i f) = Process i f
+toProcess (ScThread i f) = Process i f
+
+
 }

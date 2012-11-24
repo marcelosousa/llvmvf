@@ -34,6 +34,8 @@ import Language.LLVMIR.Extractor.Linkage
 import Language.LLVMIR.Extractor.Value
 import Language.LLVMIR.Extractor.Context
 
+import Util.Demangler
+
 import Foreign.C.String
 import Foreign.C.Types
 
@@ -139,15 +141,17 @@ getFuns = do e@Env{..} <- getEnv
 getFunction :: (String, Value) -> Context IO (String, LL.Function)
 getFunction (fname, fval) = do b    <- liftIO $ FFI.isDeclaration fval
                                rty  <- (liftIO $ FFI.getFunctionReturnType fval) >>= getType
-                               link <- liftIO $ FFI.getLinkage fval
+                               link <- liftIO $ FFI.getLinkage fval 
+                              -- liftIO$ print fname
+                               fname' <- liftIO $ demangler fname
                                pars <- liftIO $ getParams fval
                                params <- forM pars getParam
                                let lllink = convertLinkage $ FFI.toLinkage link
                                if cInt2Bool b
-                               then return (fname, LL.FunctionDecl fname lllink rty params)
+                               then return (fname', LL.FunctionDecl fname' lllink rty params)
                                else do bbs <- liftIO $ getBasicBlocks fval
                                        llbbs <- forM bbs getBasicBlock 
-                                       return (fname, LL.FunctionDef fname lllink rty params llbbs)
+                                       return (fname', LL.FunctionDef fname' lllink rty params llbbs)
 
 getParam :: (String, Value) -> Context IO LL.Parameter
 getParam (pname, pval) = do ty <- typeOf pval

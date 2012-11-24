@@ -68,6 +68,12 @@ sem Instruction
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_lock")
   | MutexUnlock 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_unlock")
+  | WaitEvent
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "wait_event")
+  | WaitTime
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "wait_time")
+  | NotifyEvent 
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "notify_event")
   | Call
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "call" <+> text @callee)
 {
