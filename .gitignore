@@ -1,0 +1,27 @@
+# Compiled Object files
+*.o
+*.hi
+
+# Ag generated file
+src/Language/LLVMIR.hs
+src/Language/LLVMIR/Printer/Module.hs
+src/Concurrent/Model/Encoder/Model.hs
+src/Concurrent/Model/PThread.hs
+src/Concurrent/Model/Analysis/DataFlow.hs
+src/ConCurrent/Model/Visualizer.hs
+src/Concurrent/Model/Analysis/ControlFlow.hs
+
+# LLVM Byte-code 
+*.bc
+*.ll
+*.zip
+
+# Garbage
+*.DS_STORE
+*.swp
+tests/demangler
+
+# Log files
+*.log
+
+dist/*

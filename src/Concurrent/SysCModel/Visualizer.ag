@@ -1,0 +1,106 @@
+optpragmas {
+{-#LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
+}
+
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.SysCModel.Visualizer
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.SysCModel.Visualizer}{}{}
+
+include "Module.ag"
+
+imports{
+import qualified Data.Map as Map
+import qualified Data.IntMap as IM
+import Data.Maybe 
+
+import UU.PPrint as P
+import Concurrent.SysCModel
+import Concurrent.Model.Analysis.ControlFlow (ControlFlow(..))
+import Language.LLVMIR
+}
+
+attr Functions Function BasicBlocks BasicBlock
+  chn ilabel :: {ILabel}
+
+attr Function BasicBlocks BasicBlock Instructions Instruction
+  syn ppccfg use {<$>} {P.empty} :: {Doc}
+
+sem BasicBlocks BasicBlock
+  inh fname :: {String}
+
+sem Functions
+  | Entry
+      val.ilabel = @lhs.ilabel
+
+sem Function
+  | FunctionDecl lhs.ppccfg = P.empty
+  | FunctionDef
+      lhs.ppccfg = text "subgraph cluster_" <> text @name.self <+> text "{" </>
+                   text "style=filled;" </>
+                   text "color=lightblue;" </>
+                   @body.ppccfg </>
+                   text "label = \"function" <+> text @name.self <> text "\"; }"
+      loc.ilabel :: uniqueref ilabel
+      body.fname = @name.self
+
+sem BasicBlock
+  | BasicBlock
+      lhs.ppccfg = text "subgraph cluster_" <> text @lhs.fname <> int @ilabel <+> text "{" </>
+                   text "style=filled;" </>
+                   text "color=gray;" </>
+                   @instrs.ppccfg </>
+                   text "label = \"basic block" <+> text @label.self <> text "\"; }"
+      loc.ilabel :: uniqueref ilabel
+
+sem Instruction
+  | Ret Alloca Load Store ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW 
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
+  | CreateThread
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "create_thread")
+  | MutexInit 
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_init")
+  | MutexLock 
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_lock")
+  | MutexUnlock 
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_unlock")
+  | Call
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "call" <+> text @callee)
+{
+type ILabel = Int
+
+nextUnique :: Int -> (Int, Int)
+nextUnique u = (u+1, u)
+
+dotLabel :: Int -> Doc -> Doc
+dotLabel i d = text "[label=\"" <> int i <+> d <> text "\"];"
+
+instance (Pretty t, SCModel t) => Pretty (Model t)  where
+  --pretty :: Model -> Doc
+  pretty mdl = text "digraph structs {" </>
+               text "bgcolor=transparent;" </>
+               text "node [shape=Mrecord];" </>
+               text "-1 [label=\"||\", shape=Mdiamond];" </>
+               pretty (mainf mdl) </>
+               vsep (Prelude.map pretty (IM.elems $ procs mdl)) </>
+               pretty' (controlflow mdl) </>
+               text "}"
+
+instance Pretty Process where
+  --pretty :: Process -> Doc
+  pretty (Process i f) = ppccfg_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function { ilabel_Inh_Function = 0 }
+
+class Pretty' t where
+  pretty' :: t -> Doc
+
+instance Pretty' ControlFlow where
+  pretty' (ControlFlow _ cfg) = vsep $ Prelude.map pretty' $ concat $ Map.elems cfg
+
+instance Pretty' (Int,Int) where
+  pretty' (a,b) = int a <+> text "->" <+> int b <> char ';'
+ 
+}
