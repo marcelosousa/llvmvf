@@ -14,6 +14,10 @@ import System.FilePath
 import Language.LLVMIR             (Module)
 import Language.LLVMIR.Extractor   (extract)
 import Language.LLVMIR.Printer
+
+import Text.Blaze.Html.Renderer.String as P
+import Language.LLVMIR.Printer.NamedTypes 
+
 import qualified Language.LTL.Base as LTL
 import Mutation.Core               (mutate)
 import UU.PPrint 
@@ -69,6 +73,7 @@ runOption bc SystemC   k = do print "SystemC version"
                               writeFile (addExtension bf "llvf")  (show $ pretty mdl)
                               writeFile (addExtension bf "model") (show $ mod) 
                               writeFile (addExtension bf "dot")   (show $ pretty mod)
+                              writeFile "index.html" $ P.renderHtml (index $ nmdtys mod)
 --                              writeFile (addExtension bf "rawm")  (show $ mdl)
 --                              writeFile (addExtension bf "smt2")  (show $ prettyprint $ encodeSysC mod k)
 

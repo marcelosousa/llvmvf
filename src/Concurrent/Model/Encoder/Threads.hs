@@ -31,7 +31,7 @@ import Prelude              hiding (sequence)
 import Data.Char            (chr)
 import qualified Data.Map as Data.Map
 import qualified Data.Map as Map
-import Data.Map hiding (foldr)
+import Data.Map
 {-# LINE 36 "src/Concurrent/Model/Encoder/Threads.hs" #-}
 
 {-# LINE 11 "src/Concurrent/Model/Encoder/Global.ag" #-}

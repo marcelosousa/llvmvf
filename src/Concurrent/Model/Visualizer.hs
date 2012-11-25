@@ -28,7 +28,7 @@ import Prelude              hiding (sequence)
 import Data.Char            (chr)
 import qualified Data.Map as Data.Map
 import qualified Data.Map as Map
-import Data.Map hiding (foldr)
+import Data.Map
 {-# LINE 33 "src/Concurrent/Model/Visualizer.hs" #-}
 {-# LINE 5 "src/Concurrent/Model/Visualizer.ag" #-}
 
