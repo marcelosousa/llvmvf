@@ -1,4 +1,4 @@
-CXX=/home/marcelosousa/Tools/clang/bin/clang++
+CXX=/Users/mabs/Tools/clang+llvm-3.1-x86_64-apple-darwin11/bin
 CXXFLAGS=-c
 CXXOFLAGS=-O3 -emit-llvm
 SOURCES=$(wildcard *.cpp)

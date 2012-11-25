@@ -26,4 +26,4 @@ convertLinkage FFI.GhostLinkage                    = LL.GhostLinkage
 convertLinkage FFI.CommonLinkage                   = LL.CommonLinkage
 convertLinkage FFI.LinkerPrivateLinkage            = LL.LinkerPrivateLinkage
 convertLinkage FFI.LinkerPrivateWeakLinkage        = LL.LinkerPrivateWeakLinkage
-convertLinkage FFI.LinkerPrivateWeakDefAutoLinkage = LL.LinkerPrivateWeakDefAutoLinkage
+--convertLinkage FFI.LinkerPrivateWeakDefAutoLinkage = LL.LinkerPrivateWeakDefAutoLinkage

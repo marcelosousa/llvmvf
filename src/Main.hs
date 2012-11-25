@@ -89,14 +89,12 @@ standard = cmdArgsMode $ LLVMVF
 main :: IO ()
 main = do args <- cmdArgsRun standard
           runllvmvf args
-
---writeFile "m1.dot" (show $ pretty $ fst $ convertToModel m1) 
           
 runllvmvf :: ProgramOptions -> IO ()
 runllvmvf options = do let filename = input options
                            option   = typeoutput options
                            k        = bound options
                        runOption filename option k
-                    
+
 usage :: String
 usage = unlines ["LLVM Verification Framework"]

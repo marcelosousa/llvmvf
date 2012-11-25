@@ -9,8 +9,8 @@ module Concurrent.Model where
 import qualified Data.IntMap as IM
 import qualified Data.Map as Map
 
-import Language.LLVMIR
-import Language.LLVMIR.Printer.Module hiding (emptyFunction)
+import Language.LLVMIR hiding (emptyFunction)
+import Language.LLVMIR.Printer.Module
 
 import Language.SMTLib2.Base
 
