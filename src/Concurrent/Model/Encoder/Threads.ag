@@ -21,6 +21,7 @@ include "Identifier.ag"
 
 imports 
 {
+import Prelude hiding (foldr)
 import Language.SMTLib2.Base
 import Language.SMTLib2.Builder
 

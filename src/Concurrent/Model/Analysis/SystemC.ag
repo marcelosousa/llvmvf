@@ -1,0 +1,11 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Analysis.SystemC
+-- Copyright :  (c) 2012 Marcelo Sousa
+-- SystemC Analysis AG
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Analysis.SystemC}{}{}
+
+include "Architecture.ag"

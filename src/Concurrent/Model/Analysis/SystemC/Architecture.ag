@@ -1,0 +1,123 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Analysis.SystemC.Architecture
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Analysis.SystemC.Architecture}{}{}
+
+include "Base.ag"
+include "Type.ag"
+
+imports 
+{
+import qualified Data.Map as Map
+import qualified Data.IntMap as IM
+import Data.Maybe 
+
+import Concurrent.Model
+import Language.LLVMIR
+import UU.PPrint
+
+import Debug.Trace (trace)
+}
+
+-- SC_Main Analysis
+attr Module 
+  syn arch :: {SysCArch}
+
+sem Module
+  | Module lhs.arch  = SysCArch @funs.syscmods @funs.sysccomm
+
+attr Functions Function BasicBlocks BasicBlock Instructions Instruction Value Identifier Constant ConstantFP Linkage CConv Visibility DefinitionTy Argument Align GCName FunAttr Attribute Section TargetData Target Parameter IntPredicate RealPredicate GlobalValue ConstantDataSequential ConstantExpr RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering Type Types Parameters TyFloatPoint Label Arguments Values Id IntTyValIdL IntTyValId PValues MIdentifier PValue Ints PC
+  syn syscmods use {++} {[]} :: {SysCMods}
+  syn sysccomm use {++} {[]} :: {SysCComm}
+  
+sem Function
+  | FunctionDef lhs.syscmods = if @name.self == "sc_main"
+                               then @body.syscmods
+                               else []
+                lhs.sysccomm = if @name.self == "sc_main"
+							   then @body.sysccomm
+							   else []
+  | FunctionDef retty.alloca = False
+                retty.ident = Nothing
+  | FunctionDecl retty.alloca = False
+                 retty.ident = Nothing
+
+sem Global
+  | GlobalVar ty.alloca = False
+              ty.ident = Nothing
+
+sem Instruction
+  | Alloca ty.ident = Just $ getIdName @id.self
+           ty.alloca = True
+  | * - Alloca - AtomicRMW - Br - CreateThread - ExtractValue - InsertValue - Load - MutexInit - MutexLock - MutexUnlock - NotifyEvent - Ret - Select - Switch - UBr - Unreachable - WaitEvent - WaitTime 
+           ty.alloca = False
+           ty.ident = Nothing
+
+sem Parameter
+  | Parameter ty.ident = Nothing
+              ty.alloca = False
+
+sem Value
+  | Id ty.ident = Just $ getIdName @v.self
+       ty.alloca = False
+
+attr Type 
+  inh ident :: {Maybe String}
+  inh alloca :: {Bool}
+
+sem Type
+  | TyStruct lhs.sysccomm = if @lhs.alloca 
+                            then case @name of
+                             "class.sc_core::sc_signal.73" -> trace "Type" $ [SysCSignal $ fromJust @lhs.ident]
+                             _ -> []
+                            else []
+
+sem Constant
+  | * - BlockAddr - ConstantDataSequential - ConstantExpr - ConstantFP - ConstantVector - GlobalValue - UndefValue 
+        ty.alloca = False
+        ty.ident  = Nothing
+
+sem CompareConstantExpr ConstantDataSequential CompareConstantExpr ConstantFP GlobalValue
+  | * ty.alloca = False
+      ty.ident = Nothing
+
+sem ConstantExpr
+  | UnaryConstantExpr 
+      ty.alloca = False
+      ty.ident = Nothing
+
+sem Types
+  | Cons
+      hd.alloca = False
+      hd.ident = Nothing
+
+sem PTyInt IntTyValId
+  | Tuple
+      x1.alloca = False
+      x1.ident = Nothing
+
+sem NamedTypes
+  | Entry
+      val.alloca = False
+      val.ident = Nothing
+
+{
+getIdName :: Identifier -> String
+getIdName (Global n) = n
+getIdName (Local  n) = n
+
+data SysCArch = SysCArch SysCMods SysCComm
+  deriving Show
+
+type SysCMods = [SysCMod]
+type SysCComm = [SysCCommElem]
+
+data SysCMod = SysCMod String
+  deriving Show
+data SysCCommElem = SysCSignal String
+  deriving Show
+}

@@ -15,3 +15,5 @@ instance Pretty Module where
 instance Pretty DataLayout where
     pretty d = pp_Syn_DataLayout $ wrap_DataLayout (sem_DataLayout d) $ Inh_DataLayout {}
 
+instance Pretty Type where
+	pretty ty = pp_Syn_Type $ wrap_Type (sem_Type ty) $ Inh_Type {}
