@@ -12,9 +12,11 @@ include "Type.ag"
 
 imports 
 {
-import qualified Data.Map as Map
+import qualified Data.Map as Map hiding (split)
 import qualified Data.IntMap as IM
 import Data.Maybe 
+import Data.List
+import qualified Data.Text as T (pack, unpack, split)
 
 import Concurrent.Model
 import Language.LLVMIR
@@ -25,15 +27,27 @@ import Debug.Trace (trace)
 
 -- SC_Main Analysis
 attr Module 
-  syn arch :: {SysCArch}
+  syn arch :: {SCArch}
 
 sem Module
-  | Module lhs.arch  = SysCArch @funs.syscmods @funs.sysccomm
+  | Module lhs.arch  = SCArch @funs.syscmods @funs.sysccomm
+           funs.globals = @gvars.self
+           funs.namedtys = @nmdtys.self
 
 attr Functions Function BasicBlocks BasicBlock Instructions Instruction Value Identifier Constant ConstantFP Linkage CConv Visibility DefinitionTy Argument Align GCName FunAttr Attribute Section TargetData Target Parameter IntPredicate RealPredicate GlobalValue ConstantDataSequential ConstantExpr RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering Type Types Parameters TyFloatPoint Label Arguments Values Id IntTyValIdL IntTyValId PValues MIdentifier PValue Ints PC
-  syn syscmods use {++} {[]} :: {SysCMods}
-  syn sysccomm use {++} {[]} :: {SysCComm}
+  syn syscmods use {++} {[]} :: {SCMods}
+  syn sysccomm use {++} {[]} :: {SCComm}
   
+attr Functions Function BasicBlocks BasicBlock Instructions Instruction
+  inh globals :: {Globals}
+  inh namedtys :: {NamedTypes}
+
+attr Function BasicBlocks BasicBlock Instructions Instruction
+  chn modnames :: {Map Id Id}
+
+sem Functions
+  | Entry val.modnames = Map.empty
+
 sem Function
   | FunctionDef lhs.syscmods = if @name.self == "sc_main"
                                then @body.syscmods
@@ -56,6 +70,24 @@ sem Instruction
   | * - Alloca - AtomicRMW - Br - CreateThread - ExtractValue - InsertValue - Load - MutexInit - MutexLock - MutexUnlock - NotifyEvent - Ret - Select - Switch - UBr - Unreachable - WaitEvent - WaitTime 
            ty.alloca = False
            ty.ident = Nothing
+  | Call lhs.modnames = case @callee.self of
+                             "sc_core::sc_module_name::sc_module_name(char const*)" -> let reg = trace (show @args.self) $ fromJust $ getRegName $ @args.self !! 0
+                                                                                           varModNm = getVarModName $ @args.self !! 1
+                                                                                       in case find (globalIdEq varModNm) @lhs.globals of
+                                                                                             Just g -> Map.singleton reg $ getModNm g
+                                                                                             Nothing -> error "retrieving module instance name"
+                             _ -> Map.empty
+         lhs.syscmods = if isInfixOf "(sc_core::sc_module_name)" @callee.self
+                        then let scmod = getModName $ @args.self !! 0
+                                 reg = getRegName $ @args.self !! 1
+                                 nm = case reg of
+                                       Nothing -> fromMaybe (error $ "undef " ++ show @lhs.modnames) $ Map.lookup "agg.tmp" @lhs.modnames
+                                       Just s  -> fromMaybe (error $ "no " ++ s ++ " in map") $ Map.lookup s @lhs.modnames 
+                             in case Map.lookup scmod @lhs.namedtys of
+                                  Just t -> let mnm = T.split (=='.') $ T.pack scmod
+                                            in [SCMod (T.unpack $ mnm !! 1) (getConstrName @callee.self) nm (getStructElem t) []]
+                                  Nothing -> error $ "retrieving named type " ++ scmod
+                        else []
 
 sem Parameter
   | Parameter ty.ident = Nothing
@@ -72,7 +104,7 @@ attr Type
 sem Type
   | TyStruct lhs.sysccomm = if @lhs.alloca 
                             then case @name of
-                             "class.sc_core::sc_signal.73" -> trace "Type" $ [SysCSignal $ fromJust @lhs.ident]
+                             "class.sc_core::sc_signal.73" -> [SCSignal $ fromJust @lhs.ident]
                              _ -> []
                             else []
 
@@ -105,19 +137,96 @@ sem NamedTypes
       val.alloca = False
       val.ident = Nothing
 
-{
+-- Retrieve processes
+attr Module Functions Function 
+  inh sc_constr :: {String}
+
+attr Module Functions Function BasicBlocks BasicBlock Instructions Instruction
+  syn meths use {++} {[]}:: {SCProcs}
+
+sem Function
+  | FunctionDef lhs.meths = if isInfixOf @lhs.sc_constr @name.self
+                            then @body.meths
+                            else []
+  | FunctionDecl lhs.meths = []
+
+sem Instruction
+  | Call lhs.meths = if isInfixOf "sc_core::sc_simcontext::create_method_process" @callee.self
+                     then let varModNm = trace (show @args.self) $ getVarModName $ @args.self !! 2
+                          in case find (globalIdEq varModNm) @lhs.globals of
+                                Just g -> [SCMethod $ getModNm g]
+                                Nothing -> error "retrieving process name"                     
+                     else if isInfixOf "sc_core::sc_simcontext::create_thread_process" 			@callee.self
+						  then let varModNm = trace (show @args.self) $ getVarModName $ @args.self !! 2
+						       in case find (globalIdEq varModNm) @lhs.globals of
+						             Just g -> [SCMethod $ getModNm g]
+						             Nothing -> error "retrieving process name"
+						  else []
+						
+{                         
+getConstrName :: String -> String
+getConstrName ('(':_) = []
+getConstrName (x:xs) = x:(getConstrName xs)
+
+getStructElem :: Type -> SCModVars
+getStructElem (TyStruct _ _ ts) = Prelude.map filterStruct $ tail ts
+getStructElem _ = error "not struct"
+
+filterStruct :: Type -> SCModVar
+filterStruct (TyStruct "class.sc_core::sc_in"    _ _) = SCPortIn
+filterStruct (TyStruct "class.sc_core::sc_out"   _ _) = SCPortOut
+filterStruct (TyStruct "class.sc_core::sc_event" _ _) = SCEvent
+filterStruct t = SCTy t
+
+getRegName :: Value -> Maybe String
+getRegName (Id i _) = Just $ getIdName i
+getRegName x = Nothing
+
+getModName :: Value -> String
+getModName (Id _ (TyPointer (TyStruct n _ _))) = n
+getModName x = show x
+
+globalIdEq :: String -> Global -> Bool
+globalIdEq varModNm (GlobalVar n _ _ _ _ _ _) = varModNm == n
+
+getModNm :: Global -> String
+getModNm (GlobalVar _ _ _ _ _ (Just (Constant (ConstantDataSequential (ConstantDataArray _ s)))) _) = s
+getModNm s = show s
+
+getVarModName :: Value -> String
+getVarModName (Constant (ConstantExpr (GetElementPtrConstantExpr (Constant (GlobalValue (GlobalVariable i _))) _))) = getIdName i
+getVarModName v = show v
+
 getIdName :: Identifier -> String
 getIdName (Global n) = n
 getIdName (Local  n) = n
 
-data SysCArch = SysCArch SysCMods SysCComm
+data SCArch = SCArch SCMods SCComm
   deriving Show
 
-type SysCMods = [SysCMod]
-type SysCComm = [SysCCommElem]
+type SCMods = [SCMod]
+type SCComm = [SCCommElem]
+type SCModVars = [SCModVar]
 
-data SysCMod = SysCMod String
+data SCMod = SCMod SCModName SCConstrName SCInstName SCModVars SCProcs
   deriving Show
-data SysCCommElem = SysCSignal String
+
+type SCModName = String
+type SCConstrName = String
+type SCInstName = String
+
+data SCCommElem = SCSignal String
+  deriving Show
+
+data SCModVar = SCPortIn
+              | SCPortOut
+              | SCEvent
+              | SCTy Type
+  deriving Show
+
+type SCProcs = [SCProc]
+
+data SCProc = SCMethod String 
+            | SCThread String
   deriving Show
 }

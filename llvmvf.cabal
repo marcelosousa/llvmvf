@@ -23,6 +23,7 @@ Executable llvmvf
                     , smtlib        == 1.0
                     , demangler     == 1.0
                     , blaze-html
+                    , text
     Hs-Source-Dirs:   src/
     include-dirs: include
     C-Sources:        cbits/demangler.cpp

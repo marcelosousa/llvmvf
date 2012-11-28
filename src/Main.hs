@@ -67,9 +67,9 @@ runOption bc SystemC   k = do print "SystemC version"
                               mdl <- extract bc
                               let bf = dropExtension bc
 --                                  mod = (model mdl) :: Model SystemC
---                              writeFile (addExtension bf "llvf")  (show $ pretty mdl)
+                              writeFile (addExtension bf "llvf")  (show $ pretty mdl)
 --                              writeFile (addExtension bf "model") (show $ mod)
-                              print $ retrieveSysCArch mdl
+--                              print $ retrieveSCArch mdl
 --                              writeFile "index.html" $ P.renderHtml (index $ nmdtys mod)
 --                              writeFile "types.html" $ P.renderHtml (types $ nmdtys mod)
 --                              writeFile (addExtension bf "dot")   (show $ pretty mod)
