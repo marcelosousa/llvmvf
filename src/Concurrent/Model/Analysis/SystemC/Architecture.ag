@@ -71,7 +71,7 @@ sem Instruction
            ty.alloca = False
            ty.ident = Nothing
   | Call lhs.modnames = case @callee.self of
-                             "sc_core::sc_module_name::sc_module_name(char const*)" -> let reg = trace (show @args.self) $ fromJust $ getRegName $ @args.self !! 0
+                             "sc_core::sc_module_name::sc_module_name(char const*)" -> let reg = fromJust $ getRegName $ @args.self !! 0
                                                                                            varModNm = getVarModName $ @args.self !! 1
                                                                                        in case find (globalIdEq varModNm) @lhs.globals of
                                                                                              Just g -> Map.singleton reg $ getModNm g
@@ -81,7 +81,7 @@ sem Instruction
                         then let scmod = getModName $ @args.self !! 0
                                  reg = getRegName $ @args.self !! 1
                                  nm = case reg of
-                                       Nothing -> fromMaybe (error $ "undef " ++ show @lhs.modnames) $ Map.lookup "agg.tmp" @lhs.modnames
+                                       Nothing -> defaultLookup @lhs.modnames
                                        Just s  -> fromMaybe (error $ "no " ++ s ++ " in map") $ Map.lookup s @lhs.modnames 
                              in case Map.lookup scmod @lhs.namedtys of
                                   Just t -> let mnm = T.split (=='.') $ T.pack scmod
@@ -152,18 +152,24 @@ sem Function
 
 sem Instruction
   | Call lhs.meths = if isInfixOf "sc_core::sc_simcontext::create_method_process" @callee.self
-                     then let varModNm = trace (show @args.self) $ getVarModName $ @args.self !! 2
+                     then let varModNm = getVarModName $ @args.self !! 2
                           in case find (globalIdEq varModNm) @lhs.globals of
                                 Just g -> [SCMethod $ getModNm g]
                                 Nothing -> error "retrieving process name"                     
                      else if isInfixOf "sc_core::sc_simcontext::create_thread_process" 			@callee.self
-						  then let varModNm = trace (show @args.self) $ getVarModName $ @args.self !! 2
+						  then let varModNm = getVarModName $ @args.self !! 2
 						       in case find (globalIdEq varModNm) @lhs.globals of
-						             Just g -> [SCMethod $ getModNm g]
+						             Just g -> [SCThread $ getModNm g]
 						             Nothing -> error "retrieving process name"
 						  else []
 						
 {                         
+defaultLookup :: Map Id Id -> Id
+defaultLookup modnames = case Map.size modnames of
+                           0 -> error "defaultLookup: empty map"
+                           1 -> head $ Map.elems modnames
+                           x -> error $ "defaultLookup: too many elems" ++ show modnames
+
 getConstrName :: String -> String
 getConstrName ('(':_) = []
 getConstrName (x:xs) = x:(getConstrName xs)
