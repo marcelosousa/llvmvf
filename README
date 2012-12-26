@@ -11,3 +11,66 @@ More information at:
 http://dl.dropbox.com/u/279177/msproposal.pdf
 
 Copyright 2012 @ Marcelo Sousa
+Installation notes:
+
+llvm (for more info llvm.org):
+ - mkdir build (inside llvm)
+ - cd build
+ - cmake ../
+ - make -j4
+
+---
+Pre-requisites: 
+
+ghc - glasglow haskell compiler (7.0.3, 7.4.0)
+cabal - like apt-get install
+-----
+haskell llvm bindings library:
+https://github.com/marcelosousa/llvm
+1. Base binding library llvm/base
+cd base
+cabal install
+
+2. High-level binding library
+cabal install (from the llvm/ dir)
+
+------
+smt-lib haskell library:
+https://github.com/marcelosousa/smtlib
+
+cd Haskell
+make or cabal install
+
+------ 
+llvmvf - our tool:
+https://github.com/marcelosousa/llvmvf
+
+There are 2 branches:
+1. master (pthread - thesis final version)
+  make   
+
+2. systemc 
+  a. Install the Demangler library:
+    cd  llvmvf/tests/cppdem 
+    cabal install
+  b. make
+
+-----
+Run the tool
+
+1. We accept bytecode files. First we need to compile with clang, clang++ or a llvm front-end.
+  eg. clang -c file.c -emit-llvm -o file.bc
+  Normally there is a Makefile reference to use with the tool
+
+2. Run the tool
+  llvmvf -b=10 file.bc
+ 
+It generates:
+
+ a. file.llvf - debug version of the front-end. pretty-printer of the LLVM IR code. It will look like the .ll file.
+ b. file.model - it will contain llvm ir code of the main function and the threads.
+ c. file.dot - if you run dot -Tpdf file.dot -o file.pdf generates the control flow graph. 
+ d. file.dfg - data flow (bit rotten right now)
+ e. file.smt2 - the smt lib file to be passed to a smt solver
+
+There is a wrap.sh file that automatically calles the smt solver if installed in the machine. 
