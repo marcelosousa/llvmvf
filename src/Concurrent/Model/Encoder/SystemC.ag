@@ -1,0 +1,56 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.SystemC
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Encoder.SystemC}{}{}
+
+include "Base.ag"
+include "Type.ag"
+
+imports 
+{
+import Language.SMTLib2.Base
+import Language.SMTLib2.Builder
+import Concurrent.Model.Analysis.SystemC (SCArch, SCMod)
+
+import Language.LLVMIR
+import Concurrent.Model.Encoder.Util
+import Debug.Trace (trace)
+import qualified Data.Map as Map
+}
+
+-- Function Encoding
+attr Functions Function BasicBlocks BasicBlock Instructions Instruction 
+  syn smod use {++} {[]} :: {SMod}
+  inh arch :: {SCArch}
+  inh nmdtys :: {NamedTypes}
+  inh gvars :: {Globals}
+
+sem Module
+  | Module 
+      funs.gvars = @gvars.self
+      funs.nmdtys = @nmdtys.self
+      funs.arch = error "funs.arch inh from Module should not happen"
+
+sem Function
+  | FunctionDecl
+      lhs.smod = []
+  | FunctionDef
+      lhs.smod = @body.smod
+
+attr Parameters Parameter
+  inh arch :: {SCArch}
+  syn paramap use {`Map.union`} {Map.empty} :: {Map Id SCMod}
+
+sem Parameter
+  | Parameter lhs.paramap = undefined -- Map.singleton @var.self (search)
+              loc.idsym = SimpleSym @var.self
+              loc.idsort = SymSort "I32"
+
+{
+nextUnique :: Int -> (Int, Int)
+nextUnique u = (u+1, u)
+}

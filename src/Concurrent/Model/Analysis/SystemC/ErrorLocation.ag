@@ -1,0 +1,16 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Analysis.SystemC.ErrorLocation
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Analysis.SystemC.ErrorLocation}{}{}
+
+attr Functions Function BasicBlocks BasicBlock Instructions Instruction
+  syn errorloc use {++} {[]} :: {[PC]}
+
+sem Instruction
+  | Call lhs.errorloc = if @callee.self == "__assert_rtn"
+                        then [@pc.self]  
+                        else []
