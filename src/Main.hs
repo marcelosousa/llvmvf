@@ -19,7 +19,6 @@ import Text.Blaze.Html.Renderer.String as P
 import Language.LLVMIR.Printer.NamedTypes 
 
 import qualified Language.LTL.Base as LTL
-import Mutation.Core               (mutate)
 import UU.PPrint 
 import Language.SMTLib2.Printer    (prettyprint)
 
@@ -37,7 +36,6 @@ import Debug.Trace
 
 -- Options 
 data Options = Parse
-             | Mutate
              | Visualize
              | Extract
              | SystemC
@@ -55,7 +53,6 @@ runOption bc Parse k = do mdl <- extract bc
                           writeFile (addExtension bf "dot")   (show $ pretty mod)
                           writeFile (addExtension bf "dfg")   (show $ dataflow mod)
                           writeFile (addExtension bf "smt2")  (show $ prettyprint $ encode mod k)
-runOption bc Mutate    _ = mutate bc
 runOption bc Visualize _ = do mdl <- extract bc
                               let bf = dropExtension bc
                                   mod = (model mdl) :: Model PThread

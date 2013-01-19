@@ -6,7 +6,7 @@
 
 module Language.LTL.Base where
 
-import Data.Set hiding (size, map)
+import Data.Set hiding (size, map,foldr)
 import Prelude  hiding ((^))
 import Unsafe.Coerce
 
