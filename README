@@ -1,13 +1,147 @@
 LLVMVF - LLVM Verification Framework
 
 Motivation
-----------
+==========
 The widespread usage of concurrent software boosted the need for verification tools to help designers and implementors in the overall software engineering process. Currently, most of the verification approaches have only been applied to sequential software or partially to concurrent software. We propose the design and implementation of a framework for formal verification of concurrent software. The goal of this framework is a reliable and scalable infrastructure for verification of several commonly used concurrent mechanisms. We propose an implementation in a functional setting leveraging the advantages of expressive type systems to achieve our design goals.
 
 Info
-----
+====
 This project source code is a part of my MSc. Thesis at Utrecht Universiteit, The Netherlands and Bogazici University, Turkey.
 More information at:
 http://dl.dropbox.com/u/279177/msproposal.pdf
 
-Copyright 2012 @ Marcelo Sousa
+Installation notes
+==================
+
+llvm (for more info llvm.org):
+ - mkdir build (inside llvm)
+ - cd build
+ - cmake ../
+ - make -j4
+
+---
+Pre-requisites: 
+
+ghc - glasglow haskell compiler (7.0.3, 7.4.0)
+cabal - like apt-get install
+-----
+haskell llvm bindings library:
+https://github.com/marcelosousa/llvm
+1. Base binding library llvm/base
+cd base
+cabal install
+
+2. High-level binding library
+cabal install (from the llvm/ dir)
+
+------
+smt-lib haskell library:
+https://github.com/marcelosousa/smtlib
+
+cd Haskell
+make or cabal install
+
+------ 
+llvmvf - our tool:
+https://github.com/marcelosousa/llvmvf
+
+There are 2 branches:
+1. master (pthread - thesis final version)
+  make   
+
+2. systemc 
+  a. Install the Demangler library:
+=======
+Installation
+============
+
+Haskell
+-------
+  I recommend installing the Haskell Platform (http://www.haskell.org/platform/) to have all the Haskell tool machinery installed quickly. If not, here's what you need: 
+   1) ghc - glasglow haskell compiler (7.0.3 or 7.4.0). If you have ghc-7.4.0, it is likely that you will run into a couple of small errors because of different packages. If you can't solve them, please send me an email.
+   2) cabal - haskell package manager
+  Once you have ghc and cabal installed you need to install uuagc (Utrecht University Attribute Grammar Compiler, http://www.cs.uu.nl/wiki/HUT/AttributeGrammarSystem). You can install it with:
+   1) cabal install uulib
+   2) cabal install uuagc
+  For more info, check the website above.
+
+
+LLVM
+----
+You need a recent version of llvm (after August 2012 should work). You can check the official llvm website (llvm.org) for detailed installation information. 
+My suggestion:
+ - download llvm and cd into it;
+ - mkdir build;
+ - cd build;
+ - cmake ../
+ - make -j4
+ - sudo make install
+
+If the installation was successful you should have llvm executables in build/bin/.
+ 
+Haskell llvm binding library
+----------------------------
+The source code is in: https://github.com/marcelosousa/llvm. I have modified/extended a previous existing library (https://github.com/bos/llvm). In this repository there are actually two libraries:
+
+1. Base binding library llvm/base. This library is the actual binding library that defines the FFI (Foreign Function Interface) functions. 
+   To install:
+   cd llvm/base
+   cabal install
+
+In Linux, you should not have problems installing it. In MacOs, there might be issues with finding the llvm headers. You need to add UNIVERSAL=1 when compiling llvm. I did not tried it in Windows.
+
+2. High-level binding library. This library uses the base library to define my abstract functions.
+   To install:
+   cd llvm
+   cabal install
+
+SMT-Lib v2 Tools
+----------------
+The source code is in: https://github.com/marcelosousa/smtlib
+
+To install:
+  cd Haskell
+  make or cabal install
+
+llvmvf
+------
+The source code is in: https://github.com/marcelosousa/llvmvf. This is the actual verification tool that currently implements a generic BMC for LLVM IR.
+
+There are 2 branches:
+1. master (pthread - thesis final version)
+   To install:
+   make   
+
+2. systemc 
+  a. Install the Demangler library (this is a simple library that demangles the c++ names during extraction):
+    cd  llvmvf/tests/cppdem 
+    cabal install
+  b. make
+
+-----
+Run the tool
+=======
+Using llvmvf
+============
+
+1. We accept bytecode files. First we need to compile with clang, clang++ or a llvm front-end.
+  eg. clang -c file.c -emit-llvm -o file.bc
+  Normally there is a Makefile reference to use with the tool
+
+2. Run the tool
+=======
+2. Run the tool. -b specifies the depth of the search.
+  llvmvf -b=10 file.bc
+ 
+It generates:
+
+ a. file.llvf - debug version of the front-end. pretty-printer of the LLVM IR code. It will look like the .ll file.
+ b. file.model - it will contain llvm ir code of the main function and the threads.
+ c. file.dot - if you run dot -Tpdf file.dot -o file.pdf generates the control flow graph. 
+ d. file.dfg - data flow (bit rotten right now)
+ e. file.smt2 - the smt lib file to be passed to a smt solver
+
+There is a wrap.sh file that automatically calles the smt solver if installed in the machine. 
+=======
+
+Copyright 2012 @ Marcelo Sousa <dipython@gmail.com>
