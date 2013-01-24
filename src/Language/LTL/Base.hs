@@ -6,7 +6,12 @@
 
 module Language.LTL.Base where
 
+#if __GLASGOW_HASKELL__ > 704
 import Data.Set hiding (size, map,foldr)
+#else
+import Data.Set hiding (size, map)
+#endif
+
 import Prelude  hiding ((^))
 import Unsafe.Coerce
 

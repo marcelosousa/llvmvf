@@ -17,7 +17,7 @@ Executable llvmvf
                     , fgl           >= 5.4.2.3
                     , uulib         >= 0.9.14
                     , cmdargs
-                    , transformers  >= 0.3.0.0
+                    , transformers 
                     , llvm-base
                     , llvm
                     , smtlib        == 1.0
@@ -27,6 +27,6 @@ Executable llvmvf
     Hs-Source-Dirs:   src/
     include-dirs: include
     C-Sources:        cbits/demangler.cpp
-    Extensions:       TypeOperators, FlexibleInstances, TypeSynonymInstances, DeriveDataTypeable
-    ghc-options:      -O3 -rtsopts 
+    Extensions:       TypeOperators, FlexibleInstances, TypeSynonymInstances, DeriveDataTypeable, CPP
+    ghc-options:      -O3 -rtsopts
     extra-libraries: stdc++

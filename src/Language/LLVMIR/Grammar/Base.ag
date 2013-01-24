@@ -13,7 +13,12 @@ import Prelude              hiding (sequence)
 import Data.Char            (chr)
 import qualified Data.Map as Data.Map
 import qualified Data.Map as Map
+#if __GLASGOW_HASKELL__ > 704
 import Data.Map hiding (foldr)
+#else
+import Data.Map 
+#endif
+
 }
 
 -------------------------------------------------------------------------------

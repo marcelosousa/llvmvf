@@ -24,7 +24,7 @@ import Language.SMTLib2.Printer    (prettyprint)
 
 import Concurrent.Model
 import Concurrent.Model.PThread
-import Concurrent.Model.SystemC
+-- import Concurrent.Model.SystemC
 import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
 import Concurrent.Model.Encoder    (encode, encodeSysC)    
@@ -60,13 +60,13 @@ runOption bc Visualize _ = do mdl <- extract bc
 runOption bc Extract   _ = do mdl <- extract bc
                               let bf = dropExtension bc
                               writeFile (addExtension bf "llvf") (show $ pretty mdl)
-runOption bc SystemC   k = do print "SystemC version"
-                              mdl <- extract bc
-                              let bf = dropExtension bc
-                                  mod = (model mdl) :: Model SystemC
-                              writeFile (addExtension bf "llvf")  (show $ pretty mdl)
-                              writeFile (addExtension bf "model") (show $ mod)
-                              writeFile (addExtension bf "arch")  (show $ retrieveSCArch mdl)
+--runOption bc SystemC   k = do print "SystemC version"
+--                              mdl <- extract bc
+--                              let bf = dropExtension bc
+--                                  mod = (model mdl) :: Model SystemC
+--                              writeFile (addExtension bf "llvf")  (show $ pretty mdl)
+--                              writeFile (addExtension bf "model") (show $ mod)
+--                              writeFile (addExtension bf "arch")  (show $ retrieveSCArch mdl)
 --                              writeFile "index.html" $ P.renderHtml (index $ nmdtys mod)
 --                              writeFile "types.html" $ P.renderHtml (types $ nmdtys mod)
 --                              writeFile (addExtension bf "dot")   (show $ pretty mod)
@@ -98,4 +98,4 @@ runllvmvf options = do let filename = input options
                        runOption filename option k
 
 usage :: String
-usage = unlines ["LLVM Verification Framework"]
+usage = unlines ["LLVM Verification Framework - v1.0"]
