@@ -14,6 +14,8 @@ import System.FilePath
 import Language.LLVMIR             (Module)
 import Language.LLVMIR.Extractor   (extract)
 import Language.LLVMIR.Printer
+import Language.HTm.Base
+import Language.LLVMIR.Converter (llvmir2Htm)
 
 import Text.Blaze.Html.Renderer.String as P
 import Language.LLVMIR.Printer.NamedTypes 
@@ -39,6 +41,7 @@ data Options = Parse
              | Visualize
              | Extract
              | SystemC
+             | Htm
   deriving (Show, Data, Typeable)
 
 instance Default Options where
@@ -60,6 +63,10 @@ runOption bc Visualize _ = do mdl <- extract bc
 runOption bc Extract   _ = do mdl <- extract bc
                               let bf = dropExtension bc
                               writeFile (addExtension bf "llvf") (show $ pretty mdl)
+runOption bc Htm _ = do mdl <- extract bc
+                        let bf = dropExtension bc
+                        writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)
+
 --runOption bc SystemC   k = do print "SystemC version"
 --                              mdl <- extract bc
 --                              let bf = dropExtension bc

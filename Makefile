@@ -5,6 +5,7 @@ VERSION	:= 0.0.1
 BASEAG := src/Language/LLVMIR/Grammar/Base.ag
 PRINTAG := src/Language/LLVMIR/Printer/Module.ag
 TYPEAG := src/Language/LLVMIR/Grammar/Type.ag
+CONVERTAG := src/Language/LLVMIR/Converter/Module.ag
 PTHREADAG := src/Concurrent/Model/PThread.ag
 VISUALCCFG := src/Concurrent/Model/Visualizer.ag
 CFLOWAG := src/Concurrent/Model/Analysis/ControlFlow.ag
@@ -17,13 +18,16 @@ ARCHSYSCAG := src/Concurrent/Model/Analysis/SystemC/Architecture.ag
  
 all : haskell
 
-ag : base printer systemc pthread cflow ppccfg  dflow encoder 
+ag : base printer systemc pthread cflow ppccfg  dflow encoder converter
 
 base : $(BASEAG) $(TYPEAG)
 	uuagc -Hd --datarecords --self -P src/Language/LLVMIR/Grammar src/Language/LLVMIR.ag
 
 printer : base $(PRINTAG) 
 	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(PRINTAG)
+
+converter : base $(CONVERTAG) 
+	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(CONVERTAG)
 
 esencoder : base 
 	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar -P src/Concurrent/Model/ESEncoder $(ESENCODEAG)

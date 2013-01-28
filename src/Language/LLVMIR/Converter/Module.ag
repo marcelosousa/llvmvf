@@ -1,0 +1,180 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Converter
+-- Copyright :  (c) 2013 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Language.LLVMIR.Converter.Module}{}{}
+
+include "Base.ag"
+include "Type.ag"
+
+imports 
+{
+import Language.HTm.Base
+import Language.LLVMIR
+import Data.Maybe
+import Control.Monad
+import Data.Map (Map)
+import qualified Data.Map as M
+import Debug.Trace (trace)
+}
+
+attr Module 
+  syn htm :: {HTm}
+
+sem Module
+  | Module lhs.htm  = HTm (@gvars.etm @funs.etm)
+ 
+-- Globals
+attr Globals Global
+  syn etm :: {ETm -> ETm}
+
+sem Globals 
+  | Nil  lhs.etm = id
+  | Cons lhs.etm = @hd.etm . @tl.etm 
+
+sem Global
+  | GlobalVar lhs.etm = \t -> let v = EBot -- TODO
+                              in ELet @name.self v t
+
+-- Functions
+attr Functions
+  syn etm :: {ETm}
+
+sem Functions
+  | Nil   lhs.etm = EBot
+  | Entry lhs.etm = if @key == "main"
+                    then let x = @val.etm 
+                         in trace (show x) $ x
+                    else @tl.etm
+
+-- Function
+attr Function
+  syn etm :: {ETm}
+
+sem Function
+  | FunctionDef lhs.etm = trace (show @body.phis) $ EFun @name.self @params.etm (buildbb "bb" @body.etm)
+                body.phis = @body.phis
+  | FunctionDecl lhs.etm = EBot
+
+-- Parameters
+attr Parameters 
+  syn etm use {:} {[]} :: {[ETm]}
+
+attr Parameter 
+  syn etm :: {ETm}
+
+sem Parameter
+  | Parameter lhs.etm = EVar @var.self
+
+-- Basic Blocks
+attr BasicBlocks
+  syn etm :: {Map Label ([Label], [ETm] -> ETm)}
+  syn phis :: {Map Label [(Ident, [(Value, Label)])]}
+  inh phim :: {Map Label [(Ident, [(Value, Label)])]}
+
+attr BasicBlock
+  syn etm :: {(Label, ([Label], [ETm] -> ETm))}
+  syn phis :: {(Label,[(Ident, [(Value, Label)])])}
+  inh 
+sem BasicBlocks
+  | Nil  lhs.etm = M.empty
+         lhs.phis = M.empty
+  | Cons lhs.etm = let (l,etm) = @hd.etm
+                   in M.insert l etm @tl.etm
+         lhs.phis = let (l,phi) = @hd.phis
+                    in if phi == [] 
+                       then @tl.phis
+                       else M.insert l phi @tl.phis
+
+sem BasicBlock
+  | BasicBlock lhs.etm = (@label.self,@instrs.etm)
+               lhs.phis = (@label.self,@instrs.phis)
+
+attr Instructions Instruction 
+  syn etm :: {([Label], [ETm] -> ETm)}
+  syn phis use {++} {[]} :: {[(Ident, [(Value, Label)])]}
+  inh cbb :: {Label}
+  inh phim :: {
+
+sem Instructions
+  | Nil  lhs.etm = (["-1"], const EBot)
+  | Cons lhs.etm = let (l,f) = @hd.etm
+                       (m,g) = @tl.etm
+                   in case m of
+                       ["-1"] -> @hd.etm
+                       x      -> (l ++ m, \t -> f [g t])
+
+sem Instruction
+  -- Terminators
+  | Ret         lhs.etm = ([], const @r.etm)
+  | Br          lhs.etm = ([getId @t.etm, getId @f.etm], \t -> EIf @v.etm (t!!0) (t!!1))
+  | UBr         lhs.etm = ([getId @d.etm], head)
+  | Switch      lhs.etm = error "Switch TODO"
+  | Unreachable lhs.etm = ([], const EBot)
+  | ICmp        lhs.etm = let f t = let i = getId @id.etm
+                                        o = EApp (EApp (EVar $ "ICmp" ++ show @cond.self) (@op1.etm)) @op2.etm
+                                    in trace (show t) $ ELet i o $! (head t) 
+                          in ([], f)
+  | Add         lhs.etm = let f t = let i = getId @id.etm
+                                        o = EApp (EApp (EVar "(+)") @op1.etm) @op2.etm
+                                    in ELet i o (head t)
+                          in ([], f)
+  | Mul         lhs.etm = let f t = let i = getId @id.etm
+                                        o = EApp (EApp (EVar "(*)") @op1.etm) @op2.etm
+                                    in ELet i o (head t)
+                          in ([], f)
+  | Call        lhs.etm = let f t = let i = getId @mres.etm
+                                        c = EVar @callee.self
+                                        a = @args.etm
+                                    in ELet i (calletm c a) (head t)
+                          in ([], f)
+  | * - Ret Br UBr Switch Unreachable ICmp Add Mul Call  lhs.etm = ([], const EBot)
+  | PHI         lhs.phis = [(getId @id.etm, Prelude.map (\(a,b) -> (a, getLabel b)) @vals.self)]
+ 
+-- The rest  
+attr Value Identifier Constant RetInst 
+  syn etm :: {ETm}
+
+attr Values
+  syn etm use {:} {[]} :: {[ETm]}
+
+sem RetInst
+  | ValueRet lhs.etm = @v.etm
+  | VoidRet  lhs.etm = EBot
+
+sem Value
+  | Id lhs.etm = @v.etm
+  | Constant lhs.etm = @c.etm
+
+-- Allows shadowing
+sem Identifier
+  | Global lhs.etm = EVar @name.self
+  | Local  lhs.etm = EVar @name.self
+
+sem Constant
+  | ConstantInt     lhs.etm = ENum @iv
+  | * - ConstantInt lhs.etm = EBot
+
+{
+getId :: ETm -> Label 
+getId (EVar i) = i 
+
+getLabel :: Value -> Label
+getLabel (Id i t) = case i of
+                   Global s -> s
+                   Local  s -> s
+getLabel _ = error "getLabel"
+
+calletm :: ETm -> [ETm] -> ETm
+calletm c [] = c
+calletm c (x:xs) = calletm (EApp c x) xs
+
+buildbb :: Label -> Map Label ([Label], [ETm] -> ETm) -> ETm
+buildbb n m = case M.lookup n m of
+               Just (l, f) -> let x = Prelude.map (\e -> buildbb e m) l
+                              in trace (show n ++ ": " ++ show x) $ f x
+               Nothing  -> error $ n ++ " not in map:" 
+}
