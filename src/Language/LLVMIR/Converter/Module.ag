@@ -78,7 +78,8 @@ attr BasicBlocks
 attr BasicBlock
   syn etm :: {(Label, ([Label], [ETm] -> ETm))}
   syn phis :: {(Label,[(Ident, [(Value, Label)])])}
-  inh 
+--  inh
+ 
 sem BasicBlocks
   | Nil  lhs.etm = M.empty
          lhs.phis = M.empty
@@ -97,7 +98,7 @@ attr Instructions Instruction
   syn etm :: {([Label], [ETm] -> ETm)}
   syn phis use {++} {[]} :: {[(Ident, [(Value, Label)])]}
   inh cbb :: {Label}
-  inh phim :: {
+--  inh phim :: {
 
 sem Instructions
   | Nil  lhs.etm = (["-1"], const EBot)

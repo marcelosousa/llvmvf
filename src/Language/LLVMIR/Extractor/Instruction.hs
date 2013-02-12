@@ -167,7 +167,12 @@ getMemoryOp GetElementPtr = do ival  <- getInstructionValue
                                return $ LL.GetElementPtr pc (LL.Local ident) ty (head ops) (tail ops)
 -- atomic operators
 getMemoryOp Fence         = error $ "TODO fence"
-getMemoryOp AtomicCmpXchg = error $ "TODO atomicCmpXchg"
+getMemoryOp AtomicCmpXchg = do ival  <- getInstructionValue
+                               pc    <- getPC
+                               ident <- getIdent ival
+                               ops   <- getOperands ival >>= mapM getValue
+                               ord   <- liftIO $ FFI.atomicCmpXChgGetOrdering ival >>= return . fromIntegral
+                               return $ LL.Cmpxchg pc (LL.Local ident) (ops!!0) (ops!!1) (ops!!2) (toAtomicOrdering ord)
 getMemoryOp AtomicRMW     = do ival  <- getInstructionValue
                                pc    <- getPC
                                ident <- getIdent ival

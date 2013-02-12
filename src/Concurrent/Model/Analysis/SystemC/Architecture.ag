@@ -67,7 +67,7 @@ sem Global
 sem Instruction
   | Alloca ty.ident = Just $ getIdName @id.self
            ty.alloca = True
-  | * - Alloca - AtomicRMW - Br - CreateThread - ExtractValue - InsertValue - Load - MutexInit - MutexLock - MutexUnlock - NotifyEvent - Ret - Select - Switch - UBr - Unreachable - WaitEvent - WaitTime 
+  | * - Alloca - Cmpxchg - AtomicRMW - Br - CreateThread - ExtractValue - InsertValue - Load - MutexInit - MutexLock - MutexUnlock - NotifyEvent - Ret - Select - Switch - UBr - Unreachable - WaitEvent - WaitTime 
            ty.alloca = False
            ty.ident = Nothing
   | Call lhs.modnames = case @callee.self of

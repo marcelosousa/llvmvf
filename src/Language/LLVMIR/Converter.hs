@@ -9,6 +9,5 @@ import Language.LLVMIR.Converter.Module
 import Language.LLVMIR
 import Language.HTm.Base
 
-
 llvmir2Htm :: Module -> HTm
 llvmir2Htm mdl = htm_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}

@@ -105,4 +105,4 @@ runllvmvf options = do let filename = input options
                        runOption filename option k
 
 usage :: String
-usage = unlines ["LLVM Verification Framework - v1.0"]
+usage = unlines ["LLVM Verification Framework - v1.0b"]
