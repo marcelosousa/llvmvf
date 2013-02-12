@@ -76,7 +76,7 @@ type DLayout = [String]
 type IntTyValId = (Type, Value, Identifier)
 type IntTyValIdL = [IntTyValId]
 
-data Module 
+data Module
   | Module
     id     :: String
     layout :: DataLayout
@@ -94,42 +94,42 @@ data Module
 --       | LittleEndian
 
 data DataLayout
-      | DataLayout 
-          s :: DLayout
+  | DataLayout 
+      s :: DLayout
 --          endianness :: Endianness
 --          pointerSize :: Int
 --          prefAlignTy :: MapTyInt
 
 data Target
-    | MacOs
-    | Linux
+  | MacOs
+  | Linux
     
 data TargetData
-    | TargetData
-        s :: String
-        t :: Target
+  | TargetData
+      s :: String
+      t :: Target
 
 data ModuleAsm
-      | ModuleAsm asm :: String
+  | ModuleAsm asm :: String
       
 data Global 
-      | GlobalVar 
-          name    :: Id
-          linkage :: Linkage
-          isConst :: Bool
-          isUaddr :: Bool 
-          ty      :: Type 
-          ival    :: MValue
-          align   :: Align
+  | GlobalVar 
+      name    :: Id
+      linkage :: Linkage
+      isConst :: Bool
+      isUaddr :: Bool 
+      ty      :: Type 
+      ival    :: MValue
+      align   :: Align
 --          section  :: MSection
 
 data Function 
-      | FunctionDef 
-          name    :: Id
-          linkage :: Linkage
-          retty   :: Type
-          params  :: Parameters
-          body    :: BasicBlocks 
+  | FunctionDef 
+      name    :: Id
+      linkage :: Linkage
+      retty   :: Type
+      params  :: Parameters
+      body    :: BasicBlocks 
 --          visibility :: MVisibility
 --          cconv      :: MCConv
 --          uaddr      :: MUnnamedAddr
@@ -138,11 +138,11 @@ data Function
 --          section    :: MSection
 --          optAlign   :: MAlign
 --          gcName     :: MGCName
-      | FunctionDecl
-          name       :: Id
-          linkage    :: Linkage
-          retty      :: Type
-          params     :: Parameters
+  | FunctionDecl
+      name       :: Id
+      linkage    :: Linkage
+      retty      :: Type
+      params     :: Parameters
 --          visibility :: MVisibility
 --          cconv      :: MCConv
 --          uaddr      :: MUnnamedAddr
@@ -156,9 +156,9 @@ emptyFunction = FunctionDef "undefined" ExternalLinkage TyVoid [] []
 }
           
 data BasicBlock
-      | BasicBlock 
-          label  :: Label
-          instrs :: Instructions
+  | BasicBlock 
+      label  :: Label
+      instrs :: Instructions
 --          tmn    :: Terminator
 
  
@@ -214,110 +214,110 @@ data CompareConstantExpr
   | FCmpExpr cond :: RealPredicate ty :: Type op1 :: Value op2 :: Value 
 
 data Align
-      | Align n :: Int
+  | Align n :: Int
 
 data Section
-      | Section s :: String
+  | Section s :: String
       
 data Argument
-      | Argument arg :: Value
+  | Argument arg :: Value
 
 data Parameter
-      | Parameter 
-          var :: Id  -- ^In practice, the name is optional
-          ty  :: Type
+  | Parameter 
+      var :: Id  -- ^In practice, the name is optional
+      ty  :: Type
        -- attr :: MAttribute            
 
 --  All Global Variables and Functions have one of the following types of linkage.
 data Linkage
-    | ExternalLinkage     -- ^Externally visible function
-    | AvailableExternallyLinkage
-    | LinkOnceAnyLinkage  -- ^Keep one copy of function when linking (inline)
-    | LinkOnceODRLinkage  -- ^Same, but only replaced by something equivalent.
-    | WeakAnyLinkage      -- ^Keep one copy of named function when linking (weak)
-    | WeakODRLinkage      -- ^Same, but only replaced by something equivalent.
-    | AppendingLinkage    -- ^Special purpose, only applies to global arrays
-    | InternalLinkage     -- ^Rename collisions when linking (static functions)
-    | PrivateLinkage      -- ^Like Internal, but omit from symbol table
-    | DLLImportLinkage    -- ^Function to be imported from DLL
-    | DLLExportLinkage    -- ^Function to be accessible from DLL
-    | ExternalWeakLinkage -- ^ExternalWeak linkage description
-    | GhostLinkage        -- ^Stand-in functions for streaming fns from BC files
-    | CommonLinkage       -- ^Tentative definitions
-    | LinkerPrivateLinkage -- ^Like Private, but linker removes.
-    | LinkerPrivateWeakLinkage -- ^Similar to PrivateLinkage, but the symbol is weak.
-    | LinkerPrivateWeakDefAutoLinkage -- ^Similar to LinkerPrivateWeakLinkage, but its known that the address of the object is not taken.
+  | ExternalLinkage     -- ^Externally visible function
+  | AvailableExternallyLinkage
+  | LinkOnceAnyLinkage  -- ^Keep one copy of function when linking (inline)
+  | LinkOnceODRLinkage  -- ^Same, but only replaced by something equivalent.
+  | WeakAnyLinkage      -- ^Keep one copy of named function when linking (weak)
+  | WeakODRLinkage      -- ^Same, but only replaced by something equivalent.
+  | AppendingLinkage    -- ^Special purpose, only applies to global arrays
+  | InternalLinkage     -- ^Rename collisions when linking (static functions)
+  | PrivateLinkage      -- ^Like Internal, but omit from symbol table
+  | DLLImportLinkage    -- ^Function to be imported from DLL
+  | DLLExportLinkage    -- ^Function to be accessible from DLL
+  | ExternalWeakLinkage -- ^ExternalWeak linkage description
+  | GhostLinkage        -- ^Stand-in functions for streaming fns from BC files
+  | CommonLinkage       -- ^Tentative definitions
+  | LinkerPrivateLinkage -- ^Like Private, but linker removes.
+  | LinkerPrivateWeakLinkage -- ^Similar to PrivateLinkage, but the symbol is weak.
+  | LinkerPrivateWeakDefAutoLinkage -- ^Similar to LinkerPrivateWeakLinkage, but its known that the address of the object is not taken.
 
 -- Call Convention
 -- LLVM functions, calls and invokes can all have an optional calling convention specified for the call.
 data CConv 
-      | Ccc    -- The C calling convention
-      | Fastcc -- The fast calling convention
-      | Coldcc -- The cold calling convention
-      | Cc10   -- GHC convention
-      | Cc n :: Int -- Numbered convention
+  | Ccc    -- The C calling convention
+  | Fastcc -- The fast calling convention
+  | Coldcc -- The cold calling convention
+  | Cc10   -- GHC convention
+  | Cc n :: Int -- Numbered convention
 
 -- All Global Variables and Functions have one of the following visibility styles.
 data Visibility 
-      | Default
-      | Hidden
-      | Protected
+  | Default
+  | Hidden
+  | Protected
 
 -- Parameter Attributes      
 data Attribute
-    | ZExtAttribute
-    | SExtAttribute
-    | NoReturnAttribute
-    | InRegAttribute
-    | StructRetAttribute
-    | NoUnwindAttribute
-    | NoAliasAttribute
-    | ByValAttribute
-    | NestAttribute
-    | ReadNoneAttribute
-    | ReadOnlyAttribute
-    | NoInlineAttribute
-    | AlwaysInlineAttribute
-    | OptimizeForSizeAttribute
-    | StackProtectAttribute
-    | StackProtectReqAttribute
-    | NoCaptureAttribute
-    | NoRedZoneAttribute
-    | NoImplicitFloatAttribute
-    | NakedAttribute
+  | ZExtAttribute
+  | SExtAttribute
+  | NoReturnAttribute
+  | InRegAttribute
+  | StructRetAttribute
+  | NoUnwindAttribute
+  | NoAliasAttribute
+  | ByValAttribute
+  | NestAttribute
+  | ReadNoneAttribute
+  | ReadOnlyAttribute
+  | NoInlineAttribute
+  | AlwaysInlineAttribute
+  | OptimizeForSizeAttribute
+  | StackProtectAttribute
+  | StackProtectReqAttribute
+  | NoCaptureAttribute
+  | NoRedZoneAttribute
+  | NoImplicitFloatAttribute
+  | NakedAttribute
 
 -- Garbage Collector Names   
 data GCName
-      | GCName name :: String
+  | GCName name :: String
 
 -- Function Attributes
 data FunAttr
-      | AddressSafety
-      | Alignstack n :: Int
-      | Alwaysinline
-      | Nonlazybind
-      | Inlinehint
-      | Naked
-      | Noimplicitfloat
-      | Noinline
-      | Noredzone
-      | Noreturn
-      | Nounwind
-      | Optsize
-      | Readnone
-      | Readonly
-      | ReturnsTwice
-      | Ssp
-      | Sspreq
-      | Uwtable
+  | AddressSafety
+  | Alignstack n :: Int
+  | Alwaysinline
+  | Nonlazybind
+  | Inlinehint
+  | Naked
+  | Noimplicitfloat
+  | Noinline
+  | Noredzone
+  | Noreturn
+  | Nounwind
+  | Optsize
+  | Readnone
+  | Readonly
+  | ReturnsTwice
+  | Ssp
+  | Sspreq
+  | Uwtable
                   
 data DefinitionTy
-      | ThreadLocal
-      | ConstantD
+  | ThreadLocal
+  | ConstantD
 
 data Alias
-      | Alias 
-          name       :: Id
+  | Alias 
+      name       :: Id
 --          linkage    :: MLinkageTy
 --          visibility :: MVisibility
 --          aliaseeTy  :: Type

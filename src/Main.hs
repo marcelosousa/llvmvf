@@ -33,6 +33,7 @@ import Concurrent.Model.Encoder    (encode, encodeSysC)
 
 import Util.Demangler
 import Debug.Trace
+import Analysis.Memory.TypeAnn
 
 -- This module needs re-factoring for elegance.
 

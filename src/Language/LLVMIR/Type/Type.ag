@@ -1,0 +1,52 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Type.Type
+-- Copyright :  (c) 2012 Marcelo Sousa
+-- Standard LLVM IR Types
+-------------------------------------------------------------------------------
+}
+
+module {Language.LLVMIR.Type.Type}{}{}
+
+type Types = [Type]
+
+data Type
+  | TyVoid
+  | Tyx86MMX
+  | TyLabel
+  | TyMetadata
+  | TyOpaque
+  | TyInt 
+      p :: Int
+  | TyFloatPoint
+      p :: TyFloatPoint
+  | TyArray
+      numEl :: Int -- ^ Flat arrays?
+      ty    :: Type
+  | TyFunction
+      party :: Types
+      retty :: Type
+  | TyStruct
+      name  :: String
+      numEl :: Int
+      tys   :: Types
+  | TyPointer
+      ty :: Type
+  | TyVector
+      numEl :: Int
+      ty    :: Type
+  | TyUndefined
+
+data TyFloatPoint
+  | TyHalf -- ^ Compatible with i386?
+  | TyFloat
+  | TyDouble
+  | TyFP128
+  | Tyx86FP80
+  | TyPPCFP128
+
+set TypeSet = Type TyFloatPoint
+
+deriving TypeSet: Show
+deriving TypeSet: Eq
+deriving TypeSet: Ord

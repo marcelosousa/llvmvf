@@ -4,7 +4,7 @@ VERSION	:= 0.0.1
 
 BASEAG := src/Language/LLVMIR/Grammar/Base.ag
 PRINTAG := src/Language/LLVMIR/Printer/Module.ag
-TYPEAG := src/Language/LLVMIR/Grammar/Type.ag
+STYPEAG := src/Language/LLVMIR/Type/Standard.ag
 CONVERTAG := src/Language/LLVMIR/Converter/Module.ag
 PTHREADAG := src/Concurrent/Model/PThread.ag
 VISUALCCFG := src/Concurrent/Model/Visualizer.ag
@@ -16,40 +16,42 @@ TENCODEAG := src/Concurrent/Model/Encoder/Threads.ag
 SYSTEMCAG := src/Concurrent/Model/Analysis/SystemC.ag
 ARCHSYSCAG := src/Concurrent/Model/Analysis/SystemC/Architecture.ag
  
+AGFLAGS := -P src/Language/LLVMIR/Grammar -P src/Language/LLVMIR/Type
+
 all : haskell
 
 ag : base printer systemc pthread cflow ppccfg  dflow encoder converter
 
 base : $(BASEAG) $(TYPEAG)
-	uuagc -Hd --datarecords --self -P src/Language/LLVMIR/Grammar src/Language/LLVMIR.ag
+	uuagc -Hd --datarecords --self $(AGFLAGS) src/Language/LLVMIR.ag
 
 printer : base $(PRINTAG) 
-	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(PRINTAG)
+	uuagc -Hcfws --self $(AGFLAGS) $(PRINTAG)
 
 converter : base $(CONVERTAG) 
-	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(CONVERTAG)
+	uuagc -Hcfws --self $(AGFLAGS) $(CONVERTAG)
 
 esencoder : base 
-	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar -P src/Concurrent/Model/ESEncoder $(ESENCODEAG)
+	uuagc -Hcfws --self $(AGFLAGS) -P src/Concurrent/Model/ESEncoder $(ESENCODEAG)
 
 encoder : base 
-	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar -P src/Concurrent/Model/Encoder $(ENCODEAG)
-	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar -P src/Concurrent/Model/Encoder $(TENCODEAG)
+	uuagc -Hcfws --self $(AGFLAGS) -P src/Concurrent/Model/Encoder $(ENCODEAG)
+	uuagc -Hcfws --self $(AGFLAGS) -P src/Concurrent/Model/Encoder $(TENCODEAG)
 
 pthread : base $(PTHREADAG) 
-	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(PTHREADAG)
+	uuagc -Hcfws --self $(AGFLAGS) $(PTHREADAG)
 
 systemc : base $(SYSTEMCAG) $(ARCHSYSCAG) 
-	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar -P src/Concurrent/Model/Analysis/SystemC $(SYSTEMCAG)
+	uuagc -Hcfws --self $(AGFLAGS) -P src/Concurrent/Model/Analysis/SystemC $(SYSTEMCAG)
 
 cflow : base $(CFLOWAG) 
-	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(CFLOWAG)
+	uuagc -Hcfws --self $(AGFLAGS) $(CFLOWAG)
 
 dflow : base $(DFLOWAG) 
-	uuagc -Hcfws --self -P src/Language/LLVMIR/Grammar $(DFLOWAG)
+	uuagc -Hcfws --self $(AGFLAGS) $(DFLOWAG)
 
 ppccfg : base $(VISUALCCFG)
-	uuagc -Hcfws --self -P src/Analysis -P src/Language/LLVMIR/Grammar -P src/Language/LLVMIR/Printer $(VISUALCCFG)
+	uuagc -Hcfws --self -P src/Analysis $(AGFLAGS) -P src/Language/LLVMIR/Printer $(VISUALCCFG)
 
 haskell : ag
 	cabal install
