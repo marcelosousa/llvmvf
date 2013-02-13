@@ -86,7 +86,7 @@ data Instruction
       pc     :: PC
       mres   :: Identifier
       ty     :: Type
-      callee :: Id 
+      callee :: Identifier
       args   :: Values 
   | Select
       pc :: PC
@@ -118,7 +118,7 @@ data Instruction
       args :: Values
       op  :: BinOp
       ord :: AtomicOrdering
-  -- Concurrent Operations
+  -- Concurrent Operations Added
   | CreateThread
       pc   :: PC 
       args :: Values

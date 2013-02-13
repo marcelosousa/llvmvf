@@ -27,7 +27,7 @@ import Language.LLVMIR
 attr Functions Function BasicBlocks BasicBlock
   chn ilabel :: {ILabel}
 
-attr Function BasicBlocks BasicBlock Instructions Instruction
+attr Function BasicBlocks BasicBlock Instructions Instruction Identifier
   syn ppccfg use {<$>} {P.empty} :: {Doc}
 
 sem BasicBlocks BasicBlock
@@ -40,13 +40,15 @@ sem Functions
 sem Function
   | FunctionDecl lhs.ppccfg = P.empty
   | FunctionDef
-      lhs.ppccfg = text "subgraph cluster_" <> text @name.self <+> text "{" </>
+      lhs.ppccfg = text "subgraph cluster_" <> @name.ppccfg <+> text "{" </>
                    text "style=filled;" </>
                    text "color=lightblue;" </>
                    @body.ppccfg </>
-                   text "label = \"function" <+> text @name.self <> text "\"; }"
+                   text "label = \"function" <+> @name.ppccfg <> text "\"; }"
       loc.ilabel :: uniqueref ilabel
-      body.fname = @name.self
+      body.fname = case @name.self of 
+                     Global x -> x
+                     Local  y -> error "Visualizer: Function should always be a Global"
 
 sem BasicBlock
   | BasicBlock
@@ -56,6 +58,10 @@ sem BasicBlock
                    @instrs.ppccfg </>
                    text "label = \"basic block" <+> text @label.self <> text "\"; }"
       loc.ilabel :: uniqueref ilabel
+
+sem Identifier
+  | Local  lhs.ppccfg = text @name.self
+  | Global lhs.ppccfg = text @name.self
 
 sem Instruction
   | Ret Alloca Load Store ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW 
@@ -75,7 +81,7 @@ sem Instruction
   | NotifyEvent 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "notify_event")
   | Call
-      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "call" <+> text @callee)
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "call" <+> @callee.ppccfg)
 {
 type ILabel = Int
 

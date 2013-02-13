@@ -114,7 +114,7 @@ data ModuleAsm
       
 data Global 
   | GlobalVar 
-      name    :: Id
+      name    :: Identifier
       linkage :: Linkage
       isConst :: Bool
       isUaddr :: Bool 
@@ -125,7 +125,7 @@ data Global
 
 data Function 
   | FunctionDef 
-      name    :: Id
+      name    :: Identifier
       linkage :: Linkage
       retty   :: Type
       params  :: Parameters
@@ -139,7 +139,7 @@ data Function
 --          optAlign   :: MAlign
 --          gcName     :: MGCName
   | FunctionDecl
-      name       :: Id
+      name       :: Identifier
       linkage    :: Linkage
       retty      :: Type
       params     :: Parameters
@@ -152,7 +152,7 @@ data Function
 
 {
 emptyFunction :: Function
-emptyFunction = FunctionDef "undefined" ExternalLinkage TyVoid [] []
+emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid [] []
 }
           
 data BasicBlock
@@ -224,7 +224,7 @@ data Argument
 
 data Parameter
   | Parameter 
-      var :: Id  -- ^In practice, the name is optional
+      var :: Identifier -- ^In practice, the name is optional
       ty  :: Type
        -- attr :: MAttribute            
 

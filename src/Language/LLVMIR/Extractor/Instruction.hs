@@ -226,7 +226,7 @@ getOtherOp Call = do ival  <- getInstructionValue
                      (callee, args) <- getOperands ival >>= getCallArgs
                      --liftIO $ print callee
                      callee' <- liftIO $ demangler callee
-                     return $ LL.Call pc (LL.Local ident) ty callee' args
+                     return $ LL.Call pc (LL.Local ident) ty (LL.Global callee') args
 getOtherOp Select         = do ival <- getInstructionValue
                                pc   <- getPC
                                ident <- getIdent ival

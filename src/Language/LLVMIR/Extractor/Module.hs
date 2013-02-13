@@ -129,7 +129,7 @@ getGlobal (gname, gval) = do link  <- liftIO $ FFI.getLinkage gval
                                  lllink  = convertLinkage $ FFI.toLinkage link
                              llival <- getInitVal gval isC
                              ty <- typeOf gval
-                             return $ LL.GlobalVar gname lllink isC llunadd ty llival llalign
+                             return $ LL.GlobalVar (LL.Global gname) lllink isC llunadd ty llival llalign
 
 -- Functions
 getFuns :: Context IO LL.Functions 
@@ -148,14 +148,14 @@ getFunction (fname, fval) = do b    <- liftIO $ FFI.isDeclaration fval
                                params <- forM pars getParam
                                let lllink = convertLinkage $ FFI.toLinkage link
                                if cInt2Bool b
-                               then return (fname', LL.FunctionDecl fname' lllink rty params)
+                               then return (fname', LL.FunctionDecl (LL.Global fname') lllink rty params)
                                else do bbs <- liftIO $ getBasicBlocks fval
                                        llbbs <- forM bbs getBasicBlock 
-                                       return (fname', LL.FunctionDef fname' lllink rty params llbbs)
+                                       return (fname', LL.FunctionDef (LL.Global fname') lllink rty params llbbs)
 
 getParam :: (String, Value) -> Context IO LL.Parameter
 getParam (pname, pval) = do ty <- typeOf pval
-                            return $ LL.Parameter pname ty
+                            return $ LL.Parameter (LL.Local pname) ty
 
 -- Basic Blocks                                 
 getBasicBlock :: (String, Value) -> Context IO LL.BasicBlock

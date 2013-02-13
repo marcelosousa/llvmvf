@@ -37,7 +37,7 @@ sem Globals
 
 sem Global
   | GlobalVar lhs.etm = \t -> let v = EBot -- TODO
-                              in ELet @name.self v t
+                              in ELet (getIdentifier @name.self) v t
 
 -- Functions
 attr Functions
@@ -55,7 +55,7 @@ attr Function
   syn etm :: {ETm}
 
 sem Function
-  | FunctionDef lhs.etm = trace (show @body.phis) $ EFun @name.self @params.etm (buildbb "bb" @body.etm)
+  | FunctionDef lhs.etm = trace (show @body.phis) $ EFun (getIdentifier @name.self) @params.etm (buildbb "bb" @body.etm)
                 body.phis = @body.phis
   | FunctionDecl lhs.etm = EBot
 
@@ -67,7 +67,7 @@ attr Parameter
   syn etm :: {ETm}
 
 sem Parameter
-  | Parameter lhs.etm = EVar @var.self
+  | Parameter lhs.etm = EVar $ getIdentifier @var.self
 
 -- Basic Blocks
 attr BasicBlocks
@@ -128,7 +128,7 @@ sem Instruction
                                     in ELet i o (head t)
                           in ([], f)
   | Call        lhs.etm = let f t = let i = getId @mres.etm
-                                        c = EVar @callee.self
+                                        c = EVar $ getIdentifier @callee.self
                                         a = @args.etm
                                     in ELet i (calletm c a) (head t)
                           in ([], f)
@@ -160,6 +160,10 @@ sem Constant
   | * - ConstantInt lhs.etm = EBot
 
 {
+getIdentifier :: Identifier -> String
+getIdentifier (Global a) = a
+getIdentifier (Local  a) = a
+
 getId :: ETm -> Label 
 getId (EVar i) = i 
 

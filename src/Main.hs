@@ -25,15 +25,15 @@ import UU.PPrint
 import Language.SMTLib2.Printer    (prettyprint)
 
 import Concurrent.Model
-import Concurrent.Model.PThread
+--import Concurrent.Model.PThread
 -- import Concurrent.Model.SystemC
 import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
-import Concurrent.Model.Encoder    (encode, encodeSysC)    
+--import Concurrent.Model.Encoder    (encode, encodeSysC)    
 
 import Util.Demangler
 import Debug.Trace
-import Analysis.Memory.TypeAnn
+import Analysis.Memory.TyAnnInf
 
 -- This module needs re-factoring for elegance.
 
@@ -49,25 +49,24 @@ instance Default Options where
   def = Parse
 
 runOption :: FilePath -> Options -> Int -> IO ()
-runOption bc Parse k = do mdl <- extract bc
-                          let bf  = dropExtension bc
-                              mod = (model mdl) :: Model PThread
-                          writeFile (addExtension bf "llvf")  (show $ pretty mdl)
-                          writeFile (addExtension bf "model") (show $ mod) 
-                          writeFile (addExtension bf "dot")   (show $ pretty mod)
-                          writeFile (addExtension bf "dfg")   (show $ dataflow mod)
-                          writeFile (addExtension bf "smt2")  (show $ prettyprint $ encode mod k)
-runOption bc Visualize _ = do mdl <- extract bc
-                              let bf = dropExtension bc
-                                  mod = (model mdl) :: Model PThread
-                              writeFile (addExtension bf "dot") (show $ pretty mod)
 runOption bc Extract   _ = do mdl <- extract bc
                               let bf = dropExtension bc
                               writeFile (addExtension bf "llvf") (show $ pretty mdl)
 runOption bc Htm _ = do mdl <- extract bc
                         let bf = dropExtension bc
                         writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)
-
+--runOption bc Parse k = do mdl <- extract bc
+--                          let bf  = dropExtension bc
+--                              mod = (model mdl) :: Model PThread
+--                          writeFile (addExtension bf "llvf")  (show $ pretty mdl)
+--                          writeFile (addExtension bf "model") (show $ mod) 
+--                          writeFile (addExtension bf "dot")   (show $ pretty mod)
+--                          writeFile (addExtension bf "dfg")   (show $ dataflow mod)
+--                          writeFile (addExtension bf "smt2")  (show $ prettyprint $ encode mod k)
+--runOption bc Visualize _ = do mdl <- extract bc
+--                              let bf = dropExtension bc
+--                                  mod = (model mdl) :: Model PThread
+--                              writeFile (addExtension bf "dot") (show $ pretty mod)
 --runOption bc SystemC   k = do print "SystemC version"
 --                              mdl <- extract bc
 --                              let bf = dropExtension bc

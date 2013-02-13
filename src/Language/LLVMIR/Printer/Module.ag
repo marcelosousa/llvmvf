@@ -59,14 +59,14 @@ sem Module
   | Module lhs.pp = text ("; ModuleID ='" ++ @id ++ "'") <$> @layout.pp <$> @target.pp <$> P.empty <$>  @nmdtys.pp <$> @gvars.pp <$> @funs.pp 
 
 sem Global
-  | GlobalVar lhs.pp = text "@" <> text @name.self <+> text "=" <+>  @linkage.pp <+> ppKeyword @isUaddr "unnamed_addr" <+> ppKeyword @isConst "constant" <+> text "," <+> @ival.pp <> text "," <+> @align.pp 
+  | GlobalVar lhs.pp = @name.pp <+> text "=" <+>  @linkage.pp <+> ppKeyword @isUaddr "unnamed_addr" <+> ppKeyword @isConst "constant" <+> text "," <+> @ival.pp <> text "," <+> @align.pp 
 
 sem Function
-  | FunctionDef  lhs.pp = text "define"  <+> @linkage.pp <+> @retty.pp <+> char '@' <> text @name.self <> parens @params.pp <> char '{' <$> @body.pp <$> char '}'
-  | FunctionDecl lhs.pp = text "declare" <+> @linkage.pp <+> @retty.pp <+> char '@' <> text @name.self <> parens @params.pp
+  | FunctionDef  lhs.pp = text "define"  <+> @linkage.pp <+> @retty.pp <+> @name.pp <> parens @params.pp <> char '{' <$> @body.pp <$> char '}'
+  | FunctionDecl lhs.pp = text "declare" <+> @linkage.pp <+> @retty.pp <+> @name.pp <> parens @params.pp
 
 sem Parameter
-  | Parameter lhs.pp = @ty.pp <> ppPName @var.self
+  | Parameter lhs.pp = @ty.pp <> @var.pp
 
 sem BasicBlock
   | BasicBlock lhs.pp = text "; <label>:" <> text @label.self <$> @instrs.pp
@@ -86,7 +86,7 @@ sem Instruction
   | FCmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
   | UBr    loc.pp = text "br" <+> @d.pp
   | Br     loc.pp = text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
-  | Call   loc.pp = @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> char '@' <> text @callee <> char '(' <> @args.pp <> char ')'
+  | Call   loc.pp = @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
   | Unreachable loc.pp = text "unreachable"
   | Trunc    loc.pp = pConvOp @id.pp "trunc"    @v.pp @ty.pp
   | ZExt     loc.pp = pConvOp @id.pp "zext"     @v.pp @ty.pp
