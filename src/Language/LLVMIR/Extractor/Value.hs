@@ -30,7 +30,7 @@ import Language.LLVMIR.Extractor.Context
 getValue :: (String, Value) -> Context IO LL.Value
 getValue (n, v) = do isC <- liftIO $ FFI.isConstant v
                      if cInt2Bool isC
-                     then getConstantValue v
+                     then getConstantValue v >>= return . LL.Constant
                      else getIdentValue n v
 
 getIdentValue :: String -> Value -> Context IO LL.Value
@@ -38,9 +38,9 @@ getIdentValue n v = do ty <- typeOf v
                        return $ LL.Id (LL.Local n) ty
 
 -- Constants
-getConstantValue :: Value -> Context IO LL.Value
+getConstantValue :: Value -> Context IO LL.Constant
 getConstantValue v = do vc <- liftIO $ FFI.getConstantClass v
-                        let constant = case toConstantClass vc of
+                        case toConstantClass vc of
                              BlockAddr              -> getBlockAddr v
                              ConstantAggregateZero  -> getConstantAggregateZero v
                              ConstantArray          -> getConstantArray v
@@ -53,7 +53,7 @@ getConstantValue v = do vc <- liftIO $ FFI.getConstantClass v
                              ConstantVector         -> getConstantVector v
                              GlobalValue            -> getGlobalValue v >>= return . LL.GlobalValue
                              UndefValue             -> return LL.UndefValue
-                        constant >>= return . LL.Constant
+                        
 
 getBlockAddr :: Value -> Context IO LL.Constant
 getBlockAddr = error "TODO getBlockAddr"

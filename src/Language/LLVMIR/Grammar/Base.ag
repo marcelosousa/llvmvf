@@ -18,7 +18,6 @@ import Data.Map hiding (foldr)
 #else
 import Data.Map 
 #endif
-
 }
 
 include "Instruction.ag"
@@ -53,7 +52,6 @@ type MLinkageTy = maybe Linkage
 type MVisibility = maybe Visibility
 type MCConv = maybe CConv
 type MUnnamedAddr = maybe Bool -- maybe () would be better
-type MConstant = maybe Bool
 type MDefinitionTy = maybe DefinitionTy
 type MAttributes = maybe Attributes
 type MAlign = maybe Align
@@ -61,6 +59,7 @@ type MGCName = maybe GCName
 type MModuleAsms = maybe ModuleAsms
 type MSection = maybe Section
 type MValue = maybe Value
+type MConstant = maybe Constant
 
 type Triplet = (Int, Int, Int)
 type MapTyInt = map {Type} Triplet
@@ -90,7 +89,7 @@ data Module
 --          mdlasm :: MModuleAsms
 
 -- data Endianness
---       | BigEndian
+	--       | BigEndian
 --       | LittleEndian
 
 data DataLayout
@@ -119,7 +118,7 @@ data Global
       isConst :: Bool
       isUaddr :: Bool 
       ty      :: Type 
-      ival    :: MValue
+      ival    :: MConstant
       align   :: Align
 --          section  :: MSection
 

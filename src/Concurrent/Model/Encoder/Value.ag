@@ -8,14 +8,14 @@
 module {Concurrent.Model.Encoder.Value}{}{}
 
 -- Value S Expressions
-attr MValue 
+attr MConstant 
   chn mts    :: {TypeEnv} 
   syn sexprs :: {SExpressions}
   syn sexpr  :: {[SExpr]}
   inh tn     :: {String}             -- Thread Name
   inh val    :: {Map.Map Id (Type, [PC])}
     
-sem MValue
+sem MConstant
   | Nothing 
       lhs.sexpr  = [] 
          .sexprs = []

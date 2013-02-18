@@ -9,19 +9,30 @@ module Analysis.Memory.TyAnn where
 type TysAnn = [TyAnn]
 
 -- First Class Type are the ones produced by instructions
-data TyAnn = TyVoid
-           | TyUndefined
-           | TyInt Int
-           | TyFloatPoint -- Just a tag
-           | TyVector Int TyAnn
-           | TyArray  Int TyAnn         -- Derived + Aggregate  
-           | TyStruct String Int TysAnn -- Derived + Aggregate
-           | TyFun TysAnn TyAnn
-           | TyPtr TyAnn  TyAnnotation
+data TyAnn = TyBot
+           | TyPri TyPri
+           | TyDer TyDer
   deriving (Show, Eq, Ord)
 
-data TyAnnotation = TyIOAddr
-                  | TyRegAddr
-                  | TyAny
+data TyPri = TyVoid
+           | TyInt Int
+           | TyFloatPoint -- Just a tag
+  deriving (Show, Eq, Ord)
+
+data TyDer = TyAgg TyAgg
+           | TyVector Int TyAnn
+           | TyFun TysAnn TyAnn
+           | TyLab TysAnn TyAnn
+           | TyPtr TyAnn  TyAnnot
+           | TyOpa String
+  deriving (Show, Eq, Ord)
+
+data TyAgg = TyArray  Int TyAnn         -- Derived + Aggregate  
+           | TyStruct String Int TysAnn -- Derived + Aggregate
+  deriving (Show, Eq, Ord)
+
+data TyAnnot = TyIOAddr
+             | TyRegAddr
+             | TyAny
   deriving (Show, Eq, Ord)
 

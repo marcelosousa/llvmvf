@@ -113,7 +113,7 @@ getGlobalVar = do e@Env{..} <- getEnv
                   globals   <- liftIO $ getGlobalVariables mdl
                   forM globals getGlobal
 
-getInitVal :: Value -> Bool -> Context IO (Maybe LL.Value)
+getInitVal :: Value -> Bool -> Context IO (Maybe LL.Constant)
 getInitVal gv isC | isC == False = return Nothing
                   | otherwise    = do cval <- liftIO $ FFI.getInitializer gv
                                       val  <- getConstantValue cval

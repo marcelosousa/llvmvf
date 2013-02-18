@@ -33,7 +33,7 @@ sem Ints
 sem PValue
   | Tuple lhs.pp = char '[' <+> @x1.pp <> char ',' <+> @x2.pp <+> char ']'
 
-attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTypes Constant GlobalValue ConstantDataSequential ConstantExpr CompareConstantExpr ConstantFP RetInst BinOp AtomicOrdering
+attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTypes Constant GlobalValue ConstantDataSequential ConstantExpr CompareConstantExpr ConstantFP RetInst BinOp AtomicOrdering MConstant
   syn pp use {<$>} {P.empty} :: {Doc}
 
 attr Target 
@@ -231,6 +231,10 @@ sem Align
   | Align lhs.pp = text "align" <+> text (show @n)
 
 sem MValue
+  | Nothing lhs.pp = P.empty
+  | Just    lhs.pp = @just.pp
+
+sem MConstant
   | Nothing lhs.pp = P.empty
   | Just    lhs.pp = @just.pp
 
