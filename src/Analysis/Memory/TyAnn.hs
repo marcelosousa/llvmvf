@@ -10,25 +10,26 @@ type TysAnn = [TyAnn]
 
 -- First Class Type are the ones produced by instructions
 data TyAnn = TyBot
+           | TyUndef
            | TyPri TyPri
            | TyDer TyDer
   deriving (Show, Eq, Ord)
 
 data TyPri = TyVoid
            | TyInt Int
-           | TyFloatPoint -- Just a tag
+           | TyFloat -- Just a tag
   deriving (Show, Eq, Ord)
 
 data TyDer = TyAgg TyAgg
-           | TyVector Int TyAnn
-           | TyFun TysAnn TyAnn
+           | TyVec Int TyAnn
+           | TyFun TysAnn TysAnn
            | TyLab TysAnn TyAnn
            | TyPtr TyAnn  TyAnnot
            | TyOpa String
   deriving (Show, Eq, Ord)
 
-data TyAgg = TyArray  Int TyAnn         -- Derived + Aggregate  
-           | TyStruct String Int TysAnn -- Derived + Aggregate
+data TyAgg = TyArr  Int TyAnn         -- Derived + Aggregate  
+           | TyStr String Int TysAnn -- Derived + Aggregate
   deriving (Show, Eq, Ord)
 
 data TyAnnot = TyIOAddr

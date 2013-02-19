@@ -171,6 +171,7 @@ data Value
 
 data Constant
   | BlockAddr
+  | UndefValue
   | ConstantAggregateZero  ty   :: Type
   | ConstantArray          ty   :: Type  vals :: Values
   | ConstantDataSequential cds  :: ConstantDataSequential
@@ -179,9 +180,8 @@ data Constant
   | ConstantInt            iv   :: Int   ty :: Type
   | ConstantPointerNull    ty   :: Type
   | ConstantStruct         ty   :: Type vals :: Values
-  | ConstantVector          
+  | ConstantVector         ty   :: Type vals :: Values 
   | GlobalValue            gv :: GlobalValue
-  | UndefValue
 
 data ConstantFP
   | ConstantFPFloat  fpv :: Float ty :: Type

@@ -57,7 +57,7 @@ runOption bc Htm _ = do mdl <- extract bc
                         let bf = dropExtension bc
                         writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)
 runOption bc Type _ = do mdl <- extract bc
-                         print $ modtyinf mdl
+                         print $ modTyInf mdl
 --runOption bc Parse k = do mdl <- extract bc
 --                          let bf  = dropExtension bc
 --                              mod = (model mdl) :: Model PThread

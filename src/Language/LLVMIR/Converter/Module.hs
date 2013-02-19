@@ -1004,8 +1004,8 @@ sem_Constant (ConstantPointerNull _ty) =
     (sem_Constant_ConstantPointerNull (sem_Type _ty))
 sem_Constant (ConstantStruct _ty _vals) =
     (sem_Constant_ConstantStruct (sem_Type _ty) (sem_Values _vals))
-sem_Constant (ConstantVector) =
-    (sem_Constant_ConstantVector)
+sem_Constant (ConstantVector _ty _vals) =
+    (sem_Constant_ConstantVector (sem_Type _ty) (sem_Values _vals))
 sem_Constant (GlobalValue _gv) =
     (sem_Constant_GlobalValue (sem_GlobalValue _gv))
 sem_Constant (UndefValue) =
@@ -1189,19 +1189,28 @@ sem_Constant_ConstantStruct ty_ vals_ =
          ( _valsIetm,_valsIself) =
              vals_
      in  ( _lhsOetm,_lhsOself))
-sem_Constant_ConstantVector :: T_Constant
-sem_Constant_ConstantVector =
+sem_Constant_ConstantVector :: T_Type ->
+                               T_Values ->
+                               T_Constant
+sem_Constant_ConstantVector ty_ vals_ =
     (let _lhsOetm :: ETm
          _lhsOself :: Constant
+         _tyIself :: Type
+         _valsIetm :: ([ETm])
+         _valsIself :: Values
          _lhsOetm =
              ({-# LINE 160 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               EBot
-              {-# LINE 1200 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 1205 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
-             ConstantVector
+             ConstantVector _tyIself _valsIself
          _lhsOself =
              _self
+         ( _tyIself) =
+             ty_
+         ( _valsIetm,_valsIself) =
+             vals_
      in  ( _lhsOetm,_lhsOself))
 sem_Constant_GlobalValue :: T_GlobalValue ->
                             T_Constant
@@ -1212,7 +1221,7 @@ sem_Constant_GlobalValue gv_ =
          _lhsOetm =
              ({-# LINE 160 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               EBot
-              {-# LINE 1216 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 1225 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              GlobalValue _gvIself
@@ -1228,7 +1237,7 @@ sem_Constant_UndefValue =
          _lhsOetm =
              ({-# LINE 160 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               EBot
-              {-# LINE 1232 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 1241 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              UndefValue
@@ -1836,7 +1845,7 @@ sem_Function_FunctionDef name_ linkage_ retty_ params_ body_ =
          _lhsOetm =
              ({-# LINE 58 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               trace (show _bodyIphis) $ EFun (getIdentifier _nameIself) _paramsIetm (buildbb "bb" _bodyIetm)
-              {-# LINE 1840 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 1849 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              FunctionDef _nameIself _linkageIself _rettyIself _paramsIself _bodyIself
@@ -1845,7 +1854,7 @@ sem_Function_FunctionDef name_ linkage_ retty_ params_ body_ =
          _bodyOphim =
              ({-# LINE 76 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               error "missing rule: Function.FunctionDef.body.phim"
-              {-# LINE 1849 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 1858 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          ( _nameIetm,_nameIself) =
              name_
@@ -1875,7 +1884,7 @@ sem_Function_FunctionDecl name_ linkage_ retty_ params_ =
          _lhsOetm =
              ({-# LINE 60 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               EBot
-              {-# LINE 1879 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 1888 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              FunctionDecl _nameIself _linkageIself _rettyIself _paramsIself
@@ -1923,7 +1932,7 @@ sem_Functions_Entry key_ val_ tl_ =
               then let x = _valIetm
                    in trace (show x) $ x
               else _tlIetm
-              {-# LINE 1927 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 1936 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Data.Map.insert key_ _valIself _tlIself
@@ -1941,7 +1950,7 @@ sem_Functions_Nil =
          _lhsOetm =
              ({-# LINE 47 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               EBot
-              {-# LINE 1945 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 1954 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Data.Map.empty
@@ -2010,7 +2019,7 @@ sem_Global_GlobalVar name_ linkage_ isConst_ isUaddr_ ty_ ival_ align_ =
              ({-# LINE 39 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               \t -> let v = EBot
                     in ELet (getIdentifier _nameIself) v t
-              {-# LINE 2014 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 2023 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              GlobalVar _nameIself _linkageIself isConst_ isUaddr_ _tyIself _ivalIself _alignIself
@@ -2127,7 +2136,7 @@ sem_Globals_Cons hd_ tl_ =
          _lhsOetm =
              ({-# LINE 36 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               _hdIetm . _tlIetm
-              {-# LINE 2131 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 2140 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -2145,7 +2154,7 @@ sem_Globals_Nil =
          _lhsOetm =
              ({-# LINE 35 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               id
-              {-# LINE 2149 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 2158 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              []
@@ -2204,7 +2213,7 @@ sem_Identifier_Global name_ =
          _lhsOetm =
              ({-# LINE 155 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               EVar _nameIself
-              {-# LINE 2208 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 2217 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Global _nameIself
@@ -2222,7 +2231,7 @@ sem_Identifier_Local name_ =
          _lhsOetm =
              ({-# LINE 156 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               EVar _nameIself
-              {-# LINE 2226 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 2235 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Local _nameIself
@@ -2411,12 +2420,12 @@ sem_Instruction_Ret pc_ r_ =
               _lhsOetm =
                   ({-# LINE 113 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const _rIetm)
-                   {-# LINE 2415 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2424 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2420 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2429 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Ret _pcIself _rIself
@@ -2447,12 +2456,12 @@ sem_Instruction_Br pc_ v_ t_ f_ =
               _lhsOetm =
                   ({-# LINE 114 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([getId _tIetm, getId _fIetm], \t -> EIf _vIetm (t!!0) (t!!1))
-                   {-# LINE 2451 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2460 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2456 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2465 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Br _pcIself _vIself _tIself _fIself
@@ -2481,12 +2490,12 @@ sem_Instruction_UBr pc_ d_ =
               _lhsOetm =
                   ({-# LINE 115 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([getId _dIetm], head)
-                   {-# LINE 2485 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2494 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2490 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2499 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   UBr _pcIself _dIself
@@ -2510,12 +2519,12 @@ sem_Instruction_Switch pc_ elems_ =
               _lhsOetm =
                   ({-# LINE 116 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    error "Switch TODO"
-                   {-# LINE 2514 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2523 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2519 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2528 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Switch _pcIself _elemsIself
@@ -2537,12 +2546,12 @@ sem_Instruction_Unreachable pc_ =
               _lhsOetm =
                   ({-# LINE 117 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 2541 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2550 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2546 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2555 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Unreachable _pcIself
@@ -2576,12 +2585,12 @@ sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
                                  o = EApp (EApp (EVar "(+)") _op1Ietm) _op2Ietm
                              in ELet i o (head t)
                    in ([], f)
-                   {-# LINE 2580 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2589 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2585 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2594 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Add _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2620,12 +2629,12 @@ sem_Instruction_FAdd pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 2624 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2633 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2629 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2638 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   FAdd _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2664,12 +2673,12 @@ sem_Instruction_Sub pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 2668 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2677 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2673 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2682 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Sub _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2708,12 +2717,12 @@ sem_Instruction_FSub pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 2712 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2721 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2717 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2726 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   FSub _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2755,12 +2764,12 @@ sem_Instruction_Mul pc_ id_ ty_ op1_ op2_ =
                                  o = EApp (EApp (EVar "(*)") _op1Ietm) _op2Ietm
                              in ELet i o (head t)
                    in ([], f)
-                   {-# LINE 2759 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2768 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2764 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2773 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Mul _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2799,12 +2808,12 @@ sem_Instruction_FMul pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 2803 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2812 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2808 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2817 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   FMul _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2843,12 +2852,12 @@ sem_Instruction_UDiv pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 2847 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2856 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2852 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2861 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   UDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2887,12 +2896,12 @@ sem_Instruction_SDiv pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 2891 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2900 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2896 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2905 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   SDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2931,12 +2940,12 @@ sem_Instruction_FDiv pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 2935 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2944 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2940 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2949 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   FDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2975,12 +2984,12 @@ sem_Instruction_URem pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 2979 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2988 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 2984 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 2993 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   URem _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3019,12 +3028,12 @@ sem_Instruction_SRem pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3023 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3032 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3028 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3037 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   SRem _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3063,12 +3072,12 @@ sem_Instruction_FRem pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3067 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3076 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3072 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3081 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   FRem _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3107,12 +3116,12 @@ sem_Instruction_Shl pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3111 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3120 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3116 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3125 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Shl _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3151,12 +3160,12 @@ sem_Instruction_LShr pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3155 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3164 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3160 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3169 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   LShr _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3195,12 +3204,12 @@ sem_Instruction_AShr pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3199 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3208 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3204 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3213 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   AShr _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3239,12 +3248,12 @@ sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3243 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3252 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3248 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3257 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   And _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3283,12 +3292,12 @@ sem_Instruction_Or pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3287 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3296 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3292 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3301 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Or _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3327,12 +3336,12 @@ sem_Instruction_Xor pc_ id_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3331 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3340 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3336 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3345 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Xor _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3367,12 +3376,12 @@ sem_Instruction_Alloca pc_ id_ ty_ align_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3371 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3380 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3376 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3385 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Alloca _pcIself _idIself _tyIself _alignIself
@@ -3408,12 +3417,12 @@ sem_Instruction_Store pc_ ty_ v1_ v2_ align_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3412 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3421 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3417 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3426 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Store _pcIself _tyIself _v1Iself _v2Iself _alignIself
@@ -3449,12 +3458,12 @@ sem_Instruction_Load pc_ id_ v_ align_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3453 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3462 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3458 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3467 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Load _pcIself _idIself _vIself _alignIself
@@ -3491,12 +3500,12 @@ sem_Instruction_GetElementPtr pc_ id_ ty_ struct_ idxs_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3495 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3504 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3500 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3509 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   GetElementPtr _pcIself _idIself _tyIself _structIself _idxsIself
@@ -3532,12 +3541,12 @@ sem_Instruction_Trunc pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3536 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3545 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3541 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3550 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Trunc _pcIself _idIself _vIself _tyIself
@@ -3571,12 +3580,12 @@ sem_Instruction_ZExt pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3575 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3584 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3580 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3589 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   ZExt _pcIself _idIself _vIself _tyIself
@@ -3610,12 +3619,12 @@ sem_Instruction_SExt pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3614 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3623 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3619 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3628 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   SExt _pcIself _idIself _vIself _tyIself
@@ -3649,12 +3658,12 @@ sem_Instruction_FPToUI pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3653 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3662 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3658 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3667 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   FPToUI _pcIself _idIself _vIself _tyIself
@@ -3688,12 +3697,12 @@ sem_Instruction_FPToSI pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3692 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3701 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3697 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3706 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   FPToSI _pcIself _idIself _vIself _tyIself
@@ -3727,12 +3736,12 @@ sem_Instruction_UIToFP pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3731 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3740 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3736 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3745 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   UIToFP _pcIself _idIself _vIself _tyIself
@@ -3766,12 +3775,12 @@ sem_Instruction_SIToFP pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3770 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3779 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3775 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3784 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   SIToFP _pcIself _idIself _vIself _tyIself
@@ -3805,12 +3814,12 @@ sem_Instruction_FPTrunc pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3809 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3818 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3814 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3823 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   FPTrunc _pcIself _idIself _vIself _tyIself
@@ -3844,12 +3853,12 @@ sem_Instruction_FPExt pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3848 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3857 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3853 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3862 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   FPExt _pcIself _idIself _vIself _tyIself
@@ -3883,12 +3892,12 @@ sem_Instruction_PtrToInt pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3887 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3896 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3892 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3901 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   PtrToInt _pcIself _idIself _vIself _tyIself
@@ -3922,12 +3931,12 @@ sem_Instruction_IntToPtr pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3926 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3935 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3931 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3940 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   IntToPtr _pcIself _idIself _vIself _tyIself
@@ -3961,12 +3970,12 @@ sem_Instruction_BitCast pc_ id_ v_ ty_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 3965 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3974 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 3970 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 3979 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   BitCast _pcIself _idIself _vIself _tyIself
@@ -4008,12 +4017,12 @@ sem_Instruction_ICmp pc_ id_ cond_ ty_ op1_ op2_ =
                                  o = EApp (EApp (EVar $ "ICmp" ++ show _condIself) (_op1Ietm)) _op2Ietm
                              in trace (show t) $ ELet i o $! (head t)
                    in ([], f)
-                   {-# LINE 4012 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4021 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4017 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4026 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   ICmp _pcIself _idIself _condIself _tyIself _op1Iself _op2Iself
@@ -4056,12 +4065,12 @@ sem_Instruction_FCmp pc_ id_ cond_ ty_ op1_ op2_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4060 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4069 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4065 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4074 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   FCmp _pcIself _idIself _condIself _tyIself _op1Iself _op2Iself
@@ -4098,12 +4107,12 @@ sem_Instruction_PHI pc_ id_ ty_ vals_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4102 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4111 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 136 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    [(getId _idIetm, Prelude.map (\(a,b) -> (a, getLabel b)) _valsIself)]
-                   {-# LINE 4107 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4116 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   PHI _pcIself _idIself _tyIself _valsIself
@@ -4144,12 +4153,12 @@ sem_Instruction_Call pc_ mres_ ty_ callee_ args_ =
                                  a = _argsIetm
                              in ELet i (calletm c a) (head t)
                    in ([], f)
-                   {-# LINE 4148 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4157 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4153 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4162 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Call _pcIself _mresIself _tyIself _calleeIself _argsIself
@@ -4189,12 +4198,12 @@ sem_Instruction_Select pc_ id_ cond_ valt_ valf_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4193 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4202 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4198 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4207 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Select _pcIself _idIself _condIself _valtIself _valfIself
@@ -4230,12 +4239,12 @@ sem_Instruction_ExtractValue pc_ id_ aggr_ idxs_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4234 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4243 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4239 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4248 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   ExtractValue _pcIself _idIself _aggrIself _idxsIself
@@ -4272,12 +4281,12 @@ sem_Instruction_InsertValue pc_ id_ aggr_ ival_ idxs_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4276 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4285 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4281 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4290 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   InsertValue _pcIself _idIself _aggrIself _ivalIself _idxsIself
@@ -4319,12 +4328,12 @@ sem_Instruction_Cmpxchg pc_ id_ mptr_ cval_ nval_ ord_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4323 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4332 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4328 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4337 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   Cmpxchg _pcIself _idIself _mptrIself _cvalIself _nvalIself _ordIself
@@ -4364,12 +4373,12 @@ sem_Instruction_AtomicRMW pc_ id_ args_ op_ ord_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4368 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4377 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4373 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4382 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   AtomicRMW _pcIself _idIself _argsIself _opIself _ordIself
@@ -4400,12 +4409,12 @@ sem_Instruction_CreateThread pc_ args_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4404 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4413 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4409 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4418 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   CreateThread _pcIself _argsIself
@@ -4433,12 +4442,12 @@ sem_Instruction_MutexInit pc_ rv_ mutex_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4437 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4446 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4442 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4451 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   MutexInit _pcIself _rvIself _mutexIself
@@ -4468,12 +4477,12 @@ sem_Instruction_MutexLock pc_ rv_ mutex_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4472 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4481 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4477 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4486 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   MutexLock _pcIself _rvIself _mutexIself
@@ -4503,12 +4512,12 @@ sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4507 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4516 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4512 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4521 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   MutexUnlock _pcIself _rvIself _mutexIself
@@ -4533,12 +4542,12 @@ sem_Instruction_WaitEvent pc_ event_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4537 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4546 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4542 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4551 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   WaitEvent _pcIself event_
@@ -4559,12 +4568,12 @@ sem_Instruction_NotifyEvent pc_ event_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4563 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4572 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4568 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4577 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   NotifyEvent _pcIself event_
@@ -4587,12 +4596,12 @@ sem_Instruction_WaitTime pc_ time_ =
               _lhsOetm =
                   ({-# LINE 135 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    ([], const EBot)
-                   {-# LINE 4591 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4600 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4596 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4605 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   WaitTime _pcIself _timeIself
@@ -4643,12 +4652,12 @@ sem_Instructions_Cons hd_ tl_ =
                    in case m of
                        ["-1"] -> _hdIetm
                        x      -> (l ++ m, \t -> f [g t])
-                   {-# LINE 4647 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4656 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    _hdIphis ++ _tlIphis
-                   {-# LINE 4652 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4661 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   (:) _hdIself _tlIself
@@ -4657,12 +4666,12 @@ sem_Instructions_Cons hd_ tl_ =
               _hdOcbb =
                   ({-# LINE 100 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    _lhsIcbb
-                   {-# LINE 4661 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4670 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _tlOcbb =
                   ({-# LINE 100 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    _lhsIcbb
-                   {-# LINE 4666 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4675 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               ( _hdIetm,_hdIphis,_hdIself) =
                   hd_ _hdOcbb
@@ -4678,12 +4687,12 @@ sem_Instructions_Nil =
               _lhsOetm =
                   ({-# LINE 104 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    (["-1"], const EBot)
-                   {-# LINE 4682 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4691 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _lhsOphis =
                   ({-# LINE 99 "./src/Language/LLVMIR/Converter/Module.ag" #-}
                    []
-                   {-# LINE 4687 "src/Language/LLVMIR/Converter/Module.hs" #-}
+                   {-# LINE 4696 "src/Language/LLVMIR/Converter/Module.hs" #-}
                    )
               _self =
                   []
@@ -5775,7 +5784,7 @@ sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
          _lhsOhtm =
              ({-# LINE 28 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               HTm (_gvarsIetm _funsIetm)
-              {-# LINE 5779 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 5788 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Module id_ _layoutIself _targetIself _gvarsIself _funsIself _nmdtysIself
@@ -6124,7 +6133,7 @@ sem_Parameter_Parameter var_ ty_ =
          _lhsOetm =
              ({-# LINE 70 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               EVar $ getIdentifier _varIself
-              {-# LINE 6128 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6137 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Parameter _varIself _tyIself
@@ -6164,7 +6173,7 @@ sem_Parameters_Cons hd_ tl_ =
          _lhsOetm =
              ({-# LINE 64 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               _hdIetm : _tlIetm
-              {-# LINE 6168 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6177 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -6182,7 +6191,7 @@ sem_Parameters_Nil =
          _lhsOetm =
              ({-# LINE 64 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               []
-              {-# LINE 6186 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6195 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              []
@@ -6391,7 +6400,7 @@ sem_RetInst_ValueRet v_ =
          _lhsOetm =
              ({-# LINE 146 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               _vIetm
-              {-# LINE 6395 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6404 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              ValueRet _vIself
@@ -6407,7 +6416,7 @@ sem_RetInst_VoidRet =
          _lhsOetm =
              ({-# LINE 147 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               EBot
-              {-# LINE 6411 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6420 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              VoidRet
@@ -6850,7 +6859,7 @@ sem_Value_Id v_ ty_ =
          _lhsOetm =
              ({-# LINE 150 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               _vIetm
-              {-# LINE 6854 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6863 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Id _vIself _tyIself
@@ -6871,7 +6880,7 @@ sem_Value_Constant c_ =
          _lhsOetm =
              ({-# LINE 151 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               _cIetm
-              {-# LINE 6875 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6884 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Constant _cIself
@@ -6949,7 +6958,7 @@ sem_Values_Cons hd_ tl_ =
          _lhsOetm =
              ({-# LINE 143 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               _hdIetm : _tlIetm
-              {-# LINE 6953 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6962 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -6967,7 +6976,7 @@ sem_Values_Nil =
          _lhsOetm =
              ({-# LINE 143 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               []
-              {-# LINE 6971 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6980 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              []
