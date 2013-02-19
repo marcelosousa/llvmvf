@@ -33,6 +33,7 @@ AtomicRMW	src/Language/LLVMIR.hs	275;"	d
 Attribute	src/Language/LLVMIR.hs	81;"	t
 Attributes	src/Language/LLVMIR.hs	103;"	t
 AvailableExternallyLinkage	src/Language/LLVMIR.hs	308;"	d
+BMC	Main.hs	50;"	d
 BasicBlock	src/Language/LLVMIR.hs	105;"	d
 BasicBlock	src/Language/LLVMIR.hs	105;"	t
 BasicBlocks	src/Language/LLVMIR.hs	108;"	t
@@ -115,6 +116,7 @@ DataLayout	src/Language/LLVMIR.hs	172;"	t
 Declarations	./Concurrent/Model.hs	58;"	t
 Default	src/Language/LLVMIR.hs	456;"	d
 DefinitionTy	src/Language/LLVMIR.hs	175;"	t
+Domain	Main.hs	56;"	t
 DoubleValue	./Language/LLVMIR/Extractor/ConstantClass.hs	38;"	d
 EAbs	./Language/HTm/Base.hs	17;"	d
 EApp	./Language/HTm/Base.hs	16;"	d
@@ -131,7 +133,7 @@ Env	./Language/LLVMIR/Extractor/Context.hs	21;"	t
 Event	./Concurrent/Model.hs	181;"	t
 ExternalLinkage	src/Language/LLVMIR.hs	307;"	d
 ExternalWeakLinkage	src/Language/LLVMIR.hs	318;"	d
-Extract	Main.hs	43;"	d
+Extract	Main.hs	49;"	d
 ExtractElement	./Language/LLVMIR/Extractor/Opcode.hs	61;"	d
 ExtractElementConstantExpr	src/Language/LLVMIR.hs	156;"	d
 ExtractValue	./Language/LLVMIR/Extractor/Opcode.hs	64;"	d
@@ -196,7 +198,7 @@ Guard	./Concurrent/Model.hs	149;"	t
 HTm	./Language/HTm/Base.hs	8;"	d
 HTm	./Language/HTm/Base.hs	8;"	t
 Hidden	src/Language/LLVMIR.hs	457;"	d
-Htm	Main.hs	45;"	d
+Htm	Main.hs	52;"	d
 ICmp	./Language/LLVMIR/Extractor/Opcode.hs	53;"	d
 ICmp	src/Language/LLVMIR.hs	267;"	d
 ICmpExpr	src/Language/LLVMIR.hs	130;"	d
@@ -1071,7 +1073,6 @@ LLVMRealULE	src/Language/LLVMIR.hs	397;"	d
 LLVMRealULT	src/Language/LLVMIR.hs	396;"	d
 LLVMRealUNE	src/Language/LLVMIR.hs	398;"	d
 LLVMRealUNO	src/Language/LLVMIR.hs	392;"	d
-LLVMVF	Main.hs	86;"	d
 LShr	./Language/LLVMIR/Extractor/Opcode.hs	29;"	d
 LShr	src/Language/LLVMIR.hs	246;"	d
 LTL	./Language/LTL/Base.hs	62;"	t
@@ -1156,7 +1157,7 @@ OpXchg	src/Language/LLVMIR.hs	110;"	d
 OpXor	src/Language/LLVMIR.hs	116;"	d
 Opcode	./Language/LLVMIR/Extractor/Opcode.hs	8;"	t
 OptimizeForSizeAttribute	src/Language/LLVMIR.hs	94;"	d
-Options	Main.hs	41;"	t
+Option	Main.hs	49;"	t
 Optsize	src/Language/LLVMIR.hs	190;"	d
 Or	./Language/LLVMIR/Extractor/Opcode.hs	32;"	d
 Or	./Language/LTL/Base.hs	69;"	d
@@ -1171,6 +1172,7 @@ PHI	./Language/LLVMIR/Extractor/Opcode.hs	55;"	d
 PHI	src/Language/LLVMIR.hs	269;"	d
 POr	./Language/LTL/Base.hs	28;"	d
 PP	./Language/LTL/Base.hs	26;"	d
+PThread	Main.hs	56;"	d
 PTyInt	src/Language/LLVMIR.hs	369;"	t
 PTyIntL	src/Language/LLVMIR.hs	371;"	t
 PValue	src/Language/LLVMIR.hs	373;"	t
@@ -1179,7 +1181,6 @@ PValues	src/Language/LLVMIR.hs	377;"	t
 Parameter	src/Language/LLVMIR.hs	379;"	d
 Parameter	src/Language/LLVMIR.hs	379;"	t
 Parameters	src/Language/LLVMIR.hs	382;"	t
-Parse	Main.hs	41;"	d
 Path	./Language/LTL/Base.hs	191;"	d
 Path	./Language/LTL/Base.hs	191;"	t
 PathLasso	./Language/LTL/Base.hs	252;"	d
@@ -1192,7 +1193,6 @@ PrivateLinkage	src/Language/LLVMIR.hs	315;"	d
 Process	./Concurrent/Model.hs	53;"	d
 Process	./Concurrent/Model.hs	53;"	t
 Processes	./Concurrent/Model.hs	59;"	t
-ProgramOptions	Main.hs	86;"	t
 Protected	src/Language/LLVMIR.hs	458;"	d
 PtrToInt	./Language/LLVMIR/Extractor/Opcode.hs	50;"	d
 PtrToInt	src/Language/LLVMIR.hs	264;"	d
@@ -2062,7 +2062,7 @@ Syn_Visibility	src/Language/LLVMIR/Converter/Module.hs	7054;"	d
 Syn_Visibility	src/Language/LLVMIR/Converter/Module.hs	7054;"	t
 Syn_Visibility	src/Language/LLVMIR/Printer/Module.hs	7706;"	d
 Syn_Visibility	src/Language/LLVMIR/Printer/Module.hs	7706;"	t
-SystemC	Main.hs	44;"	d
+SystemC	Main.hs	56;"	d
 TTransition	./Concurrent/Model.hs	146;"	t
 T_Alias	src/Concurrent/Model/Analysis/ControlFlow.hs	101;"	t
 T_Alias	src/Concurrent/Model/Analysis/DataFlow.hs	92;"	t
@@ -2528,7 +2528,7 @@ TyVector	src/Language/LLVMIR.hs	442;"	d
 TyVoid	./Analysis/Memory/TyAnn.hs	18;"	d
 TyVoid	src/Language/LLVMIR.hs	431;"	d
 Type	./Language/LLVMIR/Extractor/Type.hs	31;"	t
-Type	Main.hs	46;"	d
+Type	Main.hs	53;"	d
 Type	src/Language/LLVMIR.hs	431;"	t
 TypeEnv	./Concurrent/Model.hs	62;"	t
 TypeKind	./Language/LLVMIR/Extractor/Type.hs	32;"	t	file:
@@ -2565,7 +2565,7 @@ ValueIdxs	src/Language/LLVMIR.hs	452;"	t
 ValueRet	src/Language/LLVMIR.hs	402;"	d
 Values	src/Language/LLVMIR.hs	454;"	t
 Visibility	src/Language/LLVMIR.hs	456;"	t
-Visualize	Main.hs	42;"	d
+Visualize	Main.hs	51;"	d
 VoidRet	src/Language/LLVMIR.hs	403;"	d
 WaitEvent	src/Language/LLVMIR.hs	280;"	d
 WaitTime	src/Language/LLVMIR.hs	282;"	d
@@ -2608,8 +2608,9 @@ bbsTyInf	./Analysis/Memory/TyAnnInf.hs	44;"	v
 begin	./Concurrent/Model.hs	189;"	v
 binOps	./Language/LLVMIR/Extractor/Instruction.hs	279;"	v
 bitbinOps	./Language/LLVMIR/Extractor/Instruction.hs	289;"	v
+bmcMode	Main.hs	63;"	v
 body_Function_FunctionDef	src/Language/LLVMIR.hs	201;"	v
-bound	Main.hs	89;"	v
+bound	Main.hs	50;"	v
 buildbb	./src/Language/LLVMIR/Converter/Module.ag	185;"	v
 cInt2Bool	./Language/LLVMIR/Extractor/Util.hs	20;"	v
 cUInt2Bool	./Language/LLVMIR/Extractor/Util.hs	16;"	v
@@ -2726,6 +2727,7 @@ dflowz_Syn_ConstantDataSequential	src/Concurrent/Model/Analysis/DataFlow.hs	1672
 dflowz_Syn_GlobalValue	src/Concurrent/Model/Analysis/DataFlow.hs	2674;"	v
 dflowz_Syn_SimpleConstant	src/Concurrent/Model/Analysis/DataFlow.hs	8468;"	v
 dflowz_Syn_Value	src/Concurrent/Model/Analysis/DataFlow.hs	8966;"	v
+domain	Main.hs	50;"	v
 dotLabel	./src/Concurrent/Model/Visualizer.ag	92;"	v
 econstTyInf	./Analysis/Memory/TyAnnInf.hs	156;"	v
 elDiv	./Language/LLVMIR/Printer/NamedTypes.hs	42;"	v
@@ -2772,6 +2774,7 @@ exitpcs_Syn_Instruction	src/Concurrent/Model/Analysis/ControlFlow.hs	2470;"	v
 exitpcs_Syn_Instructions	src/Concurrent/Model/Analysis/ControlFlow.hs	5991;"	v
 expr_Constant_ConstantExpr	src/Language/LLVMIR.hs	147;"	v
 extract	./Language/LLVMIR/Extractor/Module.hs	53;"	v
+extractMode	Main.hs	60;"	v
 extractModule	./Language/LLVMIR/Extractor/Module.hs	58;"	v	file:
 fStore	./Concurrent/Model.hs	65;"	v
 f_Instruction_Br	src/Language/LLVMIR.hs	229;"	v
@@ -2910,7 +2913,7 @@ ilabel_Syn_BasicBlocks	src/Concurrent/Model/Visualizer.hs	789;"	v
 ilabel_Syn_Function	src/Concurrent/Model/Visualizer.hs	2180;"	v
 ilabel_Syn_Functions	src/Concurrent/Model/Visualizer.hs	2319;"	v
 index	./Language/LLVMIR/Printer/NamedTypes.hs	19;"	v
-input	Main.hs	87;"	v
+input	Main.hs	49;"	v
 instr	./Language/LLVMIR/Extractor/Context.hs	24;"	v
 instrs_BasicBlock_BasicBlock	src/Language/LLVMIR.hs	105;"	v
 isConst_Global_GlobalVar	src/Language/LLVMIR.hs	210;"	v
@@ -2936,7 +2939,7 @@ livePEx	./Language/LTL/Base.hs	93;"	v
 llvmir2Htm	./Language/LLVMIR/Converter.hs	13;"	v
 locals	./Concurrent/Model.hs	68;"	v
 lvals	./Concurrent/Model.hs	96;"	v
-main	Main.hs	101;"	v
+main	Main.hs	86;"	v
 mainf	./Concurrent/Model.hs	48;"	v
 mdl	./Language/LLVMIR/Extractor/Context.hs	22;"	v
 modTyInf	./Analysis/Memory/TyAnnInf.hs	18;"	v
@@ -3201,14 +3204,14 @@ ppccfg_Syn_Instruction	src/Concurrent/Model/Visualizer.hs	2876;"	v
 ppccfg_Syn_Instructions	src/Concurrent/Model/Visualizer.hs	5394;"	v
 pretty'	./src/Concurrent/Model/Visualizer.ag	110;"	v
 procs	./Concurrent/Model.hs	49;"	v
+progModes	Main.hs	71;"	v
 putEnv	./Language/LLVMIR/Extractor/Context.hs	41;"	v
 r_Instruction_Ret	src/Language/LLVMIR.hs	228;"	v
 retty_Function_FunctionDecl	src/Language/LLVMIR.hs	202;"	v
 retty_Function_FunctionDef	src/Language/LLVMIR.hs	201;"	v
 retty_Type_TyFunction	src/Language/LLVMIR.hs	439;"	v
 runContext	./Language/LLVMIR/Extractor/Context.hs	32;"	v
-runOption	Main.hs	53;"	v
-runllvmvf	Main.hs	105;"	v
+runOption	Main.hs	96;"	v
 rv_Instruction_MutexInit	src/Language/LLVMIR.hs	277;"	v
 rv_Instruction_MutexLock	src/Language/LLVMIR.hs	278;"	v
 rv_Instruction_MutexUnlock	src/Language/LLVMIR.hs	279;"	v
@@ -5608,7 +5611,6 @@ sem_Visibility_Protected	src/Language/LLVMIR/Converter/Module.hs	7078;"	v
 sem_Visibility_Protected	src/Language/LLVMIR/Printer/Module.hs	7730;"	v
 size	./Language/LTL/Base.hs	213;"	v
 sortEnv	./Concurrent/Model.hs	67;"	v
-standard	Main.hs	93;"	v
 states	./Language/LTL/Base.hs	159;"	v
 struct_ConstantExpr_GetElementPtrConstantExpr	src/Language/LLVMIR.hs	158;"	v
 struct_Instruction_GetElementPtr	src/Language/LLVMIR.hs	254;"	v
@@ -5702,7 +5704,6 @@ ty_Type_TyPointer	src/Language/LLVMIR.hs	441;"	v
 ty_Type_TyVector	src/Language/LLVMIR.hs	442;"	v
 ty_Value_Id	src/Language/LLVMIR.hs	448;"	v
 typeOf	./Language/LLVMIR/Extractor/Type.hs	35;"	v
-typeoutput	Main.hs	88;"	v
 types	./Language/LLVMIR/Printer/NamedTypes.hs	32;"	v
 types'	./Language/LLVMIR/Printer/NamedTypes.hs	39;"	v
 tys_Type_TyStruct	src/Language/LLVMIR.hs	440;"	v
@@ -5712,7 +5713,7 @@ unPathLasso	./Language/LTL/Base.hs	252;"	v
 unProc	./Concurrent/Model.hs	53;"	v
 unaryConstantExpr	./Language/LLVMIR/Extractor/Value.hs	129;"	v
 unify	./Analysis/Memory/TyAnnInf.hs	187;"	v
-usage	Main.hs	111;"	v
+usage	Main.hs	39;"	v
 v	./Language/LTL/Base.hs	80;"	v
 v1_Instruction_Store	src/Language/LLVMIR.hs	252;"	v
 v2_Instruction_Store	src/Language/LLVMIR.hs	252;"	v
