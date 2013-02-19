@@ -4191,8 +4191,8 @@ getElemPtrArgs	./Language/LLVMIR/Extractor/Instruction.hs	58;"	v
 getElementPtrConstant	./Language/LLVMIR/Extractor/Value.hs	137;"	v
 getEntry	./src/Concurrent/Model/Analysis/ControlFlow.ag	91;"	v
 getEnv	./Language/LLVMIR/Extractor/Context.hs	38;"	v
-getFnParams	./src/Concurrent/Model/Encoder/PreEncoder.ag	112;"	v
-getFnRetTy	./src/Concurrent/Model/Encoder/PreEncoder.ag	107;"	v
+getFnParams	./src/Concurrent/Model/Encoder/PreEncoder.ag	113;"	v
+getFnRetTy	./src/Concurrent/Model/Encoder/PreEncoder.ag	108;"	v
 getFnValueName	./src/Concurrent/Model/Encoder/Value.ag	302;"	v
 getFnValueName	./src/Concurrent/Model/Encoder/Value.ag	302;"	v
 getFs	./Concurrent/Model.hs	34;"	v
@@ -4743,7 +4743,7 @@ ppccfg_Syn_Identifier	src/Concurrent/Model/Visualizer.hs	2662;"	v
 ppccfg_Syn_Instruction	src/Concurrent/Model/Visualizer.hs	2876;"	v
 ppccfg_Syn_Instructions	src/Concurrent/Model/Visualizer.hs	5394;"	v
 preEncode	./Concurrent/Model/Encoder.hs	114;"	v	file:
-preEncoder	./src/Concurrent/Model/Encoder/PreEncoder.ag	117;"	v
+preEncoder	./src/Concurrent/Model/Encoder/PreEncoder.ag	118;"	v
 preamble	./Concurrent/Model/Encoder.hs	59;"	v	file:
 pred_Syn_IntPredicate	src/Concurrent/Model/Encoder/Threads.hs	11441;"	v
 prenc_Inh_BasicBlock	src/Concurrent/Model/Encoder/Model.hs	845;"	v

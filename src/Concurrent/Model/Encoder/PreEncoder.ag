@@ -48,6 +48,7 @@ sem Instruction
       mres.sortexpr = fst <$> Map.lookup @loc.ty @lhs.sortEnv
       lhs.argToPar = foldr (\((Parameter v _,a),i) m -> Map.insert (@pc.self, i, a) (getIdName v) m) Map.empty $ zip (zip (getFnParams @lhs.fdcl (getIdName @callee.self)) @args.self) [0..]
       lhs.locals   = if @mres.ident  == ""              then Map.empty  else Map.singleton @mres.ident @loc.ty
+      lhs.fails    = if (getIdName @callee.self) == "__assert_fail" then [@pc.self] else []
       lhs.declexpres = @mres.declexpr
   | CreateThread
       loc.thn = getFnValueName $ @args.self !! 2

@@ -419,8 +419,8 @@ encSpark cpce ep = let fexprs = Prelude.map (\f -> IdentExpr $ IdxIdent (bv f) [
 -}
  
 encPhi :: [SExpr] -> [PC] -> SExpr
-encPhi []   _  = error "encPhi"
-encPhi _    [] = error "encPhi"
+encPhi []   _  = error "encPhi 1"
+encPhi _    [] = error "encPhi 2"
 encPhi cpcs fs = let fsexpr = Prelude.map (\f -> IdentExpr $ IdxIdent (bv f) [32]) fs
                      exprs  = Prelude.concatMap (\cpc -> Prelude.map (\fe -> sFn "=" cpc fe) fsexpr) cpcs
                  in wrap sOr exprs

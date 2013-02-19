@@ -121,5 +121,5 @@ runBMC bc PThread k = do mdl <- extract bc
                          let bf  = dropExtension bc
                              mod = (model mdl) :: Model PThread
                              outfile = addExtension bf "smt2"
-                         print $ "Generating " ++ show outfile ++ "..."  
+                         putStrLn $ "Generating " ++ outfile ++ "..."  
                          writeFile outfile (show $ prettyprint $ encode mod k)
