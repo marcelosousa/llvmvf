@@ -40,7 +40,7 @@ sem Values
       lhs.mts = @tl.mts
       lhs.vtype = @hd.vtype:(@tl.vtype)
 
-attr Value Constant ConstantFP ConstantDataSequential ConstantExpr GlobalValue CompareConstantExpr 
+attr Value Constant ConstantFP ConstantDataSequential ConstantExpr SimpleConstant ComplexConstant GlobalValue CompareConstantExpr 
   chn mts    :: {TypeEnv}
   syn sexprs :: {SExpressions}
   syn sexpr  :: {[SExpr]}
@@ -82,34 +82,20 @@ sem Value
          .sort   = @c.sort
 
 sem Constant
-  | BlockAddr ConstantVector UndefValue ConstantArray ConstantStruct ConstantPointerNull ConstantAggregateZero ConstantDataSequential ConstantExpr ConstantFP ConstantInt
-      lhs.isGlobal = False
-         .ident    = Nothing
-         .psexpr = \_ -> []
   | GlobalValue
       lhs.isGlobal = @gv.isGlobal
          .ident    = @gv.ident
          .psexpr   = @gv.psexpr
+  | * - GlobalValue
+      lhs.isGlobal = False
+         .ident    = Nothing
+         .psexpr = \_ -> []
 
 sem Constant
-  | BlockAddr ConstantVector UndefValue
+  | BlockAddr UndefValue PoisonValue 
       lhs.sexpr  = [] 
          .sexprs = []
          .vtype  = verrormessage
-         
-  | ConstantArray ConstantStruct ConstantPointerNull ConstantAggregateZero
-      ty.mn = Nothing
-      ty.mts = @lhs.mts
-      lhs.vtype = @ty.self
-         .sexpr  = []
-         .sexprs = []
-         .sort = @ty.sort
-
-  | ConstantDataSequential 
-      lhs.sexpr  = @cds.sexpr
-         .sexprs = @cds.sexprs
-         .vtype  = @cds.vtype
-         .sort   = @cds.sort
 
   | ConstantExpr       
       lhs.sexpr  = @expr.sexpr
@@ -117,6 +103,13 @@ sem Constant
          .vtype  = @expr.vtype
          .sort   = @expr.sort
 
+  | GlobalValue          
+      lhs.sexpr    = @gv.sexpr
+         .sexprs   = @gv.sexprs
+         .vtype    = @gv.vtype
+         .sort     = @gv.sort
+ 
+sem SimpleConstant
   | ConstantFP          
       lhs.sexpr  = @fp.sexpr
          .sexprs = @fp.sexprs
@@ -130,12 +123,31 @@ sem Constant
          .sexprs = [] --  ty :: Type
          .vtype  = @ty.self
          .sort  = @ty.sort
+  | ConstantPointerNull 
+      ty.mn = Nothing
+      ty.mts = @lhs.mts
+      lhs.vtype = @ty.self
+         .sexpr  = []
+         .sexprs = []
+         .sort = @ty.sort
 
-  | GlobalValue          
-      lhs.sexpr    = @gv.sexpr
-         .sexprs   = @gv.sexprs
-         .vtype    = @gv.vtype
-         .sort     = @gv.sort
+sem ComplexConstant
+  | ConstantDataSequential 
+      lhs.sexpr  = @cds.sexpr
+         .sexprs = @cds.sexprs
+         .vtype  = @cds.vtype
+         .sort   = @cds.sort
+  | ConstantArray ConstantStruct ConstantAggregateZero
+      ty.mn = Nothing
+      ty.mts = @lhs.mts
+      lhs.vtype = @ty.self
+         .sexpr  = []
+         .sexprs = []
+         .sort = @ty.sort
+  | ConstantVector 
+      lhs.sexpr  = [] 
+         .sexprs = []
+         .vtype  = verrormessage
 
 -- TODO
 sem ConstantFP

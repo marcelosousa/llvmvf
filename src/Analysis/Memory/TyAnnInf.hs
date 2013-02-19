@@ -70,20 +70,41 @@ convTyInf tyenv i v ty = let ity = liftTy ty
 
 -- Value TyAnn Inference
 vtyinf :: TyAnnEnv -> Value -> (TyAnn, TyAnnEnv)
-vtyinf tyenv (Id v ty) = let vty = liftTy ty
-                         in case M.lookup v tyenv of
-                              Nothing  -> error $ "vtyinf"  -- (vty, M.insert v vty tyenv)
-                              Just tya -> let nty = unify vty tya
-                                          in (nty, M.adjust (const nty) v tyenv)
+vtyinf tyenv val = case val of
+   Id v ty -> let vty = liftTy ty
+              in case M.lookup v tyenv of
+                   Nothing  -> error $ "vtyinf"  -- (vty, M.insert v vty tyenv)
+                   Just tya -> let nty = unify vty tya
+                               in (nty, M.adjust (const nty) v tyenv)
+   Constant c -> constTyInf tyenv c
 
 -- Constant TyAnn Inference
 constTyInf :: TyAnnEnv -> Constant -> (TyAnn, TyAnnEnv)
 constTyInf tye c = case c of
-   UndefValue       -> (T.TyUndef, tye)
-   ConstantInt i ty -> case ty of
-                         TyInt i -> (liftTy ty, tye)
-                         err     -> error "constTyInf (1)" 
-   _ -> undefined
+   UndefValue      -> (T.TyUndef, tye)
+   PoisonValue     -> error "constTyInf: PoisonValue not supported"
+   BlockAddr       -> error "constTyInf: BlockAddr not supported"
+   SmpConst sc     -> sconstTyInf tye sc
+   CmpConst cc     -> cconstTyInf tye cc
+   GlobalValue gv  -> gvTyInf tye gv 
+   ConstantExpr ec -> econstTyInf tye ec 
+
+sconstTyInf :: TyAnnEnv -> SimpleConstant -> (TyAnn, TyAnnEnv)
+sconstTyInf tye c = case c of
+   ConstantInt _ ty -> case ty of
+        TyInt s -> (T.TyPri $ T.TyInt s, tye)
+        err     -> error "constTyInf (1)" 
+   ConstantFP fp -> (T.TyPri T.TyFloat, tye)
+   ConstantPointerNull ty -> undefined 
+
+cconstTyInf :: TyAnnEnv -> ComplexConstant -> (TyAnn, TyAnnEnv)
+cconstTyInf = undefined
+
+gvTyInf :: TyAnnEnv -> GlobalValue -> (TyAnn, TyAnnEnv)
+gvTyInf = undefined
+
+econstTyInf :: TyAnnEnv -> ConstantExpr -> (TyAnn, TyAnnEnv)
+econstTyInf = undefined
 
 -- Parameter TyAnn Inference
 parTyInf :: TyAnnEnv -> Parameter -> (TyAnn, TyAnnEnv)

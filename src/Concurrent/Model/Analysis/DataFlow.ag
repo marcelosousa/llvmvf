@@ -20,14 +20,14 @@ import Debug.Trace
 import Language.LLVMIR
 }
 
-attr Value Constant ConstantDataSequential GlobalValue Functions BasicBlocks BasicBlock Instructions Instruction RetInst Argument Arguments CompareConstantExpr ConstantExpr IntTyValId MValue PValue PValueIdx Values Global PValues Function
+attr Value Constant ConstantDataSequential GlobalValue Functions BasicBlocks BasicBlock Instructions Instruction RetInst Argument Arguments CompareConstantExpr SimpleConstant ComplexConstant  ConstantExpr IntTyValId MValue PValue PValueIdx Values Global PValues Function
   chn counter :: {Int}
 
 -- Simple Data Flow Information
 attr Functions
   syn dflow :: {Map.Map String (Map.Map Identifier Type)} 
 
-attr Function BasicBlocks BasicBlock Instructions Instruction Value RetInst Constant ConstantDataSequential GlobalValue
+attr Function BasicBlocks BasicBlock Instructions Instruction Value RetInst Constant SimpleConstant ComplexConstant ConstantDataSequential GlobalValue
   inh tname :: {String}
 
 attr Function BasicBlocks BasicBlock Instructions Instruction Value RetInst 
@@ -87,7 +87,7 @@ getId (Local s) = s
 getId (Global s) = s
 }
 
-attr Value Constant ConstantDataSequential GlobalValue
+attr Value Constant SimpleConstant ComplexConstant ConstantDataSequential GlobalValue
   syn wtype :: {Type}
   syn dflowz use {`Map.union`} {Map.empty} :: {Map.Map Identifier Type}
  
@@ -100,18 +100,26 @@ sem Value
 
 sem Constant
   | BlockAddr              lhs.wtype = TyUndefined 
-  | ConstantAggregateZero  lhs.wtype = @ty.self
-  | ConstantArray          lhs.wtype = @ty.self 
-  | ConstantDataSequential lhs.wtype = @cds.wtype 
   | ConstantExpr           lhs.wtype = TyUndefined 
-  | ConstantFP             lhs.wtype = TyUndefined
-  | ConstantInt            lhs.wtype = TyInt @iv
-  | ConstantPointerNull    lhs.wtype = @ty.self
-  | ConstantStruct         lhs.wtype = @ty.self 
-  | ConstantVector         lhs.wtype = TyUndefined
+  | SmpConst               lhs.wtype = @sc.wtype
+                              .dflowz = @sc.dflowz
+  | CmpConst               lhs.wtype = @cc.wtype
+                              .dflowz = @cc.dflowz
   | GlobalValue            lhs.wtype = @gv.wtype
                               .dflowz = @gv.dflowz 
   | UndefValue             lhs.wtype = TyUndefined
+
+sem SimpleConstant
+  | ConstantFP             lhs.wtype = TyUndefined
+  | ConstantInt            lhs.wtype = TyInt @iv
+  | ConstantPointerNull    lhs.wtype = @ty.self
+
+sem ComplexConstant
+  | ConstantAggregateZero  lhs.wtype = @ty.self
+  | ConstantArray          lhs.wtype = @ty.self 
+  | ConstantDataSequential lhs.wtype = @cds.wtype 
+  | ConstantStruct         lhs.wtype = @ty.self 
+  | ConstantVector         lhs.wtype = TyUndefined
 
 sem ConstantDataSequential
   | ConstantDataArray  lhs.wtype = @ty.self 

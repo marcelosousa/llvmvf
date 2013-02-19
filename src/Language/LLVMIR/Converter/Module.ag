@@ -136,7 +136,7 @@ sem Instruction
   | PHI         lhs.phis = [(getId @id.etm, Prelude.map (\(a,b) -> (a, getLabel b)) @vals.self)]
  
 -- The rest  
-attr Value Identifier Constant RetInst 
+attr Value Identifier Constant SimpleConstant RetInst 
   syn etm :: {ETm}
 
 attr Values
@@ -156,6 +156,10 @@ sem Identifier
   | Local  lhs.etm = EVar @name.self
 
 sem Constant
+  | SmpConst        lhs.etm = @sc.etm
+  | * - SmpConst    lhs.etm = EBot
+
+sem SimpleConstant
   | ConstantInt     lhs.etm = ENum @iv
   | * - ConstantInt lhs.etm = EBot
 

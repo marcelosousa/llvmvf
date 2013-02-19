@@ -33,7 +33,7 @@ sem Ints
 sem PValue
   | Tuple lhs.pp = char '[' <+> @x1.pp <> char ',' <+> @x2.pp <+> char ']'
 
-attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTypes Constant GlobalValue ConstantDataSequential ConstantExpr CompareConstantExpr ConstantFP RetInst BinOp AtomicOrdering MConstant
+attr Module Identifier TargetData DataLayout Functions Globals Global Linkage Align MValue Value Type TyFloatPoint Function Aliases Alias Parameter BasicBlocks BasicBlock Instructions Instruction IntPredicate RealPredicate NamedTypes Constant GlobalValue SimpleConstant ComplexConstant ConstantDataSequential ConstantExpr CompareConstantExpr ConstantFP RetInst BinOp AtomicOrdering MConstant 
   syn pp use {<$>} {P.empty} :: {Doc}
 
 attr Target 
@@ -243,19 +243,26 @@ sem Value
   | Constant lhs.pp = @c.pp
 
 sem Constant
+  | UndefValue             lhs.pp = text "undef"
   | BlockAddr              lhs.pp = text "blockaddr" 
+  | PoisonValue            lhs.pp = text "poison"
+  | SmpConst               lhs.pp = @sc.pp
+  | CmpConst               lhs.pp = @cc.pp
+  | ConstantExpr           lhs.pp = @expr.pp
+  | GlobalValue            lhs.pp = @gv.pp
+
+sem SimpleConstant 
+  | ConstantInt            lhs.pp = @ty.pp <+> int   @iv
+  | ConstantFP             lhs.pp = @fp.pp 
+  | ConstantPointerNull    lhs.pp = @ty.pp <+> text "null"
+
+sem ComplexConstant
   | ConstantAggregateZero  lhs.pp = @ty.pp <+> text "zeroinitializer"
   | ConstantArray          lhs.pp = @ty.pp <+> brackets @vals.pp
   | ConstantDataSequential lhs.pp = @cds.pp 
-  | ConstantExpr           lhs.pp = @expr.pp
-  | ConstantFP             lhs.pp = @fp.pp 
-  | ConstantInt            lhs.pp = @ty.pp <+> int   @iv
-  | ConstantPointerNull    lhs.pp = @ty.pp <+> text "null"
   | ConstantStruct         lhs.pp = @ty.pp <+> braces @vals.pp
   | ConstantVector         lhs.pp = text "ConstantVector"
-  | GlobalValue            lhs.pp = @gv.pp
-  | UndefValue             lhs.pp = text "undef"
-
+ 
 sem ConstantFP
   | ConstantFPFloat  lhs.pp = @ty.pp <+> float @fpv
   | ConstantFPDouble lhs.pp = @ty.pp <+> double @dbv  

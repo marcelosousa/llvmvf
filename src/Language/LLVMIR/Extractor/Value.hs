@@ -44,9 +44,9 @@ getConstantValue v = do vc <- liftIO $ FFI.getConstantClass v
                              BlockAddr              -> getBlockAddr v
                              ConstantAggregateZero  -> getConstantAggregateZero v
                              ConstantArray          -> getConstantArray v
-                             ConstantDataSequential -> getConstantDataSequential v >>= return . LL.ConstantDataSequential
+                             ConstantDataSequential -> getConstantDataSequential v >>= return . LL.CmpConst . LL.ConstantDataSequential
                              ConstantExpr           -> getConstantExpr v
-                             ConstantFP             -> getConstantFP v >>= return . LL.ConstantFP
+                             ConstantFP             -> getConstantFP v >>= return . LL.SmpConst . LL.ConstantFP
                              ConstantInt            -> getConstantInt v
                              ConstantPointerNull    -> getConstantPointerNull v
                              ConstantStruct         -> getConstantStruct v
@@ -60,7 +60,7 @@ getBlockAddr = error "TODO getBlockAddr"
 
 getConstantAggregateZero :: Value -> Context IO LL.Constant
 getConstantAggregateZero v = do ty <- typeOf v
-                                return $ LL.ConstantAggregateZero ty 
+                                return $ LL.CmpConst $ LL.ConstantAggregateZero ty 
 
 getConstantArrayElem :: (String,Value) -> Context IO (LL.Type, LL.Value)
 getConstantArrayElem elem@(_,v) = do ty  <- typeOf v
@@ -73,7 +73,7 @@ getConstantArray v = do aty  <- liftIO $ FFI.constantArrayGetType v
                         eles <- getOperands v >>= mapM getConstantArrayElem
                         let (tys,vals) = unzip eles
                             ty = LL.TyArray nels (head tys)
-                        return $ LL.ConstantArray ty vals
+                        return $ LL.CmpConst $ LL.ConstantArray ty vals
 
 getConstantDataSequential :: Value -> Context IO LL.ConstantDataSequential
 getConstantDataSequential v = do vc  <- liftIO $ FFI.getConstantDataSequentialClass v
@@ -149,11 +149,11 @@ getConstantFP v = do vc <- liftIO $ FFI.getConstantFPClass v
 getConstantInt :: Value -> Context IO LL.Constant
 getConstantInt v = do ty <- typeOf v 
                       av <- liftIO $ FFI.constIntGetSExtValue v
-                      return $ LL.ConstantInt (fromIntegral av) ty
+                      return $ LL.SmpConst $ LL.ConstantInt (fromIntegral av) ty
 
 getConstantPointerNull :: Value -> Context IO LL.Constant
 getConstantPointerNull v = do ty <- typeOf v
-                              return $ LL.ConstantPointerNull ty 
+                              return $ LL.SmpConst $ LL.ConstantPointerNull ty 
 
 -- Seems fine
 getConstantStruct :: Value -> Context IO LL.Constant
@@ -165,7 +165,7 @@ getConstantStruct v = do aty  <- liftIO $ FFI.constantStructGetType v
                                    peekArray n args
                          elems <- forM pars getType
                          let ty = LL.TyStruct "" n elems
-                         return $ LL.ConstantStruct ty vals
+                         return $ LL.CmpConst $ LL.ConstantStruct ty vals
 
 getConstantVector :: Value -> Context IO LL.Constant
 getConstantVector = error "TODO getConstantVector"

@@ -170,18 +170,25 @@ data Value
   | Constant c :: Constant
 
 data Constant
-  | BlockAddr
   | UndefValue
-  | ConstantAggregateZero  ty   :: Type
-  | ConstantArray          ty   :: Type  vals :: Values
-  | ConstantDataSequential cds  :: ConstantDataSequential
-  | ConstantExpr           expr :: ConstantExpr
-  | ConstantFP             fp   :: ConstantFP
+  | PoisonValue -- Not supported
+  | BlockAddr   -- Not supported 
+  | SmpConst      sc :: SimpleConstant
+  | CmpConst      cc :: ComplexConstant
+  | GlobalValue   gv :: GlobalValue
+  | ConstantExpr  expr :: ConstantExpr
+
+data SimpleConstant
   | ConstantInt            iv   :: Int   ty :: Type
+  | ConstantFP             fp   :: ConstantFP
   | ConstantPointerNull    ty   :: Type
+
+data ComplexConstant
+  | ConstantAggregateZero  ty   :: Type
+  | ConstantDataSequential cds  :: ConstantDataSequential
   | ConstantStruct         ty   :: Type vals :: Values
+  | ConstantArray          ty   :: Type  vals :: Values
   | ConstantVector         ty   :: Type vals :: Values 
-  | GlobalValue            gv :: GlobalValue
 
 data ConstantFP
   | ConstantFPFloat  fpv :: Float ty :: Type
@@ -322,7 +329,7 @@ data Alias
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
   
-set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue ConstantDataSequential ConstantExpr ConstantFP RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue SimpleConstant ComplexConstant  ConstantDataSequential ConstantExpr ConstantFP RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering
 
 deriving Every: Show
 deriving Every: Eq
