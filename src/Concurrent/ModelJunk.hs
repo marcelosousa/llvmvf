@@ -1,10 +1,11 @@
 {-#LANGUAGE EmptyDataDecls, RecordWildCards #-}
 -------------------------------------------------------------------------------
--- Module    :  Concurrent.Model
+-- Module    :  Concurrent.ModelJunk
 -- Copyright :  (c) 2012 Marcelo Sousa
+-- Junk for Explicit State Models
 -------------------------------------------------------------------------------
 
-module Concurrent.Model where
+module Concurrent.ModelJunk where
 
 import qualified Data.IntMap as IM
 import qualified Data.Map as Map
@@ -109,3 +110,107 @@ fromISExpr :: ISExpr -> SExpr
 fromISExpr (ISExpr s)     = s
 fromISExpr ISEmpty        = error "ISEmpty"
 fromISExpr (ISFunction f) = error "ISFunction"
+
+-- type Transition t = (PC, Bool, GlobalState -> (GlobalState, t), PC) -- SExpr
+
+{-
+-- Mi (1 <= i <= n) - Thread Model (Control + Data Flow)
+-- Vi - Set of local variables of Mi
+data TModel = TModel { vi  :: [Identifier]
+                     , cfg :: CFG
+                     , ci  :: [ControlState]
+                     , dfg :: DFG
+                     , code :: Function
+                     }
+-}
+
+data CFG
+data DFG
+
+type ControlState = Int
+
+-- A state is a valuation of all global and local variables
+type State = Map.Map Identifier Value
+
+-- VLi - set of tuple of values for local data variables in Vi
+-- VG  - set of tuple of values for global data variables
+
+-- Global State = ([(Ci,VLi)], VG)
+
+---- Interleaving (Operational) Semantics
+
+-- Thread transition t = <c, g, u, c'>
+-- c - current control state
+-- c' - next control state
+-- g - enabling guard
+-- u - update assignments
+type TTransition = (ControlState, Guard, Instructions, ControlState)
+
+-- A guard is a state predicate
+type Guard = State -> Bool
+
+-- next(v) - Next state update of variable v 
+
+-- pci - program counter of thread i
+type PCi = PC
+
+-- isEnabled 
+isEnabled :: PCi -> TTransition -> State -> Bool
+isEnabled pci (c,g,u,c') s = c == pci && g s
+
+-- enabled(s) gives the set of all transitions enabled at state s
+-- The interleaving semantics is a model where only one local transition
+-- is scheduled to execute from a state!
+
+--update :: PCi -> State -> State
+--update pci s = let t = getOneEnable pci s
+  --             in fire s t
+
+getOneEnable :: PCi -> State -> TTransition
+getOneEnable = undefined 
+
+--fire :: State -> TTransition -> State
+--fire = undefined 
+
+-- Schedule of P is an interleaving sequence 
+-- of thread transitions 
+type Schedule = [TTransition]
+
+-- An event e occurs when a unique transition t
+-- is fired and e is called the generator of t.
+-- t = gen(P,e)
+data Event
+
+-- A run of P is an ordered sequence of events
+-- where each event e_i corresponds to firing of 
+-- a unique transition t_i = gen(P, e_i)
+type Run = [Event]
+
+begin :: TTransition -> ControlState
+begin (c,_,_,_) = c
+
+end :: TTransition -> ControlState
+end (_,_,_,c') = c'
+
+-- tid(t) - thread id of the transition t
+tid :: TTransition -> Int
+tid = undefined
+
+-- Each transition is atomic and has at most one memory access.
+
+-- A transaction is an uninterrupted sequence of transitions
+-- of a particular thread.
+type Transaction = [TTransition]
+
+-- Atomic Transaction
+-- Happens-before
+
+
+instance Show (Model t) where
+  show (Model nmdtys gvars mainf procs decls) = show mainf ++ "\n" ++ show procs ++ "\n" ++ show decls
+
+instance Pretty Function where
+    pretty f = pp_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function {}
+
+instance Show Process where
+  show (Process i f) = show $ pretty f

@@ -43,13 +43,16 @@ sem Global
      lhs.sexprs =  @ty.sexprs ++ @ival.sexprs ++ [ declfun @loc.sym @ty.sort , declfun @loc.psym (SymSort "I32") ] 
      lhs.sexpr  = let v = IdentExpr $ IdxIdent (bv 0) [32] -- true  = IdentExpr $ SymIdent $ SimpleSym $ "true"
                   in Prelude.map (\ve -> sFn "=" (IdentExpr $ SymIdent $ @loc.sym) ve `sAnd` sFn "=" (IdentExpr $ SymIdent $ @loc.psym) v) @ival.sexpr
-     loc.sym  = SimpleSym @name.self
-     loc.psym = SimpleSym $ "l" ++ @name.self
+     loc.sym  = SimpleSym @loc.rawname
+     loc.psym = SimpleSym $ "l" ++ @loc.rawname
      lhs.gs   = let ogs@GlobalState{..} = @lhs.gs
-                    gvals' = maybe gvals (\v -> Map.insert @name.self (Right v) gvals) @ival.self
+                    gvals' = maybe gvals (\v -> Map.insert @loc.rawname (Right v) gvals) $ Constant <$> @ival.self
                 in ogs { defsorts = @ival.mts, gvals = gvals' }   
-
+     loc.rawname = getIdName @name.self
 {
+getIdName :: Identifier -> String
+getIdName (Global n) = n
+getIdName (Local  n) = n
 
 wrap :: (SExpr -> SExpr -> SExpr) -> [SExpr] -> SExpr
 wrap f []     = error "wrap SExprs"

@@ -241,8 +241,8 @@ attr Parameter
 sem Parameter
   | Parameter 
       lhs.sexpr = IdentExpr $ SymIdent @loc.sym
-      loc.sym   = SimpleSym $ @lhs.tn ++ @var.self
-      lhs.ident = @lhs.tn ++ @var.self
+      loc.sym   = SimpleSym $ @lhs.tn ++ (getIdName @var.self)
+      lhs.ident = @lhs.tn ++ (getIdName @var.self)
       ty.mts = @lhs.mts
       ty.mn  = Nothing
       lhs.sexprs = [ declfun @loc.sym @ty.sort ] ++ @ty.sexprs
@@ -276,7 +276,7 @@ getValueId (Constant (GlobalValue (GlobalVariable (Global i) _))) = Just i
 getValueId _ = Nothing
 
 getParameterId :: Parameter -> String -> Id
-getParameterId (Parameter i _) s = s ++ i
+getParameterId (Parameter i _) s = s ++ (getIdName i)
 
 ivalueId :: Valuation -> Id -> Maybe Id
 ivalueId vals i = case Map.lookup i vals of

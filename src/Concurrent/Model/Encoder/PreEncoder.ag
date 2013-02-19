@@ -44,9 +44,9 @@ sem Instructions
 sem Instruction
   | Call
       mres.tn       = @lhs.tn
-      loc.ty        = getFnRetTy @lhs.fdcl @callee.self
+      loc.ty        = getFnRetTy @lhs.fdcl $ getIdName @callee.self
       mres.sortexpr = fst <$> Map.lookup @loc.ty @lhs.sortEnv
-      lhs.argToPar = foldr (\((Parameter v _,a),i) m -> Map.insert (@pc.self, i, a) v m) Map.empty $ zip (zip (getFnParams @lhs.fdcl @callee.self) @args.self) [0..]
+      lhs.argToPar = foldr (\((Parameter v _,a),i) m -> Map.insert (@pc.self, i, a) (getIdName v) m) Map.empty $ zip (zip (getFnParams @lhs.fdcl (getIdName @callee.self)) @args.self) [0..]
       lhs.locals   = if @mres.ident  == ""              then Map.empty  else Map.singleton @mres.ident @loc.ty
       lhs.declexpres = @mres.declexpr
   | CreateThread
@@ -112,7 +112,6 @@ getFnParams :: Declarations -> Id -> Parameters
 getFnParams dcls i = case Map.lookup i dcls of
                           Nothing -> error "getFnParams error"
                           Just (_,p) -> p
-
 
 preEncoder :: Functions -> TypeEnv -> Declarations -> (SExpressions, PreEncoder)
 preEncoder fs sorte decls = let fw = wrap_Functions (sem_Functions fs) $ Inh_Functions { fdcl_Inh_Functions = decls, sortEnv_Inh_Functions = sorte }

@@ -29,7 +29,7 @@ import Concurrent.Model.PThread
 -- import Concurrent.Model.SystemC
 import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
---import Concurrent.Model.Encoder    (encode) 
+import Concurrent.Model.Encoder    (encode) 
 -- , encodeSysC)    
 
 import Util.Demangler
@@ -81,13 +81,14 @@ runOption :: Option -> IO ()
 runOption (Extract bc) = do mdl <- extract bc
                             let bf = dropExtension bc
                             writeFile (addExtension bf "llvf") (show $ pretty mdl)
+runOption (BMC bc d k) = do print $ "Working " ++ show bc ++ show d ++ show k
+                            runBMC bc d k
 {-runOption bc Htm     = do mdl <- extract bc
                           let bf = dropExtension bc
                           writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)
 runOption bc Type = do mdl <- extract bc
                        print $ modTyInf mdl
 -}
-runOption (BMC bc d k) = print $ "Working" ++ show bc ++ show d ++ show k
 --runOption bc Parse k = do mdl <- extract bc
 --                          let bf  = dropExtension bc
 --                              mod = (model mdl) :: Model PThread
@@ -112,3 +113,13 @@ runOption (BMC bc d k) = print $ "Working" ++ show bc ++ show d ++ show k
 --                              writeFile (addExtension bf "dot")   (show $ pretty mod)
 --                              writeFile (addExtension bf "rawm")  (show $ mdl)
 --                              writeFile (addExtension bf "smt2")  (show $ prettyprint $ encodeSysC mod k)
+
+-- | 'runBMC' - main bmc function
+runBMC :: FilePath -> Domain -> Bound -> IO ()
+runBMC bc SystemC _ = error "llvmvf for SystemC is currently not available."
+runBMC bc PThread k = do mdl <- extract bc
+                         let bf  = dropExtension bc
+                             mod = (model mdl) :: Model PThread
+                             outfile = addExtension bf "smt2"
+                         print $ "Generating " ++ show outfile ++ "..."  
+                         writeFile outfile (show $ prettyprint $ encode mod k)
