@@ -41,36 +41,46 @@ fnTyInf tye (FunctionDecl n l rty pms)     = let (ptys, tyex) = gLstTyInf tye pa
                                              in (tyr, M.insert n tyr tyex)
 
 bbsTyInf :: TyAnnEnv -> BasicBlocks -> ([TyAnn], TyAnnEnv)
-bbsTyInf tye bbs = undefined
+bbsTyInf tye bbs = bbUnify $ map (bbTyInf tye) bbs
+
+bbUnify :: [(Label, (TyAnn, TyAnnEnv))] -> ([TyAnn], TyAnnEnv)
+bbUnify []     = ([], M.empty)
+bbUnify (x:xs) = undefined
 
 -- Basic Block TyAnn Inference
-bbTyInf :: TyAnnEnv -> BasicBlock -> (TyAnn, TyAnnEnv)
-bbTyInf tyenv (BasicBlock l instr) = undefined
+bbTyInf :: TyAnnEnv -> BasicBlock -> (Label, (TyAnn, TyAnnEnv))
+bbTyInf tyenv (BasicBlock l instr) = (l, isTyInf tyenv instr)
 
-ityinf :: TyAnnEnv -> Instruction -> (TyAnn, TyAnnEnv)
-ityinf tyenv (Ret _ VoidRet)      = (T.TyPri T.TyVoid, tyenv)
-ityinf tyenv (Ret _ (ValueRet v)) = vtyinf tyenv v
-ityinf tyenv (Unreachable _)      = (T.TyBot, tyenv) -- Unreachable has no defined semantics 
-ityinf tyenv (Add _ i ty op1 op2) = undefined
+-- TODO
+isTyInf :: TyAnnEnv -> Instructions -> (TyAnn, TyAnnEnv)
+isTyInf tyenv []     = (T.TyBot, tyenv)
+isTyInf tyenv [x]    = iTyInf tyenv x
+isTyInf tyenv (x:xs) = let (ta,te) = iTyInf tyenv x
+                       in isTyInf te xs  
+
+iTyInf :: TyAnnEnv -> Instruction -> (TyAnn, TyAnnEnv)
+iTyInf tyenv (Ret _ VoidRet)      = (T.TyPri T.TyVoid, tyenv)
+iTyInf tyenv (Ret _ (ValueRet v)) = vTyInf tyenv v
+iTyInf tyenv (Unreachable _)      = (T.TyBot, tyenv) -- Unreachable has no defined semantics 
+iTyInf tyenv (Add _ i ty op1 op2) = undefined
 -- Conversion Operations
-ityinf tyenv (SExt    _ i v ty)   = convTyInf tyenv i v ty
-ityinf tyenv (BitCast _ i v ty)   = convTyInf tyenv i v ty
+iTyInf tyenv (SExt    _ i v ty)   = convTyInf tyenv i v ty
+iTyInf tyenv (BitCast _ i v ty)   = convTyInf tyenv i v ty
 -- Memory Operations
 -- The pointer of a load must a first class type.
-ityinf tyenv (Load _ i v a)       = let (vty, tye) = vtyinf tyenv v
+iTyInf tyenv (Load _ i v a)       = let (vty, tye) = vTyInf tyenv v
                                     in (vty, M.insert i vty tye)
 
 -- Auxiliar Function
 convTyInf :: TyAnnEnv -> Identifier -> Value -> Type -> (TyAnn, TyAnnEnv)
 convTyInf tyenv i v ty = let ity = liftTy ty
-                             (vty, tye) = vtyinf tyenv v
+                             (vty, tye) = vTyInf tyenv v
                              nty = castTy vty ity
                          in (nty, M.insert i nty tye)
 
-
 -- Value TyAnn Inference
-vtyinf :: TyAnnEnv -> Value -> (TyAnn, TyAnnEnv)
-vtyinf tyenv val = case val of
+vTyInf :: TyAnnEnv -> Value -> (TyAnn, TyAnnEnv)
+vTyInf tyenv val = case val of
    Id v ty -> let vty = liftTy ty
               in case M.lookup v tyenv of
                    Nothing  -> error $ "vtyinf"  -- (vty, M.insert v vty tyenv)
@@ -81,28 +91,67 @@ vtyinf tyenv val = case val of
 -- Constant TyAnn Inference
 constTyInf :: TyAnnEnv -> Constant -> (TyAnn, TyAnnEnv)
 constTyInf tye c = case c of
-   UndefValue      -> (T.TyUndef, tye)
-   PoisonValue     -> error "constTyInf: PoisonValue not supported"
-   BlockAddr       -> error "constTyInf: BlockAddr not supported"
-   SmpConst sc     -> sconstTyInf tye sc
-   CmpConst cc     -> cconstTyInf tye cc
-   GlobalValue gv  -> gvTyInf tye gv 
-   ConstantExpr ec -> econstTyInf tye ec 
+  UndefValue      -> (T.TyUndef, tye)
+  PoisonValue     -> error "constTyInf: PoisonValue not supported"
+  BlockAddr       -> error "constTyInf: BlockAddr not supported"
+  SmpConst sc     -> sconstTyInf tye sc
+  CmpConst cc     -> cconstTyInf tye cc
+  GlobalValue gv  -> gvTyInf tye gv 
+  ConstantExpr ec -> econstTyInf tye ec 
 
+-- Simple Constant TyAnn Inference
 sconstTyInf :: TyAnnEnv -> SimpleConstant -> (TyAnn, TyAnnEnv)
 sconstTyInf tye c = case c of
-   ConstantInt _ ty -> case ty of
-        TyInt s -> (T.TyPri $ T.TyInt s, tye)
-        err     -> error "constTyInf (1)" 
-   ConstantFP fp -> (T.TyPri T.TyFloat, tye)
-   ConstantPointerNull ty -> undefined 
+  ConstantInt _ ty -> case ty of
+       TyInt s -> (T.TyPri $ T.TyInt s, tye)
+       err     -> error "constTyInf: ConstantInt must be of type iX" 
+  ConstantFP fp -> (T.TyPri T.TyFloat, tye)
+  ConstantPointerNull ty -> case ty of
+       TyPointer t -> (liftTy ty, tye)
+       _           -> error "constTyInf: ConstantPointerNull must be of type Ptr" 
 
+-- Complex Constant TyAnn Inference
 cconstTyInf :: TyAnnEnv -> ComplexConstant -> (TyAnn, TyAnnEnv)
-cconstTyInf = undefined
+cconstTyInf tye c = case c of
+  ConstantAggregateZero  ty  -> (liftTy ty, tye) 
+  ConstantDataSequential cds -> cdsconstTyInf tye cds
+  ConstantStruct     ty vals -> (liftTy ty, tye) -- TODO 
+  ConstantArray      ty vals -> (liftTy ty, tye) -- TODO
+  ConstantVector     ty vals -> (liftTy ty, tye) -- TODO
 
+-- Constant Data Sequential TyAnn Inference
+-- TODO check that all vals are ConstantInt/ConstantFP
+cdsconstTyInf :: TyAnnEnv -> ConstantDataSequential -> (TyAnn, TyAnnEnv)
+cdsconstTyInf tye c = case c of
+  ConstantDataArray  ty _ -> case ty of
+                               TyArray  _ ety -> if isSmpTy ety
+                                                 then (liftTy ety, tye)
+                                                 else error "cdsconstTyInf: ConstantDataArray does not have TyArray with a simple type"
+  ConstantDataVector ty _ -> case ty of
+                               TyVector _ ety -> if isSmpTy ety
+                                                 then (liftTy ety, tye)
+                                                 else error "cdsconstTyInf: ConstantDataVector does not have TyArray with a simple type"
+  where isSmpTy ety = case ety of
+                       TyInt 8  -> True
+                       TyInt 16 -> True
+                       TyInt 32 -> True
+                       TyInt 64 -> True
+                       TyFloatPoint TyFloat -> True
+                       TyFloatPoint TyDouble -> True
+                       _ -> False 
+
+-- Global Variable Constant Type Inference
 gvTyInf :: TyAnnEnv -> GlobalValue -> (TyAnn, TyAnnEnv)
-gvTyInf = undefined
+gvTyInf tye v = case v of
+  FunctionValue  n ty -> gvTyInfA tye n ty
+  GlobalAlias    n ty -> gvTyInfA tye n ty
+  GlobalVariable n ty -> gvTyInfA tye n ty
 
+gvTyInfA tye n ty = case M.lookup n tye of
+                      Nothing  -> error "gvTyInf"
+                      Just tyr -> (unify (liftTy ty) tyr, tye) 
+
+-- Constant Expression Type Inference
 econstTyInf :: TyAnnEnv -> ConstantExpr -> (TyAnn, TyAnnEnv)
 econstTyInf = undefined
 

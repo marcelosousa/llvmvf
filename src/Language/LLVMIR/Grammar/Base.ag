@@ -157,9 +157,9 @@ emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid [] []
 data BasicBlock
   | BasicBlock 
       label  :: Label
+      phis   :: Instructions
       instrs :: Instructions
---          tmn    :: Terminator
-
+      tmn    :: Instruction
  
 data Identifier 
   | Global name :: Id -- (functions, global variables) begin with the '@'
