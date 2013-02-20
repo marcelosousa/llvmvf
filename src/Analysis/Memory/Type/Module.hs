@@ -5,26 +5,17 @@
 -- Type Inference
 -------------------------------------------------------------------------------
 
-module Analysis.Memory.Type.Module where
+module Analysis.Memory.Type.Module (typeModule) where
 
 import Analysis.Memory.TyAnn (TyAnn, TyAnnEnv)
 import qualified Analysis.Memory.TyAnn as T
-import Analysis.Memory.Type.Function
+import Analysis.Memory.Type.Function (typeFunction)
 import Analysis.Memory.Type.Util
-import Analysis.Memory.Type.Constant
+import Analysis.Memory.Type.Global   (typeGlobal)
 import Language.LLVMIR
 import qualified Data.Map as M
 
 -- Module TyAnn Inference
-modTyInf :: Module -> ([TyAnn], M.Map String (TyAnn, TyAnnEnv))
-modTyInf (Module i l t gvs fns nmdtys) = let (vtys, tye) = gLstTyInf M.empty gvarTyInf gvs
-                                         in (vtys, M.map (fnTyInf tye) fns)
-
--- Global TyAnn Inference
-gvarTyInf :: TyAnnEnv -> Global -> (TyAnn, TyAnnEnv)
-gvarTyInf tyenv (GlobalVar i l isConst isUAddr ty iconst align) = 
-  let ta = liftTy ty
-  in case iconst of
-      Nothing -> (ta, tyenv)
-      Just c  -> let (t,te) = constTyInf tyenv c
-                 in  (castTy t ta, te) 
+typeModule :: Module -> ([TyAnn], M.Map String (TyAnn, TyAnnEnv))
+typeModule (Module i l t gvs fns nmdtys) = let (vtys, tye) = gLstTyInf M.empty typeGlobal gvs
+                                           in (vtys, M.empty) -- M.map (typeFunction tye) fns)

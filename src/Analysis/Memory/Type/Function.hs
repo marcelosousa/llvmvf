@@ -4,7 +4,7 @@
 -- A Type System for Memory Analysis of LLVM IR Modules
 -------------------------------------------------------------------------------
 
-module Analysis.Memory.Type.Function where
+module Analysis.Memory.Type.Function (typeFunction) where
 
 import Analysis.Memory.TyAnn (TyAnn, TyAnnEnv)
 import qualified Analysis.Memory.TyAnn as T
@@ -14,24 +14,25 @@ import Language.LLVMIR
 import qualified Data.Map as M
 
 -- Function TyAnn Inference
-fnTyInf :: TyAnnEnv -> Function -> (TyAnn, TyAnnEnv)
-fnTyInf tye (FunctionDef  n l rty pms bbs) = let (ptys, tyex) = gLstTyInf tye parTyInf pms
-                                                 rtyr = liftTy rty
-                                                 (bbtyr, tyenv) = bbsTyInf tyex bbs
-                                                 tyr = T.TyDer $ T.TyFun ptys bbtyr -- TODO 
-                                                 tyey = M.insert n tyr tyenv
-                                             in (tyr, M.insert n tyr tyex)
-fnTyInf tye (FunctionDecl n l rty pms)     = let (ptys, tyex) = gLstTyInf tye parTyInf pms
-                                                 tyr = T.TyDer $ T.TyFun ptys [liftTy rty]
-                                             in (tyr, M.insert n tyr tyex)
+typeFunction :: TyAnnEnv -> Function -> (TyAnn, TyAnnEnv)
+-- Incomplete: Need to check if the return type is compatible with the actual return type from the basic blocks.
+typeFunction tye (FunctionDef  n l rty pms bbs) = let (ptys, tyex) = gLstTyInf tye typeParameter pms -- Type parameters
+                                                      rtyr = liftTy rty                              -- Lift return type
+                                                      (bbtyr, tyenv) = bbsTyInf tyex bbs
+                                                      tyr = T.TyDer $ T.TyFun ptys bbtyr -- TODO 
+                                                      tyey = M.insert n tyr tyenv
+                                                  in (tyr, M.insert n tyr tyex)
+typeFunction tye (FunctionDecl n l rty pms)     = let (ptys, tyex) = gLstTyInf tye typeParameter pms
+                                                      tyr = T.TyDer $ T.TyFun ptys [liftTy rty]
+                                                  in (tyr, M.insert n tyr tyex)
 
 -- Parameter TyAnn Inference
-parTyInf :: TyAnnEnv -> Parameter -> (TyAnn, TyAnnEnv)
-parTyInf tye (Parameter i ty) = let tyr = liftTy ty
-                                in case M.lookup i tye of
-                                  Nothing -> (tyr, M.insert i tyr tye)
-                                  Just tya -> error "parTyInf"
-                                  
+typeParameter :: TyAnnEnv -> Parameter -> (TyAnn, TyAnnEnv)
+typeParameter tye (Parameter i ty) = let tyr = liftTy ty
+                                     in case M.lookup i tye of
+                                         Nothing  -> (tyr, M.insert i tyr tye)
+                                         Just tya -> error "typeParameter"
+
 bbsTyInf :: TyAnnEnv -> BasicBlocks -> ([TyAnn], TyAnnEnv)
 bbsTyInf tye bbs = bbUnify $ map (bbTyInf tye) bbs
 

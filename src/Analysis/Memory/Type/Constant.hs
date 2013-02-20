@@ -6,7 +6,7 @@
 -- Gamma |- c : tau
 -------------------------------------------------------------------------------
 
-module Analysis.Memory.Type.Constant where
+module Analysis.Memory.Type.Constant (typeConstant) where
 
 import Analysis.Memory.TyAnn (TyAnn, TyAnnEnv)
 import qualified Analysis.Memory.TyAnn as T
@@ -15,11 +15,11 @@ import Language.LLVMIR
 import qualified Data.Map as M
 
 -- Constant TyAnn Inference
-constTyInf :: TyAnnEnv -> Constant -> (TyAnn, TyAnnEnv)
-constTyInf tye c = case c of
+typeConstant :: TyAnnEnv -> Constant -> (TyAnn, TyAnnEnv)
+typeConstant tye c = case c of
   UndefValue      -> (T.TyUndef, tye)
-  PoisonValue     -> error "constTyInf: PoisonValue not supported"
-  BlockAddr       -> error "constTyInf: BlockAddr not supported"
+  PoisonValue     -> error "typeConstant: PoisonValue not supported"
+  BlockAddr       -> error "typeConstant: BlockAddr not supported"
   SmpConst sc     -> sconstTyInf tye sc
   CmpConst cc     -> cconstTyInf tye cc
   GlobalValue gv  -> gvTyInf tye gv 
@@ -30,11 +30,11 @@ sconstTyInf :: TyAnnEnv -> SimpleConstant -> (TyAnn, TyAnnEnv)
 sconstTyInf tye c = case c of
   ConstantInt _ ty -> case ty of
        TyInt s -> (T.TyPri $ T.TyInt s, tye)
-       err     -> error "constTyInf: ConstantInt must be of type iX" 
+       err     -> error "typeConstant: ConstantInt must be of type iX" 
   ConstantFP fp -> (T.TyPri T.TyFloat, tye)
   ConstantPointerNull ty -> case ty of
        TyPointer t -> (liftTy ty, tye)
-       _           -> error "constTyInf: ConstantPointerNull must be of type Ptr" 
+       _           -> error "typeConstant: ConstantPointerNull must be of type Ptr" 
 
 -- Complex Constant TyAnn Inference
 cconstTyInf :: TyAnnEnv -> ComplexConstant -> (TyAnn, TyAnnEnv)

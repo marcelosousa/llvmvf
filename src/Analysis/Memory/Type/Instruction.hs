@@ -10,7 +10,7 @@ module Analysis.Memory.Type.Instruction where
 import Analysis.Memory.TyAnn (TyAnn, TyAnnEnv)
 import qualified Analysis.Memory.TyAnn as T
 import Analysis.Memory.Type.Util
-import Analysis.Memory.Type.Constant
+import Analysis.Memory.Type.Value
 import Language.LLVMIR
 import qualified Data.Map as M
 
@@ -33,13 +33,3 @@ convTyInf tyenv i v ty = let ity = liftTy ty
                              (vty, tye) = vTyInf tyenv v
                              nty = castTy vty ity
                          in (nty, M.insert i nty tye)
-
--- Value TyAnn Inference
-vTyInf :: TyAnnEnv -> Value -> (TyAnn, TyAnnEnv)
-vTyInf tyenv val = case val of
-   Id v ty -> let vty = liftTy ty
-              in case M.lookup v tyenv of
-                   Nothing  -> error $ "vtyinf"  -- (vty, M.insert v vty tyenv)
-                   Just tya -> let nty = unify vty tya
-                               in (nty, M.adjust (const nty) v tyenv)
-   Constant c -> constTyInf tyenv c

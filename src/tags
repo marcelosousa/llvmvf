@@ -1,6 +1,7 @@
 !-!	./Language/LTL/Base.hs	201;"	v
 !~!	./Language/LTL/Base.hs	257;"	v
 <->	./Language/LTL/Base.hs	77;"	v
+<:	./Analysis/Memory/Type/Util.hs	42;"	v
 <>	./Language/LLVMIR/Extractor/Opcode.hs	81;"	v
 AShr	./Language/LLVMIR/Extractor/Opcode.hs	30;"	d
 AShr	src/Language/LLVMIR.hs	247;"	d
@@ -3872,8 +3873,8 @@ args_Instruction_AtomicRMW	src/Language/LLVMIR.hs	275;"	v
 args_Instruction_Call	src/Language/LLVMIR.hs	270;"	v
 args_Instruction_CreateThread	src/Language/LLVMIR.hs	276;"	v
 asm_ModuleAsm_ModuleAsm	src/Language/LLVMIR.hs	361;"	v
-bbTyInf	./Analysis/Memory/Type/Function.hs	44;"	v
-bbUnify	./Analysis/Memory/Type/Function.hs	39;"	v
+bbTyInf	./Analysis/Memory/Type/Function.hs	44;"	v	file:
+bbUnify	./Analysis/Memory/Type/Function.hs	39;"	v	file:
 bbentrypc_Syn_BasicBlock	src/Concurrent/Model/Analysis/ControlFlow.hs	604;"	v
 bbentrypc_Syn_BasicBlocks	src/Concurrent/Model/Analysis/ControlFlow.hs	697;"	v
 bbentrypc_Syn_Function	src/Concurrent/Model/Analysis/ControlFlow.hs	1815;"	v
@@ -3886,7 +3887,7 @@ bbentrypci_Inh_Function	src/Concurrent/Model/Analysis/ControlFlow.hs	1814;"	v
 bbentrypci_Inh_Functions	src/Concurrent/Model/Analysis/ControlFlow.hs	1958;"	v
 bbentrypci_Inh_Instruction	src/Concurrent/Model/Analysis/ControlFlow.hs	2469;"	v
 bbentrypci_Inh_Instructions	src/Concurrent/Model/Analysis/ControlFlow.hs	5990;"	v
-bbsTyInf	./Analysis/Memory/Type/Function.hs	36;"	v
+bbsTyInf	./Analysis/Memory/Type/Function.hs	36;"	v	file:
 binOps	./Language/LLVMIR/Extractor/Instruction.hs	279;"	v
 bitbinOps	./Language/LLVMIR/Extractor/Instruction.hs	289;"	v
 bmcMode	Main.hs	64;"	v
@@ -3905,9 +3906,9 @@ castTy	./Analysis/Memory/Type/Util.hs	38;"	v
 cbb_Inh_Instruction	src/Language/LLVMIR/Converter/Module.hs	2381;"	v
 cbb_Inh_Instructions	src/Language/LLVMIR/Converter/Module.hs	4604;"	v
 cc_Constant_CmpConst	src/Language/LLVMIR.hs	145;"	v
-cconstTyInf	./Analysis/Memory/Type/Constant.hs	41;"	v
+cconstTyInf	./Analysis/Memory/Type/Constant.hs	41;"	v	file:
 cds_ComplexConstant_ConstantDataSequential	src/Language/LLVMIR.hs	135;"	v
-cdsconstTyInf	./Analysis/Memory/Type/Constant.hs	51;"	v
+cdsconstTyInf	./Analysis/Memory/Type/Constant.hs	51;"	v	file:
 cfg	./src/Concurrent/Model/Analysis/ControlFlow.ag	32;"	v
 cfg_Inh_BasicBlock	src/Concurrent/Model/Encoder/Threads.hs	910;"	v
 cfg_Inh_BasicBlocks	src/Concurrent/Model/Encoder/Threads.hs	1005;"	v
@@ -3932,7 +3933,6 @@ cond_CompareConstantExpr_ICmpExpr	src/Language/LLVMIR.hs	130;"	v
 cond_Instruction_FCmp	src/Language/LLVMIR.hs	268;"	v
 cond_Instruction_ICmp	src/Language/LLVMIR.hs	267;"	v
 cond_Instruction_Select	src/Language/LLVMIR.hs	271;"	v
-constTyInf	./Analysis/Memory/Type/Constant.hs	19;"	v
 controlflow	./Concurrent/Model.hs	28;"	v
 convOps	./Language/LLVMIR/Extractor/Instruction.hs	269;"	v
 convTyInf	./Analysis/Memory/Type/Instruction.hs	32;"	v
@@ -4054,7 +4054,7 @@ dflowz_Syn_SimpleConstant	src/Concurrent/Model/Analysis/DataFlow.hs	8468;"	v
 dflowz_Syn_Value	src/Concurrent/Model/Analysis/DataFlow.hs	8966;"	v
 domain	Main.hs	49;"	v
 dotLabel	./src/Concurrent/Model/Visualizer.ag	92;"	v
-econstTyInf	./Analysis/Memory/Type/Constant.hs	82;"	v
+econstTyInf	./Analysis/Memory/Type/Constant.hs	82;"	v	file:
 elDiv	./Language/LLVMIR/Printer/NamedTypes.hs	42;"	v
 elems_Instruction_Switch	src/Language/LLVMIR.hs	231;"	v
 emptyFunction	src/Language/LLVMIR/Grammar/Base.ag	154;"	v
@@ -4156,7 +4156,6 @@ fdcl_Inh_Functions	src/Concurrent/Model/Encoder/Model.hs	4226;"	v
 fdcl_Inh_Instruction	src/Concurrent/Model/Encoder/Model.hs	5332;"	v
 fdcl_Inh_Instructions	src/Concurrent/Model/Encoder/Model.hs	14118;"	v
 final	./Concurrent/Model/Encoder.hs	66;"	v	file:
-fnTyInf	./Analysis/Memory/Type/Function.hs	18;"	v
 fname_Inh_BasicBlock	src/Concurrent/Model/Visualizer.hs	727;"	v
 fname_Inh_BasicBlocks	src/Concurrent/Model/Visualizer.hs	788;"	v
 fp_SimpleConstant_ConstantFP	src/Language/LLVMIR.hs	410;"	v
@@ -4257,11 +4256,10 @@ gs_Syn_Global	src/Concurrent/Model/Encoder/Model.hs	4442;"	v
 gs_Syn_Global	src/Concurrent/Model/Encoder/Threads.hs	4172;"	v
 gs_Syn_Globals	src/Concurrent/Model/Encoder/Model.hs	4932;"	v
 gs_Syn_Globals	src/Concurrent/Model/Encoder/Threads.hs	4662;"	v
-gvTyInf	./Analysis/Memory/Type/Constant.hs	71;"	v
-gvTyInfA	./Analysis/Memory/Type/Constant.hs	76;"	v
+gvTyInf	./Analysis/Memory/Type/Constant.hs	71;"	v	file:
+gvTyInfA	./Analysis/Memory/Type/Constant.hs	76;"	v	file:
 gv_Constant_GlobalValue	src/Language/LLVMIR.hs	146;"	v
 gvals	./Concurrent/Model.hs	90;"	v
-gvarTyInf	./Analysis/Memory/Type/Module.hs	25;"	v
 gvars	./Concurrent/Model.hs	47;"	v
 gvars_Module_Module	src/Language/LLVMIR.hs	358;"	v
 hasInitializer	./Language/LLVMIR/Extractor/Module.hs	49;"	v	file:
@@ -4349,7 +4347,7 @@ isGlobal_Syn_GlobalValue	src/Concurrent/Model/Encoder/Threads.hs	4315;"	v
 isGlobal_Syn_Value	src/Concurrent/Model/Encoder/Model.hs	17614;"	v
 isGlobal_Syn_Value	src/Concurrent/Model/Encoder/Threads.hs	14720;"	v
 isPathInitialized	./Language/LTL/Base.hs	196;"	v
-isTyInf	./Analysis/Memory/Type/Function.hs	48;"	v
+isTyInf	./Analysis/Memory/Type/Function.hs	48;"	v	file:
 isUaddr_Global_GlobalVar	src/Language/LLVMIR.hs	210;"	v
 istates	./Language/LTL/Base.hs	160;"	v
 iv_SimpleConstant_ConstantInt	src/Language/LLVMIR.hs	409;"	v
@@ -4393,7 +4391,6 @@ mfun_Inh_Instruction	src/Concurrent/Model/PThread.hs	3702;"	v
 mfun_Inh_Instructions	src/Concurrent/Model/PThread.hs	7033;"	v
 mn_Inh_Type	src/Concurrent/Model/Encoder/Model.hs	16901;"	v
 mn_Inh_Type	src/Concurrent/Model/Encoder/Threads.hs	14007;"	v
-modTyInf	./Analysis/Memory/Type/Module.hs	20;"	v
 model	./Concurrent/Model.hs	27;"	v
 mptr_Instruction_Cmpxchg	src/Language/LLVMIR.hs	274;"	v
 mres_Instruction_Call	src/Language/LLVMIR.hs	270;"	v
@@ -4559,7 +4556,7 @@ pSomewhere	./Language/LLVMIR/Extractor/Module.hs	75;"	v	file:
 pTarget	./Language/LLVMIR/Extractor/Module.hs	79;"	v	file:
 p_Type_TyFloatPoint	src/Language/LLVMIR.hs	437;"	v
 p_Type_TyInt	src/Language/LLVMIR.hs	436;"	v
-parTyInf	./Analysis/Memory/Type/Function.hs	30;"	v
+parTyInf	./Analysis/Memory/Type/Function.hs	30;"	v	file:
 params_Function_FunctionDecl	src/Language/LLVMIR.hs	202;"	v
 params_Function_FunctionDef	src/Language/LLVMIR.hs	201;"	v
 party_Type_TyFunction	src/Language/LLVMIR.hs	439;"	v
@@ -4792,7 +4789,7 @@ s_TargetData_TargetData	src/Language/LLVMIR.hs	418;"	v
 safePEx	./Language/LTL/Base.hs	89;"	v
 sc_Constant_SmpConst	src/Language/LLVMIR.hs	144;"	v
 sched	./src/Concurrent/Model/Encoder/Threads.ag	379;"	v
-sconstTyInf	./Analysis/Memory/Type/Constant.hs	30;"	v
+sconstTyInf	./Analysis/Memory/Type/Constant.hs	30;"	v	file:
 self_Syn_Alias	src/Concurrent/Model/Analysis/ControlFlow.hs	103;"	v
 self_Syn_Alias	src/Concurrent/Model/Analysis/DataFlow.hs	94;"	v
 self_Syn_Alias	src/Concurrent/Model/Encoder/Model.hs	316;"	v
@@ -8877,8 +8874,12 @@ ty_Type_TyArray	src/Language/LLVMIR.hs	438;"	v
 ty_Type_TyPointer	src/Language/LLVMIR.hs	441;"	v
 ty_Type_TyVector	src/Language/LLVMIR.hs	442;"	v
 ty_Value_Id	src/Language/LLVMIR.hs	448;"	v
-typeAnalysis	./Analysis/Memory/TyAnnInf.hs	17;"	v
+typeAnalysis	./Analysis/Memory/Type.hs	17;"	v
+typeConstant	./Analysis/Memory/Type/Constant.hs	19;"	v
+typeFunction	./Analysis/Memory/Type/Function.hs	18;"	v
+typeGlobal	./Analysis/Memory/Type/Global.hs	19;"	v
 typeMode	Main.hs	70;"	v
+typeModule	./Analysis/Memory/Type/Module.hs	20;"	v
 typeOf	./Language/LLVMIR/Extractor/Type.hs	35;"	v
 types	./Language/LLVMIR/Printer/NamedTypes.hs	32;"	v
 types'	./Language/LLVMIR/Printer/NamedTypes.hs	39;"	v
@@ -8893,7 +8894,7 @@ usefulsorts	./Concurrent/Model/Encoder.hs	72;"	v	file:
 v	./Language/LTL/Base.hs	80;"	v
 v1_Instruction_Store	src/Language/LLVMIR.hs	252;"	v
 v2_Instruction_Store	src/Language/LLVMIR.hs	252;"	v
-vTyInf	./Analysis/Memory/Type/Instruction.hs	39;"	v
+vTyInf	./Analysis/Memory/Type/Value.hs	19;"	v
 v_Instruction_BitCast	src/Language/LLVMIR.hs	266;"	v
 v_Instruction_Br	src/Language/LLVMIR.hs	229;"	v
 v_Instruction_FPExt	src/Language/LLVMIR.hs	263;"	v
