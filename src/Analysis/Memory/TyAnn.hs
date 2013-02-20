@@ -6,9 +6,11 @@
 
 module Analysis.Memory.TyAnn where
 
+import Data.Map
+import Language.LLVMIR (Identifier)
+
 type TysAnn = [TyAnn]
 
--- First Class Type are the ones produced by instructions
 data TyAnn = TyBot
            | TyUndef
            | TyPri TyPri
@@ -37,3 +39,5 @@ data TyAnnot = TyIOAddr
              | TyAny
   deriving (Show, Eq, Ord)
 
+
+type TyAnnEnv = Map Identifier TyAnn

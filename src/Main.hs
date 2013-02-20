@@ -41,13 +41,14 @@ _summary = unlines ["LLVM Verification Framework - v0.2","llvmvf supports verifi
 _program = "llvmvf"
 _help    = "The input files of llvmvf are byte code files generated from a LLVM front-end (eg. clang)"
 _helpBMC = "Example: llvmvf bmc -d=pthread -b=10 x.bc"
-_helpExtract = unlines ["The extract command is useful for front-end debug.","llvmvf extract generates a .llvf file that is a pretty printed version of the internal representation.","Example: llvmvf extract x.bc"]
+_helpExtract = unlines ["llvmvf extract generates a .llvf file that is a pretty printed version of the internal representation.","Example: llvmvf extract x.bc"]
+_helpType = unlines ["llvmvf type uses a refined type system for separation of regular (user/kernel) and I/O memory"]
 
 data Option = Extract   {input :: FilePath}
             | Visualize {input :: FilePath}
             | BMC       {input :: FilePath, domain :: Domain, bound :: Int}
             | Convert   {input :: FilePath}
-            | TypeCheck {input :: FilePath}
+            | Type      {input :: FilePath}
   deriving (Show, Data, Typeable, Eq)
 
 data Domain = PThread | SystemC
@@ -65,9 +66,11 @@ bmcMode = BMC { input = def &= args
               , bound  = def &= help "bound (k): Int"
               } &= help _helpBMC
 
+typeMode :: Option
+typeMode = Type { input = def &= args } &= help _helpType
 
 progModes :: Mode (CmdArgs Option)
-progModes = cmdArgsMode $ modes [extractMode, bmcMode]
+progModes = cmdArgsMode $ modes [extractMode, bmcMode, typeMode]
          &= help _help
          &= program _program
          &= summary _summary
@@ -83,11 +86,11 @@ runOption (Extract bc) = do mdl <- extract bc
                             writeFile (addExtension bf "llvf") (show $ pretty mdl)
 runOption (BMC bc d k) = do print $ "Working " ++ show bc ++ show d ++ show k
                             runBMC bc d k
+runOption (Type bc) = do mdl <- extract bc
+                         print $ typeAnalysis mdl
 {-runOption bc Htm     = do mdl <- extract bc
                           let bf = dropExtension bc
                           writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)
-runOption bc Type = do mdl <- extract bc
-                       print $ modTyInf mdl
 -}
 --runOption bc Parse k = do mdl <- extract bc
 --                          let bf  = dropExtension bc
