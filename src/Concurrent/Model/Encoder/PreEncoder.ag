@@ -7,6 +7,11 @@
 
 module {Concurrent.Model.Encoder.PreEncoder}{}{}
 
+imports 
+{
+import Debug.Trace (trace)
+}
+
 sem Module
   | Module
       funs.fdcl = Map.empty
@@ -106,7 +111,7 @@ sem Instruction
 -- | Get return type 
 getFnRetTy :: Declarations -> Id -> Type
 getFnRetTy dcls i = case Map.lookup i dcls of
-                         Nothing    -> error "Function unknown"
+                         Nothing    -> error $ "Function " ++ show i ++ " not in " ++ show dcls
                          Just (t,_) -> t
 
 getFnParams :: Declarations -> Id -> Parameters

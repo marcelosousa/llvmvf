@@ -15,7 +15,7 @@ import qualified Data.Map as M
 
 -- Function TyAnn Inference
 typeFunction :: TyAnnEnv -> Function -> (TyAnn, TyAnnEnv)
--- Incomplete: Need to check if the return type is compatible with the actual return type from the basic blocks.
+-- Incomplete: Need to check if the return type is compatible with the actual return type from the basic block
 typeFunction tye (FunctionDef  n l rty pms bbs) = let (ptys, tyex) = gLstTyInf tye typeParameter pms -- Type parameters
                                                       rtyr = liftTy rty                              -- Lift return type
                                                       (bbtyr, tyenv) = bbsTyInf tyex bbs
