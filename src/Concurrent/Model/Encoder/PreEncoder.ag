@@ -111,7 +111,7 @@ sem Instruction
 -- | Get return type 
 getFnRetTy :: Declarations -> Id -> Type
 getFnRetTy dcls i = case Map.lookup i dcls of
-                         Nothing    -> error $ "Function " ++ show i ++ " not in " ++ show dcls
+                         Nothing    -> TyVoid -- error $ "Function " ++ show i ++ " not in " ++ show dcls
                          Just (t,_) -> t
 
 getFnParams :: Declarations -> Id -> Parameters
