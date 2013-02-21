@@ -116,7 +116,7 @@ getFnRetTy dcls i = case Map.lookup i dcls of
 
 getFnParams :: Declarations -> Id -> Parameters
 getFnParams dcls i = case Map.lookup i dcls of
-                          Nothing -> error "getFnParams error"
+                          Nothing -> [] --error "getFnParams error"
                           Just (_,p) -> p
 
 preEncoder :: Functions -> TypeEnv -> Declarations -> (SExpressions, PreEncoder)
