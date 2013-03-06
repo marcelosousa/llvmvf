@@ -6,7 +6,11 @@
 
 module Analysis.Memory.TyAnn where
 
-import Data.Map
+#if __GLASGOW_HASKELL__ >= 704
+import Data.Map hiding (foldr)
+#else
+import Data.Map 
+#endif
 import Language.LLVMIR (Identifier)
 
 type TysAnn = [TyAnn]
