@@ -2,6 +2,7 @@
 -------------------------------------------------------------------------------
 -- Module    :  Language.LLVMIR.Converter
 -- Copyright :  (c) 2013 Marcelo Sousa
+-- BETA * SSA -> ANF
 -------------------------------------------------------------------------------
 }
 
@@ -56,7 +57,7 @@ attr Function
 
 sem Function
   | FunctionDef lhs.etm = trace (show @body.phis) $ EFun (getIdentifier @name.self) @params.etm (buildbb "bb" @body.etm)
-                body.phis = @body.phis
+                body.phim = @body.phis
   | FunctionDecl lhs.etm = EBot
 
 -- Parameters
@@ -97,7 +98,7 @@ sem BasicBlock
 attr Instructions Instruction 
   syn etm :: {([Label], [ETm] -> ETm)}
   syn phis use {++} {[]} :: {[(Ident, [(Value, Label)])]}
-  inh cbb :: {Label}
+--  inh cbb :: {Label}
 --  inh phim :: {
 
 sem Instructions

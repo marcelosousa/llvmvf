@@ -120,7 +120,7 @@ getFnParams dcls i = case Map.lookup i dcls of
                           Just (_,p) -> p
 
 preEncoder :: Functions -> TypeEnv -> Declarations -> (SExpressions, PreEncoder)
-preEncoder fs sorte decls = let fw = wrap_Functions (sem_Functions fs) $ Inh_Functions { fdcl_Inh_Functions = decls, sortEnv_Inh_Functions = sorte }
+preEncoder fs sorte decls = let fw = wrap_Functions (sem_Functions fs) $ Inh_Functions { fdcl_Inh_Functions = decls, sortEnv_Inh_Functions = sorte, mn_Inh_Functions = undefined, mts_Inh_Functions = undefined, pcc_Inh_Functions = undefined, prenc_Inh_Functions = undefined, sortexpr_Inh_Functions = undefined, val_Inh_Functions = undefined}
                             in (declexpres_Syn_Functions fw, PreEncoder (argToPar_Syn_Functions fw) (fStore_Syn_Functions fw) (mutexes_Syn_Functions fw) (sortEnv_Syn_Functions fw) (locals_Syn_Functions fw) (fails_Syn_Functions fw))
 
 }

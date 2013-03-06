@@ -33,6 +33,10 @@ attr Function BasicBlocks BasicBlock Instructions Instruction Identifier
 sem BasicBlocks BasicBlock
   inh fname :: {String}
 
+sem Module
+  | Module
+      funs.ilabel = 0
+
 sem Functions
   | Entry
       val.ilabel = @lhs.ilabel

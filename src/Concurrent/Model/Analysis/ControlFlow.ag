@@ -43,7 +43,11 @@ attr Functions
   syn cflow use {++} {[]} :: {CF}
   syn cte   use {`Map.union`} {Map.empty} :: {Map.Map String Int}
   syn cfg   use {`Map.union`} {Map.empty} :: {Map.Map String CF}
- 
+
+sem Module
+  | Module
+      funs.bbentrypci = Map.empty
+
 attr Function BasicBlocks BasicBlock Instructions Instruction
   syn cflow use {++} {[]} :: {CF}
   inh bbentrypci :: {Map.Map String Int}
@@ -134,7 +138,7 @@ sem Instructions
      lhs.entrypc = @hd.entrypc
 
 sem Instruction
-  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW CreateThread Switch MutexInit MutexLock MutexUnlock
+  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue InsertValue Cmpxchg AtomicRMW CreateThread Switch MutexInit MutexLock MutexUnlock NotifyEvent WaitEvent WaitTime
      lhs.entrypc = @pc.self
 
 sem Instruction

@@ -72,8 +72,8 @@ type ValueIdxs = [PValueIdx]
 
 type DLayout = [String]
 
-type IntTyValId = (Type, Value, Identifier)
-type IntTyValIdL = [IntTyValId]
+type ValId = (Value, Identifier)
+type ValIdL = [ValId]
 
 data Module
   | Module

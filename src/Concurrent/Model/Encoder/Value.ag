@@ -49,6 +49,52 @@ attr Value Constant ConstantFP ConstantDataSequential ConstantExpr SimpleConstan
   syn vtype  :: {Type}
   syn sort   :: {SSortExpr}
 
+-- Added to prevent warnings
+attr ComplexConstant Constant Instruction MConstant Global Globals Value CompareConstantExpr Argument Arguments ConstantExpr Values RetInst
+  inh mn     :: {Maybe SSort}
+
+attr Functions Function
+  inh mn     :: {Maybe SSort}
+  inh mts :: {TypeEnv}
+
+attr NamedTypes PTyInt PValue PValueIdx PTyIntL PValues ValueIdxs ValId MValue Instructions BasicBlock BasicBlocks ValIdL
+  inh mn     :: {Maybe SSort}
+  inh mts :: {TypeEnv}
+  inh val    :: {Map.Map Id (Type, [PC])}
+
+attr Function Functions Global Globals
+  inh val    :: {Map.Map Id (Type, [PC])}
+
+attr PValue PValueIdx RetInst ValId PValues ValIdL MValue MIdentifier ValueIdxs Identifiers Global Globals
+  inh tn     :: {String}             -- Thread Name
+
+attr Argument Arguments Parameters
+  inh mts :: {TypeEnv}
+  inh tn     :: {String}             -- Thread Name
+  inh val    :: {Map.Map Id (Type, [PC])}
+
+attr Instruction RetInst
+  inh mts :: {TypeEnv}
+  inh val    :: {Map.Map Id (Type, [PC])}
+
+sem Module
+  | Module
+      gvars.gs = undefined -- nullGlobalState
+      gvars.sortexpr = Nothing
+      gvars.mn = Nothing
+      gvars.tn = ""
+      gvars.val = Map.empty
+      funs.mn = Nothing
+      funs.mts = Map.empty
+      funs.val = Map.empty
+--      funs.pcc = 0
+      funs.prenc = undefined --emptyPreEncoder
+      funs.sortexpr = Nothing
+      nmdtys.mn = Nothing
+      nmdtys.mts = Map.empty
+      nmdtys.val = Map.empty
+--
+
 attr Value Constant GlobalValue
   syn isGlobal :: {Bool}
   syn ident    :: {Maybe String}
@@ -96,6 +142,7 @@ sem Constant
       lhs.sexpr  = [] 
          .sexprs = []
          .vtype  = verrormessage
+         .sort   = verrormessage
 
   | ConstantExpr       
       lhs.sexpr  = @expr.sexpr
@@ -201,12 +248,14 @@ sem ConstantExpr
                    in x -- trace (show x ++ " " ++ show @struct.vtype) $ x
       lhs.sexprs = @struct.sexprs ++ @idxs.sexprs
       lhs.sexpr  = [ foldr (\(n, s1) s2 -> sFn "select" s2 $ changeN s1 n) (head @struct.sexpr) $ zip @loc.idxn $ init' @idxs.sexpr ] 
-      
+         .sort   = verrormessage
+
   | BinaryConstantExpr ExtractElementConstantExpr ExtractValueConstantExpr InsertElementConstantExpr InsertValueConstantExpr SelectConstantExpr ShuffleVectorConstantExpr 
       lhs.sexpr  = verrormessage
          .sexprs = verrormessage
          .vtype  = verrormessage
-  
+         .sort   = verrormessage
+
   | UnaryConstantExpr
       ty.mn      = Nothing
       ty.mts     = @lhs.mts
@@ -287,19 +336,18 @@ ivalueId vals i = case Map.lookup i vals of
                                               Just h  -> Just h
 
 encValue :: Value -> TypeEnv -> Map.Map Id (Type, [PC]) -> String -> (TypeEnv, SExpressions, [SExpr]) 
-encValue v mts val tn = let vw = wrap_Value (sem_Value v) $ Inh_Value {mts_Inh_Value = mts, tn_Inh_Value = tn, val_Inh_Value = val}
+encValue v mts val tn = let vw = wrap_Value (sem_Value v) $ Inh_Value {mts_Inh_Value = mts, tn_Inh_Value = tn, val_Inh_Value = val, mn_Inh_Value = undefined, sortexpr_Inh_Value = undefined}
                         in (mts_Syn_Value vw, sexprs_Syn_Value vw, sexpr_Syn_Value vw)
 
 encParameter :: Parameter -> TypeEnv -> String -> (TypeEnv, SExpressions, SExpr)
-encParameter p mts tn = let pw = wrap_Parameter (sem_Parameter p) $ Inh_Parameter {mts_Inh_Parameter = mts, tn_Inh_Parameter = tn}
+encParameter p mts tn = let pw = wrap_Parameter (sem_Parameter p) $ Inh_Parameter {mts_Inh_Parameter = mts, tn_Inh_Parameter = tn, sortexpr_Inh_Parameter=undefined}
                         in (mts_Syn_Parameter pw, sexprs_Syn_Parameter pw, sexpr_Syn_Parameter pw)
 
 
 getValueType :: Value -> Type 
-getValueType v = vtype_Syn_Value $ wrap_Value (sem_Value v) $ Inh_Value {mts_Inh_Value = undefined, tn_Inh_Value = undefined, val_Inh_Value = undefined}
+getValueType v = vtype_Syn_Value $ wrap_Value (sem_Value v) $ Inh_Value {mts_Inh_Value = undefined, tn_Inh_Value = undefined, val_Inh_Value = undefined, mn_Inh_Value = undefined, sortexpr_Inh_Value = undefined}
 
 getFnValueName :: Value -> Id
 getFnValueName (Constant (GlobalValue (FunctionValue (Global n) _))) = n
 getFnValueName _ = error "getFnValueName failed"
 }
-

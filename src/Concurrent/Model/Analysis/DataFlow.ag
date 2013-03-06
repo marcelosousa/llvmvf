@@ -2,6 +2,8 @@
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Analysis.DataFlow
 -- Copyright :  (c) 2012 Marcelo Sousa
+-- Retrieves for each function:
+-- . the used identifiers and their types
 -------------------------------------------------------------------------------
 }
 
@@ -20,15 +22,20 @@ import Debug.Trace
 import Language.LLVMIR
 }
 
-attr Value Constant ConstantDataSequential GlobalValue Functions BasicBlocks BasicBlock Instructions Instruction RetInst Argument Arguments CompareConstantExpr SimpleConstant ComplexConstant  ConstantExpr IntTyValId MValue PValue PValueIdx Values Global PValues Function
+attr Value Constant ConstantDataSequential GlobalValue Functions BasicBlocks BasicBlock Instructions Instruction RetInst Argument Arguments CompareConstantExpr SimpleConstant ComplexConstant  ConstantExpr ValId MValue PValue PValueIdx Values Global PValues Function Globals MConstant ValIdL ValueIdxs
   chn counter :: {Int}
 
 -- Simple Data Flow Information
 attr Functions
   syn dflow :: {Map.Map String (Map.Map Identifier Type)} 
 
-attr Function BasicBlocks BasicBlock Instructions Instruction Value RetInst Constant SimpleConstant ComplexConstant ConstantDataSequential GlobalValue
+attr Function BasicBlocks BasicBlock Instructions Instruction Value RetInst Constant SimpleConstant ComplexConstant ConstantDataSequential GlobalValue Argument Arguments CompareConstantExpr ConstantExpr MConstant MValue Global Globals PValue PValueIdx ValId PValues ValIdL Values ValueIdxs
   inh tname :: {String}
+
+sem Module
+  | Module
+      gvars.tname = ""
+      gvars.counter = 0
 
 attr Function BasicBlocks BasicBlock Instructions Instruction Value RetInst 
   syn dflow use {`Map.union`} {Map.empty} :: {Map.Map Identifier Type}
@@ -108,6 +115,7 @@ sem Constant
   | GlobalValue            lhs.wtype = @gv.wtype
                               .dflowz = @gv.dflowz 
   | UndefValue             lhs.wtype = TyUndefined
+  | PoisonValue            lhs.wtype = TyUndefined
 
 sem SimpleConstant
   | ConstantFP             lhs.wtype = TyUndefined

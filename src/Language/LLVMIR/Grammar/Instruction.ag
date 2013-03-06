@@ -13,10 +13,10 @@ data RetInst
 
 data Instruction
   -- Terminators
-  | Ret pc :: PC r :: RetInst
-  | Br  pc :: PC v :: Value t :: Value f :: Value
-  | UBr pc :: PC d :: Value 
-  | Switch pc :: PC elems :: IntTyValIdL -- TODO
+  | Ret         pc :: PC r :: RetInst
+  | Br          pc :: PC v :: Value t :: Value f :: Value
+  | UBr         pc :: PC d :: Value 
+  | Switch      pc :: PC ty :: Type v :: Value elems :: ValIdL -- TODO
   | Unreachable pc :: PC
   -- Standard Binary Operations
   | Add  pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value

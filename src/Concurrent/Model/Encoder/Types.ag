@@ -13,7 +13,7 @@ sem Types
       hd.mts = Map.empty
  
 -- Sorts
-attr Type 
+attr Type
   syn sort   :: {SSortExpr}
   syn sexprs use {++} {[]} :: {SExpressions}
   chn mts    :: {TypeEnv}

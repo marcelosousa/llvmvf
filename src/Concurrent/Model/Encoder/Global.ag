@@ -70,7 +70,7 @@ sFn f s1 s2 = FnAppExpr (SymIdent $ SimpleSym f) [s1, s2]
 
 -- | Encode Global Variables
 encGlobalVars :: Globals -> GlobalState -> (GlobalState, SExpressions)
-encGlobalVars gvars gs = let gw = wrap_Globals (sem_Globals gvars) $ Inh_Globals { gs_Inh_Globals = gs }
+encGlobalVars gvars gs = let gw = wrap_Globals (sem_Globals gvars) $ Inh_Globals { gs_Inh_Globals = gs, mn_Inh_Globals = undefined, sortexpr_Inh_Globals = undefined, tn_Inh_Globals = undefined, val_Inh_Globals = undefined}
                              me  = case sexpr_Syn_Globals gw of
                                         []  -> []
                                         [e] -> [assert e]

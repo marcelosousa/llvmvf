@@ -60,6 +60,9 @@ type Processes = IM.IntMap Process
 
 type Bound = Int
 type TypeEnv   = Map.Map Type (SSortExpr, SSort)
+
+emptyPreEncoder :: PreEncoder
+emptyPreEncoder = PreEncoder Map.empty Map.empty [] Map.empty Map.empty []
 -- 
 data PreEncoder = PreEncoder { argToPar :: Map.Map (PC,Int,Value) Id               -- Map an argument to a parameter -- Do not support calling the same function twice. New fresh variables
                              , fStore   :: Map.Map Id (Type, [PC])             -- Map a global variable to a list of program counter that store a new value

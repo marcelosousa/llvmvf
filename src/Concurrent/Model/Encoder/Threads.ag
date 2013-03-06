@@ -41,6 +41,12 @@ import Debug.Trace (trace)
 
 }
 
+sem Module
+  | Module
+      funs.cfg = Map.empty
+      funs.cte = Map.empty
+      funs.mutexes = []
+
 attr Functions 
   inh prenc :: {PreEncoder}
   inh cfg   :: {Map.Map String CF}
@@ -403,7 +409,7 @@ prep [x,y]  = (x, Just y):prep [y]
 prep (x:y:xs) = (x, Just y):prep (y:xs)
 
 encTs :: Functions -> [SExpr] -> [Map.Map String (SExpr, Maybe SExpr)] -> [[(SExpr, Maybe SExpr)]] -> [[(SExpr, Maybe SExpr)]] -> PreEncoder -> Map.Map String PC -> Map.Map String CF -> SExpr
-encTs fs sparks cpcs prds muts p ep cfg = let ts = ts_Syn_Functions $ wrap_Functions (sem_Functions fs) $ Inh_Functions { prenc_Inh_Functions = p, cfg_Inh_Functions = cfg, cte_Inh_Functions = ep, mutexes_Inh_Functions = muts }
+encTs fs sparks cpcs prds muts p ep cfg = let ts = ts_Syn_Functions $ wrap_Functions (sem_Functions fs) $ Inh_Functions { prenc_Inh_Functions = p, cfg_Inh_Functions = cfg, cte_Inh_Functions = ep, mutexes_Inh_Functions = muts, mn_Inh_Functions = undefined, mts_Inh_Functions = undefined, sortexpr_Inh_Functions = undefined, val_Inh_Functions = undefined}
                                               rexpr = Prelude.map (\(k,(cpc,prd)) -> Prelude.map (\t -> t cpc k prd) ts) $ zip [0..] $ zip cpcs prds -- [[SExpr]]
                                               iexpr = foldr (\(s,e) r -> (s `sAnd` wrap sOr e):r) [] $ zip sparks rexpr -- [SExpr]
                                           in wrap sAnd iexpr

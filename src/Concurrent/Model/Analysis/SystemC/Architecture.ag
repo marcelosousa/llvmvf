@@ -34,7 +34,7 @@ sem Module
            funs.globals = @gvars.self
            funs.namedtys = @nmdtys.self
 
-attr Functions Function BasicBlocks BasicBlock Instructions Instruction Value Identifier Constant ConstantFP Linkage CConv Visibility DefinitionTy Argument Align GCName FunAttr Attribute Section TargetData Target Parameter IntPredicate RealPredicate GlobalValue ConstantDataSequential ConstantExpr SimpleConstant ComplexConstant RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering Type Types Parameters TyFloatPoint Label Arguments Values Id IntTyValIdL IntTyValId PValues MIdentifier PValue Ints PC
+attr Functions Function BasicBlocks BasicBlock Instructions Instruction Value Identifier Constant ConstantFP Linkage CConv Visibility DefinitionTy Argument Align GCName FunAttr Attribute Section TargetData Target Parameter IntPredicate RealPredicate GlobalValue ConstantDataSequential ConstantExpr SimpleConstant ComplexConstant RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering Type Types Parameters TyFloatPoint Label Arguments Values Id ValIdL ValId PValues MIdentifier PValue Ints PC
   syn syscmods use {++} {[]} :: {SCMods}
   syn sysccomm use {++} {[]} :: {SCComm}
   
@@ -67,7 +67,7 @@ sem Global
 sem Instruction
   | Alloca ty.ident = Just $ getIdName @id.self
            ty.alloca = True
-  | * - Alloca - Cmpxchg - AtomicRMW - Br - CreateThread - ExtractValue - InsertValue - Load - MutexInit - MutexLock - MutexUnlock - NotifyEvent - Ret - Select - Switch - UBr - Unreachable - WaitEvent - WaitTime 
+  | * - Alloca - Cmpxchg - AtomicRMW - Br - CreateThread - ExtractValue - InsertValue - Load - MutexInit - MutexLock - MutexUnlock - NotifyEvent - Ret - Select - UBr - Unreachable - WaitEvent - WaitTime
            ty.alloca = False
            ty.ident = Nothing
   | Call lhs.modnames = case @callee.self of
@@ -114,7 +114,15 @@ sem Constant
         ty.alloca = False
         ty.ident  = Nothing
 
-sem CompareConstantExpr ConstantDataSequential CompareConstantExpr ConstantFP GlobalValue
+sem SimpleConstant
+  | ConstantInt ConstantPointerNull ty.alloca = False
+                                    ty.ident = Nothing
+
+sem ComplexConstant
+  | * - ConstantDataSequential ty.alloca = False
+                               ty.ident = Nothing
+ 
+sem CompareConstantExpr ConstantDataSequential CompareConstantExpr ConstantFP GlobalValue 
   | * ty.alloca = False
       ty.ident = Nothing
 
@@ -128,7 +136,7 @@ sem Types
       hd.alloca = False
       hd.ident = Nothing
 
-sem PTyInt IntTyValId
+sem PTyInt
   | Tuple
       x1.alloca = False
       x1.ident = Nothing
