@@ -41,11 +41,13 @@ _summary = unlines ["LLVM Verification Framework - v0.2","llvmvf supports verifi
 _program = "llvmvf"
 _help    = "The input files of llvmvf are byte code files generated from a LLVM front-end (eg. clang)"
 _helpBMC = "Example: llvmvf bmc -d=pthread -b=10 x.bc"
-_helpExtract = unlines ["llvmvf extract generates a .llvf file that is a pretty printed version of the internal representation.","Example: llvmvf extract x.bc"]
+_helpExtract = unlines ["llvmvf extract pretty prints the internal LLVM IR representations into the .llvf file.","Example: llvmvf extract x.bc"]
+_helpModel = unlines ["llvmvf model outputs a model representation into the .model file.","Example: llvmvf model -d=pthread x.bc"]
 _helpType = unlines ["llvmvf type uses a refined type system for separation of regular (user/kernel) and I/O memory"]
 
 data Option = Extract   {input :: FilePath}
             | Visualize {input :: FilePath}
+            | Model     {input :: FilePath, domain :: Domain}
             | BMC       {input :: FilePath, domain :: Domain, bound :: Int}
             | Convert   {input :: FilePath}
             | Type      {input :: FilePath}
@@ -60,6 +62,11 @@ instance Default Domain where
 extractMode :: Option
 extractMode = Extract  { input = def &= args } &= help _helpExtract
 
+modelMode :: Option
+modelMode = Model { input = def &= args
+                  , domain = def &= help "domain of verification: PThread | SystemC (Super Beta)" 
+                  } &= help _helpModel
+
 bmcMode :: Option
 bmcMode = BMC { input = def &= args
               , domain = def &= help "domain of verification: PThread | SystemC (Super Beta)" 
@@ -70,7 +77,7 @@ typeMode :: Option
 typeMode = Type { input = def &= args } &= help _helpType
 
 progModes :: Mode (CmdArgs Option)
-progModes = cmdArgsMode $ modes [extractMode, bmcMode, typeMode]
+progModes = cmdArgsMode $ modes [extractMode, modelMode, bmcMode, typeMode]
          &= help _help
          &= program _program
          &= summary _summary
@@ -84,6 +91,7 @@ runOption :: Option -> IO ()
 runOption (Extract bc) = do mdl <- extract bc
                             let bf = dropExtension bc
                             writeFile (addExtension bf "llvf") (show $ pretty mdl)
+runOption (Model bc d) = runModel bc d                           
 runOption (BMC bc d k) = do print $ "Working " ++ show bc ++ show d ++ show k
                             runBMC bc d k
 runOption (Type bc) = do mdl <- extract bc
@@ -116,6 +124,15 @@ runOption (Type bc) = do mdl <- extract bc
 --                              writeFile (addExtension bf "dot")   (show $ pretty mod)
 --                              writeFile (addExtension bf "rawm")  (show $ mdl)
 --                              writeFile (addExtension bf "smt2")  (show $ prettyprint $ encodeSysC mod k)
+
+-- | 'runModel' - extract the model
+runModel :: FilePath -> Domain -> IO ()
+runModel bc SystemC = error "llvmvf for SystemC is currently not available."
+runModel bc PThread = do mdl <- extract bc
+                         let bf  = dropExtension bc
+                             mod = (model mdl) :: Model PThread
+                             outfile = addExtension bf "model"
+                         writeFile outfile $ show mod
 
 -- | 'runBMC' - main bmc function
 runBMC :: FilePath -> Domain -> Bound -> IO ()
