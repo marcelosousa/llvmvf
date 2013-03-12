@@ -4,7 +4,8 @@
 pthread_mutex_t m;
 int nondet_int();
 int x, y, z, balance;
-_Bool deposit_done=0, withdraw_done=0;
+//_Bool deposit_done=0, withdraw_done=0;
+int deposit_done=0, withdraw_done=0;
 
 void *deposit(void *arg) 
 {

@@ -92,8 +92,7 @@ runOption (Extract bc) = do mdl <- extract bc
                             let bf = dropExtension bc
                             writeFile (addExtension bf "llvf") (show $ pretty mdl)
 runOption (Arch bc d) = runArch bc d                           
-runOption (BMC bc d k) = do print $ "Working " ++ show bc ++ show d ++ show k
-                            runBMC bc d k
+runOption (BMC bc d k) = runBMC bc d k
 runOption (Type bc) = do mdl <- extract bc
                          print $ typeAnalysis mdl
 {-runOption bc Htm     = do mdl <- extract bc
