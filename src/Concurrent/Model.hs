@@ -112,3 +112,12 @@ fromISExpr :: ISExpr -> SExpr
 fromISExpr (ISExpr s)     = s
 fromISExpr ISEmpty        = error "ISEmpty"
 fromISExpr (ISFunction f) = error "ISFunction"
+
+instance Show (Model t) where
+  show (Model nmdtys gvars mainf procs decls) = show mainf ++ "\n" ++ show procs ++ "\n" ++ show decls
+
+instance Pretty Function where
+    pretty f = pp_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function {}
+
+instance Show Process where
+  show (Process i f) = show $ pretty f

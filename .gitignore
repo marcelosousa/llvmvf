@@ -22,6 +22,7 @@ src/Concurrent/Model/Analysis/SystemC.hs
 *.DS_STORE
 *.swp
 tests/demangler
+tests/esbmc/concurrent-software-benchmarks/*
 
 # Log files
 *.log
