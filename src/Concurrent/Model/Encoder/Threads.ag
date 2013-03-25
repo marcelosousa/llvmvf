@@ -139,7 +139,7 @@ sem Instruction
                                          Nothing -> @lhs.spark k `sAnd` iexp
                                          Just e  -> let fnpce = if @loc.npcev == [] then error "ICmp instruction" else sFn "=" e $ head @loc.npcev
                                                     in  @lhs.spark k `sAnd` iexp `sAnd` fnpce 
-  | Sub Add Or And
+  | Sub Add Or And Mul Shl
       id.tn   = @lhs.tn
       id.sortexpr = Nothing
       op1.val = fStore @lhs.prenc
@@ -160,8 +160,12 @@ sem Instruction
       loc.vse = [ sFn "bvadd" e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
   | Sub
       loc.vse = [ sFn "bvsub" e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
+  | Mul 
+      loc.vse = [ sFn "bvmul" e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
   | Or
       loc.vse = [ sFn "or" e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
+  | Shl
+      loc.vse = [ sFn "bvshl" e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
   | And 
       loc.vse = [ sFn "and" e1 e2 | e1 <- @op1.sexpr, e2 <- @op2.sexpr ]
   | UBr 
@@ -283,7 +287,7 @@ sem Instruction
                                                     in  @lhs.spark k `sAnd` iexp `sAnd` fnpce 
 -- Next pc semantic
 sem Instruction
-  | Load ICmp UBr Br BitCast Call Unreachable Ret SExt GetElementPtr Store Add Sub Or And
+  | Load ICmp UBr Br BitCast Call Unreachable Ret SExt GetElementPtr Store Add Sub Or And Mul Shl
       loc.nmt   = \k -> if @lhs.mutexes == []
                         then []
                         else let cmut = @lhs.mutexes !! k
@@ -301,7 +305,7 @@ sem Instruction
                                xx = IdentExpr $ SymIdent $ SimpleSym $ fromJust @mutex.ident ++ show k
                                f = IdentExpr $ SymIdent $ SimpleSym "false"
                            in Prelude.foldr (\(x,y) r -> (maybe [] (\yy -> if x == xx then [sFn "=" yy f] else [sFn "=" yy x] ) y) ++ r) [] cmut
-  | Load ICmp UBr Br BitCast Call Unreachable Ret SExt GetElementPtr Store Add Sub Or MutexLock MutexUnlock And
+  | Load ICmp UBr Br BitCast Call Unreachable Ret SExt GetElementPtr Store Add Sub Or MutexLock MutexUnlock And Mul Shl
       loc.npc  = nextpc @pc.self @lhs.cfg
       loc.npcev = Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) @loc.npc
       loc.pcev  = IdentExpr $ IdxIdent (bv @pc.self) [32]
