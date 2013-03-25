@@ -40,11 +40,12 @@ sem Functions
 attr Function BasicBlocks BasicBlock Instructions Instruction
   inh tn :: {Id}
 
-sem Instructions
+sem Instructions BasicBlocks
   | Nil
       lhs.fStore = Map.empty
   | Cons
       lhs.fStore = Map.unionWith (\(a1,l1) (a2,l2) -> (a1, l1++l2)) @hd.fStore @tl.fStore
+
 
 sem Instruction
   | Call
