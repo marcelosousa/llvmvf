@@ -4,7 +4,7 @@
 -- A Type System for Memory Analysis of LLVM IR Modules
 -------------------------------------------------------------------------------
 
-module Analysis.Memory.Type.Function (typeFunction) where
+module Analysis.Memory.Type.Function (typeFunction,typeCheckFunction) where
 
 import Analysis.Memory.TyAnn (TyAnn, TyAnnEnv)
 import qualified Analysis.Memory.TyAnn as T
@@ -50,3 +50,7 @@ isTyInf tyenv []     = (T.TyBot, tyenv)
 isTyInf tyenv [x]    = iTyInf tyenv x
 isTyInf tyenv (x:xs) = let (ta,te) = iTyInf tyenv x
                        in isTyInf te xs  
+
+
+typeCheckFunction :: M.Map Identifier Type -> Function -> Bool
+typeCheckFunction = undefined
