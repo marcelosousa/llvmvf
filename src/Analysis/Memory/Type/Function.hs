@@ -13,6 +13,12 @@ import Analysis.Memory.Type.Instruction
 import Language.LLVMIR
 import qualified Data.Map as M
 
+
+-- Type Check Function
+typeCheckFunction :: TyEnv -> Function -> Bool
+typeCheckFunction tye (FunctionDef  n l rty pms bbs) = True
+typeCheckFunction tye (FunctionDecl n l rty pms) = True
+
 -- Function TyAnn Inference
 typeFunction :: TyAnnEnv -> Function -> (TyAnn, TyAnnEnv)
 -- Incomplete: Need to check if the return type is compatible with the actual return type from the basic block
@@ -50,7 +56,3 @@ isTyInf tyenv []     = (T.TyBot, tyenv)
 isTyInf tyenv [x]    = iTyInf tyenv x
 isTyInf tyenv (x:xs) = let (ta,te) = iTyInf tyenv x
                        in isTyInf te xs  
-
-
-typeCheckFunction :: M.Map Identifier Type -> Function -> Bool
-typeCheckFunction = undefined

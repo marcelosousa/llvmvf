@@ -47,6 +47,19 @@ isSmpTy (TyFloatPoint TyFloat) = True
 isSmpTy (TyFloatPoint TyDouble) = True
 isSmpTy _ = False 
 
+isInt :: Type -> Bool
+isInt (TyInt _) = True
+isInt _ = False
+
+isVector :: Type -> Bool
+isVector (TyVector s ty) = True
+isVector _ = False
+
+isAgg :: Type -> Bool
+isAgg (TyArray _ _) = True
+isAgg (TyStruct _ _ _) = True
+isAgg _ = False
+
 -- Subtyping relation 
 (<:) :: TyAnn -> TyAnn -> Bool
 (T.TyDer (T.TyPtr t1 T.TyAny)) <: (T.TyDer (T.TyPtr t2 k)) = True

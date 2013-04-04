@@ -44,6 +44,7 @@ _helpBMC = "Example: llvmvf bmc -d=pthread -b=10 x.bc"
 _helpExtract = unlines ["llvmvf extract pretty prints the internal LLVM IR representations into the .llvf file.","Example: llvmvf extract x.bc"]
 _helpCCFG = unlines ["llvmvf ccfg output a .dot file with the concurrent control flow graph.","Example: llvmvf ccfg x.bc"]
 _helpArch = unlines ["llvmvf arch outputs the concurrent architecture representation of the model into the .model file.","Example: llvmvf arch -d=pthread x.bc"]
+_helpTypeCheck = unlines ["llvmvf typecheck checks if the LLVM IR types are consistent with the typing rules defined in the Language Reference."]
 _helpType = unlines ["llvmvf type uses a refined type system for separation of regular (user/kernel) and I/O memory"]
 
 data Option = Extract   {input :: FilePath}
@@ -52,6 +53,7 @@ data Option = Extract   {input :: FilePath}
             | BMC       {input :: FilePath, domain :: Domain, bound :: Int}
             | Convert   {input :: FilePath}
             | Type      {input :: FilePath}
+            | TypeCheck {input :: FilePath}
   deriving (Show, Data, Typeable, Eq)
 
 data Domain = PThread | SystemC
@@ -83,8 +85,11 @@ bmcMode = BMC { input = def &= args
 typeMode :: Option
 typeMode = Type { input = def &= args } &= help _helpType
 
+typeCheckMode :: Option
+typeCheckMode = Type { input = def &= args } &= help _helpTypeCheck
+
 progModes :: Mode (CmdArgs Option)
-progModes = cmdArgsMode $ modes [extractMode, archMode, bmcMode, typeMode, ccfgMode]
+progModes = cmdArgsMode $ modes [extractMode, archMode, bmcMode, typeCheckMode, typeMode, ccfgMode]
          &= help _help
          &= program _program
          &= summary _summary
@@ -100,6 +105,8 @@ runOption (Extract bc) = do mdl <- extract bc
                             writeFile (addExtension bf "llvf") (show $ pretty mdl)
 runOption (Arch bc d) = runArch bc d                           
 runOption (BMC bc d k) = runBMC bc d k
+runOption (TypeCheck bc) = do mdl <- extract bc
+                              print $ typeCheck mdl
 runOption (Type bc) = do mdl <- extract bc
                          print $ typeAnalysis mdl
 runOption (CCFG bc d) = runCCFG bc d
