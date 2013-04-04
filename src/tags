@@ -4894,9 +4894,9 @@ r_Instruction_Ret	src/Language/LLVMIR.hs	228;"	v
 retty_Function_FunctionDecl	src/Language/LLVMIR.hs	202;"	v
 retty_Function_FunctionDef	src/Language/LLVMIR.hs	201;"	v
 retty_Type_TyFunction	src/Language/LLVMIR.hs	435;"	v
-runArch	Main.hs	140;"	v
-runBMC	Main.hs	149;"	v
-runCCFG	Main.hs	159;"	v
+runArch	Main.hs	141;"	v
+runBMC	Main.hs	150;"	v
+runCCFG	Main.hs	160;"	v
 runContext	./Language/LLVMIR/Extractor/Context.hs	32;"	v
 runOption	Main.hs	103;"	v
 rv_Instruction_MutexInit	src/Language/LLVMIR.hs	277;"	v
@@ -9110,7 +9110,7 @@ typeCheck	./Analysis/Memory/Type.hs	20;"	v
 typeCheckFunction	./Analysis/Memory/Type/Function.hs	19;"	v
 typeCheckFuns	./Analysis/Memory/Type/Module.hs	37;"	v	file:
 typeCheckGlo	./Analysis/Memory/Type/Module.hs	30;"	v	file:
-typeCheckGlobal	./Analysis/Memory/Type/Global.hs	30;"	v
+typeCheckGlobal	./Analysis/Memory/Type/Global.hs	20;"	v
 typeCheckMode	Main.hs	89;"	v
 typeCheckModule	./Analysis/Memory/Type/Module.hs	24;"	v
 typeCompareConstantExpr	./Analysis/Memory/Type/Constant.hs	142;"	v	file:
@@ -9122,7 +9122,7 @@ typeConstantFP	./Analysis/Memory/Type/Constant.hs	43;"	v	file:
 typeExpression	./Analysis/Memory/Type/Constant.hs	106;"	v	file:
 typeFunction	./Analysis/Memory/Type/Function.hs	25;"	v
 typeGetElementPtrConstantExpr	./Analysis/Memory/Type/Constant.hs	113;"	v	file:
-typeGlobal	./Analysis/Memory/Type/Global.hs	20;"	v
+typeGlobal	./Analysis/Memory/Type/Global.hs	32;"	v
 typeGlobalValue	./Analysis/Memory/Type/Constant.hs	92;"	v	file:
 typeMode	Main.hs	86;"	v
 typeModule	./Analysis/Memory/Type/Module.hs	20;"	v

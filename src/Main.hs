@@ -86,7 +86,7 @@ typeMode :: Option
 typeMode = Type { input = def &= args } &= help _helpType
 
 typeCheckMode :: Option
-typeCheckMode = Type { input = def &= args } &= help _helpTypeCheck
+typeCheckMode = TypeCheck { input = def &= args } &= help _helpTypeCheck
 
 progModes :: Mode (CmdArgs Option)
 progModes = cmdArgsMode $ modes [extractMode, archMode, bmcMode, typeCheckMode, typeMode, ccfgMode]
@@ -106,6 +106,7 @@ runOption (Extract bc) = do mdl <- extract bc
 runOption (Arch bc d) = runArch bc d                           
 runOption (BMC bc d k) = runBMC bc d k
 runOption (TypeCheck bc) = do mdl <- extract bc
+                            --  print mdl
                               print $ typeCheck mdl
 runOption (Type bc) = do mdl <- extract bc
                          print $ typeAnalysis mdl
