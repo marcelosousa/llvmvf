@@ -29,7 +29,7 @@ import Concurrent.Model.PThread
 -- import Concurrent.Model.SystemC
 import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
-import Concurrent.Model.Encoder    (encode) 
+--import Concurrent.Model.Encoder    (encode) 
 -- , encodeSysC)    
 
 import Util.Demangler
@@ -153,7 +153,7 @@ runBMC bc PThread k = do mdl <- extract bc
                              mod = (model mdl) :: Model PThread
                              outfile = addExtension bf "smt2"
                          putStrLn $ "Generating " ++ outfile ++ "..."  
-                         writeFile outfile (show $ prettyprint $ encode mod k)
+                         --writeFile outfile (show $ prettyprint $ encode mod k)
 
 -- | 'runCCFG' - extract the concurrent control flow graph
 runCCFG :: FilePath -> Domain -> IO ()

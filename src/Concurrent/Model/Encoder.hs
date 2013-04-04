@@ -41,8 +41,8 @@ import Control.Monad.State
 -- | Wrapper for main encode function. Builds the initial global state and wraps encModel in a State monad.
 encode :: (SCModel t) => Model t -> Int -> SMod
 encode m@Model{..} k = let ccfg@ControlFlow{..} = controlflow m
-                           cme = fromMaybe (error "encode")                  $ Map.lookup "main" cte  -- ^ Set the current PC to the initial pc of main
-                           tvs = Map.map (\pci -> ThreadState pci Map.empty) $ Map.delete "main" cte  -- ^ Set the initial PC for each thread
+                           cme = fromMaybe (error "encode")                  $ Map.lookup (Global "main") cte  -- ^ Set the current PC to the initial pc of main
+                           tvs = Map.map (\pci -> ThreadState pci Map.empty) $ Map.delete (Global "main") cte  -- ^ Set the initial PC for each thread
                            s0  = GlobalState Map.empty cme Map.empty tvs                              -- ^ Initial state
                            (smod, sf) = runState (encModel m k) s0                             
                        in smod --trace (show s0 ++ show sf) $ smod
@@ -106,7 +106,7 @@ encFunctions m@Model{..} k = do gs@GlobalState{..} <- get
                                     (s,p)  = preEncoder fs defsorts decls
                                     se = preEncode p
                                     (l, pcs, sexprs) = encodeMain    (unProc mainf) p decls
-                                    (cpcs, csexprs)  = encodeThreads (toFunctions procs)  k p l (Map.delete "main" cte) $ Map.delete "main" cfg 
+                                    (cpcs, csexprs)  = encodeThreads (toFunctions procs)  k p l (Map.delete (Global "main") cte) $ Map.delete (Global "main") cfg 
                                 return $ s ++ se ++ pcs ++ [ assert $ wrap sAnd sexprs ] ++ cpcs ++ [ assert csexprs ] 
                                 --trace ("----\n" ++ show p ++ "--- ---\n" ++ show l) $ return $ s ++ se ++ pcs ++ [ assert $ wrap sAnd sexprs ] ++ cpcs ++ [ assert csexprs ]  
 

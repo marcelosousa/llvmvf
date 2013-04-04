@@ -64,8 +64,8 @@ type TypeEnv   = Map.Map Type (SSortExpr, SSort)
 emptyPreEncoder :: PreEncoder
 emptyPreEncoder = PreEncoder Map.empty Map.empty [] Map.empty Map.empty []
 -- 
-data PreEncoder = PreEncoder { argToPar :: Map.Map (PC,Int,Value) Id               -- Map an argument to a parameter -- Do not support calling the same function twice. New fresh variables
-                             , fStore   :: Map.Map Id (Type, [PC])             -- Map a global variable to a list of program counter that store a new value
+data PreEncoder = PreEncoder { argToPar :: Map.Map (PC,Int,Value) Id   -- Map an argument to a parameter -- Do not support calling the same function twice. New fresh variables
+                             , fStore   :: Map.Map Id (Type, [PC])     -- Map a global variable to a list of program counter that store a new value
                              , mutexes  :: [Id]
                              , sortEnv  :: TypeEnv                     -- Map all the types to a sort expression and a sort name
                              , locals   :: Map.Map Id Type             -- Map all identifiers to a type
@@ -91,7 +91,7 @@ nullGlobalState = GlobalState Map.empty (-1) Map.empty Map.empty
 data GlobalState = GlobalState { defsorts  :: TypeEnv
                                , currentpc :: PC
                                , gvals     :: Valuation
-                               , ti        :: Map.Map String ThreadState
+                               , ti        :: Map.Map Identifier ThreadState
                                }
   deriving Show
 

@@ -49,25 +49,25 @@ sem Module
 
 attr Functions 
   inh prenc :: {PreEncoder}
-  inh cfg   :: {Map.Map String CF}
-  inh cte   :: {Map.Map String PC}
+  inh cfg   :: {Map.Map Identifier CF}
+  inh cte   :: {Map.Map Identifier PC}
   inh mutexes :: {[[(SExpr, Maybe SExpr)]]}
   syn ts use {++} {[]} :: {[Map.Map String (SExpr, Maybe SExpr) -> Int -> [(SExpr, Maybe SExpr)] -> SExpr]}
 
 sem Functions
   | Entry
       val.prenc = @lhs.prenc
-      val.cfg   = fromMaybe (error $ "no cfg for " ++ show @key) $ Map.lookup @key @lhs.cfg
+      val.cfg   = fromMaybe (error $ "no cfg for " ++ show @key) $ Map.lookup (Global @key) @lhs.cfg
       val.tn    = @key
       val.spark = \i -> IdentExpr $ SymIdent $ SimpleSym $ @key ++ show i
-      val.cte   = Map.delete @key @lhs.cte
-      val.pcs   = Map.map (\cf -> nub $ Prelude.map snd cf) $ Map.delete @key @lhs.cfg 
+      val.cte   = Map.delete (Global @key) @lhs.cte
+      val.pcs   = Map.map (\cf -> nub $ Prelude.map snd cf) $ Map.delete (Global @key) @lhs.cfg 
 
 -- common attributes
 attr Function BasicBlocks BasicBlock Instructions Instruction
   inh cfg   :: {CF}
-  inh cte   :: {Map.Map String PC}
-  inh pcs   :: {Map.Map String [PC]}
+  inh cte   :: {Map.Map Identifier PC}
+  inh pcs   :: {Map.Map Identifier [PC]}
   inh tn    :: {Id}
   inh prenc :: {PreEncoder}
   inh spark :: {Int -> SExpr}
@@ -408,7 +408,7 @@ prep [x]    = [(x, Nothing)]
 prep [x,y]  = (x, Just y):prep [y]
 prep (x:y:xs) = (x, Just y):prep (y:xs)
 
-encTs :: Functions -> [SExpr] -> [Map.Map String (SExpr, Maybe SExpr)] -> [[(SExpr, Maybe SExpr)]] -> [[(SExpr, Maybe SExpr)]] -> PreEncoder -> Map.Map String PC -> Map.Map String CF -> SExpr
+encTs :: Functions -> [SExpr] -> [Map.Map String (SExpr, Maybe SExpr)] -> [[(SExpr, Maybe SExpr)]] -> [[(SExpr, Maybe SExpr)]] -> PreEncoder -> Map.Map Identifier PC -> Map.Map String CF -> SExpr
 encTs fs sparks cpcs prds muts p ep cfg = let ts = ts_Syn_Functions $ wrap_Functions (sem_Functions fs) $ Inh_Functions { prenc_Inh_Functions = p, cfg_Inh_Functions = cfg, cte_Inh_Functions = ep, mutexes_Inh_Functions = muts, mn_Inh_Functions = undefined, mts_Inh_Functions = undefined, sortexpr_Inh_Functions = undefined, val_Inh_Functions = undefined}
                                               rexpr = Prelude.map (\(k,(cpc,prd)) -> Prelude.map (\t -> t cpc k prd) ts) $ zip [0..] $ zip cpcs prds -- [[SExpr]]
                                               iexpr = foldr (\(s,e) r -> (s `sAnd` wrap sOr e):r) [] $ zip sparks rexpr -- [SExpr]

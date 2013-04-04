@@ -69,7 +69,7 @@ sem Parameter
   | Parameter lhs.pp = @ty.pp <> @var.pp
 
 sem BasicBlock
-  | BasicBlock lhs.pp = text "; <label>:" <> text @label.self <$> @instrs.pp
+  | BasicBlock lhs.pp = text "; <label>:" <> @label.pp <$> @instrs.pp
 
 sem RetInst
   | ValueRet lhs.pp = @v.pp
