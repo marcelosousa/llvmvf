@@ -20,6 +20,7 @@ import Language.LLVMIR
 }
 
 {
+-- TODO: Join back the threads to the function that called them
 type CF = [(Int,Int)]
 
 {-
@@ -28,76 +29,96 @@ data CS = ReadS
         | Wait
 -}
 
-data ControlFlow = ControlFlow { cte :: Map.Map String Int   -- ^ Entry Point for Ti
-                               , cfg :: Map.Map String CF     -- ^ Control Flow for Ti
+data ControlFlow = ControlFlow { cte :: Map.Map Identifier Int    -- ^ Entry Point for Ti
+                               , cfg :: Map.Map Identifier CF     -- ^ Control Flow for Ti
                              --  , cgv  :: Map.Map Id ([Int], [Int]) --  ^ Data Flow Points where we use global variables - The pair ([Int],[Int]) is for Read and Write
                                }
 }
 
 -- Concurrent Control Flow Graph
-attr Function BasicBlocks BasicBlock Instructions Instruction
-  chn cpc :: {Int}
-
 attr Functions
-  inh bbentrypci :: {Map.Map String (Map.Map String Int)}
-  syn cflow use {++} {[]} :: {CF}
-  syn cte   use {`Map.union`} {Map.empty} :: {Map.Map String Int}
-  syn cfg   use {`Map.union`} {Map.empty} :: {Map.Map String CF}
+  inh mainfnName :: {String}
+  inh bbentrypci :: {Map.Map String (Map.Map Identifier Int)}
+--  syn threadIds use {++} {[]} :: {[Identifier]}
+  syn cflow     use {++} {[]} :: {CF}
+  syn cte       use {`Map.union`} {Map.empty} :: {Map.Map Identifier Int}
+  syn cfg       use {`Map.union`} {Map.empty} :: {Map.Map Identifier CF}
 
 sem Module
   | Module
-      funs.bbentrypci = Map.empty
-
-attr Function BasicBlocks BasicBlock Instructions Instruction
-  syn cflow use {++} {[]} :: {CF}
-  inh bbentrypci :: {Map.Map String Int}
+      funs.bbentrypci = error "Error ControlFlow.ag (1)"
+      funs.mainfnName = error "Error ControlFlow.ag (2)"
 
 sem Functions
   | Entry
       lhs.cflow = @loc.cflow ++ @val.cflow ++ @tl.cflow
       val.cpc  = @val.entrypc
       val.bbentrypci = fromMaybe (error "lookup") (Map.lookup @key @lhs.bbentrypci)
-      lhs.cte = Map.insert @key @val.entrypc @tl.cte
-      lhs.cfg = Map.insert @key (@loc.cflow ++ @val.cflow) @tl.cfg
-      loc.cflow = if @key /= "main"
+      lhs.cte = Map.insert (Global @key) @val.entrypc @tl.cte
+      lhs.cfg = Map.insert (Global @key) (@loc.cflow ++ @val.cflow) @tl.cfg
+      loc.cflow = if @key /= @lhs.mainfnName
                   then [(-1,@val.entrypc)]
                   else []
+
+
+attr Function BasicBlocks BasicBlock Instructions Instruction
+  inh mainfnName :: {String}
+  inh bbentrypci :: {Map.Map Identifier Int}
+  chn cpc :: {Int}
+--  syn threadIds use {++} {[]} :: {[Identifier]}
+  syn cflow     use {++} {[]} :: {CF}
+
 sem Function
   | FunctionDef
       lhs.cflow = @body.cflow
+  --    lhs.threadIds = @body.threadIds
  
 sem BasicBlock
   | BasicBlock
       lhs.cflow = tail @instrs.cflow
+  --    lhs.threadIds = @instrs.threadIds
 
 sem Instruction
   | Ret Alloca Load Store ICmp FCmp Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW MutexInit MutexLock MutexUnlock
       +cflow = (++) [(@lhs.cpc, @pc.self)]
       lhs.cpc = @pc.self
   | CreateThread 
-      +cflow = (++) [(@lhs.cpc, @pc.self), (@pc.self, -1)] 
+      +cflow = (++) [(@lhs.cpc, @pc.self), (@pc.self, -1)]
+  --    lhs.threadIds = [getIdentifier (@args.self!!0)] 
       lhs.cpc = @pc.self
   | UBr 
-      +cflow = (++) [(@lhs.cpc, @pc.self), (@pc.self, getEntry (getId @d.self) @lhs.bbentrypci)]
+      +cflow = (++) [(@lhs.cpc, @pc.self), (@pc.self, getEntry (getIdentifier' @d.self) @lhs.bbentrypci)]
       lhs.cpc = @pc.self
   | Br
-      +cflow = (++) [(@lhs.cpc, @pc.self), (@pc.self, getEntry (getId @t.self) @lhs.bbentrypci), (@pc.self, getEntry (getId @f.self) @lhs.bbentrypci)]
+      +cflow = (++) [(@lhs.cpc, @pc.self), (@pc.self, getEntry (getIdentifier' @t.self) @lhs.bbentrypci), (@pc.self, getEntry (getIdentifier' @f.self) @lhs.bbentrypci)]
       lhs.cpc = @pc.self
       
 {
-getId :: Value -> String
-getId (Id i t) = case i of 
-                   Global s -> s
-                   Local  s -> s 
-getId _ = error "'getId'"
+getEntry :: Identifier -> Map.Map Identifier Int -> Int
+getEntry s m = fromMaybe (error $ "getEntry " ++ show s ++ show m) $ Map.lookup s m
 
-getEntry :: String -> Map.Map String Int -> Int
-getEntry s m = fromMaybe (error $ "getEntry " ++ s ++ show m) $ Map.lookup s m
+getId :: Identifier -> Id
+getId (Global i) = i
+getId (Local  i) = i
+
+getIdentifier :: Value -> Maybe Identifier
+getIdentifier (Id i _) = Just i
+getIdentifier _        = Nothing
+
+getIdValue :: Value -> Maybe Id
+getIdValue (Id i _) = Just $ getId i
+getIdValue _        = Nothing
+
+getIdentifier' :: Value -> Identifier
+getIdentifier' = fromMaybe (error "Value is not Identifier") . getIdentifier
+
+getIdValue' :: Value -> Id
+getIdValue' = getId . getIdentifier'
 }
 
 -- Entry & Exit points
 attr Functions 
-  syn bbentrypc use {`Map.union`} {Map.empty} :: {Map.Map String (Map.Map String Int)}
+  syn bbentrypc use {`Map.union`} {Map.empty} :: {Map.Map String (Map.Map Identifier Int)}
 
 sem Functions
   | Entry 
@@ -108,7 +129,7 @@ sem Functions
 attr Function BasicBlocks BasicBlock Instructions Instruction
   syn entrypc :: {Int}
   syn exitpcs use {++} {[]} :: {[Int]}
-  syn bbentrypc use {`Map.union`} {Map.empty} :: {Map.Map String Int}
+  syn bbentrypc use {`Map.union`} {Map.empty} :: {Map.Map Identifier Int}
 
 sem Function
   | FunctionDecl
@@ -146,7 +167,7 @@ sem Instruction
       +exitpcs = (++) [@pc.self]
 {
 cflowfs :: Functions -> ControlFlow
-cflowfs fs = let i = bbentrypc_Syn_Functions$ wrap_Functions (sem_Functions fs) $ Inh_Functions { bbentrypci_Inh_Functions = Map.empty }
-                 c = wrap_Functions (sem_Functions fs) $ Inh_Functions { bbentrypci_Inh_Functions = i }
+cflowfs fs = let i = bbentrypc_Syn_Functions$ wrap_Functions (sem_Functions fs) $ Inh_Functions { bbentrypci_Inh_Functions = Map.empty, mainfnName_Inh_Functions = "main" }
+                 c = wrap_Functions (sem_Functions fs) $ Inh_Functions { bbentrypci_Inh_Functions = i, mainfnName_Inh_Functions = "main" }
              in ControlFlow (cte_Syn_Functions c) (cfg_Syn_Functions c) 
 }

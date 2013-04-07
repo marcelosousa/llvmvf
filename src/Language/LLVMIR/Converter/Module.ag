@@ -72,13 +72,13 @@ sem Parameter
 
 -- Basic Blocks
 attr BasicBlocks
-  syn etm :: {Map Label ([Label], [ETm] -> ETm)}
-  syn phis :: {Map Label [(Ident, [(Value, Label)])]}
-  inh phim :: {Map Label [(Ident, [(Value, Label)])]}
+  syn etm :: {Map Identifier ([Identifier], [ETm] -> ETm)}
+  syn phis :: {Map Identifier [(Ident, [(Value, Identifier)])]}
+  inh phim :: {Map Identifier [(Ident, [(Value, Identifier)])]}
 
 attr BasicBlock
-  syn etm :: {(Label, ([Label], [ETm] -> ETm))}
-  syn phis :: {(Label,[(Ident, [(Value, Label)])])}
+  syn etm :: {(Identifier, ([Identifier], [ETm] -> ETm))}
+  syn phis :: {(Identifier,[(Ident, [(Value, Identifier)])])}
 --  inh
  
 sem BasicBlocks
@@ -92,13 +92,13 @@ sem BasicBlocks
                        else M.insert l phi @tl.phis
 
 sem BasicBlock
-  | BasicBlock lhs.etm = (@label.self,@instrs.etm)
-               lhs.phis = (@label.self,@instrs.phis)
+  | BasicBlock lhs.etm = (@Identifier.self,@instrs.etm)
+               lhs.phis = (@Identifier.self,@instrs.phis)
 
 attr Instructions Instruction 
-  syn etm :: {([Label], [ETm] -> ETm)}
-  syn phis use {++} {[]} :: {[(Ident, [(Value, Label)])]}
---  inh cbb :: {Label}
+  syn etm :: {([Identifier], [ETm] -> ETm)}
+  syn phis use {++} {[]} :: {[(Ident, [(Value, Identifier)])]}
+--  inh cbb :: {Identifier}
 --  inh phim :: {
 
 sem Instructions
@@ -134,7 +134,7 @@ sem Instruction
                                     in ELet i (calletm c a) (head t)
                           in ([], f)
   | * - Ret Br UBr Switch Unreachable ICmp Add Mul Call  lhs.etm = ([], const EBot)
-  | PHI         lhs.phis = [(getId @id.etm, Prelude.map (\(a,b) -> (a, getLabel b)) @vals.self)]
+  | PHI         lhs.phis = [(getId @id.etm, Prelude.map (\(a,b) -> (a, getIdentifier b)) @vals.self)]
  
 -- The rest  
 attr Value Identifier Constant SimpleConstant RetInst 
@@ -165,24 +165,22 @@ sem SimpleConstant
   | * - ConstantInt lhs.etm = EBot
 
 {
-getIdentifier :: Identifier -> String
-getIdentifier (Global a) = a
-getIdentifier (Local  a) = a
+getId :: Identifier -> String
+getId (Global a) = a
+getId (Local  a) = a
 
-getId :: ETm -> Label 
-getId (EVar i) = i 
+getIdETm :: ETm -> Identifier 
+getIdETm (EVar i) = i
 
-getLabel :: Value -> Label
-getLabel (Id i t) = case i of
-                   Global s -> s
-                   Local  s -> s
-getLabel _ = error "getLabel"
+getIdentifier :: Value -> Identifier
+getIdentifier (Id i t) = i
+getIdentifier _ = error "getIdentifier"
 
 calletm :: ETm -> [ETm] -> ETm
 calletm c [] = c
 calletm c (x:xs) = calletm (EApp c x) xs
 
-buildbb :: Label -> Map Label ([Label], [ETm] -> ETm) -> ETm
+buildbb :: Identifier -> Map Identifier ([Identifier], [ETm] -> ETm) -> ETm
 buildbb n m = case M.lookup n m of
                Just (l, f) -> let x = Prelude.map (\e -> buildbb e m) l
                               in trace (show n ++ ": " ++ show x) $ f x

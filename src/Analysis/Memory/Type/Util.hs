@@ -9,6 +9,9 @@ module Analysis.Memory.Type.Util where
 import Analysis.Memory.TyAnn (TyAnn)
 import qualified Analysis.Memory.TyAnn as T
 import Language.LLVMIR
+import qualified Data.Map as M
+
+type TyEnv = M.Map Identifier Type
 
 gLstTyInf tyenv f [] = ([], tyenv)
 gLstTyInf tyenv f (x:xs) = let (ty,tye) = f tyenv x
@@ -37,7 +40,32 @@ unify = undefined
 castTy :: TyAnn -> TyAnn -> TyAnn
 castTy = undefined
 
+isSmpTy :: Type -> Bool
+isSmpTy (TyInt x)  = let n = div x 8
+                     in n == 1 || n == 2 || n == 4 || n == 8
+isSmpTy (TyFloatPoint TyFloat) = True
+isSmpTy (TyFloatPoint TyDouble) = True
+isSmpTy _ = False 
+
+isInt :: Type -> Bool
+isInt (TyInt _) = True
+isInt _ = False
+
+isVector :: Type -> Bool
+isVector (TyVector s ty) = True
+isVector _ = False
+
+isAgg :: Type -> Bool
+isAgg (TyArray _ _) = True
+isAgg (TyStruct _ _ _) = True
+isAgg _ = False
+
 -- Subtyping relation 
 (<:) :: TyAnn -> TyAnn -> Bool
 (T.TyDer (T.TyPtr t1 T.TyAny)) <: (T.TyDer (T.TyPtr t2 k)) = True
 t1 <: t2 = t1 == t2
+
+insert :: (Ord k, Show k, Show a) => k -> a -> M.Map k a -> M.Map k a
+insert k v m = case M.lookup k m of
+	                Nothing -> M.insert k v m
+	                Just _  -> error $ "insert: " ++ show k ++ " " ++ show v ++ " " ++ show m

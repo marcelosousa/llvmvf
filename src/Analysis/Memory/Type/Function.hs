@@ -4,7 +4,7 @@
 -- A Type System for Memory Analysis of LLVM IR Modules
 -------------------------------------------------------------------------------
 
-module Analysis.Memory.Type.Function (typeFunction) where
+module Analysis.Memory.Type.Function (typeFunction,typeCheckFunction) where
 
 import Analysis.Memory.TyAnn (TyAnn, TyAnnEnv)
 import qualified Analysis.Memory.TyAnn as T
@@ -12,6 +12,22 @@ import Analysis.Memory.Type.Util
 import Analysis.Memory.Type.Instruction
 import Language.LLVMIR
 import qualified Data.Map as M
+
+
+-- Type Check Function
+typeCheckFunction :: TyEnv -> Function -> Bool
+typeCheckFunction tye (FunctionDef  n l rty pms bbs) = let (tysig, tye') = typeSignature tye pms rty
+                                                           ntye = insert n tysig tye'
+                                                       in typeCheckBasicBlock ntye bbs (head bbs) -- assuming that head bbs is the entry block 
+typeCheckFunction tye (FunctionDecl n l rty pms) = True
+
+typeSignature :: TyEnv -> Parameters -> Type -> (Type, TyEnv)
+typeSignature = undefined
+
+typeCheckBasicBlock :: TyEnv -> BasicBlocks -> BasicBlock -> Bool
+typeCheckBasicBlock tye bbs (BasicBlock l instr) = undefined
+
+
 
 -- Function TyAnn Inference
 typeFunction :: TyAnnEnv -> Function -> (TyAnn, TyAnnEnv)
@@ -36,12 +52,12 @@ typeParameter tye (Parameter i ty) = let tyr = liftTy ty
 bbsTyInf :: TyAnnEnv -> BasicBlocks -> ([TyAnn], TyAnnEnv)
 bbsTyInf tye bbs = bbUnify $ map (bbTyInf tye) bbs
 
-bbUnify :: [(Label, (TyAnn, TyAnnEnv))] -> ([TyAnn], TyAnnEnv)
+bbUnify :: [(Identifier, (TyAnn, TyAnnEnv))] -> ([TyAnn], TyAnnEnv)
 bbUnify []     = ([], M.empty)
 bbUnify (x:xs) = undefined
 
 -- Basic Block TyAnn Inference
-bbTyInf :: TyAnnEnv -> BasicBlock -> (Label, (TyAnn, TyAnnEnv))
+bbTyInf :: TyAnnEnv -> BasicBlock -> (Identifier, (TyAnn, TyAnnEnv))
 bbTyInf tyenv (BasicBlock l instr) = (l, isTyInf tyenv instr)
 
 -- TODO

@@ -60,7 +60,7 @@ sem BasicBlock
                    text "style=filled;" </>
                    text "color=gray;" </>
                    @instrs.ppccfg </>
-                   text "label = \"basic block" <+> text @label.self <> text "\"; }"
+                   text "label = \"basic block" <+> @label.pp <> text "\"; }"
       loc.ilabel :: uniqueref ilabel
 
 sem Identifier

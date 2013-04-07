@@ -13,6 +13,7 @@ import Prelude              hiding (sequence)
 import Data.Char            (chr)
 import qualified Data.Map as Data.Map
 import qualified Data.Map as Map
+import Data.Maybe (fromMaybe)
 #if __GLASGOW_HASKELL__ >= 704
 import Data.Map hiding (foldr)
 #else
@@ -28,8 +29,6 @@ include "Instruction.ag"
 
 type PC = (Int)
 type Id = (String)
-type Label = (String) 
-type MLabel = maybe Label
 type MId = maybe Id
 type MIdentifier = maybe Identifier
 
@@ -156,7 +155,7 @@ emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid [] []
           
 data BasicBlock
   | BasicBlock 
-      label  :: Label
+      label  :: Identifier
  --     phis   :: Instructions
       instrs :: Instructions
  --     tmn    :: Instruction
@@ -328,7 +327,7 @@ data Alias
 --          visibility :: MVisibility
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
-  
+
 set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue SimpleConstant ComplexConstant  ConstantDataSequential ConstantExpr ConstantFP RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering
 
 deriving Every: Show

@@ -20,12 +20,13 @@ import Prelude              hiding (sequence)
 import Data.Char            (chr)
 import qualified Data.Map as Data.Map
 import qualified Data.Map as Map
+import Data.Maybe (fromMaybe)
 #if __GLASGOW_HASKELL__ >= 704
 import Data.Map hiding (foldr)
 #else
 import Data.Map 
 #endif
-{-# LINE 29 "src/Language/LLVMIR/Converter/Module.hs" #-}
+{-# LINE 30 "src/Language/LLVMIR/Converter/Module.hs" #-}
 {-# LINE 1 "src/Language/LLVMIR/Converter/Module.ag" #-}
 
 -------------------------------------------------------------------------------
@@ -33,33 +34,31 @@ import Data.Map
 -- Copyright :  (c) 2013 Marcelo Sousa
 -- BETA * SSA -> ANF
 -------------------------------------------------------------------------------
-{-# LINE 37 "src/Language/LLVMIR/Converter/Module.hs" #-}
+{-# LINE 38 "src/Language/LLVMIR/Converter/Module.hs" #-}
 
 {-# LINE 167 "src/Language/LLVMIR/Converter/Module.ag" #-}
 
-getIdentifier :: Identifier -> String
-getIdentifier (Global a) = a
-getIdentifier (Local  a) = a
+getId :: Identifier -> String
+getId (Global a) = a
+getId (Local  a) = a
 
-getId :: ETm -> Label 
-getId (EVar i) = i 
+getIdETm :: ETm -> Identifier 
+getIdETm (EVar i) = i
 
-getLabel :: Value -> Label
-getLabel (Id i t) = case i of
-                   Global s -> s
-                   Local  s -> s
-getLabel _ = error "getLabel"
+getIdentifier :: Value -> Identifier
+getIdentifier (Id i t) = i
+getIdentifier _ = error "getIdentifier"
 
 calletm :: ETm -> [ETm] -> ETm
 calletm c [] = c
 calletm c (x:xs) = calletm (EApp c x) xs
 
-buildbb :: Label -> Map Label ([Label], [ETm] -> ETm) -> ETm
+buildbb :: Identifier -> Map Identifier ([Identifier], [ETm] -> ETm) -> ETm
 buildbb n m = case M.lookup n m of
                Just (l, f) -> let x = Prelude.map (\e -> buildbb e m) l
                               in trace (show n ++ ": " ++ show x) $ f x
                Nothing  -> error $ n ++ " not in map:" 
-{-# LINE 63 "src/Language/LLVMIR/Converter/Module.hs" #-}
+{-# LINE 62 "src/Language/LLVMIR/Converter/Module.hs" #-}
 
 {-# LINE 1 "src/Language/LLVMIR/Grammar/Base.ag" #-}
 
@@ -67,13 +66,13 @@ buildbb n m = case M.lookup n m of
 -- Module    :  Language.LLVMIR.Base
 -- Copyright :  (c) 2012 Marcelo Sousa
 -------------------------------------------------------------------------------
-{-# LINE 71 "src/Language/LLVMIR/Converter/Module.hs" #-}
+{-# LINE 70 "src/Language/LLVMIR/Converter/Module.hs" #-}
 
-{-# LINE 152 "src/Language/LLVMIR/Grammar/Base.ag" #-}
+{-# LINE 151 "src/Language/LLVMIR/Grammar/Base.ag" #-}
 
 emptyFunction :: Function
 emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid [] []
-{-# LINE 77 "src/Language/LLVMIR/Converter/Module.hs" #-}
+{-# LINE 76 "src/Language/LLVMIR/Converter/Module.hs" #-}
 
 {-# LINE 1 "src/Language/LLVMIR/Grammar/Instruction.ag" #-}
 
@@ -81,7 +80,7 @@ emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid [] []
 -- Module    :  Language.LLVMIR.Grammar.Instruction
 -- Copyright :  (c) 2013 Marcelo Sousa
 -------------------------------------------------------------------------------
-{-# LINE 85 "src/Language/LLVMIR/Converter/Module.hs" #-}
+{-# LINE 84 "src/Language/LLVMIR/Converter/Module.hs" #-}
 
 {-# LINE 1 "src/Language/LLVMIR/Type/Type.ag" #-}
 
@@ -90,7 +89,7 @@ emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid [] []
 -- Copyright :  (c) 2012 Marcelo Sousa
 -- Standard LLVM IR Types
 -------------------------------------------------------------------------------
-{-# LINE 94 "src/Language/LLVMIR/Converter/Module.hs" #-}
+{-# LINE 93 "src/Language/LLVMIR/Converter/Module.hs" #-}
 -- Alias -------------------------------------------------------
 -- cata
 sem_Alias :: Alias ->
@@ -596,43 +595,44 @@ sem_Attributes_Nil =
 sem_BasicBlock :: BasicBlock ->
                   T_BasicBlock
 sem_BasicBlock (BasicBlock _label _instrs) =
-    (sem_BasicBlock_BasicBlock (sem_Label _label) (sem_Instructions _instrs))
+    (sem_BasicBlock_BasicBlock (sem_Identifier _label) (sem_Instructions _instrs))
 -- semantic domain
-type T_BasicBlock = ( ((Label, ([Label], [ETm] -> ETm))),((Label,[(Ident, [(Value, Label)])])),BasicBlock)
+type T_BasicBlock = ( ((Identifier, ([Identifier], [ETm] -> ETm))),((Identifier,[(Ident, [(Value, Identifier)])])),BasicBlock)
 data Inh_BasicBlock = Inh_BasicBlock {}
-data Syn_BasicBlock = Syn_BasicBlock {etm_Syn_BasicBlock :: ((Label, ([Label], [ETm] -> ETm))),phis_Syn_BasicBlock :: ((Label,[(Ident, [(Value, Label)])])),self_Syn_BasicBlock :: BasicBlock}
+data Syn_BasicBlock = Syn_BasicBlock {etm_Syn_BasicBlock :: ((Identifier, ([Identifier], [ETm] -> ETm))),phis_Syn_BasicBlock :: ((Identifier,[(Ident, [(Value, Identifier)])])),self_Syn_BasicBlock :: BasicBlock}
 wrap_BasicBlock :: T_BasicBlock ->
                    Inh_BasicBlock ->
                    Syn_BasicBlock
 wrap_BasicBlock sem (Inh_BasicBlock) =
     (let ( _lhsOetm,_lhsOphis,_lhsOself) = sem
      in  (Syn_BasicBlock _lhsOetm _lhsOphis _lhsOself))
-sem_BasicBlock_BasicBlock :: T_Label ->
+sem_BasicBlock_BasicBlock :: T_Identifier ->
                              T_Instructions ->
                              T_BasicBlock
 sem_BasicBlock_BasicBlock label_ instrs_ =
-    (let _lhsOetm :: ((Label, ([Label], [ETm] -> ETm)))
-         _lhsOphis :: ((Label,[(Ident, [(Value, Label)])]))
+    (let _lhsOetm :: ((Identifier, ([Identifier], [ETm] -> ETm)))
+         _lhsOphis :: ((Identifier,[(Ident, [(Value, Identifier)])]))
          _lhsOself :: BasicBlock
-         _labelIself :: Label
-         _instrsIetm :: (([Label], [ETm] -> ETm))
-         _instrsIphis :: ([(Ident, [(Value, Label)])])
+         _labelIetm :: ETm
+         _labelIself :: Identifier
+         _instrsIetm :: (([Identifier], [ETm] -> ETm))
+         _instrsIphis :: ([(Ident, [(Value, Identifier)])])
          _instrsIself :: Instructions
          _lhsOetm =
              ({-# LINE 95 "src/Language/LLVMIR/Converter/Module.ag" #-}
-              (_labelIself,_instrsIetm)
+              (@Identifier.self,_instrsIetm)
               {-# LINE 625 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _lhsOphis =
              ({-# LINE 96 "src/Language/LLVMIR/Converter/Module.ag" #-}
-              (_labelIself,_instrsIphis)
+              (@Identifier.self,_instrsIphis)
               {-# LINE 630 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              BasicBlock _labelIself _instrsIself
          _lhsOself =
              _self
-         ( _labelIself) =
+         ( _labelIetm,_labelIself) =
              label_
          ( _instrsIetm,_instrsIphis,_instrsIself) =
              instrs_
@@ -644,10 +644,10 @@ sem_BasicBlocks :: BasicBlocks ->
 sem_BasicBlocks list =
     (Prelude.foldr sem_BasicBlocks_Cons sem_BasicBlocks_Nil (Prelude.map sem_BasicBlock list))
 -- semantic domain
-type T_BasicBlocks = (Map Label [(Ident, [(Value, Label)])]) ->
-                     ( (Map Label ([Label], [ETm] -> ETm)),(Map Label [(Ident, [(Value, Label)])]),BasicBlocks)
-data Inh_BasicBlocks = Inh_BasicBlocks {phim_Inh_BasicBlocks :: (Map Label [(Ident, [(Value, Label)])])}
-data Syn_BasicBlocks = Syn_BasicBlocks {etm_Syn_BasicBlocks :: (Map Label ([Label], [ETm] -> ETm)),phis_Syn_BasicBlocks :: (Map Label [(Ident, [(Value, Label)])]),self_Syn_BasicBlocks :: BasicBlocks}
+type T_BasicBlocks = (Map Identifier [(Ident, [(Value, Identifier)])]) ->
+                     ( (Map Identifier ([Identifier], [ETm] -> ETm)),(Map Identifier [(Ident, [(Value, Identifier)])]),BasicBlocks)
+data Inh_BasicBlocks = Inh_BasicBlocks {phim_Inh_BasicBlocks :: (Map Identifier [(Ident, [(Value, Identifier)])])}
+data Syn_BasicBlocks = Syn_BasicBlocks {etm_Syn_BasicBlocks :: (Map Identifier ([Identifier], [ETm] -> ETm)),phis_Syn_BasicBlocks :: (Map Identifier [(Ident, [(Value, Identifier)])]),self_Syn_BasicBlocks :: BasicBlocks}
 wrap_BasicBlocks :: T_BasicBlocks ->
                     Inh_BasicBlocks ->
                     Syn_BasicBlocks
@@ -659,15 +659,15 @@ sem_BasicBlocks_Cons :: T_BasicBlock ->
                         T_BasicBlocks
 sem_BasicBlocks_Cons hd_ tl_ =
     (\ _lhsIphim ->
-         (let _lhsOetm :: (Map Label ([Label], [ETm] -> ETm))
-              _lhsOphis :: (Map Label [(Ident, [(Value, Label)])])
+         (let _lhsOetm :: (Map Identifier ([Identifier], [ETm] -> ETm))
+              _lhsOphis :: (Map Identifier [(Ident, [(Value, Identifier)])])
               _lhsOself :: BasicBlocks
-              _tlOphim :: (Map Label [(Ident, [(Value, Label)])])
-              _hdIetm :: ((Label, ([Label], [ETm] -> ETm)))
-              _hdIphis :: ((Label,[(Ident, [(Value, Label)])]))
+              _tlOphim :: (Map Identifier [(Ident, [(Value, Identifier)])])
+              _hdIetm :: ((Identifier, ([Identifier], [ETm] -> ETm)))
+              _hdIphis :: ((Identifier,[(Ident, [(Value, Identifier)])]))
               _hdIself :: BasicBlock
-              _tlIetm :: (Map Label ([Label], [ETm] -> ETm))
-              _tlIphis :: (Map Label [(Ident, [(Value, Label)])])
+              _tlIetm :: (Map Identifier ([Identifier], [ETm] -> ETm))
+              _tlIphis :: (Map Identifier [(Ident, [(Value, Identifier)])])
               _tlIself :: BasicBlocks
               _lhsOetm =
                   ({-# LINE 87 "src/Language/LLVMIR/Converter/Module.ag" #-}
@@ -700,8 +700,8 @@ sem_BasicBlocks_Cons hd_ tl_ =
 sem_BasicBlocks_Nil :: T_BasicBlocks
 sem_BasicBlocks_Nil =
     (\ _lhsIphim ->
-         (let _lhsOetm :: (Map Label ([Label], [ETm] -> ETm))
-              _lhsOphis :: (Map Label [(Ident, [(Value, Label)])])
+         (let _lhsOetm :: (Map Identifier ([Identifier], [ETm] -> ETm))
+              _lhsOphis :: (Map Identifier [(Ident, [(Value, Identifier)])])
               _lhsOself :: BasicBlocks
               _lhsOetm =
                   ({-# LINE 85 "src/Language/LLVMIR/Converter/Module.ag" #-}
@@ -1838,7 +1838,7 @@ sem_Function_FunctionDef :: T_Identifier ->
                             T_Function
 sem_Function_FunctionDef name_ linkage_ retty_ params_ body_ =
     (let _lhsOetm :: ETm
-         _bodyOphim :: (Map Label [(Ident, [(Value, Label)])])
+         _bodyOphim :: (Map Identifier [(Ident, [(Value, Identifier)])])
          _lhsOself :: Function
          _nameIetm :: ETm
          _nameIself :: Identifier
@@ -1846,8 +1846,8 @@ sem_Function_FunctionDef name_ linkage_ retty_ params_ body_ =
          _rettyIself :: Type
          _paramsIetm :: ([ETm])
          _paramsIself :: Parameters
-         _bodyIetm :: (Map Label ([Label], [ETm] -> ETm))
-         _bodyIphis :: (Map Label [(Ident, [(Value, Label)])])
+         _bodyIetm :: (Map Identifier ([Identifier], [ETm] -> ETm))
+         _bodyIphis :: (Map Identifier [(Ident, [(Value, Identifier)])])
          _bodyIself :: BasicBlocks
          _lhsOetm =
              ({-# LINE 59 "src/Language/LLVMIR/Converter/Module.ag" #-}
@@ -2371,9 +2371,9 @@ sem_Instruction (Xor _pc _id _ty _op1 _op2) =
 sem_Instruction (ZExt _pc _id _v _ty) =
     (sem_Instruction_ZExt (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
 -- semantic domain
-type T_Instruction = ( (([Label], [ETm] -> ETm)),([(Ident, [(Value, Label)])]),Instruction)
+type T_Instruction = ( (([Identifier], [ETm] -> ETm)),([(Ident, [(Value, Identifier)])]),Instruction)
 data Inh_Instruction = Inh_Instruction {}
-data Syn_Instruction = Syn_Instruction {etm_Syn_Instruction :: (([Label], [ETm] -> ETm)),phis_Syn_Instruction :: ([(Ident, [(Value, Label)])]),self_Syn_Instruction :: Instruction}
+data Syn_Instruction = Syn_Instruction {etm_Syn_Instruction :: (([Identifier], [ETm] -> ETm)),phis_Syn_Instruction :: ([(Ident, [(Value, Identifier)])]),self_Syn_Instruction :: Instruction}
 wrap_Instruction :: T_Instruction ->
                     Inh_Instruction ->
                     Syn_Instruction
@@ -2387,8 +2387,8 @@ sem_Instruction_AShr :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_AShr pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2430,8 +2430,8 @@ sem_Instruction_Add :: T_PC ->
                        T_Value ->
                        T_Instruction
 sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2475,8 +2475,8 @@ sem_Instruction_Alloca :: T_PC ->
                           T_Align ->
                           T_Instruction
 sem_Instruction_Alloca pc_ id_ ty_ align_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2513,8 +2513,8 @@ sem_Instruction_And :: T_PC ->
                        T_Value ->
                        T_Instruction
 sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2556,8 +2556,8 @@ sem_Instruction_AtomicRMW :: T_PC ->
                              T_AtomicOrdering ->
                              T_Instruction
 sem_Instruction_AtomicRMW pc_ id_ args_ op_ ord_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2597,8 +2597,8 @@ sem_Instruction_BitCast :: T_PC ->
                            T_Type ->
                            T_Instruction
 sem_Instruction_BitCast pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2635,8 +2635,8 @@ sem_Instruction_Br :: T_PC ->
                       T_Value ->
                       T_Instruction
 sem_Instruction_Br pc_ v_ t_ f_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _vIetm :: ETm
@@ -2675,8 +2675,8 @@ sem_Instruction_Call :: T_PC ->
                         T_Values ->
                         T_Instruction
 sem_Instruction_Call pc_ mres_ ty_ callee_ args_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _mresIetm :: ETm
@@ -2723,8 +2723,8 @@ sem_Instruction_Cmpxchg :: T_PC ->
                            T_AtomicOrdering ->
                            T_Instruction
 sem_Instruction_Cmpxchg pc_ id_ mptr_ cval_ nval_ ord_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2767,8 +2767,8 @@ sem_Instruction_CreateThread :: T_PC ->
                                 T_Values ->
                                 T_Instruction
 sem_Instruction_CreateThread pc_ args_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _argsIetm :: ([ETm])
@@ -2798,8 +2798,8 @@ sem_Instruction_ExtractValue :: T_PC ->
                                 T_Ints ->
                                 T_Instruction
 sem_Instruction_ExtractValue pc_ id_ aggr_ idxs_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2837,8 +2837,8 @@ sem_Instruction_FAdd :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_FAdd pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2881,8 +2881,8 @@ sem_Instruction_FCmp :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_FCmp pc_ id_ cond_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2927,8 +2927,8 @@ sem_Instruction_FDiv :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_FDiv pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -2970,8 +2970,8 @@ sem_Instruction_FMul :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_FMul pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3012,8 +3012,8 @@ sem_Instruction_FPExt :: T_PC ->
                          T_Type ->
                          T_Instruction
 sem_Instruction_FPExt pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3050,8 +3050,8 @@ sem_Instruction_FPToSI :: T_PC ->
                           T_Type ->
                           T_Instruction
 sem_Instruction_FPToSI pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3088,8 +3088,8 @@ sem_Instruction_FPToUI :: T_PC ->
                           T_Type ->
                           T_Instruction
 sem_Instruction_FPToUI pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3126,8 +3126,8 @@ sem_Instruction_FPTrunc :: T_PC ->
                            T_Type ->
                            T_Instruction
 sem_Instruction_FPTrunc pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3165,8 +3165,8 @@ sem_Instruction_FRem :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_FRem pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3208,8 +3208,8 @@ sem_Instruction_FSub :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_FSub pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3251,8 +3251,8 @@ sem_Instruction_GetElementPtr :: T_PC ->
                                  T_Values ->
                                  T_Instruction
 sem_Instruction_GetElementPtr pc_ id_ ty_ struct_ idxs_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3295,8 +3295,8 @@ sem_Instruction_ICmp :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_ICmp pc_ id_ cond_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3344,8 +3344,8 @@ sem_Instruction_InsertValue :: T_PC ->
                                T_Ints ->
                                T_Instruction
 sem_Instruction_InsertValue pc_ id_ aggr_ ival_ idxs_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3386,8 +3386,8 @@ sem_Instruction_IntToPtr :: T_PC ->
                             T_Type ->
                             T_Instruction
 sem_Instruction_IntToPtr pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3425,8 +3425,8 @@ sem_Instruction_LShr :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_LShr pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3467,8 +3467,8 @@ sem_Instruction_Load :: T_PC ->
                         T_Align ->
                         T_Instruction
 sem_Instruction_Load pc_ id_ v_ align_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3506,8 +3506,8 @@ sem_Instruction_Mul :: T_PC ->
                        T_Value ->
                        T_Instruction
 sem_Instruction_Mul pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3550,8 +3550,8 @@ sem_Instruction_MutexInit :: T_PC ->
                              T_Value ->
                              T_Instruction
 sem_Instruction_MutexInit pc_ rv_ mutex_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _rvIetm :: ETm
@@ -3584,8 +3584,8 @@ sem_Instruction_MutexLock :: T_PC ->
                              T_Value ->
                              T_Instruction
 sem_Instruction_MutexLock pc_ rv_ mutex_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _rvIetm :: ETm
@@ -3618,8 +3618,8 @@ sem_Instruction_MutexUnlock :: T_PC ->
                                T_Value ->
                                T_Instruction
 sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _rvIetm :: ETm
@@ -3651,8 +3651,8 @@ sem_Instruction_NotifyEvent :: T_PC ->
                                Int ->
                                T_Instruction
 sem_Instruction_NotifyEvent pc_ event_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _lhsOetm =
@@ -3679,8 +3679,8 @@ sem_Instruction_Or :: T_PC ->
                       T_Value ->
                       T_Instruction
 sem_Instruction_Or pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3721,8 +3721,8 @@ sem_Instruction_PHI :: T_PC ->
                        T_PValues ->
                        T_Instruction
 sem_Instruction_PHI pc_ id_ ty_ vals_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3736,7 +3736,7 @@ sem_Instruction_PHI pc_ id_ ty_ vals_ =
               )
          _lhsOphis =
              ({-# LINE 137 "src/Language/LLVMIR/Converter/Module.ag" #-}
-              [(getId _idIetm, Prelude.map (\(a,b) -> (a, getLabel b)) _valsIself)]
+              [(getId _idIetm, Prelude.map (\(a,b) -> (a, getIdentifier b)) _valsIself)]
               {-# LINE 3741 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
@@ -3758,8 +3758,8 @@ sem_Instruction_PtrToInt :: T_PC ->
                             T_Type ->
                             T_Instruction
 sem_Instruction_PtrToInt pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3794,8 +3794,8 @@ sem_Instruction_Ret :: T_PC ->
                        T_RetInst ->
                        T_Instruction
 sem_Instruction_Ret pc_ r_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _rIetm :: ETm
@@ -3826,8 +3826,8 @@ sem_Instruction_SDiv :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_SDiv pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3868,8 +3868,8 @@ sem_Instruction_SExt :: T_PC ->
                         T_Type ->
                         T_Instruction
 sem_Instruction_SExt pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3906,8 +3906,8 @@ sem_Instruction_SIToFP :: T_PC ->
                           T_Type ->
                           T_Instruction
 sem_Instruction_SIToFP pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3945,8 +3945,8 @@ sem_Instruction_SRem :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_SRem pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -3988,8 +3988,8 @@ sem_Instruction_Select :: T_PC ->
                           T_Value ->
                           T_Instruction
 sem_Instruction_Select pc_ id_ cond_ valt_ valf_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -4032,8 +4032,8 @@ sem_Instruction_Shl :: T_PC ->
                        T_Value ->
                        T_Instruction
 sem_Instruction_Shl pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -4075,8 +4075,8 @@ sem_Instruction_Store :: T_PC ->
                          T_Align ->
                          T_Instruction
 sem_Instruction_Store pc_ ty_ v1_ v2_ align_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _tyIself :: Type
@@ -4117,8 +4117,8 @@ sem_Instruction_Sub :: T_PC ->
                        T_Value ->
                        T_Instruction
 sem_Instruction_Sub pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -4159,8 +4159,8 @@ sem_Instruction_Switch :: T_PC ->
                           T_ValIdL ->
                           T_Instruction
 sem_Instruction_Switch pc_ ty_ v_ elems_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _tyIself :: Type
@@ -4196,8 +4196,8 @@ sem_Instruction_Trunc :: T_PC ->
                          T_Type ->
                          T_Instruction
 sem_Instruction_Trunc pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -4232,8 +4232,8 @@ sem_Instruction_UBr :: T_PC ->
                        T_Value ->
                        T_Instruction
 sem_Instruction_UBr pc_ d_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _dIetm :: ETm
@@ -4264,8 +4264,8 @@ sem_Instruction_UDiv :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_UDiv pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -4306,8 +4306,8 @@ sem_Instruction_UIToFP :: T_PC ->
                           T_Type ->
                           T_Instruction
 sem_Instruction_UIToFP pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -4345,8 +4345,8 @@ sem_Instruction_URem :: T_PC ->
                         T_Value ->
                         T_Instruction
 sem_Instruction_URem pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -4384,8 +4384,8 @@ sem_Instruction_URem pc_ id_ ty_ op1_ op2_ =
 sem_Instruction_Unreachable :: T_PC ->
                                T_Instruction
 sem_Instruction_Unreachable pc_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _lhsOetm =
@@ -4409,8 +4409,8 @@ sem_Instruction_WaitEvent :: T_PC ->
                              Int ->
                              T_Instruction
 sem_Instruction_WaitEvent pc_ event_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _lhsOetm =
@@ -4434,8 +4434,8 @@ sem_Instruction_WaitTime :: T_PC ->
                             T_Value ->
                             T_Instruction
 sem_Instruction_WaitTime pc_ time_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _timeIetm :: ETm
@@ -4466,8 +4466,8 @@ sem_Instruction_Xor :: T_PC ->
                        T_Value ->
                        T_Instruction
 sem_Instruction_Xor pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -4508,8 +4508,8 @@ sem_Instruction_ZExt :: T_PC ->
                         T_Type ->
                         T_Instruction
 sem_Instruction_ZExt pc_ id_ v_ ty_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIetm :: ETm
@@ -4547,9 +4547,9 @@ sem_Instructions :: Instructions ->
 sem_Instructions list =
     (Prelude.foldr sem_Instructions_Cons sem_Instructions_Nil (Prelude.map sem_Instruction list))
 -- semantic domain
-type T_Instructions = ( (([Label], [ETm] -> ETm)),([(Ident, [(Value, Label)])]),Instructions)
+type T_Instructions = ( (([Identifier], [ETm] -> ETm)),([(Ident, [(Value, Identifier)])]),Instructions)
 data Inh_Instructions = Inh_Instructions {}
-data Syn_Instructions = Syn_Instructions {etm_Syn_Instructions :: (([Label], [ETm] -> ETm)),phis_Syn_Instructions :: ([(Ident, [(Value, Label)])]),self_Syn_Instructions :: Instructions}
+data Syn_Instructions = Syn_Instructions {etm_Syn_Instructions :: (([Identifier], [ETm] -> ETm)),phis_Syn_Instructions :: ([(Ident, [(Value, Identifier)])]),self_Syn_Instructions :: Instructions}
 wrap_Instructions :: T_Instructions ->
                      Inh_Instructions ->
                      Syn_Instructions
@@ -4560,14 +4560,14 @@ sem_Instructions_Cons :: T_Instruction ->
                          T_Instructions ->
                          T_Instructions
 sem_Instructions_Cons hd_ tl_ =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instructions
-         _hdIetm :: (([Label], [ETm] -> ETm))
-         _hdIphis :: ([(Ident, [(Value, Label)])])
+         _hdIetm :: (([Identifier], [ETm] -> ETm))
+         _hdIphis :: ([(Ident, [(Value, Identifier)])])
          _hdIself :: Instruction
-         _tlIetm :: (([Label], [ETm] -> ETm))
-         _tlIphis :: ([(Ident, [(Value, Label)])])
+         _tlIetm :: (([Identifier], [ETm] -> ETm))
+         _tlIphis :: ([(Ident, [(Value, Identifier)])])
          _tlIself :: Instructions
          _lhsOetm =
              ({-# LINE 106 "src/Language/LLVMIR/Converter/Module.ag" #-}
@@ -4594,8 +4594,8 @@ sem_Instructions_Cons hd_ tl_ =
      in  ( _lhsOetm,_lhsOphis,_lhsOself))
 sem_Instructions_Nil :: T_Instructions
 sem_Instructions_Nil =
-    (let _lhsOetm :: (([Label], [ETm] -> ETm))
-         _lhsOphis :: ([(Ident, [(Value, Label)])])
+    (let _lhsOetm :: (([Identifier], [ETm] -> ETm))
+         _lhsOphis :: ([(Ident, [(Value, Identifier)])])
          _lhsOself :: Instructions
          _lhsOetm =
              ({-# LINE 105 "src/Language/LLVMIR/Converter/Module.ag" #-}
@@ -4760,31 +4760,6 @@ sem_Ints_Nil =
     (let _lhsOself :: Ints
          _self =
              []
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
--- Label -------------------------------------------------------
--- cata
-sem_Label :: Label ->
-             T_Label
-sem_Label ( x1) =
-    (sem_Label_Tuple x1)
--- semantic domain
-type T_Label = ( Label)
-data Inh_Label = Inh_Label {}
-data Syn_Label = Syn_Label {self_Syn_Label :: Label}
-wrap_Label :: T_Label ->
-              Inh_Label ->
-              Syn_Label
-wrap_Label sem (Inh_Label) =
-    (let ( _lhsOself) = sem
-     in  (Syn_Label _lhsOself))
-sem_Label_Tuple :: String ->
-                   T_Label
-sem_Label_Tuple x1_ =
-    (let _lhsOself :: Label
-         _self =
-             (x1_)
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -5278,44 +5253,6 @@ sem_MIdentifier_Nothing =
          _lhsOself =
              _self
      in  ( _lhsOself))
--- MLabel ------------------------------------------------------
--- cata
-sem_MLabel :: MLabel ->
-              T_MLabel
-sem_MLabel (Prelude.Just x) =
-    (sem_MLabel_Just (sem_Label x))
-sem_MLabel Prelude.Nothing =
-    sem_MLabel_Nothing
--- semantic domain
-type T_MLabel = ( MLabel)
-data Inh_MLabel = Inh_MLabel {}
-data Syn_MLabel = Syn_MLabel {self_Syn_MLabel :: MLabel}
-wrap_MLabel :: T_MLabel ->
-               Inh_MLabel ->
-               Syn_MLabel
-wrap_MLabel sem (Inh_MLabel) =
-    (let ( _lhsOself) = sem
-     in  (Syn_MLabel _lhsOself))
-sem_MLabel_Just :: T_Label ->
-                   T_MLabel
-sem_MLabel_Just just_ =
-    (let _lhsOself :: MLabel
-         _justIself :: Label
-         _self =
-             Just _justIself
-         _lhsOself =
-             _self
-         ( _justIself) =
-             just_
-     in  ( _lhsOself))
-sem_MLabel_Nothing :: T_MLabel
-sem_MLabel_Nothing =
-    (let _lhsOself :: MLabel
-         _self =
-             Nothing
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
 -- MLinkageTy --------------------------------------------------
 -- cata
 sem_MLinkageTy :: MLinkageTy ->
@@ -5619,7 +5556,7 @@ sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
          _lhsOhtm =
              ({-# LINE 29 "src/Language/LLVMIR/Converter/Module.ag" #-}
               HTm (_gvarsIetm _funsIetm)
-              {-# LINE 5623 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 5560 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Module id_ _layoutIself _targetIself _gvarsIself _funsIself _nmdtysIself
@@ -5968,7 +5905,7 @@ sem_Parameter_Parameter var_ ty_ =
          _lhsOetm =
              ({-# LINE 71 "src/Language/LLVMIR/Converter/Module.ag" #-}
               EVar $ getIdentifier _varIself
-              {-# LINE 5972 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 5909 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Parameter _varIself _tyIself
@@ -6008,7 +5945,7 @@ sem_Parameters_Cons hd_ tl_ =
          _lhsOetm =
              ({-# LINE 65 "src/Language/LLVMIR/Converter/Module.ag" #-}
               _hdIetm : _tlIetm
-              {-# LINE 6012 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 5949 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -6026,7 +5963,7 @@ sem_Parameters_Nil =
          _lhsOetm =
              ({-# LINE 65 "src/Language/LLVMIR/Converter/Module.ag" #-}
               []
-              {-# LINE 6030 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 5967 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              []
@@ -6235,7 +6172,7 @@ sem_RetInst_ValueRet v_ =
          _lhsOetm =
              ({-# LINE 147 "src/Language/LLVMIR/Converter/Module.ag" #-}
               _vIetm
-              {-# LINE 6239 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6176 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              ValueRet _vIself
@@ -6251,7 +6188,7 @@ sem_RetInst_VoidRet =
          _lhsOetm =
              ({-# LINE 148 "src/Language/LLVMIR/Converter/Module.ag" #-}
               EBot
-              {-# LINE 6255 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6192 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              VoidRet
@@ -6312,7 +6249,7 @@ sem_SimpleConstant_ConstantFP fp_ =
          _lhsOetm =
              ({-# LINE 165 "src/Language/LLVMIR/Converter/Module.ag" #-}
               EBot
-              {-# LINE 6316 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6253 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              ConstantFP _fpIself
@@ -6331,7 +6268,7 @@ sem_SimpleConstant_ConstantInt iv_ ty_ =
          _lhsOetm =
              ({-# LINE 164 "src/Language/LLVMIR/Converter/Module.ag" #-}
               ENum iv_
-              {-# LINE 6335 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6272 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              ConstantInt iv_ _tyIself
@@ -6349,7 +6286,7 @@ sem_SimpleConstant_ConstantPointerNull ty_ =
          _lhsOetm =
              ({-# LINE 165 "src/Language/LLVMIR/Converter/Module.ag" #-}
               EBot
-              {-# LINE 6353 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6290 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              ConstantPointerNull _tyIself
@@ -6841,7 +6778,7 @@ sem_Value_Constant c_ =
          _lhsOetm =
              ({-# LINE 152 "src/Language/LLVMIR/Converter/Module.ag" #-}
               _cIetm
-              {-# LINE 6845 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6782 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Constant _cIself
@@ -6862,7 +6799,7 @@ sem_Value_Id v_ ty_ =
          _lhsOetm =
              ({-# LINE 151 "src/Language/LLVMIR/Converter/Module.ag" #-}
               _vIetm
-              {-# LINE 6866 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6803 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Id _vIself _tyIself
@@ -6942,7 +6879,7 @@ sem_Values_Cons hd_ tl_ =
          _lhsOetm =
              ({-# LINE 144 "src/Language/LLVMIR/Converter/Module.ag" #-}
               _hdIetm : _tlIetm
-              {-# LINE 6946 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6883 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -6960,7 +6897,7 @@ sem_Values_Nil =
          _lhsOetm =
              ({-# LINE 144 "src/Language/LLVMIR/Converter/Module.ag" #-}
               []
-              {-# LINE 6964 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6901 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              []

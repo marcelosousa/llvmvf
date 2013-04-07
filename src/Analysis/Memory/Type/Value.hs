@@ -10,7 +10,7 @@ module Analysis.Memory.Type.Value where
 import Analysis.Memory.TyAnn (TyAnn, TyAnnEnv)
 import qualified Analysis.Memory.TyAnn as T
 import Analysis.Memory.Type.Util
-import Analysis.Memory.Type.Constant (typeConstant)
+import Analysis.Memory.Type.Constant (typeConstant')
 import Language.LLVMIR
 import qualified Data.Map as M
 
@@ -22,4 +22,4 @@ vTyInf tyenv val = case val of
                    Nothing  -> error $ "vtyinf"  -- (vty, M.insert v vty tyenv)
                    Just tya -> let nty = unify vty tya
                                in (nty, M.adjust (const nty) v tyenv)
-   Constant c -> typeConstant tyenv c
+   Constant c -> typeConstant' tyenv c

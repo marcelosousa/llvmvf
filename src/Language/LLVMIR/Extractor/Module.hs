@@ -161,7 +161,7 @@ getParam (pname, pval) = do ty <- typeOf pval
 getBasicBlock :: (String, Value) -> Context IO LL.BasicBlock
 getBasicBlock (bbname, bbvalue) = do instr  <- liftIO $ getInstructions bbvalue
                                      instrs <- forM instr getInst
-                                     return $ LL.BasicBlock bbname instrs
+                                     return $ LL.BasicBlock (LL.Local bbname) instrs
                    
 getInst :: (String, Value) -> Context IO LL.Instruction
 getInst (_,instrv) = do e@Env{..} <- getEnv
