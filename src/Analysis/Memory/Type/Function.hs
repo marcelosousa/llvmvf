@@ -16,11 +16,11 @@ import Debug.Trace (trace)
 import Data.Maybe
 
 -- Type Check Function
-typeCheckFunction :: TyEnv -> Function -> Bool
+typeCheckFunction :: TyEnv -> Function -> TyEnv
 typeCheckFunction tye (FunctionDef  n l rty pms bbs) = let (tysig, tye') = typeSignature tye pms rty
                                                            ntye = insert n tysig tye'
-                                                       in snd $ typeCheckBasicBlock ntye bbs (head bbs) -- assuming that head bbs is the entry block 
-typeCheckFunction tye (FunctionDecl n l rty pms) = True
+                                                       in typeCheckBasicBlock ntye bbs (head bbs) -- assuming that head bbs is the entry block 
+typeCheckFunction tye (FunctionDecl n l rty pms) = tye
 
 typeSignature :: TyEnv -> Parameters -> Type -> (Type, TyEnv)
 typeSignature tye ps rty = let (tps, ntye) = typeCheckParameters tye ps
@@ -36,17 +36,15 @@ typeCheckParameters tye (x:xs) = let (tx,tye') = typeCheckParameter tye x
 typeCheckParameter :: TyEnv -> Parameter -> (Type, TyEnv)
 typeCheckParameter tye (Parameter i ty) = (ty, insert i ty tye)
 
-typeCheckBasicBlock :: TyEnv -> BasicBlocks -> BasicBlock -> (TyEnv, Bool)
+typeCheckBasicBlock :: TyEnv -> BasicBlocks -> BasicBlock -> TyEnv
 typeCheckBasicBlock tye bbs (BasicBlock l instr) = 
-  let (tye', mrty) = typeCheckInstructions tye instr 
+  let (tye', rty) = typeCheckInstructions tye instr 
   in case M.lookup l tye of
-    Nothing -> case mrty of
-      Nothing -> (tye', False)
-      Just rty -> case rty of
+    Nothing -> case rty of
         TyJumpTo ids -> let bbsj = map (fromMaybe (error "typeCheckBasicBlock: cant find basic block") . findBasicBlock bbs) ids 
                         in typeCheckBasicBlocks tye' bbs bbsj  
-        ty -> (tye', True)
-    Just ty -> (tye, True) 
+        ty -> tye'
+    Just ty -> tye 
 
 
 findBasicBlock :: BasicBlocks -> Identifier -> Maybe BasicBlock
@@ -54,28 +52,23 @@ findBasicBlock [] l = Nothing
 findBasicBlock (bb@(BasicBlock l _):bbs) i | i == l = Just bb
                                            | otherwise = findBasicBlock bbs i
 
-typeCheckBasicBlocks :: TyEnv -> BasicBlocks -> BasicBlocks -> (TyEnv, Bool)
+typeCheckBasicBlocks :: TyEnv -> BasicBlocks -> BasicBlocks -> TyEnv
 typeCheckBasicBlocks tye bbs [bb] = typeCheckBasicBlock tye bbs bb
-typeCheckBasicBlocks tye bbs [bbt,bbf] = let (tybbt, bt) = typeCheckBasicBlock tye bbs bbt 
-                                             (tybbf, bf) = typeCheckBasicBlock tye bbs bbf
-                                             ntye = M.union tybbt tybbf
-                                             r = (ntye, bt && bf)
-                                         in r --if  == tybbt' && ntye == tybbf' && ntye == ntye'
-                                            --then trace "typeCheckBasicBlocks: Interesting" $ r 
-                                            --else r  
+typeCheckBasicBlocks tye bbs [bbt,bbf] = let tybbt = typeCheckBasicBlock tye bbs bbt 
+                                             tybbf = typeCheckBasicBlock tye bbs bbf
+                                         in M.union tybbt tybbf -- probably problematic
 typeCheckBasicBlocks tye bbs x = error $ "typeCheckBasicBlocks: " ++ show x
 
 
 -- typeCheckInstructions
-typeCheckInstructions :: TyEnv -> Instructions -> (TyEnv, Maybe Type)
-typeCheckInstructions tye []  = (tye, Nothing)
+typeCheckInstructions :: TyEnv -> Instructions -> (TyEnv, Type)
+typeCheckInstructions tye []  = error "typeCheckInstructions: emtpy list"
 typeCheckInstructions tye [i] = typeCheckInstruction tye i
 typeCheckInstructions tye (x:xs) = 
   let (tye', v) = typeCheckInstruction tye x
-  in case v of
-     Nothing -> (tye',v)
-     Just t  -> typeCheckInstructions tye' xs
+  in typeCheckInstructions tye' xs
 
+-- ==============================================================
 -- Function TyAnn Inference
 typeFunction :: TyAnnEnv -> Function -> (TyAnn, TyAnnEnv)
 -- Incomplete: Need to check if the return type is compatible with the actual return type from the basic block

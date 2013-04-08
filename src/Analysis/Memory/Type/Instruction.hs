@@ -10,75 +10,29 @@ module Analysis.Memory.Type.Instruction where
 import Analysis.Memory.TyAnn (TyAnn, TyAnnEnv)
 import qualified Analysis.Memory.TyAnn as T
 import Analysis.Memory.Type.Util
-import Analysis.Memory.Type.Value
 import Analysis.Memory.Type.Constant
 import Language.LLVMIR
 import qualified Data.Map as M
 import Debug.Trace (trace)
 
-typeCheckBinInstr :: TyClass -> TyEnv -> Identifier -> Type -> Type -> Type -> (TyEnv, Maybe Type)
-typeCheckBinInstr TyClassInt tye i ty@(TyInt x)        tv1 tv2 = (insert i ty tye, f ty tv1 tv2)
-typeCheckBinInstr TyClassFloat tye i ty@(TyFloatPoint x) tv1 tv2 = (insert i ty tye, f ty tv1 tv2)
-typeCheckBinInstr n _   _ _ _ _ = error "typeCheckBinInstr"
-f t1 t2 t3 = if t1 == t2 && t2 == t3 
-		     then Just t1
-		     else Nothing
-
 -- Need to pattern match on the value here.
-typeCheckBranchs :: Values -> Maybe Type
-typeCheckBranchs [] = Nothing
-typeCheckBranchs l  = do ids <- mapM typeCheckBranch l
-                         return $ TyJumpTo ids
+typeCheckBranchs :: Values -> Type
+typeCheckBranchs [] = error "typeCheckBranchs: Empty value list"
+typeCheckBranchs l  = TyJumpTo $ map typeCheckBranch l
 
-typeCheckBranch :: Value -> Maybe Identifier
-typeCheckBranch (Id i ty) = Just i -- TODO need to check if ty is a TyLabel or *(TyInt 8)
-typeCheckBranch v = Nothing
+typeCheckBranch :: Value -> Identifier
+typeCheckBranch (Id i ty) = i -- TODO need to check if ty is a TyLabel or *(TyInt 8)
+typeCheckBranch v = error $ "typeCheckBranchs: Expected identifier and given " ++ show v
 
-typeCheckCmp :: TyClass -> TyEnv -> Identifier -> Type -> Type -> Type -> (TyEnv, Maybe Type)
-typeCheckCmp TyClassInt tye i ty@(TyInt 1) tv1 tv2 =
-    let ntye = insert i ty tye 
-	in if tv1 == tv2 
-	   then case tv1 of
-	     TyPointer _ -> (ntye, Just ty)
-	     TyInt _     -> (ntye, Just ty)
-	     x           -> (tye, Nothing)
-	   else (tye, Nothing)
-typeCheckCmp TyClassInt tye i ty@(TyVector s (TyInt _)) tv1 tv2 =
-    let ntye = insert i ty tye 
-	in if tv1 == tv2 
-	   then case tv1 of
-	     TyVector r (TyInt _) -> if r == s 
-	     	                     then (ntye, Just ty)
-	                             else (tye, Nothing)
-	     x           -> (tye, Nothing)
-	   else (tye, Nothing)
-typeCheckCmp TyClassFloat tye i ty@(TyInt 1) tv1 tv2 =
-    let ntye = insert i ty tye 
-	in if tv1 == tv2 
-	   then case tv1 of
-	     TyPointer _    -> (ntye, Just ty)
-	     TyFloatPoint _ -> (ntye, Just ty)
-	     x              -> (tye, Nothing)
-	   else (tye, Nothing)
-typeCheckCmp TyClassFloat tye i ty@(TyVector s (TyFloatPoint _)) tv1 tv2 =
-    let ntye = insert i ty tye 
-	in if tv1 == tv2 
-	   then case tv1 of
-	     TyVector r (TyFloatPoint _) -> if r == s 
-	     	                            then (ntye, Just ty)
-	                                    else (tye, Nothing)
-	     x           -> (tye, Nothing)
-	   else (tye, Nothing)
-
-typeCheckInstruction :: TyEnv -> Instruction -> (TyEnv, Maybe Type)
+typeCheckInstruction :: TyEnv -> Instruction -> (TyEnv, Type)
 typeCheckInstruction tye i = case i of
   -- Terminators
-	Ret pc VoidRet      -> (tye, Just $ TyVoid)
-	Ret pc (ValueRet v) -> (tye, Just $ typeValue tye v) 
-	Unreachable pc      -> (tye, Just $ TyUndefined) -- Unreachable has no defined semantics 
+	Ret pc VoidRet      -> (tye, TyVoid)
+	Ret pc (ValueRet v) -> (tye, typeValue tye v) 
+	Unreachable pc      -> (tye, TyUndefined) -- Unreachable has no defined semantics 
 	Br  pc v t f        -> if typeValue tye v == TyInt 1
 		                   then (tye, typeCheckBranchs [t,f])
-		                   else (tye, Nothing)
+		                   else error "typeCheckInstruction.Br: Condition type is not i1"
 	UBr pc d            -> (tye, typeCheckBranchs [d])
 	Switch pc ty v elems -> error "typeCheckInstruction: Switch instruction not supported."
   -- Phi Instructions
@@ -86,12 +40,9 @@ typeCheckInstruction tye i = case i of
  	                        tyvs = map (typeValue tye) vs
  	                        tyls = map typeCheckBranch ls
  	                        p1 = all (==ty) tyvs
- 	                        p2 = all (\x -> case x of
- 	                        	              Just _ -> True
- 	                        	              Nothing -> False) tyls
- 	                    in if p1 && p2
- 	                       then (insert i ty tye, Just ty)
- 	                       else (tye, Nothing)
+ 	                    in if seq tyls p1
+ 	                       then (insert i ty tye, ty)
+ 	                       else error $ "typeCheckInstruction.PHI: " ++ show ty ++ " " ++ show tyvs
   -- Standard Binary Operations
   -- Integer Operations
  	Add  pc i ty op1 op2 -> typeCheckBinInstr TyClassInt tye i ty (typeValue tye op1) (typeValue tye op2) 
@@ -131,26 +82,26 @@ typeCheckInstruction tye i = case i of
  	ICmp pc i cond ty op1 op2 -> typeCheckCmp TyClassInt   tye i ty (typeValue tye op1) (typeValue tye op2)
  	FCmp pc i cond ty op1 op2 -> typeCheckCmp TyClassFloat tye i ty (typeValue tye op1) (typeValue tye op2)
   -- Memory Operations
- 	Alloca pc i ty       align   -> trace (show ty) $ (insert i (TyPointer ty) tye, Just ty)-- Alloca should receive a size integer too  
+ 	Alloca pc i ty       align   -> (insert i (TyPointer ty) tye, ty)-- Alloca should receive a size integer too  
  	Store  pc   ty v1 v2 align   -> 
  	  case typeValue tye v2 of
  	  	TyPointer ty -> 
  	  	  let tyv2 = typeValue tye v1
  	  	  in if ty == tyv2 && isFstClass ty
- 	  	     then (tye, Just $ TyVoid)
- 	  	     else (tye, Nothing) 
+ 	  	     then (tye, TyVoid)
+ 	  	     else error $ "typeCheckInstruction.Store: " ++ show ty 
  	  	x -> error $ "typeCheck Store: " ++ show x
 	Load   pc i    v     align   -> 
 	  case typeValue tye v of
 	  	TyPointer ty -> if isFstClass ty
-	  		            then (insert i ty tye, Just ty)
-	  		            else (tye, Nothing)
+	  		            then (insert i ty tye, ty)
+	  		            else error $ "typeCheckInstruction.Load: " ++ show ty 
 	  	x -> error $ "typeCheck Load: " ++ show x
  	GetElementPtr pc i ty v idxs ->
  	  let ety = typeGetElementPtrConstantExpr tye v idxs
  	  in if ety == ty
-      	 then (insert i ty tye, Just ty)
-      	 else (tye, Nothing)
+      	 then (insert i ty tye, ty)
+      	 else error $ "typeCheckInstruction.GetElementPtr: " ++ show [ety,ty]
   -- Call Operation
   	Call pc i ty callee vs -> typeCheckCall tye i ty callee vs
   -- Selection Operations
@@ -162,19 +113,63 @@ typeCheckInstruction tye i = case i of
   	AtomicRMW pc i vals op        ord -> error "AtomicRMW operation not supported"
 
 
-typeCheckCall :: TyEnv -> Identifier -> Type -> Identifier -> Values -> (TyEnv, Maybe Type)
-typeCheckCall tye i ty c args = 
+typeCheckCall :: TyEnv -> Identifier -> Type -> Identifier -> Values -> (TyEnv, Type)
+typeCheckCall tye i rfnty c args = 
 	case M.lookup c tye of
 		Nothing -> error $ "typeCheckCall: Function " ++ show c ++ " not in env: " ++ show tye
 		Just ty -> case ty of
-			TyPointer (TyFunction typms tyr) -> 
+			TyPointer (TyFunction typms tyr) ->
 			  let tyargs = map (typeValue tye) args
-			  in if (length tyargs == length typms) && tyr == ty
+			  in if (length tyargs == length typms) && tyr == rfnty
 			  	then if all (\(a,b) -> a == b) $ zip tyargs typms
-					 then (insert i ty tye, Just ty)
-					 else (tye, Nothing) 
-				else (tye, Nothing)
+					 then (insert i ty tye, ty)
+					 else error $ "typeCheckCall: " ++ show (zip tyargs typms)
+				else error $ "typeCheckCall: length dismatch " ++ show [tyargs, typms] ++ show [tyr, ty]
 			x -> error $ "typeCheckCall: Function has type: " ++ show x
+
+typeCheckBinInstr :: TyClass -> TyEnv -> Identifier -> Type -> Type -> Type -> (TyEnv, Type)
+typeCheckBinInstr TyClassInt   tye i ty@(TyInt x)        tv1 tv2 = (insert i ty tye, f ty tv1 tv2)
+typeCheckBinInstr TyClassFloat tye i ty@(TyFloatPoint x) tv1 tv2 = (insert i ty tye, f ty tv1 tv2)
+typeCheckBinInstr n _ _ _ _ _ = error "typeCheckBinInstr"
+f t1 t2 t3 = if t1 == t2 && t2 == t3 
+		     then t1
+		     else error $ "typeCheckBinInstr: " ++ show [t1,t2,t3]
+		     
+typeCheckCmp :: TyClass -> TyEnv -> Identifier -> Type -> Type -> Type -> (TyEnv, Type)
+typeCheckCmp TyClassInt tye i ty@(TyInt 1) tv1 tv2 =
+    let ntye = insert i ty tye 
+	in if tv1 == tv2 
+	   then case tv1 of
+	     TyPointer _ -> (ntye, ty)
+	     TyInt _     -> (ntye, ty)
+	     x           -> error $ "typeCheckCmp.TyClassInt: " ++ show x
+	   else error $ "typeCheckCmp.TyClassInt: " ++ show [tv1,tv2]
+typeCheckCmp TyClassInt tye i ty@(TyVector s (TyInt _)) tv1 tv2 =
+    let ntye = insert i ty tye 
+	in if tv1 == tv2
+	   then case tv1 of
+	     TyVector r (TyInt _) -> if r == s 
+	     	                     then (ntye, ty)
+	                             else error $ "typeCheckCmp.TyClassInt(2): " ++ show [r,s]
+	     x -> error $ "typeCheckCmp.TyClassInt(2): " ++ show x
+	   else error $ "typeCheckCmp.TyClassInt(2): " ++ show [tv1,tv2]
+typeCheckCmp TyClassFloat tye i ty@(TyInt 1) tv1 tv2 =
+    let ntye = insert i ty tye 
+	in if tv1 == tv2 
+	   then case tv1 of
+	     TyPointer _    -> (ntye, ty)
+	     TyFloatPoint _ -> (ntye, ty)
+	     x -> error $ "typeCheckCmp.TyClassFloat: " ++ show x
+	   else error $ "typeCheckCmp.TyClassFloat: " ++ show [tv1,tv2]
+typeCheckCmp TyClassFloat tye i ty@(TyVector s (TyFloatPoint _)) tv1 tv2 =
+    let ntye = insert i ty tye 
+	in if tv1 == tv2 
+	   then case tv1 of
+	     TyVector r (TyFloatPoint _) -> if r == s 
+	     	                            then (ntye, ty)
+	                                    else error $ "typeCheckCmp.TyClassFloat(2): " ++ show [r,s]
+	     x           -> error $ "typeCheckCmp.TyClassFloat(2): " ++ show x
+	   else error $ "typeCheckCmp.TyClassFloat(2): " ++ show [tv1,tv2]
 
 iTyInf :: TyAnnEnv -> Instruction -> (TyAnn, TyAnnEnv)
 iTyInf tyenv (Ret _ VoidRet)      = (T.TyPri T.TyVoid, tyenv)

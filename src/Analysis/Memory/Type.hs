@@ -7,6 +7,7 @@
 
 module Analysis.Memory.Type where
 
+import Analysis.Memory.Type.Util (TyEnv)
 import Analysis.Memory.TyAnn (TyAnn, TyAnnEnv)
 import Analysis.Memory.Type.Module (typeModule, typeCheckModule)
 import Language.LLVMIR
@@ -16,5 +17,5 @@ import qualified Data.Map as M
 typeAnalysis :: Module -> ([TyAnn], M.Map String (TyAnn, TyAnnEnv))
 typeAnalysis = typeModule
 
-typeCheck :: Module -> Bool
+typeCheck :: Module -> (TyEnv, M.Map String TyEnv)
 typeCheck = typeCheckModule

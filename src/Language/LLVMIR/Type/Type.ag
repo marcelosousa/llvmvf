@@ -16,10 +16,8 @@ data Type
   | TyLabel
   | TyMetadata
   | TyOpaque
-  | TyInt 
-      p :: Int
-  | TyFloatPoint
-      p :: TyFloatPoint
+  | TyInt        p :: Int
+  | TyFloatPoint p :: TyFloatPoint
   | TyArray
       numEl :: Int -- ^ Flat arrays?
       ty    :: Type
@@ -36,8 +34,7 @@ data Type
       numEl :: Int
       ty    :: Type
   | TyUndefined
-  | TyJumpTo
-      lb :: Identifiers
+  | TyJumpTo lb :: Identifiers
 
 data TyFloatPoint
   | TyHalf -- ^ Compatible with i386?

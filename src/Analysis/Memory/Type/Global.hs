@@ -16,14 +16,13 @@ import qualified Data.Map as M
 import Debug.Trace (trace)
 
 -- Type Check Global
-typeCheckGlobal :: TyEnv -> Global -> (Bool, TyEnv)
-typeCheckGlobal tye (GlobalVar i l False isUAddr ty Nothing align) = (True, insert i ty tye)
+typeCheckGlobal :: TyEnv -> Global -> TyEnv
+typeCheckGlobal tye (GlobalVar i l False isUAddr ty Nothing align) = insert i ty tye
 typeCheckGlobal tye (GlobalVar i l True isUAddr ty (Just c) align) = 
-  case typeConstant tye c of
-    Nothing -> trace ("typeCheckGlobal(1): " ++ show c) $ (False, tye)
-    Just t  -> if (TyPointer t) == ty 
-               then (True, insert i ty tye)
-               else trace ("typeCheckGlobal(2): " ++ show t ++ " " ++ show ty) $ (False, tye)
+  let t = typeConstant tye c
+  in if (TyPointer t) == ty 
+     then insert i ty tye
+     else error $ "typeCheckGlobal: " ++ show i ++ " " ++ show t ++ " " ++ show ty
 typeCheckGlobal tye gv = error $ "typeCheckGlobal: " ++ show gv
 
 -- Global TyAnn Inference

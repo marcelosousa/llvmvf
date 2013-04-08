@@ -30,14 +30,13 @@ import Concurrent.Model.PThread
 import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
 --import Concurrent.Model.Encoder    (encode) 
--- , encodeSysC)    
 
 import Util.Demangler
 import Debug.Trace
 import Analysis.Memory.Type
 
 _program, _summary :: String
-_summary = unlines ["LLVM Verification Framework - v0.2","llvmvf supports verification of pthread code at the LLVM IR level.","Copyright 2012 @ Marcelo Sousa"]
+_summary = unlines ["LLVM Verification Framework - v0.2","llvmvf supports verification of pthread code at the LLVM IR level.","Copyright 2012-2013 @ Marcelo Sousa"]
 _program = "llvmvf"
 _help    = "The input files of llvmvf are byte code files generated from a LLVM front-end (eg. clang)"
 _helpBMC = "Example: llvmvf bmc -d=pthread -b=10 x.bc"
