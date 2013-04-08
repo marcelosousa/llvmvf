@@ -13,6 +13,8 @@ import qualified Data.Map as M
 
 type TyEnv = M.Map Identifier Type
 
+data TyClass = TyClassInt | TyClassFloat
+
 gLstTyInf tyenv f [] = ([], tyenv)
 gLstTyInf tyenv f (x:xs) = let (ty,tye) = f tyenv x
                                (tys,tyef) = gLstTyInf tye f xs
@@ -59,6 +61,17 @@ isAgg :: Type -> Bool
 isAgg (TyArray _ _) = True
 isAgg (TyStruct _ _ _) = True
 isAgg _ = False
+
+isTyOrVecOfTy :: TyClass -> Type -> Bool
+isTyOrVecOfTy TyClassInt (TyInt _) = True
+isTyOrVecOfTy TyClassInt (TyVector _ (TyInt _)) = True
+isTyOrVecOfTy TyClassFloat (TyFloatPoint _) = True
+isTyOrVecOfTy TyClassFloat (TyVector _ (TyFloatPoint _)) = True
+isTyOrVecOfTy _ _ = False
+
+-- TODO: Complete this definition
+isFstClass :: Type -> Bool
+isFstClass x = True
 
 -- Subtyping relation 
 (<:) :: TyAnn -> TyAnn -> Bool

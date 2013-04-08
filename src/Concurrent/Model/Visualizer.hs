@@ -7749,6 +7749,8 @@ sem_Type (TyVector _numEl _ty) =
     (sem_Type_TyVector _numEl (sem_Type _ty))
 sem_Type (TyUndefined) =
     (sem_Type_TyUndefined)
+sem_Type (TyJumpTo _lb) =
+    (sem_Type_TyJumpTo (sem_Identifiers _lb))
 -- semantic domain
 type T_Type = ( Doc,Type)
 data Inh_Type = Inh_Type {}
@@ -7766,7 +7768,7 @@ sem_Type_TyVoid =
          _lhsOpp =
              ({-# LINE 296 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "void"
-              {-# LINE 7770 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7772 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyVoid
@@ -7780,7 +7782,7 @@ sem_Type_Tyx86MMX =
          _lhsOpp =
              ({-# LINE 297 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "x86mmx"
-              {-# LINE 7784 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7786 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Tyx86MMX
@@ -7794,7 +7796,7 @@ sem_Type_TyLabel =
          _lhsOpp =
              ({-# LINE 298 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "label"
-              {-# LINE 7798 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7800 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyLabel
@@ -7808,7 +7810,7 @@ sem_Type_TyMetadata =
          _lhsOpp =
              ({-# LINE 299 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "metadata"
-              {-# LINE 7812 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7814 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyMetadata
@@ -7822,7 +7824,7 @@ sem_Type_TyOpaque =
          _lhsOpp =
              ({-# LINE 300 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "opaque"
-              {-# LINE 7826 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7828 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyOpaque
@@ -7837,7 +7839,7 @@ sem_Type_TyInt p_ =
          _lhsOpp =
              ({-# LINE 301 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char 'i' <> int p_
-              {-# LINE 7841 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7843 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyInt p_
@@ -7854,7 +7856,7 @@ sem_Type_TyFloatPoint p_ =
          _lhsOpp =
              ({-# LINE 302 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pIpp
-              {-# LINE 7858 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7860 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyFloatPoint _pIself
@@ -7874,7 +7876,7 @@ sem_Type_TyArray numEl_ ty_ =
          _lhsOpp =
              ({-# LINE 303 "src/Language/LLVMIR/Printer/Module.ag" #-}
               brackets $ int numEl_ <+> char 'x' <+> _tyIpp
-              {-# LINE 7878 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7880 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyArray numEl_ _tyIself
@@ -7896,7 +7898,7 @@ sem_Type_TyFunction party_ retty_ =
          _lhsOpp =
              ({-# LINE 304 "src/Language/LLVMIR/Printer/Module.ag" #-}
               parens $ _partyIpp <+> text "->" <+> _rettyIpp
-              {-# LINE 7900 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7902 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyFunction _partyIself _rettyIself
@@ -7919,7 +7921,7 @@ sem_Type_TyStruct name_ numEl_ tys_ =
          _lhsOpp =
              ({-# LINE 305 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '%' <> text name_ <+> int numEl_ <+> braces _tysIpp
-              {-# LINE 7923 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7925 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyStruct name_ numEl_ _tysIself
@@ -7938,7 +7940,7 @@ sem_Type_TyPointer ty_ =
          _lhsOpp =
              ({-# LINE 306 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <> char '*'
-              {-# LINE 7942 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7944 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyPointer _tyIself
@@ -7958,7 +7960,7 @@ sem_Type_TyVector numEl_ ty_ =
          _lhsOpp =
              ({-# LINE 307 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '<' <> int numEl_ <+> char 'x' <+> _tyIpp <> char '>'
-              {-# LINE 7962 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7964 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyVector numEl_ _tyIself
@@ -7974,12 +7976,30 @@ sem_Type_TyUndefined =
          _lhsOpp =
              ({-# LINE 308 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "TODO TYPE UNDEFINED"
-              {-# LINE 7978 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7980 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyUndefined
          _lhsOself =
              _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Type_TyJumpTo :: T_Identifiers ->
+                     T_Type
+sem_Type_TyJumpTo lb_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Type
+         _lbIself :: Identifiers
+         _lhsOpp =
+             ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              P.empty
+              {-# LINE 7996 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             TyJumpTo _lbIself
+         _lhsOself =
+             _self
+         ( _lbIself) =
+             lb_
      in  ( _lhsOpp,_lhsOself))
 -- Types -------------------------------------------------------
 -- cata
@@ -8012,7 +8032,7 @@ sem_Types_Cons hd_ tl_ =
               if (length _tlIself == 0)
               then _hdIpp
               else _hdIpp <> char ',' <+> _tlIpp
-              {-# LINE 8016 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8036 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -8030,7 +8050,7 @@ sem_Types_Nil =
          _lhsOpp =
              ({-# LINE 23 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 8034 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8054 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              []
@@ -8144,7 +8164,7 @@ sem_Value_Id v_ ty_ =
          _lhsOpp =
              ({-# LINE 242 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> _vIpp
-              {-# LINE 8148 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8168 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Id _vIself _tyIself
@@ -8165,7 +8185,7 @@ sem_Value_Constant c_ =
          _lhsOpp =
              ({-# LINE 243 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _cIpp
-              {-# LINE 8169 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8189 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Constant _cIself
@@ -8245,7 +8265,7 @@ sem_Values_Cons hd_ tl_ =
               if (length _tlIself == 0)
               then _hdIpp
               else _hdIpp <> char ',' <+> _tlIpp
-              {-# LINE 8249 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8269 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -8263,7 +8283,7 @@ sem_Values_Nil =
          _lhsOpp =
              ({-# LINE 23 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 8267 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8287 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              []

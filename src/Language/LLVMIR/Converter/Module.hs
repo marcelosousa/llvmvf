@@ -6489,6 +6489,8 @@ sem_Type (TyVector _numEl _ty) =
     (sem_Type_TyVector _numEl (sem_Type _ty))
 sem_Type (TyUndefined) =
     (sem_Type_TyUndefined)
+sem_Type (TyJumpTo _lb) =
+    (sem_Type_TyJumpTo (sem_Identifiers _lb))
 -- semantic domain
 type T_Type = ( Type)
 data Inh_Type = Inh_Type {}
@@ -6636,6 +6638,18 @@ sem_Type_TyUndefined =
          _lhsOself =
              _self
      in  ( _lhsOself))
+sem_Type_TyJumpTo :: T_Identifiers ->
+                     T_Type
+sem_Type_TyJumpTo lb_ =
+    (let _lhsOself :: Type
+         _lbIself :: Identifiers
+         _self =
+             TyJumpTo _lbIself
+         _lhsOself =
+             _self
+         ( _lbIself) =
+             lb_
+     in  ( _lhsOself))
 -- Types -------------------------------------------------------
 -- cata
 sem_Types :: Types ->
@@ -6780,7 +6794,7 @@ sem_Value_Id v_ ty_ =
          _lhsOetm =
              ({-# LINE 151 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               _vIetm
-              {-# LINE 6784 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6798 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Id _vIself _tyIself
@@ -6801,7 +6815,7 @@ sem_Value_Constant c_ =
          _lhsOetm =
              ({-# LINE 152 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               _cIetm
-              {-# LINE 6805 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6819 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              Constant _cIself
@@ -6879,7 +6893,7 @@ sem_Values_Cons hd_ tl_ =
          _lhsOetm =
              ({-# LINE 144 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               _hdIetm : _tlIetm
-              {-# LINE 6883 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6897 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -6897,7 +6911,7 @@ sem_Values_Nil =
          _lhsOetm =
              ({-# LINE 144 "./src/Language/LLVMIR/Converter/Module.ag" #-}
               []
-              {-# LINE 6901 "src/Language/LLVMIR/Converter/Module.hs" #-}
+              {-# LINE 6915 "src/Language/LLVMIR/Converter/Module.hs" #-}
               )
          _self =
              []

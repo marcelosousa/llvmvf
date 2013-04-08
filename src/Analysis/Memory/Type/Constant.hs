@@ -6,7 +6,7 @@
 -- Gamma |- c : tau
 -------------------------------------------------------------------------------
 
-module Analysis.Memory.Type.Constant (typeConstant,typeConstant') where
+module Analysis.Memory.Type.Constant (typeConstant,typeConstant', typeValue, typeGetElementPtrConstantExpr) where
 
 import Analysis.Memory.TyAnn (TyAnn, TyAnnEnv)
 import qualified Analysis.Memory.TyAnn as T
