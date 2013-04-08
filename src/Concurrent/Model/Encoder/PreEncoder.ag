@@ -77,14 +77,14 @@ sem Instruction
       lhs.fStore   = if @v2.isGlobal then Map.singleton (fromJust @v2.ident) (@v2.vtype, [@pc.self]) else Map.empty 
   | MutexInit
       lhs.mutexes  = [fromJust @mutex.ident]
-  | Add Sub
+  | Add Sub Mul 
       id.tn = @lhs.tn
       id.sortexpr = Just @ty.sort 
       ty.mts = @lhs.sortEnv
       ty.mn  = Nothing
       lhs.locals = Map.singleton @id.ident @ty.self
       lhs.declexpres = @id.declexpr
-  | Or And 
+  | Or And Shl
       id.tn = @lhs.tn
       id.sortexpr = Just @ty.sort 
       ty.mts = @lhs.sortEnv
