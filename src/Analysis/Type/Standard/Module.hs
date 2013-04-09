@@ -7,7 +7,7 @@
 
 module Analysis.Type.Standard.Module (typeCheckModule, STyRes) where
 
-import Analysis.Type.Standard.Function (typeCheckFunction)
+import Analysis.Type.Standard.Function (typeCheckFunction,typeFunction)
 import Analysis.Type.Util
 import Analysis.Type.Standard.Global   (typeCheckGlobal)
 import Language.LLVMIR
@@ -27,7 +27,8 @@ typeCheckGlo (x:xs) tye = let tye' = typeCheckGlobal tye x
                           in typeCheckGlo xs tye'
 
 typeCheckFuns :: TyEnv -> Functions -> M.Map String TyEnv
-typeCheckFuns tye funs = M.map (typeCheckFunction tye) funs
+typeCheckFuns tye funs = let ntye =  M.fold (\f r -> typeFunction r f) tye funs
+                         in M.map (typeCheckFunction ntye) funs
 
 instance Show STyRes where
 	show (STyRes s gs fns) = 

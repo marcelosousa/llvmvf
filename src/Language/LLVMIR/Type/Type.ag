@@ -48,4 +48,4 @@ set TypeSet = Type TyFloatPoint
 
 deriving TypeSet: Show
 deriving TypeSet: Eq
-deriving TypeSet: Ord
+deriving Type: Ord

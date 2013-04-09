@@ -11,6 +11,7 @@ module Analysis.Type.Standard.Constant where
 import Analysis.Type.Util
 import Language.LLVMIR
 import qualified Data.Map as M
+import Debug.Trace (trace)
 
 -- typeValue
 typeValue :: TyEnv -> Value -> Type
@@ -109,7 +110,7 @@ typeGetElementPtrConstantExpr :: TyEnv -> Value -> Values -> Type
 typeGetElementPtrConstantExpr tye v idxs = case typeValue tye v of
       TyPointer ty -> if and $ map (isInt . typeValue tye) idxs
                       then if isAgg ty
-                           then getTypeAgg ty $ map getIntValue idxs
+                           then getTypeAgg ty $ map getIntValue $ tail idxs
                            else error $ "typeGetElementPtrConstantExpr: " ++ show ty ++ " is not aggregate."  
                       else error $ "typeGetElementPtrConstantExpr: not all indices are integers" 
       ty -> error $ "typeGetElementPtrConstantExpr: " ++ show ty 
@@ -119,13 +120,11 @@ getIntValue (Constant (SmpConst (ConstantInt i _))) = i
 getIntValue _ = -1
 
 getTypeAgg :: Type -> [Int] -> Type
-getTypeAgg ty [] = ty
+getTypeAgg ty [] = TyPointer ty
 getTypeAgg ty (x:xs) = case ty of 
-      TyArray s t -> if isAgg t 
-                     then if x < 0 || x >= s 
-                          then error $ "getTypeAgg: out of bounds"
-                          else getTypeAgg t xs
-                     else error $ "getTypeAgg: " ++ show t ++ " is not aggregate. (1)"  
+      TyArray s t -> if x < 0 || x >= s 
+                     then error $ "getTypeAgg: out of bounds"
+                     else getTypeAgg t xs
       TyStruct _ s t -> if x < 0 || x >= s 
                         then error $ "getTypeAgg: out of bounds"
                         else let nt = t !! x

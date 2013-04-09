@@ -4,7 +4,7 @@
 -- A Type System for Memory Analysis of LLVM IR Modules
 -------------------------------------------------------------------------------
 
-module Analysis.Type.Standard.Function (typeCheckFunction) where
+module Analysis.Type.Standard.Function (typeFunction,typeCheckFunction) where
 
 import Analysis.Type.Util
 import Analysis.Type.Standard.Instruction
@@ -13,10 +13,15 @@ import qualified Data.Map as M
 import Debug.Trace (trace)
 import Data.Maybe
 
+typeFunction :: TyEnv -> Function -> TyEnv
+typeFunction tye (FunctionDef  n l rty pms bbs) = let (tysig, _) = typeSignature tye pms rty
+                                                  in insert n tysig tye 
+typeFunction tye (FunctionDecl n l rty pms) = let (tysig, _) = typeSignature tye pms rty
+                                              in insert n tysig tye 
+
 -- Type Check Function
 typeCheckFunction :: TyEnv -> Function -> TyEnv
-typeCheckFunction tye (FunctionDef  n l rty pms bbs) = let (tysig, tye') = typeSignature tye pms rty
-                                                           ntye = insert n tysig tye'
+typeCheckFunction tye (FunctionDef  n l rty pms bbs) = let (tysig, ntye) = typeSignature tye pms rty
                                                        in typeCheckBasicBlock ntye bbs (head bbs) -- assuming that head bbs is the entry block 
 typeCheckFunction tye (FunctionDecl n l rty pms) = tye
 

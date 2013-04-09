@@ -1,0 +1,24 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Type.FloatOrd
+-- Copyright :  (c) 2012 Marcelo Sousa
+-- Standard LLVM IR Types
+-------------------------------------------------------------------------------
+}
+
+module {Language.LLVMIR.Type.FloatOrd}{}{}
+
+{
+instance Ord TyFloatPoint where
+  TyHalf   <= _ = True
+  TyFloat  <= x | x <= TyHalf = False
+                | otherwise   = True
+  TyDouble <= x | x <= TyFloat = False
+                | otherwise    = True
+  Tyx86FP80 <= x | x <= TyDouble = False
+                 | otherwise    = True 
+  TyFP128  <= x | x <= Tyx86FP80 = False
+                | otherwise    = True 
+  TyPPCFP128 <= x | x <= Tyx86FP80 = False
+                  | otherwise    = True 
+}
