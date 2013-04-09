@@ -17,3 +17,6 @@ instance Pretty DataLayout where
 
 instance Pretty Type where
 	pretty ty = pp_Syn_Type $ wrap_Type (sem_Type ty) $ Inh_Type {}
+
+instance Pretty Identifier where
+	pretty ty = pp_Syn_Identifier $ wrap_Identifier (sem_Identifier ty) $ Inh_Identifier {}

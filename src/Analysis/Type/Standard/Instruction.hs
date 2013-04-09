@@ -120,7 +120,7 @@ typeCheckCall tye i rfnty c args =
 			  let tyargs = map (typeValue tye) args
 			  in if (length tyargs == length typms) && tyr == rfnty
 			  	then if all (\(a,b) -> a == b) $ zip tyargs typms
-					 then (insert i ty tye, ty)
+					 then (insert i tyr tye, ty)
 					 else error $ "typeCheckCall: " ++ show (zip tyargs typms)
 				else error $ "typeCheckCall: length dismatch " ++ show [tyargs, typms] ++ show [tyr, ty]
 			x -> error $ "typeCheckCall: Function has type: " ++ show x
