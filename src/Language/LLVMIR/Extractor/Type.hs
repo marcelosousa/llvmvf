@@ -68,6 +68,7 @@ getTypeWithKind ty FFI.FunctionTypeKind  = do retty <- (liftIO $ FFI.getReturnTy
                                                         peekArray n args
                                               party <- forM pars getType 
                                               return $ LL.TyFunction party retty
+getTypeWithKind ty FFI.MetadataTypeKind  = return LL.TyMetadata
 getTypeWithKind ty x  = error $ "'getTypeWithKind': Type " ++ (show x) ++ " not suppported" 
 
 {-

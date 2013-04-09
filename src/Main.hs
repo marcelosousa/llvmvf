@@ -33,7 +33,7 @@ import Concurrent.Model.Visualizer
 
 import Util.Demangler
 import Debug.Trace
-import Analysis.Memory.Type
+import Analysis.Type
 
 _program, _summary :: String
 _summary = unlines ["LLVM Verification Framework - v0.2","llvmvf supports verification of pthread code at the LLVM IR level.","Copyright 2012-2013 @ Marcelo Sousa"]

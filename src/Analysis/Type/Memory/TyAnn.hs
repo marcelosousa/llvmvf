@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
--- Module    :  Analysis.Memory.TyAnn
+-- Module    :  Analysis.Type.Memory.TyAnn
 -- Copyright :  (c) 2013 Marcelo Sousa
 -- A Type System for Memory Analysis of LLVM IR Modules
 -------------------------------------------------------------------------------
 
-module Analysis.Memory.TyAnn where
+module Analysis.Type.Memory.TyAnn where
 
 #if __GLASGOW_HASKELL__ >= 704
 import Data.Map hiding (foldr)
