@@ -43,7 +43,7 @@ typeCheckParameter :: TyEnv -> Parameter -> (Type, TyEnv)
 typeCheckParameter tye (Parameter i ty) = (ty, insert i ty tye)
 
 typeCheckBasicBlock :: TyEnv -> BasicBlocks -> BasicBlock -> TyEnv
-typeCheckBasicBlock tye bbs (BasicBlock l instr) = trace ("typeCheckBasicBlock " ++ show l) $
+typeCheckBasicBlock tye bbs (BasicBlock l instr) = -- trace ("typeCheckBasicBlock " ++ show l) $
   let (tye', rty) = typeCheckInstructions tye instr 
   in case M.lookup l tye of
     Nothing -> case rty of

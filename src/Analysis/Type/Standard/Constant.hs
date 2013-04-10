@@ -127,7 +127,7 @@ getTypeAgg ty (x:xs) = case ty of
                      else getTypeAgg t xs
       TyStruct _ s t -> if x < 0 || x >= s 
                         then error $ "getTypeAgg: out of bounds"
-                        else let nt = t !! x
+                        else let nt = trace ("!!: " ++ show ty ++ " " ++ show t ++ " " ++ show x) $ t !! x
                              in if isAgg nt 
                                 then getTypeAgg nt xs
                                 else error $ "getTypeAgg: " ++ show nt ++ " is not aggregate. (2)" 
