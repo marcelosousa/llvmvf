@@ -169,10 +169,10 @@ encPhi cpcs fs = let fsexpr = Prelude.map (\f -> IdentExpr $ IdxIdent (bv f) [32
 -------------------------------------------------------------------------------
 {-# LINE 171 "src/Concurrent/Model/Encoder/Threads.hs" #-}
 
-{-# LINE 151 "src/Language/LLVMIR/Grammar/Base.ag" #-}
+{-# LINE 153 "src/Language/LLVMIR/Grammar/Base.ag" #-}
 
 emptyFunction :: Function
-emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid [] []
+emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid False [] []
 {-# LINE 177 "src/Concurrent/Model/Encoder/Threads.hs" #-}
 
 {-# LINE 1 "src/Language/LLVMIR/Grammar/Instruction.ag" #-}
@@ -4219,10 +4219,10 @@ sem_FuncAttrs_Nil =
 -- cata
 sem_Function :: Function ->
                 T_Function
-sem_Function (FunctionDef _name _linkage _retty _params _body) =
-    (sem_Function_FunctionDef (sem_Identifier _name) (sem_Linkage _linkage) (sem_Type _retty) (sem_Parameters _params) (sem_BasicBlocks _body))
-sem_Function (FunctionDecl _name _linkage _retty _params) =
-    (sem_Function_FunctionDecl (sem_Identifier _name) (sem_Linkage _linkage) (sem_Type _retty) (sem_Parameters _params))
+sem_Function (FunctionDef _name _linkage _retty _isVar _params _body) =
+    (sem_Function_FunctionDef (sem_Identifier _name) (sem_Linkage _linkage) (sem_Type _retty) _isVar (sem_Parameters _params) (sem_BasicBlocks _body))
+sem_Function (FunctionDecl _name _linkage _retty _isVar _params) =
+    (sem_Function_FunctionDecl (sem_Identifier _name) (sem_Linkage _linkage) (sem_Type _retty) _isVar (sem_Parameters _params))
 -- semantic domain
 type T_Function = CF ->
                   (Map.Map Identifier PC) ->
@@ -4247,10 +4247,11 @@ wrap_Function sem (Inh_Function _lhsIcfg _lhsIcte _lhsImn _lhsImts _lhsImutexes 
 sem_Function_FunctionDef :: T_Identifier ->
                             T_Linkage ->
                             T_Type ->
+                            Bool ->
                             T_Parameters ->
                             T_BasicBlocks ->
                             T_Function
-sem_Function_FunctionDef name_ linkage_ retty_ params_ body_ =
+sem_Function_FunctionDef name_ linkage_ retty_ isVar_ params_ body_ =
     (\ _lhsIcfg
        _lhsIcte
        _lhsImn
@@ -4300,106 +4301,106 @@ sem_Function_FunctionDef name_ linkage_ retty_ params_ body_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _bodyIts
-                   {-# LINE 4304 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4305 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
-                  FunctionDef _nameIself _linkageIself _rettyIself _paramsIself _bodyIself
+                  FunctionDef _nameIself _linkageIself _rettyIself isVar_ _paramsIself _bodyIself
               _lhsOself =
                   _self
               _nameOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 4313 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4314 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nameOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 4318 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4319 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rettyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 4323 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4324 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rettyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 4328 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4329 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _paramsOmts =
                   ({-# LINE 72 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _rettyImts
-                   {-# LINE 4333 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4334 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _paramsOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 4338 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4339 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _paramsOtn =
                   ({-# LINE 73 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 4343 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4344 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _paramsOval =
                   ({-# LINE 74 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 4348 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4349 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOcfg =
                   ({-# LINE 68 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIcfg
-                   {-# LINE 4353 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4354 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOcte =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIcte
-                   {-# LINE 4358 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4359 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 4363 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4364 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _rettyImts
-                   {-# LINE 4368 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4369 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOmutexes =
                   ({-# LINE 74 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsImutexes
-                   {-# LINE 4373 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4374 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOpcs =
                   ({-# LINE 70 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIpcs
-                   {-# LINE 4378 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4379 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOprenc =
                   ({-# LINE 72 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIprenc
-                   {-# LINE 4383 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4384 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 4388 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4389 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOspark =
                   ({-# LINE 73 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIspark
-                   {-# LINE 4393 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4394 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOtn =
                   ({-# LINE 71 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 4398 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4399 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _bodyOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 4403 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4404 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _nameIdeclexpr,_nameIident,_nameIself,_nameIsexpr,_nameIssymbol) =
                   name_ _nameOsortexpr _nameOtn
@@ -4415,9 +4416,10 @@ sem_Function_FunctionDef name_ linkage_ retty_ params_ body_ =
 sem_Function_FunctionDecl :: T_Identifier ->
                              T_Linkage ->
                              T_Type ->
+                             Bool ->
                              T_Parameters ->
                              T_Function
-sem_Function_FunctionDecl name_ linkage_ retty_ params_ =
+sem_Function_FunctionDecl name_ linkage_ retty_ isVar_ params_ =
     (\ _lhsIcfg
        _lhsIcte
        _lhsImn
@@ -4454,51 +4456,51 @@ sem_Function_FunctionDecl name_ linkage_ retty_ params_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 4458 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4460 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
-                  FunctionDecl _nameIself _linkageIself _rettyIself _paramsIself
+                  FunctionDecl _nameIself _linkageIself _rettyIself isVar_ _paramsIself
               _lhsOself =
                   _self
               _nameOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 4467 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4469 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nameOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 4472 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4474 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rettyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 4477 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4479 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rettyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 4482 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4484 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _paramsOmts =
                   ({-# LINE 72 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _rettyImts
-                   {-# LINE 4487 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4489 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _paramsOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 4492 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4494 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _paramsOtn =
                   ({-# LINE 73 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 4497 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4499 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _paramsOval =
                   ({-# LINE 74 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 4502 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4504 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _nameIdeclexpr,_nameIident,_nameIself,_nameIsexpr,_nameIssymbol) =
                   name_ _nameOsortexpr _nameOtn
@@ -4574,37 +4576,37 @@ sem_Functions_Entry key_ val_ tl_ =
               _valOprenc =
                   ({-# LINE 59 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIprenc
-                   {-# LINE 4578 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4580 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valOcfg =
                   ({-# LINE 60 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fromMaybe (error $ "no cfg for " ++ show key_) $ Map.lookup (Global key_) _lhsIcfg
-                   {-# LINE 4583 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4585 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valOtn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    key_
-                   {-# LINE 4588 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4590 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valOspark =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \i -> IdentExpr $ SymIdent $ SimpleSym $ key_ ++ show i
-                   {-# LINE 4593 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4595 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valOcte =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Map.delete (Global key_) _lhsIcte
-                   {-# LINE 4598 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4600 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valOpcs =
                   ({-# LINE 64 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Map.map (\cf -> nub $ Prelude.map snd cf) $ Map.delete (Global key_) _lhsIcfg
-                   {-# LINE 4603 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4605 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 55 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _valIts ++ _tlIts
-                   {-# LINE 4608 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4610 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Data.Map.insert key_ _valIself _tlIself
@@ -4613,67 +4615,67 @@ sem_Functions_Entry key_ val_ tl_ =
               _valOmn =
                   ({-# LINE 57 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 4617 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4619 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valOmts =
                   ({-# LINE 58 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 4622 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4624 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valOmutexes =
                   ({-# LINE 74 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsImutexes
-                   {-# LINE 4627 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4629 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 4632 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4634 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valOval =
                   ({-# LINE 66 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 4637 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4639 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOcfg =
                   ({-# LINE 52 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIcfg
-                   {-# LINE 4642 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4644 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOcte =
                   ({-# LINE 53 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIcte
-                   {-# LINE 4647 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4649 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmn =
                   ({-# LINE 57 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 4652 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4654 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmts =
                   ({-# LINE 58 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 4657 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4659 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmutexes =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsImutexes
-                   {-# LINE 4662 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4664 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOprenc =
                   ({-# LINE 51 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIprenc
-                   {-# LINE 4667 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4669 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 4672 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4674 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOval =
                   ({-# LINE 66 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 4677 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4679 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _valIself,_valIts) =
                   val_ _valOcfg _valOcte _valOmn _valOmts _valOmutexes _valOpcs _valOprenc _valOsortexpr _valOspark _valOtn _valOval
@@ -4695,7 +4697,7 @@ sem_Functions_Nil =
               _lhsOts =
                   ({-# LINE 55 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 4699 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4701 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Data.Map.empty
@@ -4794,55 +4796,55 @@ sem_Global_GlobalVar name_ linkage_ isConst_ isUaddr_ ty_ ival_ align_ =
               _tyOmts =
                   ({-# LINE 39 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    defsorts _lhsIgs
-                   {-# LINE 4798 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4800 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 40 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    Nothing
-                   {-# LINE 4803 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4805 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ivalOmts =
                   ({-# LINE 41 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    _tyImts
-                   {-# LINE 4808 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4810 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ivalOtn =
                   ({-# LINE 42 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    ""
-                   {-# LINE 4813 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4815 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 43 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    _tyIsexprs ++ _ivalIsexprs ++ [ declfun _sym     _tyIsort , declfun _psym     (SymSort "I32") ]
-                   {-# LINE 4818 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4820 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    let v = IdentExpr $ IdxIdent (bv 0) [32]
                    in Prelude.map (\ve -> sFn "=" (IdentExpr $ SymIdent $ _sym    ) ve `sAnd` sFn "=" (IdentExpr $ SymIdent $ _psym    ) v) _ivalIsexpr
-                   {-# LINE 4824 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4826 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sym =
                   ({-# LINE 46 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    SimpleSym _rawname
-                   {-# LINE 4829 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4831 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _psym =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    SimpleSym $ "l" ++ _rawname
-                   {-# LINE 4834 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4836 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOgs =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    let ogs@GlobalState{..} = _lhsIgs
                        gvals' = maybe gvals (\v -> Map.insert _rawname     (Right v) gvals) $ Constant <$> _ivalIself
                    in ogs { defsorts = _ivalImts, gvals = gvals' }
-                   {-# LINE 4841 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4843 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rawname =
                   ({-# LINE 51 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    getIdName _nameIself
-                   {-# LINE 4846 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4848 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   GlobalVar _nameIself _linkageIself isConst_ isUaddr_ _tyIself _ivalIself _alignIself
@@ -4851,27 +4853,27 @@ sem_Global_GlobalVar name_ linkage_ isConst_ isUaddr_ ty_ ival_ align_ =
               _nameOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 4855 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4857 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nameOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 4860 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4862 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ivalOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 4865 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4867 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ivalOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 4870 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4872 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ivalOval =
                   ({-# LINE 16 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 4875 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4877 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _nameIdeclexpr,_nameIident,_nameIself,_nameIsexpr,_nameIssymbol) =
                   name_ _nameOsortexpr _nameOtn
@@ -4942,34 +4944,34 @@ sem_GlobalValue_FunctionValue n_ ty_ =
               _nOtn =
                   ({-# LINE 211 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 4946 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4948 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 212 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Nothing
-                   {-# LINE 4951 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4953 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 213 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 4956 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4958 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sexpr' =
                   ({-# LINE 214 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    case Map.lookup _nIident _lhsIval of
                      Nothing -> []
                      Just (_,l) -> [ IdentExpr $ SymIdent $ SimpleSym $ _nIident ++ show n | n <- [0..(length l)-1]]
-                   {-# LINE 4963 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4965 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 217 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    [ IdentExpr $ SymIdent _nIssymbol ] ++ _sexpr'
-                   {-# LINE 4968 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4970 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 218 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 4973 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4975 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOpsexpr =
                   ({-# LINE 219 "./src/Concurrent/Model/Encoder/Value.ag" #-}
@@ -4978,27 +4980,27 @@ sem_GlobalValue_FunctionValue n_ ty_ =
                          in case Map.lookup _nIident _lhsIval of
                               Nothing    -> [ sFn "=" (IdentExpr $ SymIdent $ SimpleSym $ "l" ++ _nIident) z ]
                               Just (_,l) -> [ sFn "=" pi z ] ++ Prelude.map (\v -> sFn "=" pi $ IdentExpr $ IdxIdent (bv v) [32]) l
-                   {-# LINE 4982 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4984 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOvtype =
                   ({-# LINE 224 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIself
-                   {-# LINE 4987 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4989 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOisGlobal =
                   ({-# LINE 225 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    True
-                   {-# LINE 4992 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4994 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOident =
                   ({-# LINE 226 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Just _nIident
-                   {-# LINE 4997 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 4999 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 227 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIsort
-                   {-# LINE 5002 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5004 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FunctionValue _nIself _tyIself
@@ -5007,12 +5009,12 @@ sem_GlobalValue_FunctionValue n_ ty_ =
               _lhsOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 5011 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5013 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 5016 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5018 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _nIdeclexpr,_nIident,_nIself,_nIsexpr,_nIssymbol) =
                   n_ _nOsortexpr _nOtn
@@ -5053,34 +5055,34 @@ sem_GlobalValue_GlobalAlias n_ ty_ =
               _nOtn =
                   ({-# LINE 211 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 5057 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5059 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 212 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Nothing
-                   {-# LINE 5062 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5064 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 213 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 5067 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5069 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sexpr' =
                   ({-# LINE 214 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    case Map.lookup _nIident _lhsIval of
                      Nothing -> []
                      Just (_,l) -> [ IdentExpr $ SymIdent $ SimpleSym $ _nIident ++ show n | n <- [0..(length l)-1]]
-                   {-# LINE 5074 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5076 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 217 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    [ IdentExpr $ SymIdent _nIssymbol ] ++ _sexpr'
-                   {-# LINE 5079 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5081 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 218 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 5084 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5086 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOpsexpr =
                   ({-# LINE 219 "./src/Concurrent/Model/Encoder/Value.ag" #-}
@@ -5089,27 +5091,27 @@ sem_GlobalValue_GlobalAlias n_ ty_ =
                          in case Map.lookup _nIident _lhsIval of
                               Nothing    -> [ sFn "=" (IdentExpr $ SymIdent $ SimpleSym $ "l" ++ _nIident) z ]
                               Just (_,l) -> [ sFn "=" pi z ] ++ Prelude.map (\v -> sFn "=" pi $ IdentExpr $ IdxIdent (bv v) [32]) l
-                   {-# LINE 5093 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5095 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOvtype =
                   ({-# LINE 224 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIself
-                   {-# LINE 5098 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5100 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOisGlobal =
                   ({-# LINE 225 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    True
-                   {-# LINE 5103 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5105 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOident =
                   ({-# LINE 226 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Just _nIident
-                   {-# LINE 5108 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5110 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 227 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIsort
-                   {-# LINE 5113 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5115 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   GlobalAlias _nIself _tyIself
@@ -5118,12 +5120,12 @@ sem_GlobalValue_GlobalAlias n_ ty_ =
               _lhsOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 5122 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5124 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 5127 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5129 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _nIdeclexpr,_nIident,_nIself,_nIsexpr,_nIssymbol) =
                   n_ _nOsortexpr _nOtn
@@ -5164,34 +5166,34 @@ sem_GlobalValue_GlobalVariable n_ ty_ =
               _nOtn =
                   ({-# LINE 211 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 5168 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5170 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 212 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Nothing
-                   {-# LINE 5173 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5175 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 213 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 5178 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5180 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sexpr' =
                   ({-# LINE 214 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    case Map.lookup _nIident _lhsIval of
                      Nothing -> []
                      Just (_,l) -> [ IdentExpr $ SymIdent $ SimpleSym $ _nIident ++ show n | n <- [0..(length l)-1]]
-                   {-# LINE 5185 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5187 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 217 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    [ IdentExpr $ SymIdent _nIssymbol ] ++ _sexpr'
-                   {-# LINE 5190 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5192 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 218 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 5195 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5197 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOpsexpr =
                   ({-# LINE 219 "./src/Concurrent/Model/Encoder/Value.ag" #-}
@@ -5200,27 +5202,27 @@ sem_GlobalValue_GlobalVariable n_ ty_ =
                          in case Map.lookup _nIident _lhsIval of
                               Nothing    -> [ sFn "=" (IdentExpr $ SymIdent $ SimpleSym $ "l" ++ _nIident) z ]
                               Just (_,l) -> [ sFn "=" pi z ] ++ Prelude.map (\v -> sFn "=" pi $ IdentExpr $ IdxIdent (bv v) [32]) l
-                   {-# LINE 5204 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5206 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOvtype =
                   ({-# LINE 224 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIself
-                   {-# LINE 5209 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5211 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOisGlobal =
                   ({-# LINE 225 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    True
-                   {-# LINE 5214 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5216 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOident =
                   ({-# LINE 226 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Just _nIident
-                   {-# LINE 5219 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5221 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 227 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIsort
-                   {-# LINE 5224 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5226 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   GlobalVariable _nIself _tyIself
@@ -5229,12 +5231,12 @@ sem_GlobalValue_GlobalVariable n_ ty_ =
               _lhsOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 5233 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5235 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 5238 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5240 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _nIdeclexpr,_nIident,_nIself,_nIsexpr,_nIssymbol) =
                   n_ _nOsortexpr _nOtn
@@ -5299,12 +5301,12 @@ sem_Globals_Cons hd_ tl_ =
                    in  if l == []
                        then []
                        else [ wrap sAnd l ]
-                   {-# LINE 5303 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5305 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 30 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    nub $  _hdIsexprs ++ _tlIsexprs
-                   {-# LINE 5308 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5310 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   (:) _hdIself _tlIself
@@ -5313,57 +5315,57 @@ sem_Globals_Cons hd_ tl_ =
               _lhsOgs =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    _tlIgs
-                   {-# LINE 5317 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5319 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOgs =
                   ({-# LINE 35 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    _lhsIgs
-                   {-# LINE 5322 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5324 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 5327 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5329 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 5332 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5334 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 5337 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5339 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOval =
                   ({-# LINE 66 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 5342 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5344 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOgs =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    _hdIgs
-                   {-# LINE 5347 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5349 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 5352 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5354 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 5357 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5359 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 5362 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5364 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOval =
                   ({-# LINE 66 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 5367 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5369 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _hdIgs,_hdIself,_hdIsexpr,_hdIsexprs) =
                   hd_ _hdOgs _hdOmn _hdOsortexpr _hdOtn _hdOval
@@ -5384,12 +5386,12 @@ sem_Globals_Nil =
               _lhsOsexpr =
                   ({-# LINE 24 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    []
-                   {-# LINE 5388 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5390 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    []
-                   {-# LINE 5393 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5395 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   []
@@ -5398,7 +5400,7 @@ sem_Globals_Nil =
               _lhsOgs =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Global.ag" #-}
                    _lhsIgs
-                   {-# LINE 5402 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5404 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
           in  ( _lhsOgs,_lhsOself,_lhsOsexpr,_lhsOsexprs)))
 -- Id ----------------------------------------------------------
@@ -5460,27 +5462,27 @@ sem_Identifier_Global name_ =
               _lhsOssymbol =
                   ({-# LINE 24 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _sym
-                   {-# LINE 5464 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5466 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOident =
                   ({-# LINE 25 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _nameIself
-                   {-# LINE 5469 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5471 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 26 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    IdentExpr $ SymIdent _sym
-                   {-# LINE 5474 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5476 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOdeclexpr =
                   ({-# LINE 27 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    maybe [] (\se -> [declfun _sym     se]) _lhsIsortexpr
-                   {-# LINE 5479 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5481 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sym =
                   ({-# LINE 28 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    SimpleSym _nameIself
-                   {-# LINE 5484 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5486 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Global _nameIself
@@ -5503,29 +5505,29 @@ sem_Identifier_Local name_ =
               _lhsOssymbol =
                   ({-# LINE 30 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _sym
-                   {-# LINE 5507 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5509 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOident =
                   ({-# LINE 31 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn ++ _nameIself
-                   {-# LINE 5512 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5514 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 32 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    IdentExpr $ SymIdent _sym
-                   {-# LINE 5517 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5519 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOdeclexpr =
                   ({-# LINE 33 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    if _nameIself == ""
                    then []
                    else maybe [] (\se -> [declfun _sym     se]) _lhsIsortexpr
-                   {-# LINE 5524 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5526 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sym =
                   ({-# LINE 36 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    SimpleSym $ _lhsItn ++ _nameIself
-                   {-# LINE 5529 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5531 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Local _nameIself
@@ -5576,22 +5578,22 @@ sem_Identifiers_Cons hd_ tl_ =
               _hdOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 5580 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5582 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 5585 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5587 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 5590 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5592 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 5595 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5597 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _hdIdeclexpr,_hdIident,_hdIself,_hdIsexpr,_hdIssymbol) =
                   hd_ _hdOsortexpr _hdOtn
@@ -5773,7 +5775,7 @@ sem_Instruction_Ret pc_ r_ =
                                          preds  = encPreds le k _pcIself (fStore _lhsIprenc) Nothing
                                          iexp = wrap sAnd $ fpce:preds
                                      in _lhsIspark k `sAnd` iexp `sAnd` (IdentExpr $ SymIdent $ SimpleSym "false")
-                   {-# LINE 5777 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5779 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -5781,34 +5783,34 @@ sem_Instruction_Ret pc_ r_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 5785 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5787 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 5790 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5792 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 5795 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5797 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 5800 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5802 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 5807 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5809 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 5812 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5814 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Ret _pcIself _rIself
@@ -5817,27 +5819,27 @@ sem_Instruction_Ret pc_ r_ =
               _rOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 5821 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5823 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rOmts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 5826 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5828 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 5831 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5833 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 5836 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5838 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rOval =
                   ({-# LINE 78 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 5841 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5843 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -5909,17 +5911,17 @@ sem_Instruction_Br pc_ v_ t_ f_ =
               _vOmts =
                   ({-# LINE 180 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 5913 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5915 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 181 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 5918 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5920 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 182 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 5923 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5925 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 183 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -5930,7 +5932,7 @@ sem_Instruction_Br pc_ v_ t_ f_ =
                                            Nothing -> _lhsIspark k `sAnd` iexp
                                            Just e  -> let fnpce = wrap sOr $ [ (ve `sAnd` sFn "=" e (_npcev     !! 0) ) `sOr` (FnAppExpr (SymIdent $ SimpleSym "not") [ve] `sAnd` sFn "=" e (_npcev     !! 1)) | ve <- _vIsexpr ]
                                                       in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 5934 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5936 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -5938,34 +5940,34 @@ sem_Instruction_Br pc_ v_ t_ f_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 5942 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5944 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 5947 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5949 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 5952 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5954 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 5957 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5959 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 5964 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5966 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 5969 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5971 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Br _pcIself _vIself _tIself _fIself
@@ -5974,62 +5976,62 @@ sem_Instruction_Br pc_ v_ t_ f_ =
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 5978 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5980 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 5983 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5985 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 5988 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5990 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _vImts
-                   {-# LINE 5993 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 5995 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 5998 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6000 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 6003 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6005 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 6008 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6010 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _fOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 6013 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6015 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _fOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tImts
-                   {-# LINE 6018 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6020 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _fOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6023 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6025 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _fOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 6028 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6030 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _fOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 6033 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6035 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -6081,7 +6083,7 @@ sem_Instruction_UBr pc_ d_ =
                                             Nothing -> _lhsIspark k `sAnd` iexp
                                             Just e  -> let fnpce = if _npcev     == [] then error "Ubr instruction" else sFn "=" e $ head _npcev
                                                        in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 6085 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6087 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -6089,34 +6091,34 @@ sem_Instruction_UBr pc_ d_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 6093 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6095 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 6098 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6100 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 6103 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6105 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 6108 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6110 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 6115 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6117 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 6120 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6122 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   UBr _pcIself _dIself
@@ -6125,27 +6127,27 @@ sem_Instruction_UBr pc_ d_ =
               _dOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 6129 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6131 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _dOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 6134 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6136 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _dOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6139 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6141 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _dOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 6144 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6146 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _dOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 6149 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6151 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -6202,7 +6204,7 @@ sem_Instruction_Switch pc_ ty_ v_ elems_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 6206 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6208 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Switch _pcIself _tyIself _vIself _elemsIself
@@ -6211,62 +6213,62 @@ sem_Instruction_Switch pc_ ty_ v_ elems_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 6215 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6217 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 6220 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6222 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 6225 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6227 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 6230 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6232 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6235 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6237 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 6240 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6242 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 6245 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6247 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _elemsOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 6250 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6252 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _elemsOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _vImts
-                   {-# LINE 6255 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6257 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _elemsOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6260 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6262 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _elemsOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 6265 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6267 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _elemsOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 6270 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6272 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -6300,7 +6302,7 @@ sem_Instruction_Unreachable pc_ =
                                          preds  = encPreds le k _pcIself (fStore _lhsIprenc) Nothing
                                          iexp = wrap sAnd $ fpce:preds
                                      in _lhsIspark k `sAnd` iexp `sAnd` (IdentExpr $ SymIdent $ SimpleSym "false")
-                   {-# LINE 6304 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6306 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -6308,34 +6310,34 @@ sem_Instruction_Unreachable pc_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 6312 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6314 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 6317 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6319 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 6322 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6324 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 6327 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6329 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 6334 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6336 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 6339 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6341 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Unreachable _pcIself
@@ -6410,47 +6412,47 @@ sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
               _idOtn =
                   ({-# LINE 143 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 6414 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6416 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 144 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 6419 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6421 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 145 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 6424 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6426 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 146 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 6429 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6431 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 147 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 6434 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6436 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 148 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 6439 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6441 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 149 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 6444 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6446 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 150 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 6449 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6451 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _enc =
                   ({-# LINE 151 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    wrap sOr $ Prelude.map (\se -> sFn "=" _idIsexpr se) _vse
-                   {-# LINE 6454 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6456 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 152 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -6461,12 +6463,12 @@ sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
                                             Nothing -> _lhsIspark k `sAnd` iexp
                                             Just e  -> let fnpce = if _npcev     == [] then error "bin instruction" else sFn "=" e $ head _npcev
                                                        in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 6465 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6467 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vse =
                   ({-# LINE 160 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ sFn "bvadd" e1 e2 | e1 <- _op1Isexpr, e2 <- _op2Isexpr ]
-                   {-# LINE 6470 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6472 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -6474,34 +6476,34 @@ sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 6478 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6480 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 6483 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6485 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 6488 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6490 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 6493 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6495 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 6500 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6502 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 6505 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6507 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Add _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -6510,32 +6512,32 @@ sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 6514 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6516 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 6519 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6521 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 6524 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6526 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6529 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6531 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 6534 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6536 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6539 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6541 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -6614,7 +6616,7 @@ sem_Instruction_FAdd pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 6618 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6620 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FAdd _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -6623,72 +6625,72 @@ sem_Instruction_FAdd pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6627 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6629 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 6632 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6634 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 6637 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6639 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 6642 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6644 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 6647 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6649 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 6652 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6654 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6657 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6659 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 6662 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6664 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 6667 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6669 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 6672 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6674 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 6677 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6679 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6682 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6684 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 6687 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6689 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 6692 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6694 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -6767,47 +6769,47 @@ sem_Instruction_Sub pc_ id_ ty_ op1_ op2_ =
               _idOtn =
                   ({-# LINE 143 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 6771 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6773 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 144 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 6776 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6778 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 145 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 6781 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6783 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 146 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 6786 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6788 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 147 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 6791 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6793 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 148 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 6796 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6798 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 149 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 6801 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6803 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 150 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 6806 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6808 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _enc =
                   ({-# LINE 151 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    wrap sOr $ Prelude.map (\se -> sFn "=" _idIsexpr se) _vse
-                   {-# LINE 6811 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6813 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 152 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -6818,12 +6820,12 @@ sem_Instruction_Sub pc_ id_ ty_ op1_ op2_ =
                                             Nothing -> _lhsIspark k `sAnd` iexp
                                             Just e  -> let fnpce = if _npcev     == [] then error "bin instruction" else sFn "=" e $ head _npcev
                                                        in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 6822 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6824 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vse =
                   ({-# LINE 162 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ sFn "bvsub" e1 e2 | e1 <- _op1Isexpr, e2 <- _op2Isexpr ]
-                   {-# LINE 6827 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6829 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -6831,34 +6833,34 @@ sem_Instruction_Sub pc_ id_ ty_ op1_ op2_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 6835 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6837 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 6840 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6842 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 6845 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6847 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 6850 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6852 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 6857 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6859 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 6862 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6864 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Sub _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -6867,32 +6869,32 @@ sem_Instruction_Sub pc_ id_ ty_ op1_ op2_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 6871 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6873 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 6876 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6878 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 6881 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6883 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6886 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6888 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 6891 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6893 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6896 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6898 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -6971,7 +6973,7 @@ sem_Instruction_FSub pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 6975 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6977 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FSub _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -6980,72 +6982,72 @@ sem_Instruction_FSub pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 6984 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6986 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 6989 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6991 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 6994 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 6996 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 6999 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7001 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7004 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7006 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 7009 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7011 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7014 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7016 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7019 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7021 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7024 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7026 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7029 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7031 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 7034 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7036 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7039 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7041 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7044 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7046 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7049 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7051 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -7124,47 +7126,47 @@ sem_Instruction_Mul pc_ id_ ty_ op1_ op2_ =
               _idOtn =
                   ({-# LINE 143 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 7128 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7130 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 144 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 7133 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7135 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 145 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 7138 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7140 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 146 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 7143 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7145 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 147 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 7148 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7150 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 148 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 7153 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7155 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 149 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 7158 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7160 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 150 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 7163 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7165 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _enc =
                   ({-# LINE 151 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    wrap sOr $ Prelude.map (\se -> sFn "=" _idIsexpr se) _vse
-                   {-# LINE 7168 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7170 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 152 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -7175,12 +7177,12 @@ sem_Instruction_Mul pc_ id_ ty_ op1_ op2_ =
                                             Nothing -> _lhsIspark k `sAnd` iexp
                                             Just e  -> let fnpce = if _npcev     == [] then error "bin instruction" else sFn "=" e $ head _npcev
                                                        in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 7179 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7181 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vse =
                   ({-# LINE 164 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ sFn "bvmul" e1 e2 | e1 <- _op1Isexpr, e2 <- _op2Isexpr ]
-                   {-# LINE 7184 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7186 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -7188,34 +7190,34 @@ sem_Instruction_Mul pc_ id_ ty_ op1_ op2_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 7192 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7194 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 7197 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7199 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 7202 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7204 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 7207 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7209 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 7214 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7216 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 7219 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7221 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Mul _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -7224,32 +7226,32 @@ sem_Instruction_Mul pc_ id_ ty_ op1_ op2_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 7228 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7230 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 7233 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7235 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7238 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7240 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7243 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7245 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7248 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7250 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7253 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7255 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -7328,7 +7330,7 @@ sem_Instruction_FMul pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 7332 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7334 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FMul _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -7337,72 +7339,72 @@ sem_Instruction_FMul pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7341 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7343 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 7346 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7348 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 7351 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7353 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 7356 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7358 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7361 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7363 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 7366 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7368 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7371 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7373 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7376 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7378 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7381 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7383 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7386 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7388 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 7391 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7393 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7396 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7398 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7401 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7403 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7406 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7408 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -7481,7 +7483,7 @@ sem_Instruction_UDiv pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 7485 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7487 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   UDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -7490,72 +7492,72 @@ sem_Instruction_UDiv pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7494 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7496 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 7499 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7501 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 7504 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7506 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 7509 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7511 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7514 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7516 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 7519 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7521 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7524 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7526 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7529 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7531 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7534 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7536 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7539 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7541 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 7544 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7546 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7549 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7551 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7554 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7556 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7559 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7561 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -7634,7 +7636,7 @@ sem_Instruction_SDiv pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 7638 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7640 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   SDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -7643,72 +7645,72 @@ sem_Instruction_SDiv pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7647 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7649 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 7652 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7654 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 7657 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7659 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 7662 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7664 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7667 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7669 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 7672 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7674 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7677 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7679 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7682 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7684 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7687 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7689 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7692 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7694 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 7697 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7699 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7702 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7704 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7707 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7709 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7712 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7714 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -7787,7 +7789,7 @@ sem_Instruction_FDiv pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 7791 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7793 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -7796,72 +7798,72 @@ sem_Instruction_FDiv pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7800 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7802 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 7805 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7807 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 7810 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7812 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 7815 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7817 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7820 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7822 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 7825 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7827 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7830 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7832 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7835 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7837 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7840 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7842 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7845 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7847 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 7850 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7852 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7855 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7857 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7860 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7862 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7865 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7867 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -7940,7 +7942,7 @@ sem_Instruction_URem pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 7944 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7946 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   URem _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -7949,72 +7951,72 @@ sem_Instruction_URem pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7953 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7955 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 7958 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7960 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 7963 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7965 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 7968 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7970 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7973 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7975 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 7978 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7980 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 7983 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7985 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 7988 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7990 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 7993 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 7995 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 7998 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8000 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 8003 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8005 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8008 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8010 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 8013 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8015 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 8018 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8020 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -8093,7 +8095,7 @@ sem_Instruction_SRem pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 8097 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8099 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   SRem _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -8102,72 +8104,72 @@ sem_Instruction_SRem pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8106 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8108 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 8111 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8113 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 8116 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8118 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 8121 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8123 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 8126 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8128 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 8131 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8133 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8136 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8138 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 8141 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8143 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 8146 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8148 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 8151 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8153 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 8156 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8158 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8161 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8163 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 8166 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8168 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 8171 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8173 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -8246,7 +8248,7 @@ sem_Instruction_FRem pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 8250 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8252 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FRem _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -8255,72 +8257,72 @@ sem_Instruction_FRem pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8259 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8261 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 8264 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8266 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 8269 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8271 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 8274 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8276 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 8279 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8281 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 8284 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8286 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8289 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8291 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 8294 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8296 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 8299 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8301 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 8304 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8306 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 8309 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8311 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8314 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8316 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 8319 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8321 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 8324 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8326 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -8399,47 +8401,47 @@ sem_Instruction_Shl pc_ id_ ty_ op1_ op2_ =
               _idOtn =
                   ({-# LINE 143 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 8403 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8405 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 144 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 8408 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8410 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 145 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 8413 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8415 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 146 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 8418 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8420 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 147 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 8423 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8425 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 148 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 8428 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8430 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 149 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 8433 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8435 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 150 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 8438 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8440 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _enc =
                   ({-# LINE 151 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    wrap sOr $ Prelude.map (\se -> sFn "=" _idIsexpr se) _vse
-                   {-# LINE 8443 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8445 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 152 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -8450,12 +8452,12 @@ sem_Instruction_Shl pc_ id_ ty_ op1_ op2_ =
                                             Nothing -> _lhsIspark k `sAnd` iexp
                                             Just e  -> let fnpce = if _npcev     == [] then error "bin instruction" else sFn "=" e $ head _npcev
                                                        in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 8454 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8456 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vse =
                   ({-# LINE 168 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ sFn "bvshl" e1 e2 | e1 <- _op1Isexpr, e2 <- _op2Isexpr ]
-                   {-# LINE 8459 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8461 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -8463,34 +8465,34 @@ sem_Instruction_Shl pc_ id_ ty_ op1_ op2_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 8467 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8469 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 8472 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8474 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 8477 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8479 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 8482 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8484 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 8489 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8491 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 8494 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8496 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Shl _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -8499,32 +8501,32 @@ sem_Instruction_Shl pc_ id_ ty_ op1_ op2_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 8503 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8505 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 8508 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8510 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 8513 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8515 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8518 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8520 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 8523 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8525 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8528 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8530 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -8603,7 +8605,7 @@ sem_Instruction_LShr pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 8607 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8609 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   LShr _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -8612,72 +8614,72 @@ sem_Instruction_LShr pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8616 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8618 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 8621 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8623 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 8626 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8628 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 8631 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8633 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 8636 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8638 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 8641 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8643 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8646 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8648 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 8651 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8653 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 8656 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8658 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 8661 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8663 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 8666 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8668 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8671 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8673 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 8676 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8678 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 8681 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8683 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -8756,7 +8758,7 @@ sem_Instruction_AShr pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 8760 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8762 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   AShr _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -8765,72 +8767,72 @@ sem_Instruction_AShr pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8769 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8771 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 8774 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8776 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 8779 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8781 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 8784 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8786 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 8789 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8791 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 8794 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8796 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8799 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8801 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 8804 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8806 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 8809 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8811 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 8814 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8816 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 8819 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8821 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 8824 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8826 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 8829 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8831 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 8834 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8836 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -8909,47 +8911,47 @@ sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
               _idOtn =
                   ({-# LINE 143 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 8913 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8915 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 144 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 8918 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8920 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 145 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 8923 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8925 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 146 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 8928 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8930 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 147 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 8933 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8935 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 148 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 8938 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8940 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 149 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 8943 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8945 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 150 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 8948 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8950 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _enc =
                   ({-# LINE 151 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    wrap sOr $ Prelude.map (\se -> sFn "=" _idIsexpr se) _vse
-                   {-# LINE 8953 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8955 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 152 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -8960,12 +8962,12 @@ sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
                                             Nothing -> _lhsIspark k `sAnd` iexp
                                             Just e  -> let fnpce = if _npcev     == [] then error "bin instruction" else sFn "=" e $ head _npcev
                                                        in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 8964 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8966 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vse =
                   ({-# LINE 170 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ sFn "and" e1 e2 | e1 <- _op1Isexpr, e2 <- _op2Isexpr ]
-                   {-# LINE 8969 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8971 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -8973,34 +8975,34 @@ sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 8977 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8979 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 8982 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8984 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 8987 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8989 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 8992 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 8994 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 8999 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9001 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 9004 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9006 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   And _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -9009,32 +9011,32 @@ sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 9013 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9015 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 9018 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9020 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 9023 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9025 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9028 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9030 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 9033 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9035 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9038 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9040 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -9113,47 +9115,47 @@ sem_Instruction_Or pc_ id_ ty_ op1_ op2_ =
               _idOtn =
                   ({-# LINE 143 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 9117 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9119 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 144 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 9122 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9124 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 145 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 9127 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9129 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 146 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 9132 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9134 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 147 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 9137 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9139 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 148 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 9142 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9144 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 149 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 9147 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9149 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 150 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 9152 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9154 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _enc =
                   ({-# LINE 151 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    wrap sOr $ Prelude.map (\se -> sFn "=" _idIsexpr se) _vse
-                   {-# LINE 9157 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9159 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 152 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -9164,12 +9166,12 @@ sem_Instruction_Or pc_ id_ ty_ op1_ op2_ =
                                             Nothing -> _lhsIspark k `sAnd` iexp
                                             Just e  -> let fnpce = if _npcev     == [] then error "bin instruction" else sFn "=" e $ head _npcev
                                                        in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 9168 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9170 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vse =
                   ({-# LINE 166 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ sFn "or" e1 e2 | e1 <- _op1Isexpr, e2 <- _op2Isexpr ]
-                   {-# LINE 9173 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9175 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -9177,34 +9179,34 @@ sem_Instruction_Or pc_ id_ ty_ op1_ op2_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 9181 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9183 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 9186 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9188 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 9191 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9193 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 9196 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9198 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 9203 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9205 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 9208 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9210 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Or _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -9213,32 +9215,32 @@ sem_Instruction_Or pc_ id_ ty_ op1_ op2_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 9217 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9219 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 9222 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9224 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 9227 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9229 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9232 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9234 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 9237 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9239 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9242 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9244 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -9317,7 +9319,7 @@ sem_Instruction_Xor pc_ id_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 9321 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9323 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Xor _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -9326,72 +9328,72 @@ sem_Instruction_Xor pc_ id_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9330 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9332 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 9335 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9337 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 9340 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9342 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 9345 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9347 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 9350 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9352 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 9355 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9357 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9360 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9362 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 9365 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9367 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 9370 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9372 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 9375 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9377 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 9380 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9382 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9385 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9387 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 9390 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9392 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 9395 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9397 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -9442,7 +9444,7 @@ sem_Instruction_Alloca pc_ id_ ty_ align_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 9446 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9448 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Alloca _pcIself _idIself _tyIself _alignIself
@@ -9451,22 +9453,22 @@ sem_Instruction_Alloca pc_ id_ ty_ align_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9455 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9457 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 9460 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9462 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 9465 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9467 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 9470 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9472 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -9537,32 +9539,32 @@ sem_Instruction_Store pc_ ty_ v1_ v2_ align_ =
               _val =
                   ({-# LINE 103 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 9541 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9543 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v1Omts =
                   ({-# LINE 104 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 9546 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9548 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v1Oval =
                   ({-# LINE 105 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _val
-                   {-# LINE 9551 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9553 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v2Omts =
                   ({-# LINE 106 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 9556 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9558 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v2Oval =
                   ({-# LINE 107 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _val
-                   {-# LINE 9561 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9563 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v1e =
                   ({-# LINE 108 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    if _v1Isexpr == [] then error "Store Instruction" else head _v1Isexpr
-                   {-# LINE 9566 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9568 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 109 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -9581,7 +9583,7 @@ sem_Instruction_Store pc_ ty_ v1_ v2_ align_ =
                                             Nothing -> _lhsIspark k `sAnd` iexp
                                             Just e  -> let fnpce = if _npcev     == [] then error "Store instruction" else sFn "=" e $ head _npcev
                                                        in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 9585 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9587 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -9589,34 +9591,34 @@ sem_Instruction_Store pc_ ty_ v1_ v2_ align_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 9593 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9595 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 9598 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9600 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 9603 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9605 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 9608 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9610 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 9615 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9617 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 9620 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9622 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Store _pcIself _tyIself _v1Iself _v2Iself _alignIself
@@ -9625,42 +9627,42 @@ sem_Instruction_Store pc_ ty_ v1_ v2_ align_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 9629 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9631 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 9634 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9636 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 9639 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9641 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9644 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9646 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 9649 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9651 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 9654 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9656 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9659 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9661 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _v2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 9664 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9666 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -9718,27 +9720,27 @@ sem_Instruction_Load pc_ id_ v_ align_ =
               _vOmts =
                   ({-# LINE 87 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 9722 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9724 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 88 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 9727 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9729 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 89 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 9732 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9734 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 90 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 9737 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9739 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 91 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 9742 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9744 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 92 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -9752,7 +9754,7 @@ sem_Instruction_Load pc_ id_ v_ align_ =
                                              Nothing -> _lhsIspark k `sAnd` iexp
                                              Just e  -> let fnpce = if _npcev     == [] then error "Load Instruction" else sFn "=" e $ head _npcev
                                                         in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 9756 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9758 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -9760,34 +9762,34 @@ sem_Instruction_Load pc_ id_ v_ align_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 9764 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9766 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 9769 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9771 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 9774 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9776 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 9779 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9781 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 9786 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9788 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 9791 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9793 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Load _pcIself _idIself _vIself _alignIself
@@ -9796,12 +9798,12 @@ sem_Instruction_Load pc_ id_ v_ align_ =
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 9800 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9802 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9805 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9807 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -9874,57 +9876,57 @@ sem_Instruction_GetElementPtr pc_ id_ ty_ struct_ idxs_ =
               _idOtn =
                   ({-# LINE 223 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 9878 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9880 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 224 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 9883 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9885 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _structOmts =
                   ({-# LINE 225 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 9888 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9890 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _structOtn =
                   ({-# LINE 226 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 9893 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9895 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _structOval =
                   ({-# LINE 227 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 9898 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9900 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _size =
                   ({-# LINE 228 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    getIdxSize _structIvtype
-                   {-# LINE 9903 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9905 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idxsOmts =
                   ({-# LINE 229 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 9908 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9910 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idxsOtn =
                   ({-# LINE 230 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 9913 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9915 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idxsOval =
                   ({-# LINE 231 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 9918 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9920 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _encidx =
                   ({-# LINE 232 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \i -> ExtractExpr [ IdentExpr $ IdxIdent (SimpleSym "extract") [_size     - 1, 0] , i ]
-                   {-# LINE 9923 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9925 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _enc =
                   ({-# LINE 233 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    wrap sOr $ [ sFn "=" _idIsexpr (sFn "select" a (_encidx     i)) | a <- _structIsexpr, i <- tail _idxsIsexpr  ]
-                   {-# LINE 9928 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9930 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 234 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -9935,7 +9937,7 @@ sem_Instruction_GetElementPtr pc_ id_ ty_ struct_ idxs_ =
                                             Nothing -> _lhsIspark k `sAnd` iexp
                                             Just e  -> let fnpce = if _npcev     == [] then error "GetElementPtr instruction" else  sFn "=" e $ head _npcev
                                                        in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 9939 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9941 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -9943,34 +9945,34 @@ sem_Instruction_GetElementPtr pc_ id_ ty_ struct_ idxs_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 9947 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9949 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 9952 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9954 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 9957 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9959 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 9962 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9964 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 9969 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9971 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 9974 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9976 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   GetElementPtr _pcIself _idIself _tyIself _structIself _idxsIself
@@ -9979,32 +9981,32 @@ sem_Instruction_GetElementPtr pc_ id_ ty_ struct_ idxs_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 9983 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9985 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 9988 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9990 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _structOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 9993 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 9995 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _structOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 9998 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10000 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idxsOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 10003 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10005 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idxsOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10008 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10010 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -10068,7 +10070,7 @@ sem_Instruction_Trunc pc_ id_ v_ ty_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 10072 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10074 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Trunc _pcIself _idIself _vIself _tyIself
@@ -10077,47 +10079,47 @@ sem_Instruction_Trunc pc_ id_ v_ ty_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10081 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10083 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 10086 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10088 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 10091 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10093 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 10096 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10098 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10101 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10103 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 10106 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10108 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 10111 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10113 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 10116 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10118 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 10121 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10123 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -10179,7 +10181,7 @@ sem_Instruction_ZExt pc_ id_ v_ ty_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 10183 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10185 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   ZExt _pcIself _idIself _vIself _tyIself
@@ -10188,47 +10190,47 @@ sem_Instruction_ZExt pc_ id_ v_ ty_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10192 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10194 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 10197 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10199 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 10202 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10204 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 10207 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10209 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10212 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10214 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 10217 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10219 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 10222 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10224 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 10227 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10229 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 10232 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10234 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -10290,33 +10292,33 @@ sem_Instruction_SExt pc_ id_ v_ ty_ =
               _idOtn =
                   ({-# LINE 208 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 10294 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10296 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 209 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 10299 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10301 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 210 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 10304 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10306 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 211 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 10309 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10311 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 212 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 10314 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10316 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _enc =
                   ({-# LINE 213 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    let n = getISize _tyIself - getISize _vIvtype
                    in  wrap sOr $ Prelude.map (\e -> sFn "=" _idIsexpr $ SignExtExpr e n) _vIsexpr
-                   {-# LINE 10320 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10322 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 215 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -10327,7 +10329,7 @@ sem_Instruction_SExt pc_ id_ v_ ty_ =
                                              Nothing -> _lhsIspark k `sAnd` iexp
                                              Just e  -> let fnpce = if _npcev     == [] then error "SExt instruction" else sFn "=" e $ head _npcev
                                                         in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 10331 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10333 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -10335,34 +10337,34 @@ sem_Instruction_SExt pc_ id_ v_ ty_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 10339 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10341 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 10344 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10346 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 10349 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10351 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 10354 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10356 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 10361 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10363 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 10366 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10368 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   SExt _pcIself _idIself _vIself _tyIself
@@ -10371,22 +10373,22 @@ sem_Instruction_SExt pc_ id_ v_ ty_ =
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 10375 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10377 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10380 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10382 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 10385 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10387 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 10390 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10392 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -10448,7 +10450,7 @@ sem_Instruction_FPToUI pc_ id_ v_ ty_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 10452 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10454 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FPToUI _pcIself _idIself _vIself _tyIself
@@ -10457,47 +10459,47 @@ sem_Instruction_FPToUI pc_ id_ v_ ty_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10461 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10463 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 10466 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10468 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 10471 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10473 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 10476 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10478 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10481 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10483 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 10486 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10488 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 10491 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10493 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 10496 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10498 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 10501 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10503 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -10559,7 +10561,7 @@ sem_Instruction_FPToSI pc_ id_ v_ ty_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 10563 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10565 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FPToSI _pcIself _idIself _vIself _tyIself
@@ -10568,47 +10570,47 @@ sem_Instruction_FPToSI pc_ id_ v_ ty_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10572 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10574 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 10577 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10579 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 10582 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10584 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 10587 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10589 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10592 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10594 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 10597 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10599 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 10602 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10604 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 10607 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10609 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 10612 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10614 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -10670,7 +10672,7 @@ sem_Instruction_UIToFP pc_ id_ v_ ty_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 10674 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10676 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   UIToFP _pcIself _idIself _vIself _tyIself
@@ -10679,47 +10681,47 @@ sem_Instruction_UIToFP pc_ id_ v_ ty_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10683 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10685 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 10688 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10690 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 10693 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10695 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 10698 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10700 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10703 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10705 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 10708 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10710 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 10713 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10715 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 10718 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10720 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 10723 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10725 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -10781,7 +10783,7 @@ sem_Instruction_SIToFP pc_ id_ v_ ty_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 10785 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10787 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   SIToFP _pcIself _idIself _vIself _tyIself
@@ -10790,47 +10792,47 @@ sem_Instruction_SIToFP pc_ id_ v_ ty_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10794 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10796 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 10799 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10801 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 10804 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10806 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 10809 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10811 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10814 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10816 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 10819 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10821 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 10824 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10826 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 10829 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10831 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 10834 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10836 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -10892,7 +10894,7 @@ sem_Instruction_FPTrunc pc_ id_ v_ ty_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 10896 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10898 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FPTrunc _pcIself _idIself _vIself _tyIself
@@ -10901,47 +10903,47 @@ sem_Instruction_FPTrunc pc_ id_ v_ ty_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10905 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10907 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 10910 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10912 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 10915 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10917 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 10920 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10922 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 10925 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10927 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 10930 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10932 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 10935 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10937 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 10940 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10942 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 10945 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 10947 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -11003,7 +11005,7 @@ sem_Instruction_FPExt pc_ id_ v_ ty_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 11007 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11009 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FPExt _pcIself _idIself _vIself _tyIself
@@ -11012,47 +11014,47 @@ sem_Instruction_FPExt pc_ id_ v_ ty_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11016 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11018 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 11021 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11023 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 11026 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11028 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 11031 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11033 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11036 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11038 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 11041 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11043 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 11046 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11048 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 11051 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11053 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 11056 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11058 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -11114,7 +11116,7 @@ sem_Instruction_PtrToInt pc_ id_ v_ ty_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 11118 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11120 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   PtrToInt _pcIself _idIself _vIself _tyIself
@@ -11123,47 +11125,47 @@ sem_Instruction_PtrToInt pc_ id_ v_ ty_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11127 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11129 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 11132 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11134 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 11137 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11139 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 11142 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11144 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11147 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11149 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 11152 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11154 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 11157 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11159 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 11162 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11164 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 11167 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11169 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -11225,7 +11227,7 @@ sem_Instruction_IntToPtr pc_ id_ v_ ty_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 11229 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11231 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   IntToPtr _pcIself _idIself _vIself _tyIself
@@ -11234,47 +11236,47 @@ sem_Instruction_IntToPtr pc_ id_ v_ ty_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11238 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11240 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 11243 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11245 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 11248 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11250 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 11253 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11255 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11258 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11260 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 11263 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11265 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 11268 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11270 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 11273 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11275 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 11278 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11280 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -11336,27 +11338,27 @@ sem_Instruction_BitCast pc_ id_ v_ ty_ =
               _idOtn =
                   ({-# LINE 191 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 11340 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11342 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 192 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 11345 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11347 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 193 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 11350 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11352 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 194 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 11355 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11357 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 195 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 11360 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11362 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _enc =
                   ({-# LINE 196 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -11364,7 +11366,7 @@ sem_Instruction_BitCast pc_ id_ v_ ty_ =
                    then wrap sOr $ Prelude.map (\e -> sFn "=" _idIsexpr $ ExtractExpr [ IdentExpr $ IdxIdent (SimpleSym "extract") [(getISize _tyIself)-1, 0] , e ]) _vIsexpr
                    else let n = getISize _tyIself - getISize _vIvtype
                         in  wrap sOr $ Prelude.map (\e -> sFn "=" _idIsexpr $ ZeroExtExpr e n) _vIsexpr
-                   {-# LINE 11368 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11370 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 200 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -11375,7 +11377,7 @@ sem_Instruction_BitCast pc_ id_ v_ ty_ =
                                              Nothing -> _lhsIspark k `sAnd` iexp
                                              Just e  -> let fnpce = if _npcev     == [] then error "Bitcast instruction" else sFn "=" e $ head _npcev
                                                         in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 11379 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11381 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -11383,34 +11385,34 @@ sem_Instruction_BitCast pc_ id_ v_ ty_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 11387 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11389 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 11392 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11394 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 11397 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11399 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 11402 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11404 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 11409 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11411 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 11414 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11416 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   BitCast _pcIself _idIself _vIself _tyIself
@@ -11419,22 +11421,22 @@ sem_Instruction_BitCast pc_ id_ v_ ty_ =
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 11423 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11425 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11428 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11430 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 11433 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11435 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _vImts
-                   {-# LINE 11438 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11440 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -11514,52 +11516,52 @@ sem_Instruction_ICmp pc_ id_ cond_ ty_ op1_ op2_ =
               _idOtn =
                   ({-# LINE 125 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 11518 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11520 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOsortexpr =
                   ({-# LINE 126 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 11523 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11525 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 127 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 11528 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11530 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 128 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 11533 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11535 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 129 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 11538 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11540 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 130 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 11543 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11545 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 131 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 11548 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11550 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 132 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 11553 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11555 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vse =
                   ({-# LINE 133 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ if _condIself == IntNE then FnAppExpr (SymIdent $ SimpleSym "not") [ sFn "=" e1 e2 ] else sFn _condIpred e1 e2 | e1 <- _op1Isexpr, e2 <- _op2Isexpr ]
-                   {-# LINE 11558 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11560 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _enc =
                   ({-# LINE 134 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    wrap sOr $ Prelude.map (\se -> sFn "=" _idIsexpr se) _vse
-                   {-# LINE 11563 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11565 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 135 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -11570,7 +11572,7 @@ sem_Instruction_ICmp pc_ id_ cond_ ty_ op1_ op2_ =
                                             Nothing -> _lhsIspark k `sAnd` iexp
                                             Just e  -> let fnpce = if _npcev     == [] then error "ICmp instruction" else sFn "=" e $ head _npcev
                                                        in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 11574 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11576 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -11578,34 +11580,34 @@ sem_Instruction_ICmp pc_ id_ cond_ ty_ op1_ op2_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 11582 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11584 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 11587 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11589 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 11592 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11594 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 11597 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11599 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 11604 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11606 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 11609 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11611 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   ICmp _pcIself _idIself _condIself _tyIself _op1Iself _op2Iself
@@ -11614,32 +11616,32 @@ sem_Instruction_ICmp pc_ id_ cond_ ty_ op1_ op2_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 11618 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11620 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 11623 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11625 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 11628 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11630 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11633 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11635 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 11638 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11640 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11643 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11645 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -11722,7 +11724,7 @@ sem_Instruction_FCmp pc_ id_ cond_ ty_ op1_ op2_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 11726 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11728 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   FCmp _pcIself _idIself _condIself _tyIself _op1Iself _op2Iself
@@ -11731,72 +11733,72 @@ sem_Instruction_FCmp pc_ id_ cond_ ty_ op1_ op2_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11735 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11737 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 11740 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11742 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 11745 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11747 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 11750 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11752 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 11755 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11757 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 11760 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11762 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11765 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11767 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 11770 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11772 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 11775 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11777 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 11780 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11782 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _op1Imts
-                   {-# LINE 11785 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11787 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11790 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11792 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 11795 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11797 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _op2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 11800 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11802 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -11854,7 +11856,7 @@ sem_Instruction_PHI pc_ id_ ty_ vals_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 11858 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11860 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   PHI _pcIself _idIself _tyIself _valsIself
@@ -11863,47 +11865,47 @@ sem_Instruction_PHI pc_ id_ ty_ vals_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11867 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11869 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 11872 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11874 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 11877 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11879 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 11882 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11884 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valsOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 11887 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11889 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valsOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 11892 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11894 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valsOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 11897 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11899 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valsOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 11902 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11904 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valsOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 11907 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11909 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -11975,7 +11977,7 @@ sem_Instruction_Call pc_ mres_ ty_ callee_ args_ =
                                              Nothing -> _lhsIspark k `sAnd` fpce
                                              Just e  -> let fnpce = if _npcev     == [] then error "Call instruction" else sFn "=" e $ head _npcev
                                                         in  _lhsIspark k `sAnd` fpce `sAnd` fnpce
-                   {-# LINE 11979 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11981 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 291 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -11983,34 +11985,34 @@ sem_Instruction_Call pc_ mres_ ty_ callee_ args_ =
                          then []
                          else let cmut = _lhsImutexes !! k
                               in  Prelude.foldr (\(x,y) r -> (maybe [] (\x2 -> [sFn "=" x2 x]) y)++ r) [] cmut
-                   {-# LINE 11987 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11989 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 11992 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11994 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 11997 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 11999 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 12002 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12004 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 12009 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12011 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 12014 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12016 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Call _pcIself _mresIself _tyIself _calleeIself _argsIself
@@ -12019,57 +12021,57 @@ sem_Instruction_Call pc_ mres_ ty_ callee_ args_ =
               _mresOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12023 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12025 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mresOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 12028 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12030 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 12033 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12035 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 12038 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12040 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _calleeOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12043 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12045 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _calleeOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 12048 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12050 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12053 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12055 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOmts =
                   ({-# LINE 27 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 12058 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12060 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12063 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12065 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOtn =
                   ({-# LINE 29 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12068 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12070 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOval =
                   ({-# LINE 28 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12073 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12075 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -12155,7 +12157,7 @@ sem_Instruction_Select pc_ id_ cond_ valt_ valf_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 12159 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12161 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Select _pcIself _idIself _condIself _valtIself _valfIself
@@ -12164,87 +12166,87 @@ sem_Instruction_Select pc_ id_ cond_ valt_ valf_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12168 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12170 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 12173 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12175 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _condOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12178 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12180 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _condOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 12183 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12185 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _condOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12188 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12190 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _condOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12193 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12195 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _condOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12198 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12200 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valtOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12203 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12205 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valtOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _condImts
-                   {-# LINE 12208 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12210 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valtOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12213 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12215 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valtOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12218 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12220 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valtOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12223 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12225 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valfOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12228 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12230 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valfOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _valtImts
-                   {-# LINE 12233 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12235 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valfOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12238 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12240 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valfOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12243 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12245 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valfOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12248 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12250 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -12302,7 +12304,7 @@ sem_Instruction_ExtractValue pc_ id_ aggr_ idxs_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 12306 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12308 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   ExtractValue _pcIself _idIself _aggrIself _idxsIself
@@ -12311,37 +12313,37 @@ sem_Instruction_ExtractValue pc_ id_ aggr_ idxs_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12315 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12317 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 12320 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12322 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _aggrOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12325 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12327 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _aggrOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 12330 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12332 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _aggrOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12335 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12337 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _aggrOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12340 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12342 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _aggrOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12345 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12347 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -12412,7 +12414,7 @@ sem_Instruction_InsertValue pc_ id_ aggr_ ival_ idxs_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 12416 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12418 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   InsertValue _pcIself _idIself _aggrIself _ivalIself _idxsIself
@@ -12421,62 +12423,62 @@ sem_Instruction_InsertValue pc_ id_ aggr_ ival_ idxs_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12425 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12427 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 12430 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12432 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _aggrOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12435 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12437 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _aggrOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 12440 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12442 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _aggrOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12445 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12447 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _aggrOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12450 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12452 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _aggrOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12455 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12457 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ivalOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12460 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12462 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ivalOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _aggrImts
-                   {-# LINE 12465 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12467 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ivalOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12470 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12472 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ivalOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12475 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12477 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ivalOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12480 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12482 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -12564,7 +12566,7 @@ sem_Instruction_Cmpxchg pc_ id_ mptr_ cval_ nval_ ord_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 12568 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12570 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Cmpxchg _pcIself _idIself _mptrIself _cvalIself _nvalIself _ordIself
@@ -12573,87 +12575,87 @@ sem_Instruction_Cmpxchg pc_ id_ mptr_ cval_ nval_ ord_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12577 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12579 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 12582 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12584 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mptrOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12587 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12589 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mptrOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 12592 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12594 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mptrOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12597 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12599 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mptrOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12602 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12604 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mptrOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12607 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12609 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _cvalOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12612 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12614 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _cvalOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _mptrImts
-                   {-# LINE 12617 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12619 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _cvalOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12622 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12624 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _cvalOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12627 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12629 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _cvalOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12632 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12634 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nvalOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12637 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12639 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nvalOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _cvalImts
-                   {-# LINE 12642 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12644 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nvalOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12647 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12649 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nvalOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12652 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12654 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nvalOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12657 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12659 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -12711,7 +12713,7 @@ sem_Instruction_AtomicRMW pc_ id_ args_ op_ ord_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 12715 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12717 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   AtomicRMW _pcIself _idIself _argsIself _opIself _ordIself
@@ -12720,37 +12722,37 @@ sem_Instruction_AtomicRMW pc_ id_ args_ op_ ord_ =
               _idOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12724 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12726 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _idOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 12729 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12731 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12734 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12736 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOmts =
                   ({-# LINE 27 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 12739 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12741 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12744 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12746 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOtn =
                   ({-# LINE 29 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12749 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12751 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOval =
                   ({-# LINE 28 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12754 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12756 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -12794,7 +12796,7 @@ sem_Instruction_CreateThread pc_ args_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 12798 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12800 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   CreateThread _pcIself _argsIself
@@ -12803,27 +12805,27 @@ sem_Instruction_CreateThread pc_ args_ =
               _argsOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12807 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12809 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOmts =
                   ({-# LINE 27 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 12812 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12814 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12817 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12819 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOtn =
                   ({-# LINE 29 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12822 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12824 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _argsOval =
                   ({-# LINE 28 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12827 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12829 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -12873,7 +12875,7 @@ sem_Instruction_MutexInit pc_ rv_ mutex_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 12877 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12879 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   MutexInit _pcIself _rvIself _mutexIself
@@ -12882,37 +12884,37 @@ sem_Instruction_MutexInit pc_ rv_ mutex_ =
               _rvOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12886 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12888 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rvOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 12891 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12893 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 12896 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12898 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 12901 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12903 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 12906 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12908 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 12911 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12913 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 12916 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12918 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -12964,27 +12966,27 @@ sem_Instruction_MutexLock pc_ rv_ mutex_ =
               _rvOtn =
                   ({-# LINE 255 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 12968 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12970 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rvOsortexpr =
                   ({-# LINE 256 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 12973 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12975 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOmts =
                   ({-# LINE 257 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 12978 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12980 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOtn =
                   ({-# LINE 258 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 12983 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12985 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOval =
                   ({-# LINE 259 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 12988 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 12990 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 260 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -12998,7 +13000,7 @@ sem_Instruction_MutexLock pc_ rv_ mutex_ =
                                              Nothing -> _lhsIspark k `sAnd` iexp
                                              Just e  -> let fnpce = if _npcev     == [] then error "mutexlock instruction" else sFn "=" e $ head _npcev
                                                         in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 13002 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13004 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 296 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -13007,34 +13009,34 @@ sem_Instruction_MutexLock pc_ rv_ mutex_ =
                          else let cmut = _lhsImutexes !! k
                                   xx = IdentExpr $ SymIdent $ SimpleSym $ fromJust _mutexIident ++ show k
                               in Prelude.foldr (\(x,y) r -> (maybe [] (\yy -> if x == xx then [yy] else [sFn "=" yy x] ) y) ++ r) [] cmut
-                   {-# LINE 13011 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13013 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 13016 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13018 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 13021 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13023 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 13026 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13028 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 13033 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13035 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 13038 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13040 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   MutexLock _pcIself _rvIself _mutexIself
@@ -13043,12 +13045,12 @@ sem_Instruction_MutexLock pc_ rv_ mutex_ =
               _mutexOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 13047 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13049 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 13052 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13054 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -13100,27 +13102,27 @@ sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
               _rvOtn =
                   ({-# LINE 273 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 13104 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13106 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rvOsortexpr =
                   ({-# LINE 274 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Nothing
-                   {-# LINE 13109 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13111 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOmts =
                   ({-# LINE 275 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    sortEnv _lhsIprenc
-                   {-# LINE 13114 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13116 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOtn =
                   ({-# LINE 276 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 13119 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13121 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOval =
                   ({-# LINE 277 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    fStore _lhsIprenc
-                   {-# LINE 13124 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13126 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _ts =
                   ({-# LINE 278 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -13133,7 +13135,7 @@ sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
                                              Nothing -> _lhsIspark k `sAnd` iexp
                                              Just e  -> let fnpce = if _npcev     == [] then error "mutexunlock instruction" else sFn "=" e $ head _npcev
                                                         in  _lhsIspark k `sAnd` iexp `sAnd` fnpce
-                   {-# LINE 13137 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13139 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _nmt =
                   ({-# LINE 302 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
@@ -13143,34 +13145,34 @@ sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
                                   xx = IdentExpr $ SymIdent $ SimpleSym $ fromJust _mutexIident ++ show k
                                   f = IdentExpr $ SymIdent $ SimpleSym "false"
                               in Prelude.foldr (\(x,y) r -> (maybe [] (\yy -> if x == xx then [sFn "=" yy f] else [sFn "=" yy x] ) y) ++ r) [] cmut
-                   {-# LINE 13147 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13149 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npc =
                   ({-# LINE 309 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    nextpc _pcIself _lhsIcfg
-                   {-# LINE 13152 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13154 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _npcev =
                   ({-# LINE 310 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    Prelude.map (\p -> IdentExpr $ IdxIdent (bv p) [32]) _npc
-                   {-# LINE 13157 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13159 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pcev =
                   ({-# LINE 311 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    IdentExpr $ IdxIdent (bv _pcIself) [32]
-                   {-# LINE 13162 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13164 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _pts =
                   ({-# LINE 312 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    \m k le -> let p = fromMaybe (error "Searching for pcs") $ Map.lookup _lhsItn m
                                   m' = Map.elems $ Map.delete _lhsItn m
                               in wrap sAnd $ ((_ts     p k le):(_nmt     k)) ++ (encOFPC m')
-                   {-# LINE 13169 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13171 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOts =
                   ({-# LINE 315 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    [ _pts     ]
-                   {-# LINE 13174 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13176 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   MutexUnlock _pcIself _rvIself _mutexIself
@@ -13179,12 +13181,12 @@ sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
               _mutexOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 13183 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13185 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _mutexOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 13188 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13190 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -13214,7 +13216,7 @@ sem_Instruction_WaitEvent pc_ event_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 13218 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13220 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   WaitEvent _pcIself event_
@@ -13244,7 +13246,7 @@ sem_Instruction_NotifyEvent pc_ event_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 13248 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13250 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   NotifyEvent _pcIself event_
@@ -13288,7 +13290,7 @@ sem_Instruction_WaitTime pc_ time_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 13292 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13294 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   WaitTime _pcIself _timeIself
@@ -13297,27 +13299,27 @@ sem_Instruction_WaitTime pc_ time_ =
               _timeOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 13301 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13303 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _timeOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 13306 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13308 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _timeOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 13311 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13313 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _timeOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 13316 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13318 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _timeOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 13321 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13323 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _pcIself) =
                   pc_
@@ -13397,7 +13399,7 @@ sem_Instructions_Cons hd_ tl_ =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _hdIts ++ _tlIts
-                   {-# LINE 13401 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13403 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   (:) _hdIself _tlIself
@@ -13406,112 +13408,112 @@ sem_Instructions_Cons hd_ tl_ =
               _hdOcfg =
                   ({-# LINE 68 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIcfg
-                   {-# LINE 13410 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13412 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOcte =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIcte
-                   {-# LINE 13415 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13417 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 13420 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13422 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOmts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 13425 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13427 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOmutexes =
                   ({-# LINE 74 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsImutexes
-                   {-# LINE 13430 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13432 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOpcs =
                   ({-# LINE 70 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIpcs
-                   {-# LINE 13435 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13437 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOprenc =
                   ({-# LINE 72 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIprenc
-                   {-# LINE 13440 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13442 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 13445 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13447 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOspark =
                   ({-# LINE 73 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIspark
-                   {-# LINE 13450 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13452 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOtn =
                   ({-# LINE 71 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 13455 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13457 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOval =
                   ({-# LINE 78 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 13460 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13462 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOcfg =
                   ({-# LINE 68 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIcfg
-                   {-# LINE 13465 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13467 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOcte =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIcte
-                   {-# LINE 13470 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13472 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 13475 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13477 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 13480 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13482 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmutexes =
                   ({-# LINE 74 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsImutexes
-                   {-# LINE 13485 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13487 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOpcs =
                   ({-# LINE 70 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIpcs
-                   {-# LINE 13490 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13492 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOprenc =
                   ({-# LINE 72 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIprenc
-                   {-# LINE 13495 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13497 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 13500 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13502 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOspark =
                   ({-# LINE 73 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsIspark
-                   {-# LINE 13505 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13507 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOtn =
                   ({-# LINE 71 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    _lhsItn
-                   {-# LINE 13510 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13512 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 13515 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13517 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _hdIself,_hdIts) =
                   hd_ _hdOcfg _hdOcte _hdOmn _hdOmts _hdOmutexes _hdOpcs _hdOprenc _hdOsortexpr _hdOspark _hdOtn _hdOval
@@ -13536,7 +13538,7 @@ sem_Instructions_Nil =
               _lhsOts =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
                    []
-                   {-# LINE 13540 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 13542 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   []
@@ -13584,7 +13586,7 @@ sem_IntPredicate_IntEQ =
          _lhsOpred =
              ({-# LINE 321 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               "="
-              {-# LINE 13588 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 13590 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              IntEQ
@@ -13598,7 +13600,7 @@ sem_IntPredicate_IntNE =
          _lhsOpred =
              ({-# LINE 322 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               error "IntNE"
-              {-# LINE 13602 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 13604 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              IntNE
@@ -13612,7 +13614,7 @@ sem_IntPredicate_IntUGT =
          _lhsOpred =
              ({-# LINE 323 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               "bvugt"
-              {-# LINE 13616 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 13618 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              IntUGT
@@ -13626,7 +13628,7 @@ sem_IntPredicate_IntUGE =
          _lhsOpred =
              ({-# LINE 324 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               "bvuge"
-              {-# LINE 13630 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 13632 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              IntUGE
@@ -13640,7 +13642,7 @@ sem_IntPredicate_IntULT =
          _lhsOpred =
              ({-# LINE 325 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               "bvult"
-              {-# LINE 13644 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 13646 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              IntULT
@@ -13654,7 +13656,7 @@ sem_IntPredicate_IntULE =
          _lhsOpred =
              ({-# LINE 326 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               "bvule"
-              {-# LINE 13658 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 13660 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              IntULE
@@ -13668,7 +13670,7 @@ sem_IntPredicate_IntSGT =
          _lhsOpred =
              ({-# LINE 327 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               "bvsgt"
-              {-# LINE 13672 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 13674 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              IntSGT
@@ -13682,7 +13684,7 @@ sem_IntPredicate_IntSGE =
          _lhsOpred =
              ({-# LINE 328 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               "bvsge"
-              {-# LINE 13686 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 13688 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              IntSGE
@@ -13696,7 +13698,7 @@ sem_IntPredicate_IntSLT =
          _lhsOpred =
              ({-# LINE 329 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               "bvslt"
-              {-# LINE 13700 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 13702 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              IntSLT
@@ -13710,7 +13712,7 @@ sem_IntPredicate_IntSLE =
          _lhsOpred =
              ({-# LINE 330 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               "bvsle"
-              {-# LINE 13714 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 13716 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              IntSLE
@@ -14104,12 +14106,12 @@ sem_MConstant_Just just_ =
               _lhsOsexpr =
                   ({-# LINE 23 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _justIsexpr
-                   {-# LINE 14108 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14110 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 24 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _justIsexprs
-                   {-# LINE 14113 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14115 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Just _justIself
@@ -14118,32 +14120,32 @@ sem_MConstant_Just just_ =
               _lhsOmts =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _justImts
-                   {-# LINE 14122 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14124 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _justOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 14127 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14129 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _justOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 14132 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14134 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _justOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 14137 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14139 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _justOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 14142 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14144 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _justOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 14147 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14149 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _justIident,_justIisGlobal,_justImts,_justIpsexpr,_justIself,_justIsexpr,_justIsexprs,_justIsort,_justIvtype) =
                   just_ _justOmn _justOmts _justOsortexpr _justOtn _justOval
@@ -14162,12 +14164,12 @@ sem_MConstant_Nothing =
               _lhsOsexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 14166 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14168 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 14171 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14173 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Nothing
@@ -14176,7 +14178,7 @@ sem_MConstant_Nothing =
               _lhsOmts =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 14180 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14182 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
           in  ( _lhsOmts,_lhsOself,_lhsOsexpr,_lhsOsexprs)))
 -- MDefinitionTy -----------------------------------------------
@@ -14333,12 +14335,12 @@ sem_MIdentifier_Just just_ =
               _justOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 14337 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14339 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _justOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 14342 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14344 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _justIdeclexpr,_justIident,_justIself,_justIsexpr,_justIssymbol) =
                   just_ _justOsortexpr _justOtn
@@ -14555,27 +14557,27 @@ sem_MValue_Just just_ =
               _justOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 14559 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14561 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _justOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 14564 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14566 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _justOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 14569 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14571 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _justOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 14574 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14576 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _justOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 14579 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14581 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _justIident,_justIisGlobal,_justImts,_justIpsexpr,_justIself,_justIsexpr,_justIsexprs,_justIsort,_justIvtype) =
                   just_ _justOmn _justOmts _justOsortexpr _justOtn _justOval
@@ -14725,82 +14727,82 @@ sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
          _funsOcfg =
              ({-# LINE 46 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               Map.empty
-              {-# LINE 14729 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14731 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOcte =
              ({-# LINE 47 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               Map.empty
-              {-# LINE 14734 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14736 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOmutexes =
              ({-# LINE 48 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
               []
-              {-# LINE 14739 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14741 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _gvarsOgs =
              ({-# LINE 82 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               undefined
-              {-# LINE 14744 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14746 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _gvarsOsortexpr =
              ({-# LINE 83 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Nothing
-              {-# LINE 14749 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14751 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _gvarsOmn =
              ({-# LINE 84 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Nothing
-              {-# LINE 14754 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14756 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _gvarsOtn =
              ({-# LINE 85 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               ""
-              {-# LINE 14759 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14761 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _gvarsOval =
              ({-# LINE 86 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Map.empty
-              {-# LINE 14764 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14766 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOmn =
              ({-# LINE 87 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Nothing
-              {-# LINE 14769 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14771 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOmts =
              ({-# LINE 88 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Map.empty
-              {-# LINE 14774 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14776 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOval =
              ({-# LINE 89 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Map.empty
-              {-# LINE 14779 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14781 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOprenc =
              ({-# LINE 91 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               undefined
-              {-# LINE 14784 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14786 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOsortexpr =
              ({-# LINE 92 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Nothing
-              {-# LINE 14789 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14791 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _nmdtysOmn =
              ({-# LINE 93 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Nothing
-              {-# LINE 14794 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14796 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _nmdtysOmts =
              ({-# LINE 94 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Map.empty
-              {-# LINE 14799 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14801 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _nmdtysOval =
              ({-# LINE 95 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Map.empty
-              {-# LINE 14804 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14806 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              Module id_ _layoutIself _targetIself _gvarsIself _funsIself _nmdtysIself
@@ -14928,27 +14930,27 @@ sem_NamedTypes_Entry key_ val_ tl_ =
               _valOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 14932 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14934 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _valOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 14937 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14939 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 14942 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14944 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _valImts
-                   {-# LINE 14947 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14949 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 14952 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 14954 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _valImts,_valIself,_valIsexprs,_valIsort,_valIsortn) =
                   val_ _valOmn _valOmts
@@ -15032,12 +15034,12 @@ sem_PTyInt_Tuple x1_ x2_ =
               _x1Omn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 15036 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15038 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Omts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 15041 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15043 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _x1Imts,_x1Iself,_x1Isexprs,_x1Isort,_x1Isortn) =
                   x1_ _x1Omn _x1Omts
@@ -15084,32 +15086,32 @@ sem_PTyIntL_Cons hd_ tl_ =
               _hdOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 15088 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15090 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 15093 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15095 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 15098 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15100 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 15103 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15105 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 15108 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15110 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 15113 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15115 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _hdIself) =
                   hd_ _hdOmn _hdOmts _hdOval
@@ -15193,52 +15195,52 @@ sem_PValue_Tuple x1_ x2_ =
               _x1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 15197 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15199 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 15202 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15204 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 15207 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15209 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 15212 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15214 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 15217 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15219 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x2Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 15222 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15224 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x2Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _x1Imts
-                   {-# LINE 15227 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15229 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x2Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 15232 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15234 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x2Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 15237 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15239 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x2Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 15242 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15244 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _x1Iident,_x1IisGlobal,_x1Imts,_x1Ipsexpr,_x1Iself,_x1Isexpr,_x1Isexprs,_x1Isort,_x1Ivtype) =
                   x1_ _x1Omn _x1Omts _x1Osortexpr _x1Otn _x1Oval
@@ -15297,27 +15299,27 @@ sem_PValueIdx_Tuple x1_ x2_ =
               _x1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 15301 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15303 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 15306 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15308 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 15311 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15313 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 15316 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15318 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 15321 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15323 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _x1Iident,_x1IisGlobal,_x1Imts,_x1Ipsexpr,_x1Iself,_x1Isexpr,_x1Isexprs,_x1Isort,_x1Ivtype) =
                   x1_ _x1Omn _x1Omts _x1Osortexpr _x1Otn _x1Oval
@@ -15372,52 +15374,52 @@ sem_PValues_Cons hd_ tl_ =
               _hdOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 15376 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15378 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 15381 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15383 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 15386 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15388 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 15391 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15393 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 15396 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15398 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 15401 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15403 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 15406 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15408 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 15411 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15413 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 15416 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15418 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 15421 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15423 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _hdIself) =
                   hd_ _hdOmn _hdOmts _hdOsortexpr _hdOtn _hdOval
@@ -15485,37 +15487,37 @@ sem_Parameter_Parameter var_ ty_ =
               _lhsOsexpr =
                   ({-# LINE 292 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    IdentExpr $ SymIdent _sym
-                   {-# LINE 15489 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15491 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sym =
                   ({-# LINE 293 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    SimpleSym $ _lhsItn ++ (getIdName _varIself)
-                   {-# LINE 15494 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15496 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOident =
                   ({-# LINE 294 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn ++ (getIdName _varIself)
-                   {-# LINE 15499 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15501 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 295 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 15504 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15506 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 296 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Nothing
-                   {-# LINE 15509 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15511 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 297 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    [ declfun _sym     _tyIsort ] ++ _tyIsexprs
-                   {-# LINE 15514 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15516 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 298 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 15519 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15521 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Parameter _varIself _tyIself
@@ -15524,12 +15526,12 @@ sem_Parameter_Parameter var_ ty_ =
               _varOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 15528 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15530 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _varOtn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 15533 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15535 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _varIdeclexpr,_varIident,_varIself,_varIsexpr,_varIssymbol) =
                   var_ _varOsortexpr _varOtn
@@ -15585,37 +15587,37 @@ sem_Parameters_Cons hd_ tl_ =
               _hdOmts =
                   ({-# LINE 284 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 15589 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15591 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 15594 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15596 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOtn =
                   ({-# LINE 287 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 15599 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15601 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmts =
                   ({-# LINE 72 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _hdImts
-                   {-# LINE 15604 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15606 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 15609 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15611 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOtn =
                   ({-# LINE 73 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 15614 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15616 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOval =
                   ({-# LINE 74 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 15619 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15621 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _hdIident,_hdImts,_hdIself,_hdIsexpr,_hdIsexprs) =
                   hd_ _hdOmts _hdOsortexpr _hdOtn
@@ -15861,27 +15863,27 @@ sem_RetInst_ValueRet v_ =
               _vOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 15865 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15867 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 15870 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15872 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 15875 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15877 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 15880 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15882 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 15885 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15887 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _vIident,_vIisGlobal,_vImts,_vIpsexpr,_vIself,_vIsexpr,_vIsexprs,_vIsort,_vIvtype) =
                   v_ _vOmn _vOmts _vOsortexpr _vOtn _vOval
@@ -15970,32 +15972,32 @@ sem_SimpleConstant_ConstantInt iv_ ty_ =
               _tyOmn =
                   ({-# LINE 167 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Nothing
-                   {-# LINE 15974 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15976 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 168 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 15979 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15981 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 169 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    [ IdentExpr $ IdxIdent (bv iv_) [getISize _tyIself] ]
-                   {-# LINE 15984 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15986 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 170 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 15989 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15991 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOvtype =
                   ({-# LINE 171 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIself
-                   {-# LINE 15994 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 15996 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 172 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIsort
-                   {-# LINE 15999 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16001 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   ConstantInt iv_ _tyIself
@@ -16004,7 +16006,7 @@ sem_SimpleConstant_ConstantInt iv_ ty_ =
               _lhsOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 16008 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16010 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _tyImts,_tyIself,_tyIsexprs,_tyIsort,_tyIsortn) =
                   ty_ _tyOmn _tyOmts
@@ -16033,22 +16035,22 @@ sem_SimpleConstant_ConstantFP fp_ =
               _lhsOsexpr =
                   ({-# LINE 161 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _fpIsexpr
-                   {-# LINE 16037 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16039 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 162 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _fpIsexprs
-                   {-# LINE 16042 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16044 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOvtype =
                   ({-# LINE 163 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _fpIvtype
-                   {-# LINE 16047 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16049 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 164 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _fpIsort
-                   {-# LINE 16052 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16054 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   ConstantFP _fpIself
@@ -16057,22 +16059,22 @@ sem_SimpleConstant_ConstantFP fp_ =
               _lhsOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _fpImts
-                   {-# LINE 16061 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16063 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _fpOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 16066 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16068 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _fpOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 16071 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16073 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _fpOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 16076 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16078 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _fpImts,_fpIself,_fpIsexpr,_fpIsexprs,_fpIsort,_fpIvtype) =
                   fp_ _fpOmts _fpOtn _fpOval
@@ -16099,32 +16101,32 @@ sem_SimpleConstant_ConstantPointerNull ty_ =
               _tyOmn =
                   ({-# LINE 174 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Nothing
-                   {-# LINE 16103 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16105 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 175 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 16108 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16110 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOvtype =
                   ({-# LINE 176 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIself
-                   {-# LINE 16113 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16115 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 177 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 16118 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16120 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 178 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 16123 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16125 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 179 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIsort
-                   {-# LINE 16128 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16130 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   ConstantPointerNull _tyIself
@@ -16133,7 +16135,7 @@ sem_SimpleConstant_ConstantPointerNull ty_ =
               _lhsOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 16137 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16139 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _tyImts,_tyIself,_tyIsexprs,_tyIsort,_tyIsortn) =
                   ty_ _tyOmn _tyOmts
@@ -16322,8 +16324,8 @@ sem_Type (TyFloatPoint _p) =
     (sem_Type_TyFloatPoint (sem_TyFloatPoint _p))
 sem_Type (TyArray _numEl _ty) =
     (sem_Type_TyArray _numEl (sem_Type _ty))
-sem_Type (TyFunction _party _retty) =
-    (sem_Type_TyFunction (sem_Types _party) (sem_Type _retty))
+sem_Type (TyFunction _party _retty _isVar) =
+    (sem_Type_TyFunction (sem_Types _party) (sem_Type _retty) _isVar)
 sem_Type (TyStruct _name _numEl _tys) =
     (sem_Type_TyStruct _name _numEl (sem_Types _tys))
 sem_Type (TyPointer _ty) =
@@ -16358,22 +16360,22 @@ sem_Type_TyVoid =
               _lhsOsort =
                   ({-# LINE 25 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16362 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16364 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 26 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16367 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16369 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 27 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16372 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16374 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 18 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    []
-                   {-# LINE 16377 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16379 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyVoid
@@ -16392,22 +16394,22 @@ sem_Type_Tyx86MMX =
               _lhsOsort =
                   ({-# LINE 29 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16396 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16398 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 30 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16401 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16403 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 31 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16406 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16408 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 18 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    []
-                   {-# LINE 16411 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16413 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Tyx86MMX
@@ -16426,22 +16428,22 @@ sem_Type_TyLabel =
               _lhsOsort =
                   ({-# LINE 33 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16430 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16432 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 34 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16435 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16437 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 35 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16440 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16442 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 18 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    []
-                   {-# LINE 16445 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16447 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyLabel
@@ -16460,22 +16462,22 @@ sem_Type_TyMetadata =
               _lhsOsort =
                   ({-# LINE 37 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16464 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16466 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 38 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16469 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16471 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 39 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16474 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16476 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 18 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    []
-                   {-# LINE 16479 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16481 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyMetadata
@@ -16494,22 +16496,22 @@ sem_Type_TyOpaque =
               _lhsOsort =
                   ({-# LINE 41 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16498 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16500 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 42 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16503 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16505 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 43 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16508 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16510 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 18 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    []
-                   {-# LINE 16513 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16515 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyOpaque
@@ -16531,27 +16533,27 @@ sem_Type_TyInt p_ =
                    if p_ == 1
                    then fromMaybe "Bool"           _lhsImn
                    else fromMaybe ("I" ++ show p_) _lhsImn
-                   {-# LINE 16535 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16537 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _sortn
-                   {-# LINE 16540 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16542 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sort =
                   ({-# LINE 49 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    SymSort _sortn
-                   {-# LINE 16545 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16547 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 50 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _sort
-                   {-# LINE 16550 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16552 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 51 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    Map.insert _self (_sort    , _sortn    ) _lhsImts
-                   {-# LINE 16555 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16557 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 52 "./src/Concurrent/Model/Encoder/Types.ag" #-}
@@ -16560,7 +16562,7 @@ sem_Type_TyInt p_ =
                                    then []
                                    else [ defsorti p_ ]
                         Just _  -> []
-                   {-# LINE 16564 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16566 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyInt p_
@@ -16581,22 +16583,22 @@ sem_Type_TyFloatPoint p_ =
               _lhsOsort =
                   ({-# LINE 58 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16585 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16587 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 59 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16590 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16592 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 60 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16595 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16597 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 18 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    []
-                   {-# LINE 16600 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16602 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyFloatPoint _pIself
@@ -16626,47 +16628,47 @@ sem_Type_TyArray numEl_ ty_ =
               _bsize =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    getBSize numEl_
-                   {-# LINE 16630 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16632 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sortn =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    fromMaybe ("Array" ++ show numEl_ ++ _tyIsortn) _lhsImn
-                   {-# LINE 16635 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16637 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 64 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _sortn
-                   {-# LINE 16640 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16642 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 65 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 16645 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16647 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 66 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    Map.insert _self (_sort    , _sortn    ) _tyImts
-                   {-# LINE 16650 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16652 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sort =
                   ({-# LINE 67 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    SymSort _sortn
-                   {-# LINE 16655 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16657 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 68 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _sort
-                   {-# LINE 16660 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16662 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sortd =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    ArraySort (BitVector _bsize    ) _tyIsort
-                   {-# LINE 16665 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16667 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 70 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _tyIsexprs ++ [ SE $ DefSort (SimpleSym _sortn    ) [] $ toSExpr _sortd     ]
-                   {-# LINE 16670 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16672 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyArray numEl_ _tyIself
@@ -16675,15 +16677,16 @@ sem_Type_TyArray numEl_ ty_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 16679 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16681 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _tyImts,_tyIself,_tyIsexprs,_tyIsort,_tyIsortn) =
                   ty_ _tyOmn _tyOmts
           in  ( _lhsOmts,_lhsOself,_lhsOsexprs,_lhsOsort,_lhsOsortn)))
 sem_Type_TyFunction :: T_Types ->
                        T_Type ->
+                       Bool ->
                        T_Type
-sem_Type_TyFunction party_ retty_ =
+sem_Type_TyFunction party_ retty_ isVar_ =
     (\ _lhsImn
        _lhsImts ->
          (let _lhsOsort :: SSortExpr
@@ -16702,36 +16705,36 @@ sem_Type_TyFunction party_ retty_ =
               _lhsOsort =
                   ({-# LINE 72 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16706 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16709 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 73 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16711 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16714 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 74 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16716 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16719 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 18 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _rettyIsexprs
-                   {-# LINE 16721 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16724 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
-                  TyFunction _partyIself _rettyIself
+                  TyFunction _partyIself _rettyIself isVar_
               _lhsOself =
                   _self
               _rettyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 16730 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16733 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _rettyOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 16735 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16738 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _partyIself) =
                   party_
@@ -16754,12 +16757,12 @@ sem_Type_TyStruct name_ numEl_ tys_ =
               _sortn =
                   ({-# LINE 76 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    fromMaybe name_ _lhsImn
-                   {-# LINE 16758 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16761 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 77 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _sortn
-                   {-# LINE 16763 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16766 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tysi =
                   ({-# LINE 78 "./src/Concurrent/Model/Encoder/Types.ag" #-}
@@ -16768,33 +16771,33 @@ sem_Type_TyStruct name_ numEl_ tys_ =
                         "struct.__pthread_mutex_s"       -> (_lhsImts, [], SymSort "Bool")
                         "struct.__pthread_internal_list" -> (_lhsImts, [], SymSort "Bool")
                         n -> encTypes _tysIself _lhsImts
-                   {-# LINE 16772 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16775 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sort =
                   ({-# LINE 83 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    case _sortn     of
                         "" -> trdu _tysi
                         n  -> SymSort _sortn
-                   {-# LINE 16779 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16782 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 86 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _sort
-                   {-# LINE 16784 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16787 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 87 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    case _sortn     of
                         "" -> fstu _tysi
                         n  -> Map.insert _self (_sort    , n) $ fstu _tysi
-                   {-# LINE 16791 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16794 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 90 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    case _sortn     of
                         "" -> sndu _tysi
                         n  -> sndu _tysi     ++ [ SE $ DefSort (SimpleSym _sortn    ) [] $ toSExpr $ trdu _tysi     ]
-                   {-# LINE 16798 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16801 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyStruct name_ numEl_ _tysIself
@@ -16823,42 +16826,42 @@ sem_Type_TyPointer ty_ =
               _sortn =
                   ({-# LINE 94 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    fromMaybe _tyIsortn _lhsImn
-                   {-# LINE 16827 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16830 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 95 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _sortn
-                   {-# LINE 16832 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16835 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sort =
                   ({-# LINE 96 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    SymSort _sortn
-                   {-# LINE 16837 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16840 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 97 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _sort
-                   {-# LINE 16842 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16845 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 98 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 16847 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16850 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 99 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    Map.insert _self (_sort    , _sortn    ) _tyImts
-                   {-# LINE 16852 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16855 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sortd =
                   ({-# LINE 100 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _tyIsort
-                   {-# LINE 16857 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16860 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 101 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _tyIsexprs
-                   {-# LINE 16862 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16865 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyPointer _tyIself
@@ -16867,7 +16870,7 @@ sem_Type_TyPointer ty_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 16871 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16874 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _tyImts,_tyIself,_tyIsexprs,_tyIsort,_tyIsortn) =
                   ty_ _tyOmn _tyOmts
@@ -16893,47 +16896,47 @@ sem_Type_TyVector numEl_ ty_ =
               _bsize =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    getBSize numEl_
-                   {-# LINE 16897 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16900 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sortn =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    fromMaybe ("Array" ++ show numEl_ ++ _tyIsortn) _lhsImn
-                   {-# LINE 16902 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16905 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 64 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _sortn
-                   {-# LINE 16907 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16910 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmts =
                   ({-# LINE 65 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 16912 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16915 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 66 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    Map.insert _self (_sort    , _sortn    ) _tyImts
-                   {-# LINE 16917 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16920 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sort =
                   ({-# LINE 67 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    SymSort _sortn
-                   {-# LINE 16922 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16925 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 68 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _sort
-                   {-# LINE 16927 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16930 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _sortd =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    ArraySort (BitVector _bsize    ) _tyIsort
-                   {-# LINE 16932 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16935 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 70 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _tyIsexprs ++ [ SE $ DefSort (SimpleSym _sortn    ) [] $ toSExpr _sortd     ]
-                   {-# LINE 16937 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16940 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyVector numEl_ _tyIself
@@ -16942,7 +16945,7 @@ sem_Type_TyVector numEl_ ty_ =
               _tyOmn =
                   ({-# LINE 21 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImn
-                   {-# LINE 16946 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16949 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _tyImts,_tyIself,_tyIsexprs,_tyIsort,_tyIsortn) =
                   ty_ _tyOmn _tyOmts
@@ -16959,22 +16962,22 @@ sem_Type_TyUndefined =
               _lhsOsort =
                   ({-# LINE 103 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16963 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16966 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 104 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16968 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16971 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 105 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    errormessage
-                   {-# LINE 16973 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16976 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 18 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    []
-                   {-# LINE 16978 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 16981 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyUndefined
@@ -16997,7 +17000,7 @@ sem_Type_TyJumpTo lb_ =
               _lhsOsexprs =
                   ({-# LINE 18 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    []
-                   {-# LINE 17001 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17004 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   TyJumpTo _lbIself
@@ -17006,27 +17009,27 @@ sem_Type_TyJumpTo lb_ =
               _lhsOmts =
                   ({-# LINE 19 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    _lhsImts
-                   {-# LINE 17010 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17013 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    error "missing rule: Type.TyJumpTo.lhs.sort"
-                   {-# LINE 17015 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17018 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsortn =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Types.ag" #-}
                    error "missing rule: Type.TyJumpTo.lhs.sortn"
-                   {-# LINE 17020 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17023 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lbOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    error "missing rule: Type.TyJumpTo.lb.sortexpr"
-                   {-# LINE 17025 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17028 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lbOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    error "missing rule: Type.TyJumpTo.lb.tn"
-                   {-# LINE 17030 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17033 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _lbIself) =
                   lb_ _lbOsortexpr _lbOtn
@@ -17063,12 +17066,12 @@ sem_Types_Cons hd_ tl_ =
          _hdOmn =
              ({-# LINE 12 "./src/Concurrent/Model/Encoder/Types.ag" #-}
               Nothing
-              {-# LINE 17067 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 17070 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _hdOmts =
              ({-# LINE 13 "./src/Concurrent/Model/Encoder/Types.ag" #-}
               Map.empty
-              {-# LINE 17072 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 17075 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -17146,37 +17149,37 @@ sem_ValId_Tuple x1_ x2_ =
               _x1Omn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 17150 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17153 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Omts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 17155 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17158 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Osortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 17160 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17163 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Otn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 17165 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17168 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x1Oval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 17170 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17173 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x2Osortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 17175 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17178 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _x2Otn =
                   ({-# LINE 12 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsItn
-                   {-# LINE 17180 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17183 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _x1Iident,_x1IisGlobal,_x1Imts,_x1Ipsexpr,_x1Iself,_x1Isexpr,_x1Isexprs,_x1Isort,_x1Ivtype) =
                   x1_ _x1Omn _x1Omts _x1Osortexpr _x1Otn _x1Oval
@@ -17233,52 +17236,52 @@ sem_ValIdL_Cons hd_ tl_ =
               _hdOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 17237 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17240 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 17242 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17245 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 17247 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17250 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 17252 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17255 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 17257 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17260 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 17262 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17265 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 17267 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17270 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 17272 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17275 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 17277 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17280 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 17282 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17285 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _hdIself) =
                   hd_ _hdOmn _hdOmts _hdOsortexpr _hdOtn _hdOval
@@ -17356,61 +17359,61 @@ sem_Value_Id v_ ty_ =
               _tyOmts =
                   ({-# LINE 105 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 17360 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17363 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tyOmn =
                   ({-# LINE 106 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Nothing
-                   {-# LINE 17365 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17368 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _vOtn =
                   ({-# LINE 107 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 17370 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17373 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 108 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    case Map.lookup _vIident _lhsIval of
                         Nothing -> [ _vIsexpr ]
                         Just (t,lp)  -> Prelude.map (\p -> IdentExpr $ SymIdent $ SimpleSym $ _lhsItn ++ _vIident ++ show p) [0.. length lp]
-                   {-# LINE 17377 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17380 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOpsexpr =
                   ({-# LINE 111 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    \_ -> case Map.lookup _vIident _lhsIval of
                               Nothing -> [ ]
                               Just (t,lp)  -> Prelude.map (\p -> IdentExpr $ SymIdent $ SimpleSym $ "p" ++ _lhsItn ++ _vIident ++ show p) [0.. length lp]
-                   {-# LINE 17384 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17387 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 114 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIsexprs
-                   {-# LINE 17389 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17392 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 115 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyImts
-                   {-# LINE 17394 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17397 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOvtype =
                   ({-# LINE 116 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIself
-                   {-# LINE 17399 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17402 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOisGlobal =
                   ({-# LINE 117 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    False
-                   {-# LINE 17404 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17407 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOident =
                   ({-# LINE 118 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    Just _vIident
-                   {-# LINE 17409 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17412 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 119 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tyIsort
-                   {-# LINE 17414 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17417 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Id _vIself _tyIself
@@ -17419,7 +17422,7 @@ sem_Value_Id v_ ty_ =
               _vOsortexpr =
                   ({-# LINE 17 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 17423 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17426 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _vIdeclexpr,_vIident,_vIself,_vIsexpr,_vIssymbol) =
                   v_ _vOsortexpr _vOtn
@@ -17460,37 +17463,37 @@ sem_Value_Constant c_ =
               _lhsOsexpr =
                   ({-# LINE 122 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _cIsexpr
-                   {-# LINE 17464 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17467 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOpsexpr =
                   ({-# LINE 123 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _cIpsexpr
-                   {-# LINE 17469 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17472 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 124 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _cIsexprs
-                   {-# LINE 17474 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17477 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOvtype =
                   ({-# LINE 125 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _cIvtype
-                   {-# LINE 17479 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17482 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOisGlobal =
                   ({-# LINE 126 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _cIisGlobal
-                   {-# LINE 17484 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17487 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOident =
                   ({-# LINE 127 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _cIident
-                   {-# LINE 17489 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17492 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsort =
                   ({-# LINE 128 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _cIsort
-                   {-# LINE 17494 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17497 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   Constant _cIself
@@ -17499,32 +17502,32 @@ sem_Value_Constant c_ =
               _lhsOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _cImts
-                   {-# LINE 17503 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17506 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _cOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 17508 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17511 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _cOmts =
                   ({-# LINE 44 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 17513 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17516 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _cOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 17518 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17521 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _cOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 17523 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17526 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _cOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 17528 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17531 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _cIident,_cIisGlobal,_cImts,_cIpsexpr,_cIself,_cIsexpr,_cIsexprs,_cIsort,_cIvtype) =
                   c_ _cOmn _cOmts _cOsortexpr _cOtn _cOval
@@ -17579,52 +17582,52 @@ sem_ValueIdxs_Cons hd_ tl_ =
               _hdOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 17583 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17586 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 17588 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17591 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 17593 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17596 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 17598 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17601 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 17603 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17606 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmn =
                   ({-# LINE 61 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 17608 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17611 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmts =
                   ({-# LINE 62 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 17613 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17616 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 17618 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17621 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOtn =
                   ({-# LINE 69 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 17623 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17626 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOval =
                   ({-# LINE 63 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 17628 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17631 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _hdIself) =
                   hd_ _hdOmn _hdOmts _hdOsortexpr _hdOtn _hdOval
@@ -17706,32 +17709,32 @@ sem_Values_Cons hd_ tl_ =
               _hdOmts =
                   ({-# LINE 38 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 17710 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17713 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmts =
                   ({-# LINE 39 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _hdImts
-                   {-# LINE 17715 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17718 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOmts =
                   ({-# LINE 40 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _tlImts
-                   {-# LINE 17720 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17723 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOvtype =
                   ({-# LINE 41 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _hdIvtype:(_tlIvtype)
-                   {-# LINE 17725 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17728 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 31 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _hdIsexpr ++ _tlIsexpr
-                   {-# LINE 17730 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17733 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 30 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _hdIsexprs ++ _tlIsexprs
-                   {-# LINE 17735 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17738 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   (:) _hdIself _tlIself
@@ -17740,42 +17743,42 @@ sem_Values_Cons hd_ tl_ =
               _hdOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 17744 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17747 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 17749 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17752 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOtn =
                   ({-# LINE 47 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 17754 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17757 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _hdOval =
                   ({-# LINE 48 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 17759 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17762 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOmn =
                   ({-# LINE 54 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImn
-                   {-# LINE 17764 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17767 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOsortexpr =
                   ({-# LINE 20 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
                    _lhsIsortexpr
-                   {-# LINE 17769 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17772 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOtn =
                   ({-# LINE 29 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsItn
-                   {-# LINE 17774 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17777 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _tlOval =
                   ({-# LINE 28 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsIval
-                   {-# LINE 17779 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17782 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               ( _hdIident,_hdIisGlobal,_hdImts,_hdIpsexpr,_hdIself,_hdIsexpr,_hdIsexprs,_hdIsort,_hdIvtype) =
                   hd_ _hdOmn _hdOmts _hdOsortexpr _hdOtn _hdOval
@@ -17797,22 +17800,22 @@ sem_Values_Nil =
               _lhsOmts =
                   ({-# LINE 36 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    _lhsImts
-                   {-# LINE 17801 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17804 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexpr =
                   ({-# LINE 31 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 17806 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17809 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOsexprs =
                   ({-# LINE 30 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 17811 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17814 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _lhsOvtype =
                   ({-# LINE 32 "./src/Concurrent/Model/Encoder/Value.ag" #-}
                    []
-                   {-# LINE 17816 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+                   {-# LINE 17819 "src/Concurrent/Model/Encoder/Threads.hs" #-}
                    )
               _self =
                   []

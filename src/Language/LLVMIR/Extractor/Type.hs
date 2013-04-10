@@ -63,11 +63,12 @@ getTypeWithKind ty FFI.VectorTypeKind    = do n   <- liftIO $ FFI.getVectorSize 
 getTypeWithKind ty FFI.StructTypeKind    = getStructType ty
 getTypeWithKind ty FFI.FunctionTypeKind  = do retty <- (liftIO $ FFI.getReturnType ty) >>= getType
                                               n     <- liftIO $ FFI.countParamTypes ty >>= return . fromIntegral
+                                              isVar <- liftIO $ FFI.isFunctionVarArg ty
                                               pars <- liftIO $ allocaArray n $ \ args -> do
                                                         FFI.getParamTypes ty args
                                                         peekArray n args
                                               party <- forM pars getType 
-                                              return $ LL.TyFunction party retty
+                                              return $ LL.TyFunction party retty $ cInt2Bool isVar
 getTypeWithKind ty FFI.MetadataTypeKind  = return LL.TyMetadata
 getTypeWithKind ty x  = error $ "'getTypeWithKind': Type " ++ (show x) ++ " not suppported" 
 

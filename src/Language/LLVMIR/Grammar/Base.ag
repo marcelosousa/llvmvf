@@ -126,8 +126,9 @@ data Function
       name    :: Identifier
       linkage :: Linkage
       retty   :: Type
+      isVar   :: Bool
       params  :: Parameters
-      body    :: BasicBlocks 
+      body    :: BasicBlocks
 --          visibility :: MVisibility
 --          cconv      :: MCConv
 --          uaddr      :: MUnnamedAddr
@@ -140,6 +141,7 @@ data Function
       name       :: Identifier
       linkage    :: Linkage
       retty      :: Type
+      isVar      :: Bool
       params     :: Parameters
 --          visibility :: MVisibility
 --          cconv      :: MCConv
@@ -150,7 +152,7 @@ data Function
 
 {
 emptyFunction :: Function
-emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid [] []
+emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid False [] []
 }
           
 data BasicBlock

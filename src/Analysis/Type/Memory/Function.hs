@@ -19,15 +19,17 @@ import Data.Maybe
 -- Function TyAnn Inference
 typeFunction :: TyAnnEnv -> Function -> (TyAnn, TyAnnEnv)
 -- Incomplete: Need to check if the return type is compatible with the actual return type from the basic block
-typeFunction tye (FunctionDef  n l rty pms bbs) = let (ptys, tyex) = gLstTyInf tye typeParameter pms -- Type parameters
-                                                      rtyr = liftTy rty                              -- Lift return type
-                                                      (bbtyr, tyenv) = bbsTyInf tyex bbs
-                                                      tyr = T.TyDer $ T.TyFun ptys bbtyr -- TODO 
-                                                      tyey = M.insert n tyr tyenv
-                                                  in (tyr, M.insert n tyr tyex)
-typeFunction tye (FunctionDecl n l rty pms)     = let (ptys, tyex) = gLstTyInf tye typeParameter pms
-                                                      tyr = T.TyDer $ T.TyFun ptys [liftTy rty]
-                                                  in (tyr, M.insert n tyr tyex)
+typeFunction tye (FunctionDef  n l rty iv pms bbs) = 
+    let (ptys, tyex) = gLstTyInf tye typeParameter pms -- Type parameters
+        rtyr = liftTy rty                              -- Lift return type
+        (bbtyr, tyenv) = bbsTyInf tyex bbs
+        tyr = T.TyDer $ T.TyFun ptys bbtyr -- TODO 
+        tyey = M.insert n tyr tyenv
+    in (tyr, M.insert n tyr tyex)
+typeFunction tye (FunctionDecl n l rty iv pms) = 
+    let (ptys, tyex) = gLstTyInf tye typeParameter pms
+        tyr = T.TyDer $ T.TyFun ptys [liftTy rty]
+    in (tyr, M.insert n tyr tyex)
 
 -- Parameter TyAnn Inference
 typeParameter :: TyAnnEnv -> Parameter -> (TyAnn, TyAnnEnv)

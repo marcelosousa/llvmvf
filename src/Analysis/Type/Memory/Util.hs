@@ -29,7 +29,7 @@ liftTy TyOpaque          = T.TyDer $ T.TyOpa ""
 liftTy (TyArray s ty)    = T.TyDer $ T.TyAgg $ T.TyArr s $ liftTy ty
 liftTy (TyStruct n s ty) = T.TyDer $ T.TyAgg $ T.TyStr n s $ map liftTy ty
 liftTy TyLabel           = T.TyDer $ T.TyLab [] T.TyBot
-liftTy (TyFunction a r)  = T.TyDer $ T.TyFun (map liftTy a) [liftTy r]
+liftTy (TyFunction a r iv)  = T.TyDer $ T.TyFun (map liftTy a) [liftTy r]
 liftTy (TyPointer ty)    = T.TyDer $ T.TyPtr (liftTy ty) T.TyAny
 liftTy (TyVector s ty)   = T.TyDer $ T.TyVec s $ liftTy ty
 

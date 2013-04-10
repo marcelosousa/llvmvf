@@ -170,13 +170,15 @@ typeCheckCall :: TyEnv -> Identifier -> Type -> Identifier -> Values -> (TyEnv, 
 typeCheckCall tye i rfnty c args = 
 	let ty = getFnType tye c 
 	in case ty of
-			TyPointer (TyFunction typms tyr) ->
+			TyPointer (TyFunction typms tyr iv) ->
 			  let tyargs = map (typeValue tye) args
-			  in if (length tyargs == length typms) && tyr == rfnty
-			  	then if all (\(a,b) -> a == b) $ zip tyargs typms
-					 then (insert i tyr tye, ty)
-					 else error $ "typeCheckCall: " ++ show (zip tyargs typms)
-				else error $ "typeCheckCall: length dismatch in " ++ show c ++ "\n" ++ show [tyargs, typms] ++ "\n" ++ show [tyr, ty]
+			  in if tyr == rfnty
+			  	 then if all (\(a,b) -> a == b) $ zip tyargs typms
+				 	  then if iv || length tyargs == length typms
+					       then (insert i tyr tye, ty)
+					       else error $ "typeCheckCall: length mismatch in " ++ show c
+					  else error $ "typeCheckCall: argument type mismatch " ++ show (zip tyargs typms)
+				 else error $ "typeCheckCall: return type are different in " ++ show c ++ "\n" ++ show [tyr, ty]
 			x -> error $ "typeCheckCall: Function has type: " ++ show x
 
 getFnType :: TyEnv -> Identifier -> Type

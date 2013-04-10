@@ -24,6 +24,7 @@ data Type
   | TyFunction
       party :: Types
       retty :: Type
+      isVar :: Bool
   | TyStruct
       name  :: String
       numEl :: Int
