@@ -18,17 +18,19 @@ import qualified Data.Map as M
 data STyRes = STyRes String TyEnv (M.Map String TyEnv)
 
 typeCheckModule :: Module -> STyRes
-typeCheckModule (Module i _ _ gvars funs _) = let tye = typeCheckGlo gvars M.empty
-                                              in STyRes i tye $ typeCheckFuns tye funs
+typeCheckModule (Module i _ _ gvars funs nmdtys) = 
+	let tye = typeCheckGlo nmdtys M.empty gvars 
+    in STyRes i tye $ typeCheckFuns nmdtys tye funs
 
-typeCheckGlo :: Globals -> TyEnv -> TyEnv
-typeCheckGlo []     tye = tye
-typeCheckGlo (x:xs) tye = let tye' = typeCheckGlobal tye x
-                          in typeCheckGlo xs tye'
+typeCheckGlo :: NamedTyEnv -> TyEnv -> Globals -> TyEnv
+typeCheckGlo nmdtye tye []     = tye
+typeCheckGlo nmdtye tye (x:xs) = 
+	let tye' = typeCheckGlobal nmdtye tye x
+    in typeCheckGlo nmdtye tye' xs 
 
-typeCheckFuns :: TyEnv -> Functions -> M.Map String TyEnv
-typeCheckFuns tye funs = let ntye =  M.fold (\f r -> typeFunction r f) tye funs
-                         in M.map (typeCheckFunction ntye) funs
+typeCheckFuns :: NamedTyEnv -> TyEnv -> Functions -> M.Map String TyEnv
+typeCheckFuns nmdtye tye funs = let ntye =  M.fold (\f r -> typeFunction r f) tye funs
+                                in M.map (typeCheckFunction nmdtye ntye) funs
 
 instance Show STyRes where
 	show (STyRes s gs fns) = 

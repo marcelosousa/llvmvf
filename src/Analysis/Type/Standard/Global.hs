@@ -14,11 +14,11 @@ import qualified Data.Map as M
 import Debug.Trace (trace)
 
 -- Type Check Global
-typeCheckGlobal :: TyEnv -> Global -> TyEnv
-typeCheckGlobal tye (GlobalVar i l False isUAddr ty Nothing align) = insert i ty tye
-typeCheckGlobal tye (GlobalVar i l True isUAddr ty (Just c) align) = 
-  let t = typeConstant tye c
+typeCheckGlobal :: NamedTyEnv -> TyEnv -> Global -> TyEnv
+typeCheckGlobal nmdtye tye (GlobalVar i l False isUAddr ty Nothing align) = insert i ty tye
+typeCheckGlobal nmdtye tye (GlobalVar i l True isUAddr ty (Just c) align) = 
+  let t = typeConstant nmdtye tye c
   in if (TyPointer t) == ty 
      then insert i ty tye
      else error $ "typeCheckGlobal: " ++ show i ++ " " ++ show t ++ " " ++ show ty
-typeCheckGlobal tye gv = error $ "typeCheckGlobal: " ++ show gv
+typeCheckGlobal nmdtye tye gv = error $ "typeCheckGlobal: " ++ show gv

@@ -10,6 +10,7 @@ import Language.LLVMIR
 import qualified Data.Map as M
 
 type TyEnv = M.Map Identifier Type
+type NamedTyEnv = M.Map Id Type
 
 data TyClass = TyClassInt | TyClassFloat
 

@@ -22,11 +22,11 @@ typeFunction tye (FunctionDecl n l rty iv pms) =
     in insert n tysig tye 
 
 -- Type Check Function
-typeCheckFunction :: TyEnv -> Function -> TyEnv
-typeCheckFunction tye (FunctionDef  n l rty iv pms bbs) = 
+typeCheckFunction :: NamedTyEnv -> TyEnv -> Function -> TyEnv
+typeCheckFunction nmdtye tye (FunctionDef  n l rty iv pms bbs) = 
     let (tysig, ntye) = typeSignature tye pms rty iv
-    in typeCheckBasicBlock ntye bbs (head bbs) -- assuming that head bbs is the entry block 
-typeCheckFunction tye (FunctionDecl n l rty iv pms) = tye
+    in typeCheckBasicBlock nmdtye ntye bbs (head bbs) -- assuming that head bbs is the entry block 
+typeCheckFunction nmdtye tye (FunctionDecl n l rty iv pms) = tye
 
 typeSignature :: TyEnv -> Parameters -> Type -> Bool -> (Type, TyEnv)
 typeSignature tye ps rty iv = let (tps, ntye) = typeCheckParameters tye ps
@@ -42,13 +42,13 @@ typeCheckParameters tye (x:xs) = let (tx,tye') = typeCheckParameter tye x
 typeCheckParameter :: TyEnv -> Parameter -> (Type, TyEnv)
 typeCheckParameter tye (Parameter i ty) = (ty, insert i ty tye)
 
-typeCheckBasicBlock :: TyEnv -> BasicBlocks -> BasicBlock -> TyEnv
-typeCheckBasicBlock tye bbs (BasicBlock l instr) = -- trace ("typeCheckBasicBlock " ++ show l) $
-  let (tye', rty) = typeCheckInstructions tye instr 
+typeCheckBasicBlock :: NamedTyEnv -> TyEnv -> BasicBlocks -> BasicBlock -> TyEnv
+typeCheckBasicBlock nmdtye tye bbs (BasicBlock l instr) = -- trace ("typeCheckBasicBlock " ++ show l) $
+  let (tye', rty) = typeCheckInstructions nmdtye tye instr 
   in case M.lookup l tye of
     Nothing -> case rty of
         TyJumpTo ids -> let bbsj = map (fromMaybe (error "typeCheckBasicBlock: cant find basic block") . findBasicBlock bbs) ids 
-                        in typeCheckBasicBlocks (insert l rty tye') bbs bbsj  
+                        in typeCheckBasicBlocks nmdtye (insert l rty tye') bbs bbsj  
         ty -> tye'
     Just ty -> tye 
 
@@ -58,18 +58,18 @@ findBasicBlock [] l = Nothing
 findBasicBlock (bb@(BasicBlock l _):bbs) i | i == l = Just bb
                                            | otherwise = findBasicBlock bbs i
 
-typeCheckBasicBlocks :: TyEnv -> BasicBlocks -> BasicBlocks -> TyEnv
-typeCheckBasicBlocks tye bbs [bb] = typeCheckBasicBlock tye bbs bb
-typeCheckBasicBlocks tye bbs [bbt,bbf] = let tybbt = typeCheckBasicBlock tye bbs bbt 
-                                             tybbf = typeCheckBasicBlock tye bbs bbf
-                                         in M.union tybbt tybbf -- probably problematic
-typeCheckBasicBlocks tye bbs x = error $ "typeCheckBasicBlocks: " ++ show x
+typeCheckBasicBlocks :: NamedTyEnv -> TyEnv -> BasicBlocks -> BasicBlocks -> TyEnv
+typeCheckBasicBlocks nmdtye tye bbs [bb] = typeCheckBasicBlock nmdtye tye bbs bb
+typeCheckBasicBlocks nmdtye tye bbs [bbt,bbf] = let tybbt = typeCheckBasicBlock nmdtye tye bbs bbt 
+                                                    tybbf = typeCheckBasicBlock nmdtye tye bbs bbf
+                                                in M.union tybbt tybbf -- probably problematic
+typeCheckBasicBlocks nmdtye tye bbs x = error $ "typeCheckBasicBlocks: " ++ show x
 
 
 -- typeCheckInstructions
-typeCheckInstructions :: TyEnv -> Instructions -> (TyEnv, Type)
-typeCheckInstructions tye []  = error "typeCheckInstructions: emtpy list"
-typeCheckInstructions tye [i] = typeCheckInstruction tye i
-typeCheckInstructions tye (x:xs) = 
-  let (tye', v) = typeCheckInstruction tye x
-  in typeCheckInstructions tye' xs
+typeCheckInstructions :: NamedTyEnv -> TyEnv -> Instructions -> (TyEnv, Type)
+typeCheckInstructions nmdtye tye []  = error "typeCheckInstructions: emtpy list"
+typeCheckInstructions nmdtye tye [i] = typeCheckInstruction nmdtye tye i
+typeCheckInstructions nmdtye tye (x:xs) = 
+  let (tye', v) = typeCheckInstruction nmdtye tye x
+  in typeCheckInstructions nmdtye tye' xs
