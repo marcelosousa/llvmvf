@@ -6,11 +6,6 @@
 
 module Analysis.Type.Memory.TyAnn where
 
-#if __GLASGOW_HASKELL__ >= 704
-import Data.Map hiding (foldr)
-#else
-import Data.Map 
-#endif
 import Language.LLVMIR (Identifier)
 
 type TysAnn = [TyAnn]
@@ -24,14 +19,16 @@ data TyAnn = TyBot
 data TyPri = TyVoid
            | TyInt Int
            | TyFloat -- Just a tag
+           | TyMetadata
+           | TyLabel
   deriving (Eq, Ord)
 
 data TyDer = TyAgg TyAgg
            | TyVec Int TyAnn
            | TyFun TysAnn TysAnn
-           | TyLab TysAnn TyAnn
            | TyPtr TyAnn  TyAnnot
-           | TyOpa String
+--           | TyLab TysAnn TyAnn
+--           | TyOpa String
   deriving (Eq, Ord)
 
 data TyAgg = TyArr  Int TyAnn         -- Derived + Aggregate  
@@ -43,9 +40,6 @@ data TyAnnot = TyIOAddr
              | TyAny
   deriving (Eq, Ord)
 
-
-type TyAnnEnv = Map Identifier TyAnn
-
 instance Show TyAnn where
   show TyBot = "_|_"
   show TyUndef = "undef"
@@ -53,17 +47,18 @@ instance Show TyAnn where
   show (TyDer t) = show t
 
 instance Show TyPri where
-  show TyVoid = "void"
-  show (TyInt n) = "i"++show n
-  show TyFloat = "float"
+  show TyVoid     = "void"
+  show TyFloat    = "float"
+  show TyLabel    = "label"
+  show TyMetadata = "metadata"
+  show (TyInt n)  = "i"++show n
 
 instance Show TyDer where
   show (TyAgg t) = show t
   show (TyVec n t) = "<" ++ show n ++ " x " ++ show t ++ ">"
   show (TyFun tys t) = "fn :: " ++ (foldr (\x s -> show x ++ " -> " ++ show s) "" tys) ++ show " -> " ++ show t
-  show (TyLab tys t) = "l :: " ++ (foldr (\x s -> show x ++ " -> " ++ show s) "" tys) ++ show " -> " ++ show t
   show (TyPtr ty tya) = "* (" ++ show ty ++ ")" ++ show tya
-  show (TyOpa s) = "{" ++ s ++ "}"
+--  show (TyOpa s) = "{" ++ s ++ "}"
 
 instance Show TyAgg where
   show (TyArr n t) = "[" ++ show n ++ " x " ++ show t ++ "]"

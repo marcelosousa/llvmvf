@@ -4,17 +4,21 @@
 -- A Type System for Memory Analysis of LLVM IR Modules
 -------------------------------------------------------------------------------
 
-module Analysis.Type.Memory.Function (typeFunction) where
+module Analysis.Type.Memory.Function (tyanFunction,tyanFnSig) where
 
-import Analysis.Type.Memory.TyAnn (TyAnn, TyAnnEnv)
+import qualified Data.Map as M
+
+--import Analysis.Type.Memory.TyAnn (TyAnn, TyAnnEnv)
 import qualified Analysis.Type.Memory.TyAnn as T
 import Analysis.Type.Memory.Util
-import Analysis.Type.Memory.Instruction
+--import Analysis.Type.Memory.Instruction
 import Language.LLVMIR
-import qualified Data.Map as M
 import Debug.Trace (trace)
 import Data.Maybe
 
+tyanFunction = undefined
+tyanFnSig = undefined
+{-
 -- ==============================================================
 -- Function TyAnn Inference
 typeFunction :: TyAnnEnv -> Function -> (TyAnn, TyAnnEnv)
@@ -55,3 +59,4 @@ isTyInf tyenv []     = (T.TyBot, tyenv)
 isTyInf tyenv [x]    = iTyInf tyenv x
 isTyInf tyenv (x:xs) = let (ta,te) = iTyInf tyenv x
                        in isTyInf te xs
+-}

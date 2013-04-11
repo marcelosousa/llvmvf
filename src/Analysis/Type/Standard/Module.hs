@@ -57,7 +57,6 @@ prettyFn (n,ty) r = "Function " ++ n ++ "\n"
 	  		   ++ prettyTy ty
 	  		   ++ r 
 
-
 prettyTy :: TyEnv -> String
 prettyTy m = foldr prettyE "" $ M.toList m
   where prettyE (i,ty) s = (show $ pretty i) ++ "::" ++ (show $ pretty ty) ++ "\n" ++ s

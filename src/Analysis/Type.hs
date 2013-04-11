@@ -11,14 +11,13 @@ module Analysis.Type where
 
 import Analysis.Type.Util (TyEnv)
 import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
-import Analysis.Type.Memory.TyAnn (TyAnn, TyAnnEnv)
-import Analysis.Type.Memory.Module (typeModule)
+import Analysis.Type.Memory.Context (RTyRes)
+import Analysis.Type.Memory.Module (tyanModule)
 import Language.LLVMIR
 import qualified Data.Map as M
 
 typeCheck :: Module -> STyRes 
 typeCheck = typeCheckModule
-
 -- 
-typeAnalysis :: Module -> ([TyAnn], M.Map String (TyAnn, TyAnnEnv))
-typeAnalysis = typeModule
+typeAnalysis :: Module -> RTyRes
+typeAnalysis = tyanModule

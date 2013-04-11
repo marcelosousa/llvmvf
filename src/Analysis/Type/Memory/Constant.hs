@@ -8,7 +8,8 @@
 
 module Analysis.Type.Memory.Constant where
 
-import Analysis.Type.Memory.TyAnn (TyAnn, TyAnnEnv)
+import Analysis.Type.Memory.TyAnn (TyAnn)
+import Analysis.Type.Memory.Context
 import qualified Analysis.Type.Memory.TyAnn as T
 import Analysis.Type.Memory.Util
 import Analysis.Type.Util
@@ -16,6 +17,8 @@ import Language.LLVMIR
 import qualified Data.Map as M
 
 -------------------------------------------------------------------
+typeConstant = undefined
+
 vTyInf :: TyAnnEnv -> Value -> (TyAnn, TyAnnEnv)
 vTyInf tyenv val = case val of
    Id v ty -> let vty = liftTy ty
