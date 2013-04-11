@@ -2615,7 +2615,7 @@ bbentrypci_Inh_Instructions	src/Concurrent/Model/Analysis/ControlFlow.hs	6119;"	
 bbsTyInf	./Analysis/Type/Memory/Function.hs	42;"	v	file:
 binOps	./Language/LLVMIR/Extractor/Instruction.hs	279;"	v
 bitbinOps	./Language/LLVMIR/Extractor/Instruction.hs	289;"	v
-bitcast	./Analysis/Type/Standard/Instruction.hs	147;"	v
+bitcast	./Analysis/Type/Standard/Instruction.hs	160;"	v
 bmcMode	Main.hs	80;"	v
 body_Function_FunctionDef	src/Language/LLVMIR.hs	227;"	v
 bound	Main.hs	53;"	v
@@ -2793,7 +2793,7 @@ expr_Constant_ConstantExpr	src/Language/LLVMIR.hs	173;"	v
 extract	./Language/LLVMIR/Extractor/Module.hs	53;"	v
 extractMode	Main.hs	66;"	v
 extractModule	./Language/LLVMIR/Extractor/Module.hs	58;"	v	file:
-f	./Analysis/Type/Standard/Instruction.hs	197;"	v
+f	./Analysis/Type/Standard/Instruction.hs	210;"	v
 fStore	./Concurrent/Model.hs	68;"	v
 f_Instruction_Br	src/Language/LLVMIR.hs	255;"	v
 fails	./Concurrent/Model.hs	72;"	v
@@ -2801,7 +2801,7 @@ findBasicBlock	./Analysis/Type/Standard/Function.hs	57;"	v	file:
 fname_Inh_BasicBlock	src/Concurrent/Model/Visualizer.hs	728;"	v
 fname_Inh_BasicBlocks	src/Concurrent/Model/Visualizer.hs	791;"	v
 fp_SimpleConstant_ConstantFP	src/Language/LLVMIR.hs	428;"	v
-fptoint	./Analysis/Type/Standard/Instruction.hs	133;"	v
+fptoint	./Analysis/Type/Standard/Instruction.hs	146;"	v
 fpv_ConstantFP_ConstantFPFloat	src/Language/LLVMIR.hs	192;"	v
 fromISExpr	./Concurrent/Model.hs	112;"	v
 funs_Module_Module	src/Language/LLVMIR.hs	376;"	v
@@ -2829,7 +2829,7 @@ getElemPtrArgs	./Language/LLVMIR/Extractor/Instruction.hs	58;"	v
 getElementPtrConstant	./Language/LLVMIR/Extractor/Value.hs	137;"	v
 getEntry	./src/Concurrent/Model/Analysis/ControlFlow.ag	98;"	v
 getEnv	./Language/LLVMIR/Extractor/Context.hs	38;"	v
-getFnType	./Analysis/Type/Standard/Instruction.hs	185;"	v
+getFnType	./Analysis/Type/Standard/Instruction.hs	198;"	v
 getFs	./Concurrent/Model.hs	34;"	v
 getFunction	./Language/LLVMIR/Extractor/Module.hs	142;"	v	file:
 getFuns	./Language/LLVMIR/Extractor/Module.hs	136;"	v	file:
@@ -2940,7 +2940,7 @@ insert	./Analysis/Type/Memory/Util.hs	48;"	v
 insert	./Analysis/Type/Util.hs	60;"	v
 instr	./Language/LLVMIR/Extractor/Context.hs	24;"	v
 instrs_BasicBlock_BasicBlock	src/Language/LLVMIR.hs	131;"	v
-inttofp	./Analysis/Type/Standard/Instruction.hs	156;"	v
+inttofp	./Analysis/Type/Standard/Instruction.hs	169;"	v
 isAgg	./Analysis/Type/Util.hs	41;"	v
 isComparableTypeFloat	./Analysis/Type/Standard/Constant.hs	163;"	v
 isComparableTypeInt	./Analysis/Type/Standard/Constant.hs	157;"	v
@@ -5750,15 +5750,15 @@ ty_Type_TyPointer	src/Language/LLVMIR.hs	459;"	v
 ty_Type_TyVector	src/Language/LLVMIR.hs	460;"	v
 ty_Value_Id	src/Language/LLVMIR.hs	471;"	v
 typeAnalysis	./Analysis/Type.hs	24;"	v
-typeCastOp	./Analysis/Type/Standard/Instruction.hs	124;"	v
+typeCastOp	./Analysis/Type/Standard/Instruction.hs	137;"	v
 typeCheck	./Analysis/Type.hs	20;"	v
 typeCheckBasicBlock	./Analysis/Type/Standard/Function.hs	46;"	v	file:
 typeCheckBasicBlocks	./Analysis/Type/Standard/Function.hs	62;"	v	file:
-typeCheckBinInstr	./Analysis/Type/Standard/Instruction.hs	194;"	v
+typeCheckBinInstr	./Analysis/Type/Standard/Instruction.hs	207;"	v
 typeCheckBranch	./Analysis/Type/Standard/Instruction.hs	23;"	v
 typeCheckBranchs	./Analysis/Type/Standard/Instruction.hs	19;"	v
-typeCheckCall	./Analysis/Type/Standard/Instruction.hs	170;"	v
-typeCheckCmp	./Analysis/Type/Standard/Instruction.hs	202;"	v
+typeCheckCall	./Analysis/Type/Standard/Instruction.hs	183;"	v
+typeCheckCmp	./Analysis/Type/Standard/Instruction.hs	215;"	v
 typeCheckFunction	./Analysis/Type/Standard/Function.hs	26;"	v
 typeCheckFuns	./Analysis/Type/Standard/Module.hs	32;"	v	file:
 typeCheckGlo	./Analysis/Type/Standard/Module.hs	26;"	v	file:

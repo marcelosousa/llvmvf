@@ -116,8 +116,21 @@ typeCheckInstruction nmdtye tye i = case i of
   	ExtractValue pc i v idxs   -> error "ExtractValue operation not supported"
   	InsertValue pc i v vi idxs -> error "InsertValue operation not supported"
   -- Atomic Operations
-  	Cmpxchg   pc i mptr cval nval ord -> error "Cmpxchg operation not supported"
-  	AtomicRMW pc i mptr val  op   ord -> error "AtomicRMW operation not supported"
+  	Cmpxchg   pc i mptr cval nval ord -> 
+  		case typeValue nmdtye tye mptr of
+  			TyPointer ty -> let cty = typeValue nmdtye tye cval
+  			                    nty = typeValue nmdtye tye nval
+                            in if ty == cty && cty == nty
+                               then (insert i ty tye, ty)
+                               else error $ "Cmpxchg: Types are not equal " ++ show [ty,cty,nty]
+  			x -> error $ "Cmpxchg: Type of first element is not pointer: " ++ show x
+  	AtomicRMW pc i mptr val op ord -> 
+  		case typeValue nmdtye tye mptr of
+  			TyPointer ty -> let vty = typeValue nmdtye tye val
+                            in if ty == vty 
+                               then (insert i ty tye, ty)
+                               else error $ "AtomicRMW: Types are not equal " ++ show [ty,vty]
+  			x -> error $ "AtomicRMW: Type of first element is not pointer: " ++ show x
 
 
 typeCastOp :: NamedTyEnv -> TyEnv -> Identifier -> Value -> Type -> (Type -> Bool) -> (Type -> Type -> Bool) -> (TyEnv, Type)
