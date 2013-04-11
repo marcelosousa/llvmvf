@@ -142,7 +142,6 @@ pBinOp ty id c op1 op2 = ty <+> id <+> char '=' <+> text c <+> op1 <> char ',' <
 
 pBitBinOp :: Doc -> Doc -> String -> Doc -> Doc -> Doc
 pBitBinOp ty id c op1 op2 = id <+> char '=' <+> text c <+> ty <+> op1 <> char ',' <+> op2
-
 }
  
 sem Alias
@@ -284,8 +283,8 @@ sem ConstantExpr
   | UnaryConstantExpr          lhs.pp = @ty.pp <+> text @name <+> @val.pp
 
 sem CompareConstantExpr
-  | ICmpExpr   lhs.pp = text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
-  | FCmpExpr   lhs.pp = text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
+  | ICmpExpr   lhs.pp = text "icmp" <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
+  | FCmpExpr   lhs.pp = text "icmp" <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
 
 sem GlobalValue
   | FunctionValue  lhs.pp = @ty.pp <+> @n.pp 

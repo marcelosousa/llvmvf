@@ -25,7 +25,7 @@ typeGlobalValue tye (GlobalVariable n ty) = typeValueGen tye n ty "typeGlobalVal
 
 typeValueGen :: TyEnv -> Identifier -> Type -> String -> Type
 typeValueGen tye v ty s = case M.lookup v tye of
-                            Nothing -> error $ s ++ ": " ++ show v ++ " is not in the context: " ++ show tye
+                            Nothing -> ty -- trace (s ++ ": " ++ show v ++ " is not in the context: " ++ show tye) $ ty
                             Just t  -> if t == ty
                                        then ty
                                        else error $ s ++ ": Given " ++ show ty ++ ". Expected " ++ show t
@@ -100,14 +100,15 @@ errorMsg s r v = "typeConstantDataSequential: " ++ s ++ " does not have " ++ r +
 
 -- typeExpression
 typeExpression :: NamedTyEnv -> TyEnv -> ConstantExpr -> Type
-typeExpression nmdtye tye (CompareConstantExpr ce) = typeCompareConstantExpr nmdtye tye ce
+typeExpression nmdtye tye (CompareConstantExpr ce)           = typeCompareConstantExpr nmdtye tye ce
 typeExpression nmdtye tye (GetElementPtrConstantExpr v idxs) = typeGetElementPtrConstantExpr nmdtye tye v idxs
-typeExpression nmdtye tye (UnaryConstantExpr name _ _ _) = error $ "typeExpression: UnaryConstantExpr " ++ show name ++ " not supported."
+typeExpression nmdtye tye e@(UnaryConstantExpr name i v ty)  = typeUnaryExpression nmdtye tye name i v ty
 typeExpression nmdtye tye e = error $ "typeExpression: " ++ show e ++ " not supported."
 
 
 typeGetElementPtrConstantExpr :: NamedTyEnv -> TyEnv -> Value -> Values -> Type
-typeGetElementPtrConstantExpr nmdtye tye v idxs = case typeValue nmdtye tye v of
+typeGetElementPtrConstantExpr nmdtye tye v idxs = --trace ("gep: " ++ show v ++ " " ++ show idxs) $
+  case typeValue nmdtye tye v of
       TyPointer ty -> if and $ map (isInt . typeValue nmdtye tye) idxs
                       then if isAgg ty
                            then getTypeAgg nmdtye ty $ map getIntValue $ tail idxs
@@ -132,9 +133,7 @@ getTypeAgg nmdtye ty (x:xs) = case ty of
                                        Just (TyStruct _ r t') -> if r == s 
                                                                  then t' !! x
                                                                  else error $ "getTypeAgg: Should not happen"
-                             in if isAgg nt 
-                                then getTypeAgg nmdtye nt xs
-                                else error $ "getTypeAgg: " ++ show nt ++ " is not aggregate. (2)" 
+                             in getTypeAgg nmdtye nt xs
       _  -> error $ "getTypeAgg: " ++ show ty ++ " is not aggregate. (3)"   
 
 typeCompareConstantExpr :: NamedTyEnv -> TyEnv -> CompareConstantExpr -> Type
@@ -164,3 +163,20 @@ isComparableTypeFloat (TyFloatPoint _) = (True,0)
 isComparableTypeFloat (TyVector _ (TyFloatPoint _)) = (True,1)
 isComparableTypeFloat (TyPointer _) = (True,0) -- Suspicious
 isComparableTypeFloat _ = (False, 0)
+
+typeUnaryExpression :: NamedTyEnv -> TyEnv -> String -> Int -> Value -> Type -> Type
+typeUnaryExpression nmdtye tye n opcode val ty =
+  case opcode of
+    41 -> let tyv = typeValue nmdtye tye val
+          in if isPointer tyv && isInt ty 
+             then ty
+             else error $ "PtrToInt(1): Either type is not pointer or not int: " ++ show [tyv, ty] ++ "\n" ++ show val
+    43 -> let tyv = typeValue nmdtye tye val
+          in if notAggFstClass tyv && notAggFstClass ty
+             then if sizeof tyv == sizeof ty
+                  then ty
+                  else error $ "bitcast: types with different bit sizes:" ++ show tyv ++ "\n" ++ show ty
+     else error $ "bitcast: One of the types " ++ show [tyv, ty] ++ " is aggregate or not fst class" 
+    x  -> error $ "typeUnaryExpression: " ++ show n ++ " not supported."
+
+      

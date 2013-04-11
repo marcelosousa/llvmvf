@@ -11,4 +11,4 @@ module {Language.LLVMIR}{}{}
 
 include "Base.ag"
 include "Type.ag"
-include "FloatOrd"
+include "TypeEq"

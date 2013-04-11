@@ -65,26 +65,26 @@ typeCheckInstruction nmdtye tye i = case i of
  	FDiv pc i ty op1 op2 -> typeCheckBinInstr TyClassFloat tye i ty (typeValue nmdtye tye op1) (typeValue nmdtye tye op2)
  	FRem pc i ty op1 op2 -> typeCheckBinInstr TyClassFloat tye i ty (typeValue nmdtye tye op1) (typeValue nmdtye tye op2)
   -- Cast Operations
-	Trunc    pc i v ty -> typeCastOp nmdtye tye i v ty isInt (>)       -- Truncate integers
-	ZExt     pc i v ty -> typeCastOp nmdtye tye i v ty isInt (<)       -- Zero extend integers
-	SExt     pc i v ty -> typeCastOp nmdtye tye i v ty isInt (<)       -- Sign extend integers
-	FPTrunc  pc i v ty -> typeCastOp nmdtye tye i v ty isFloat (>)     -- Truncate floating point
-	FPExt    pc i v ty -> typeCastOp nmdtye tye i v ty isFloat (<=)    -- Extend floating point
-	FPToUI   pc i v ty -> fptoint    nmdtye tye i v ty                 -- floating point -> UInt
-	FPToSI   pc i v ty -> fptoint    nmdtye tye i v ty                 -- floating point -> SInt
-	UIToFP   pc i v ty -> inttofp    nmdtye tye i v ty                 -- UInt -> floating point
-	SIToFP   pc i v ty -> inttofp    nmdtye tye i v ty                 -- SInt -> floating point
-	PtrToInt pc i v ty ->                                       -- Pointer -> Integer
-		let tyv = typeValue nmdtye tye v
-	    in if isPointer tyv && isInt ty 
-	       then (insert i ty tye, ty)
-	       else error $ "PtrToInt: Either type is not pointer or not int: " ++ show [tyv, ty] 
+	Trunc    pc i v ty -> typeCastOp nmdtye tye i v ty isInt (>)    -- Truncate integers
+	ZExt     pc i v ty -> typeCastOp nmdtye tye i v ty isInt (<)    -- Zero extend integers
+	SExt     pc i v ty -> typeCastOp nmdtye tye i v ty isInt (<)    -- Sign extend integers
+	FPTrunc  pc i v ty -> typeCastOp nmdtye tye i v ty isFloat (>)  -- Truncate floating point
+	FPExt    pc i v ty -> typeCastOp nmdtye tye i v ty isFloat (<=) -- Extend floating point
+	FPToUI   pc i v ty -> fptoint    nmdtye tye i v ty              -- floating point -> UInt
+	FPToSI   pc i v ty -> fptoint    nmdtye tye i v ty              -- floating point -> SInt
+	UIToFP   pc i v ty -> inttofp    nmdtye tye i v ty              -- UInt -> floating point
+	SIToFP   pc i v ty -> inttofp    nmdtye tye i v ty              -- SInt -> floating point
+	PtrToInt pc i v ty ->                                           -- Pointer -> Integer
+		let tyv = typeUnaryExpression nmdtye tye "PtrToInt" 41 v ty
+	    in (insert i tyv tye, tyv)
 	IntToPtr pc i v ty -> 										-- Integer -> Pointer
 		let tyv = typeValue nmdtye tye v
-	    in if isPointer tyv && isInt ty 
+	    in if isInt tyv && isPointer ty 
 	       then (insert i ty tye, ty)
-	       else error $ "PtrToInt: Either type is not pointer or not int: " ++ show [tyv, ty] 
-	BitCast  pc i v ty -> bitcast nmdtye tye i v ty                    -- Type cast      
+	       else error $ "IntToPtr: Either type is not pointer or not int: " ++ show [tyv, ty] 
+	BitCast  pc i v ty ->                                       -- Type cast
+		let tyv = typeUnaryExpression nmdtye tye "BitCast" 43 v ty
+		in (insert i tyv tye, tyv)                
   -- Other Operations
  	ICmp pc i cond ty op1 op2 -> typeCheckCmp TyClassInt   tye i ty (typeValue nmdtye tye op1) (typeValue nmdtye tye op2)
  	FCmp pc i cond ty op1 op2 -> typeCheckCmp TyClassFloat tye i ty (typeValue nmdtye tye op1) (typeValue nmdtye tye op2)
@@ -113,7 +113,14 @@ typeCheckInstruction nmdtye tye i = case i of
   	Call pc i ty callee vs -> typeCheckCall nmdtye tye i ty callee vs
   -- Selection Operations
   	Select pc i cv vt vf       -> error "select operation not supported."
-  	ExtractValue pc i v idxs   -> error "ExtractValue operation not supported"
+  	ExtractValue pc i v idxs   -> 
+  	  let ty = typeValue nmdtye tye v
+  	  in if length idxs > 0
+         then if isAgg ty
+              then let t = getTypeAgg nmdtye ty idxs
+                   in (insert i t tye, t)
+              else error $ "ExtractValue: " ++ show ty ++ " is not aggregate."  
+         else error $ "ExtractValue: empty list" 
   	InsertValue pc i v vi idxs -> error "InsertValue operation not supported"
   -- Atomic Operations
   	Cmpxchg   pc i mptr cval nval ord -> 
@@ -156,15 +163,6 @@ fptoint nmdtye tye i v ty =
 			x -> error $ "fptoint: " ++ show x ++ " is not a vector of ints"
 		x -> error $ "fptoint: Type " ++ show x ++ " is not a float or vector of floats"
 
-bitcast :: NamedTyEnv -> TyEnv -> Identifier -> Value -> Type -> (TyEnv, Type)
-bitcast nmdtye tye i v ty = 
-	let tyv = typeValue nmdtye tye v
-	in if notAggFstClass tyv && notAggFstClass ty
-	   then if sizeof tyv == sizeof ty
-	   	    then (insert i ty tye, ty)
-	   	    else error $ "bitcast: " ++ show [tyv, ty] ++ " have different bit sizes"
-	   else error $ "bitcast: One of the types " ++ show [tyv, ty] ++ " is aggregate or not fst class" 
-
 inttofp :: NamedTyEnv -> TyEnv -> Identifier -> Value -> Type -> (TyEnv, Type)
 inttofp nmdtye tye i v ty = 
 	let tyv = typeValue nmdtye tye v
@@ -188,7 +186,9 @@ typeCheckCall nmdtye tye i rfnty c args =
 			  in if tyr == rfnty
 			  	 then if all (\(a,b) -> a == b) $ zip tyargs typms
 				 	  then if iv || length tyargs == length typms
-					       then (insert i tyr tye, ty)
+					       then if i == Local "" 
+					       	    then (tye, ty)
+					       	    else (insert i tyr tye, ty)
 					       else error $ "typeCheckCall: length mismatch in " ++ show c
 					  else error $ "typeCheckCall: argument type mismatch " ++ show (zip tyargs typms)
 				 else error $ "typeCheckCall: return type are different in " ++ show c ++ "\n" ++ show [tyr, ty]

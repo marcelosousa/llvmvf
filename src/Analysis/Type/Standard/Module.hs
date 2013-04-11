@@ -17,9 +17,16 @@ import qualified Data.Map as M
 
 data STyRes = STyRes String TyEnv (M.Map String TyEnv)
 
+initenv :: TyEnv
+initenv = M.insert    (Global "llvm.lifetime.start") (TyPointer $ TyFunction [TyInt 64, TyPointer $ TyInt 8] TyVoid False) $ 
+          M.insert    (Global "llvm.lifetime.end") (TyPointer $ TyFunction [TyInt 64, TyPointer $ TyInt 8] TyVoid False) $ 
+          M.insert    (Global "llvm.frameaddress") (TyPointer $ TyFunction [TyInt 32] (TyPointer $ TyInt 8) False) $ 
+          M.insert    (Global "llvm.dbg.declare") (TyPointer $ TyFunction [TyMetadata,TyMetadata] TyVoid False) $ 
+          M.singleton (Global "llvm.dbg.value") $ TyPointer $ TyFunction [TyMetadata, TyInt 64, TyMetadata] TyVoid False
+
 typeCheckModule :: Module -> STyRes
 typeCheckModule (Module i _ _ gvars funs nmdtys) = 
-	let tye = typeCheckGlo nmdtys M.empty gvars 
+	let tye = typeCheckGlo nmdtys initenv gvars 
     in STyRes i tye $ typeCheckFuns nmdtys tye funs
 
 typeCheckGlo :: NamedTyEnv -> TyEnv -> Globals -> TyEnv

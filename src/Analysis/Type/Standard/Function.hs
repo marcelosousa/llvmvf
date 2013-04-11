@@ -17,7 +17,7 @@ typeFunction :: TyEnv -> Function -> TyEnv
 typeFunction tye (FunctionDef  n l rty iv pms bbs) = 
     let (tysig, _) = typeSignature tye pms rty iv
     in insert n tysig tye 
-typeFunction tye (FunctionDecl n l rty iv pms) = 
+typeFunction tye (FunctionDecl n l rty iv pms) = trace ("inserting " ++ show n) $ 
     let (tysig, _) = typeSignature tye pms rty iv
     in insert n tysig tye 
 

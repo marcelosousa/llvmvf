@@ -88,7 +88,7 @@ data Module
 --          mdlasm :: MModuleAsms
 
 -- data Endianness
-	--       | BigEndian
+--       | BigEndian
 --       | LittleEndian
 
 data DataLayout

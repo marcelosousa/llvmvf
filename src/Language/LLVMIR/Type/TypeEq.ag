@@ -1,6 +1,6 @@
 {
 -------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Type.FloatOrd
+-- Module    :  Language.LLVMIR.Type.TypeEq
 -- Copyright :  (c) 2012 Marcelo Sousa
 -- Standard LLVM IR Types
 -------------------------------------------------------------------------------

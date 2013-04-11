@@ -169,32 +169,31 @@ data AtomicOrdering
   | SequentiallyConsistent 
 
 data IntPredicate
-      | IntEQ                       -- ^ equal
-      | IntNE                       -- ^ not equal
-      | IntUGT                      -- ^ unsigned greater than
-      | IntUGE                      -- ^ unsigned greater or equal
-      | IntULT                      -- ^ unsigned less than
-      | IntULE                      -- ^ unsigned less or equal
-      | IntSGT                      -- ^ signed greater than
-      | IntSGE                      -- ^ signed greater or equal
-      | IntSLT                      -- ^ signed less than
-      | IntSLE                      -- ^ signed less or equal
+  | IntEQ                  -- ^ equal
+  | IntNE                  -- ^ not equal
+  | IntUGT                 -- ^ unsigned greater than
+  | IntUGE                 -- ^ unsigned greater or equal
+  | IntULT                 -- ^ unsigned less than
+  | IntULE                 -- ^ unsigned less or equal
+  | IntSGT                 -- ^ signed greater than
+  | IntSGE                 -- ^ signed greater or equal
+  | IntSLT                 -- ^ signed less than
+  | IntSLE                 -- ^ signed less or equal
 
 data RealPredicate
-      | LLVMRealPredicateFalse -- ^ Always false (always folded) 
-      | LLVMRealOEQ            -- ^ True if ordered and equal 
-      | LLVMRealOGT            -- ^ True if ordered and greater than 
-      | LLVMRealOGE            -- ^ True if ordered and greater than or equal 
-      | LLVMRealOLT            -- ^ True if ordered and less than 
-      | LLVMRealOLE            -- ^ True if ordered and less than or equal 
-      | LLVMRealONE            -- ^ True if ordered and operands are unequal 
-      | LLVMRealORD            -- ^ True if ordered (no nans) 
-      | LLVMRealUNO            -- ^ True if unordered: isnan(X) | isnan(Y) 
-      | LLVMRealUEQ            -- ^ True if unordered or equal 
-      | LLVMRealUGT            -- ^ True if unordered or greater than 
-      | LLVMRealUGE            -- ^ True if unordered, greater than, or equal 
-      | LLVMRealULT            -- ^ True if unordered or less than
-      | LLVMRealULE            -- ^ True if unordered, less than, or equal 
-      | LLVMRealUNE            -- ^ True if unordered or not equal 
-      | LLVMRealPredicateTrue  -- ^ Always true (always folded) 
-
+  | LLVMRealPredicateFalse -- ^ Always false (always folded) 
+  | LLVMRealOEQ            -- ^ True if ordered and equal 
+  | LLVMRealOGT            -- ^ True if ordered and greater than 
+  | LLVMRealOGE            -- ^ True if ordered and greater than or equal 
+  | LLVMRealOLT            -- ^ True if ordered and less than 
+  | LLVMRealOLE            -- ^ True if ordered and less than or equal 
+  | LLVMRealONE            -- ^ True if ordered and operands are unequal 
+  | LLVMRealORD            -- ^ True if ordered (no nans) 
+  | LLVMRealUNO            -- ^ True if unordered: isnan(X) | isnan(Y) 
+  | LLVMRealUEQ            -- ^ True if unordered or equal 
+  | LLVMRealUGT            -- ^ True if unordered or greater than 
+  | LLVMRealUGE            -- ^ True if unordered, greater than, or equal 
+  | LLVMRealULT            -- ^ True if unordered or less than
+  | LLVMRealULE            -- ^ True if unordered, less than, or equal 
+  | LLVMRealUNE            -- ^ True if unordered or not equal 
+  | LLVMRealPredicateTrue  -- ^ Always true (always folded) 

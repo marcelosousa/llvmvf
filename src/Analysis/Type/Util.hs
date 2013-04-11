@@ -54,7 +54,7 @@ isFstClass :: Type -> Bool
 isFstClass x = True
 
 notAggFstClass :: Type -> Bool
-notAggFstClass ty = isAgg ty && isFstClass ty
+notAggFstClass ty = (not $ isAgg ty) && isFstClass ty
 
 insert :: (Ord k, Show k, Show a) => k -> a -> M.Map k a -> M.Map k a
 insert k v m = case M.lookup k m of
@@ -70,8 +70,8 @@ sizeof (TyFloatPoint TyDouble  ) = 64
 sizeof (TyFloatPoint TyFP128   ) = 128
 sizeof (TyFloatPoint Tyx86FP80 ) = 80
 sizeof (TyFloatPoint TyPPCFP128) = 128
+sizeof (TyPointer    ty        ) = 8 --sizeof ty 
 sizeof (TyVector     numEl ty  ) = numEl * sizeof ty
-sizeof (TyPointer    ty        ) = sizeof ty 
 sizeof (TyArray      numEl ty  ) = numEl * sizeof ty
 sizeof (TyStruct   _ numEl tys ) = sum $ map sizeof tys
 sizeof (TyVoid                 ) = error "sizeof"
@@ -82,3 +82,43 @@ sizeof (TyOpaque               ) = error "sizeof"
 sizeof (TyUndefined            ) = error "sizeof"
 sizeof (TyFunction pty rty iv  ) = error "sizeof"
 sizeof (TyJumpTo lb            ) = error "sizeof"
+
+(<=>) :: NamedTyEnv -> Type -> Type -> Bool
+(<=>) nmdtye TyVoid      TyVoid      = True
+(<=>) nmdtye Tyx86MMX    Tyx86MMX    = True
+(<=>) nmdtye TyLabel     TyLabel     = True
+(<=>) nmdtye TyMetadata  TyMetadata  = True
+(<=>) nmdtye TyOpaque    TyOpaque    = True
+(<=>) nmdtye TyUndefined TyUndefined = True
+(<=>) nmdtye (TyInt p)         (TyInt n)         = p == n
+(<=>) nmdtye (TyFloatPoint p)  (TyFloatPoint n)  = p == n
+(<=>) nmdtye (TyPointer p)     (TyPointer n)     = (<=>) nmdtye p n
+(<=>) nmdtye (TyVector n r)    (TyVector m s)    = n == m && (<=>) nmdtye r s
+(<=>) nmdtye (TyArray  n r)    (TyArray  m s)    = n == m && (<=>) nmdtye r s
+(<=>) nmdtye (TyStruct nr n r) (TyStruct ns m s) = eqStruct nmdtye (nr,n,r) (ns,m,s)
+(<=>) nmdtye x y = False
+
+
+eqStruct :: NamedTyEnv -> (String,Int,[Type]) -> (String,Int,[Type]) -> Bool
+eqStruct nmdtye ("",n,r) ("",m,s) = n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
+eqStruct nmdtye ("",n,r) (ns,m,s) = 
+	case M.lookup ns nmdtye of
+		Nothing -> n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
+		Just (TyStruct ns' m' s') -> n==m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s')
+		Just _ -> False
+eqStruct nmdtye (nr,n,r) ("",m,s) = 
+	case M.lookup nr nmdtye of
+		Nothing -> n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
+		Just (TyStruct nr' n' r') -> eqStruct nmdtye (nr',n',r') ("",m,s)
+		Just _ -> False
+eqStruct nmdtye (nr,n,r) (ns,m,s) = 
+	case M.lookup nr nmdtye of
+		Nothing -> case M.lookup ns nmdtye of
+			Nothing -> n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
+			Just (TyStruct ns' m' s') -> eqStruct nmdtye (nr,n,r) (ns',m',s')
+			Just _ -> False
+		Just (TyStruct nr' n' r') -> case M.lookup ns nmdtye of
+			Nothing -> eqStruct nmdtye (nr',n',r') (ns,m,s)
+			Just (TyStruct ns' m' s') -> n' == m' && nr == ns
+			Just _ -> False 
+		Just _ -> False
