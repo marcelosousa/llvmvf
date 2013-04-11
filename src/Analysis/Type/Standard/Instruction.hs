@@ -117,7 +117,7 @@ typeCheckInstruction nmdtye tye i = case i of
   	InsertValue pc i v vi idxs -> error "InsertValue operation not supported"
   -- Atomic Operations
   	Cmpxchg   pc i mptr cval nval ord -> error "Cmpxchg operation not supported"
-  	AtomicRMW pc i vals op        ord -> error "AtomicRMW operation not supported"
+  	AtomicRMW pc i mptr val  op   ord -> error "AtomicRMW operation not supported"
 
 
 typeCastOp :: NamedTyEnv -> TyEnv -> Identifier -> Value -> Type -> (Type -> Bool) -> (Type -> Type -> Bool) -> (TyEnv, Type)

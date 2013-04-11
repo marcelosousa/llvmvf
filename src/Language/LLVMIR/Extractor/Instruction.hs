@@ -179,7 +179,7 @@ getMemoryOp AtomicRMW     = do ival  <- getInstructionValue
                                ops   <- getOperands ival >>= mapM getValue
                                op    <- liftIO $ FFI.atomicRMWGetOperation ival >>= return . fromIntegral
                                ord   <- liftIO $ FFI.atomicRMWGetOrdering ival >>= return . fromIntegral
-                               return $ LL.AtomicRMW pc (LL.Local ident) ops (toBinOp op) (toAtomicOrdering ord)
+                               return $ LL.AtomicRMW pc (LL.Local ident) (ops!!0) (ops!!1) (toBinOp op) (toAtomicOrdering ord)
 -- error $ "TODO atomicRMW"
 
 -- | Get Cast Instruction

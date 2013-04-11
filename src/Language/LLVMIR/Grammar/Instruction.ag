@@ -115,7 +115,8 @@ data Instruction
   | AtomicRMW
       pc :: PC
       id :: Identifier
-      args :: Values
+      mptr :: Value
+      opval :: Value
       op  :: BinOp
       ord :: AtomicOrdering
   -- Concurrent Operations Added

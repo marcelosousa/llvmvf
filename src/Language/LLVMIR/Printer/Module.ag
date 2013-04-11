@@ -124,7 +124,7 @@ sem Instruction
   | ExtractValue loc.pp = @id.pp <+> char '=' <+> text "extractvalue" <+> @aggr.pp <> char ',' <+> @idxs.pp
   | InsertValue loc.pp = @id.pp <+> char '=' <+> text "insertvalue" <+> @aggr.pp <> char ',' <+> @ival.pp <> char ',' <+> @idxs.pp
   | Cmpxchg loc.pp = @id.pp <+> char '=' <+> text "cmpxchg" <+> @mptr.pp <+> @cval.pp <+> @nval.pp <+> @ord.pp
-  | AtomicRMW loc.pp = @id.pp <+> char '=' <+> text "atomicrmw" <+> @op.pp <+>  @args.pp  <+> @ord.pp
+  | AtomicRMW loc.pp = @id.pp <+> char '=' <+> text "atomicrmw" <+> @mptr.pp <+> @opval.pp <+> @ord.pp
   | CreateThread loc.pp = text "create_thread" <+> parens @args.pp
   | MutexInit    loc.pp = text "mutex_init"    <+> @mutex.pp 
   | MutexLock    loc.pp = text "mutex_lock"    <+> @mutex.pp
