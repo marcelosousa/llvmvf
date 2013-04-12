@@ -98,7 +98,6 @@ sizeof (TyJumpTo lb            ) = error "sizeof"
 (<=>) nmdtye (TyStruct nr n r) (TyStruct ns m s) = eqStruct nmdtye (nr,n,r) (ns,m,s)
 (<=>) nmdtye x y = False
 
-
 eqStruct :: NamedTyEnv -> (String,Int,[Type]) -> (String,Int,[Type]) -> Bool
 eqStruct nmdtye ("",n,r) ("",m,s) = n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
 eqStruct nmdtye ("",n,r) (ns,m,s) = 

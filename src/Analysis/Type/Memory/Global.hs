@@ -23,20 +23,10 @@ import Debug.Trace (trace)
 -- Incomplete
 tyanGlobal :: NamedTyEnv -> TyAnnEnv -> Global -> TyAnnEnv
 tyanGlobal nmdtye tye (GlobalVar i l False isUAddr ty Nothing  align) = insert i (liftTy ty) tye
-tyanGlobal nmdtye tye (GlobalVar i l True  isUAddr ty (Just c) align) = undefined
---  let t = typeConstant nmdtye tye c
---  in if (<=>) nmdtye (TyPointer t) ty 
---     then insert i ty tye
---     else error $ "typeCheckGlobal(1): " ++ show i ++ "\n" ++ show t ++ "\n" ++ show ty
-typeCheckGlobal nmdtye tye gv = error $ "typeCheckGlobal(2): " ++ show gv
-
---typeGlobal :: TyAnnEnv -> Global -> (TyAnn, TyAnnEnv)
---typeGlobal tyenv (GlobalVar i l isConst isUAddr ty iconst align) = 
---  let ta = liftTy ty
---  in case iconst of
---      Nothing -> (ta, M.insert i ta tyenv)
---      Just c  -> let (t,te) = typeConstant' tyenv c
---                 in  if ta <: (T.TyDer (T.TyPtr t T.TyAny))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
---                 	 then (ta, M.insert i ta te)
---                 	 else error $ "typeGlobal: Disjoint types " ++ show ta ++ " " ++ show t
-
+tyanGlobal nmdtye tye (GlobalVar i l True  isUAddr ty (Just c) align) = 
+  let t = typeConstant nmdtye tye c
+      tyt = liftTy ty
+  in if (<=>) nmdtye (TyPointer t TyAny) ty
+     then insert i ty tye
+     else error $ "tyanGlobal(1): " ++ show i ++ "\n" ++ show t ++ "\n" ++ show ty
+tyanGlobal nmdtye tye gv = error $ "tyanGlobal(2): " ++ show gv
