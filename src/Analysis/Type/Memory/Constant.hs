@@ -14,6 +14,7 @@ import Analysis.Type.Util
 import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.Context
 import Analysis.Type.Memory.TyAnn (TyAnn)
+import Analysis.Type.Standard.Constant
 import qualified Analysis.Type.Memory.TyAnn as T
 
 -- type analyse value
@@ -22,5 +23,12 @@ tyanValue nmdtye tye (Id v ty)    = (typeValueGen tye v (liftTy ty) ((<~=~>) nmd
 tyanValue nmdtye tye (Constant c) = tyanConstant nmdtye tye c
 
 tyanConstant :: NamedTyEnv -> TyAnnEnv -> Constant -> TyLIdPair
-tyanConstant = undefined
+tyanConstant nmdtye tye c = case c of
+  UndefValue      -> (T.TyUndef, [])
+  PoisonValue     -> error "tyanConstant: PoisonValue not supported"
+  BlockAddr       -> error "tyanConstant: BlockAddr not supported"
+  SmpConst sc     -> (liftTy $ typeSimpleConstant sc, [])
+  CmpConst cc     -> undefined -- typeComplexConstant nmdtye tye cc
+  GlobalValue gv  -> (typeGlobalValue tye liftTy ((<~=~>) nmdtye) gv, [])
+  ConstantExpr ec -> undefined -- typeExpression      nmdtye tye ec
 

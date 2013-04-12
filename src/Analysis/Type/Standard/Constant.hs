@@ -18,39 +18,34 @@ typeValue :: NamedTyEnv -> TyEnv -> Value -> Type
 typeValue nmdtye tye (Id v ty)    = typeValueGen tye v ty (==) "tyValue:Id"
 typeValue nmdtye tye (Constant c) = typeConstant nmdtye tye c
 
-typeGlobalValue :: TyEnv -> GlobalValue -> Type 
-typeGlobalValue tye (FunctionValue  n ty) = typeValueGen tye n ty (==) "typeGlobalValue:FunctionValue"
-typeGlobalValue tye (GlobalAlias    n ty) = typeValueGen tye n ty (==) "typeGlobalValue:GlobalAlias"
-typeGlobalValue tye (GlobalVariable n ty) = typeValueGen tye n ty (==) "typeGlobalValue:GlobalVariable"
-
 -- Type Constant
 typeConstant :: NamedTyEnv -> TyEnv -> Constant -> Type
 typeConstant nmdtye tye c = case c of
   UndefValue      -> TyUndefined
   PoisonValue     -> error "typeConstant: PoisonValue not supported"
   BlockAddr       -> error "typeConstant: BlockAddr not supported"
-  SmpConst sc     -> typeSimpleConstant         tye sc
+  SmpConst sc     -> typeSimpleConstant             sc
   CmpConst cc     -> typeComplexConstant nmdtye tye cc
-  GlobalValue gv  -> typeGlobalValue            tye gv 
+  GlobalValue gv  -> typeGlobalValue            tye id (==) gv  
   ConstantExpr ec -> typeExpression      nmdtye tye ec 
 
 -- typeSimpleConstant
-typeSimpleConstant :: TyEnv -> SimpleConstant -> Type
-typeSimpleConstant tye c = case c of
+typeSimpleConstant :: SimpleConstant -> Type
+typeSimpleConstant c = case c of
   -- ConstantInt
   ConstantInt _ ty@(TyInt x) -> ty -- Here I could check if the value fits in that number of bits.
   ConstantInt _ err          -> error $ "typeSimpleConstant: ConstantInt must be of type iX. Given: " ++ show err
   -- ConstantFP
-  ConstantFP fp -> typeConstantFP tye fp
+  ConstantFP fp -> typeConstantFP fp
   -- ConstantPointerNull
   ConstantPointerNull ty@(TyPointer t) -> ty
   ConstantPointerNull err              -> error $ "typeSimpleConstant: ConstantPointerNull must be of type Ptr. Given: " ++ show err 
 
 -- typeConstantFP
-typeConstantFP :: TyEnv -> ConstantFP -> Type
-typeConstantFP tye (ConstantFPFloat  _ ty@(TyFloatPoint TyFloat))  = ty
-typeConstantFP tye (ConstantFPDouble _ ty@(TyFloatPoint TyDouble)) = ty
-typeConstantFP _   cfp = error $ "typeConstantFP: " ++ show cfp
+typeConstantFP :: ConstantFP -> Type
+typeConstantFP (ConstantFPFloat  _ ty@(TyFloatPoint TyFloat))  = ty
+typeConstantFP (ConstantFPDouble _ ty@(TyFloatPoint TyDouble)) = ty
+typeConstantFP cfp = error $ "typeConstantFP: " ++ show cfp
 
 -- typeComplexConstant
 typeComplexConstant :: NamedTyEnv -> TyEnv -> ComplexConstant -> Type
