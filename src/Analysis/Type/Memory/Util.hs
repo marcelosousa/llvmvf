@@ -6,10 +6,15 @@
 
 module Analysis.Type.Memory.Util where
 
+import qualified Data.Map as M
+
+import Language.LLVMIR
+
+import Analysis.Type.Util
 import Analysis.Type.Memory.TyAnn (TyAnn)
 import qualified Analysis.Type.Memory.TyAnn as T
-import Language.LLVMIR
-import qualified Data.Map as M
+
+type TyLIdPair = (TyAnn, Identifiers)
 
 -- Lift a LLVM IR Type to the most generic Type Annotation
 liftTy :: Type -> TyAnn
@@ -37,3 +42,21 @@ castTy = undefined
 (<:) :: TyAnn -> TyAnn -> Bool
 (T.TyDer (T.TyPtr t1 T.TyAny)) <: (T.TyDer (T.TyPtr t2 k)) = True
 t1 <: t2 = t1 == t2
+
+(<~=~>) :: NamedTyEnv -> TyAnn -> TyAnn -> Bool
+(<~=~>) nmdtye qtya qtyb = True
+{-
+(<=>) nmdtye TyVoid      TyVoid      = True
+(<=>) nmdtye Tyx86MMX    Tyx86MMX    = True
+(<=>) nmdtye TyLabel     TyLabel     = True
+(<=>) nmdtye TyMetadata  TyMetadata  = True
+(<=>) nmdtye TyOpaque    TyOpaque    = True
+(<=>) nmdtye TyUndefined TyUndefined = True
+(<=>) nmdtye (TyInt p)         (TyInt n)         = p == n
+(<=>) nmdtye (TyFloatPoint p)  (TyFloatPoint n)  = p == n
+(<=>) nmdtye (TyPointer p)     (TyPointer n)     = (<=>) nmdtye p n
+(<=>) nmdtye (TyVector n r)    (TyVector m s)    = n == m && (<=>) nmdtye r s
+(<=>) nmdtye (TyArray  n r)    (TyArray  m s)    = n == m && (<=>) nmdtye r s
+(<=>) nmdtye (TyStruct nr n r) (TyStruct ns m s) = eqStruct nmdtye (nr,n,r) (ns,m,s)
+(<=>) nmdtye x y = False
+-}

@@ -15,20 +15,13 @@ import Debug.Trace (trace)
 
 -- typeValue
 typeValue :: NamedTyEnv -> TyEnv -> Value -> Type
-typeValue nmdtye tye (Id v ty)    = typeValueGen tye v ty "tyValue:Id"
+typeValue nmdtye tye (Id v ty)    = typeValueGen tye v ty (==) "tyValue:Id"
 typeValue nmdtye tye (Constant c) = typeConstant nmdtye tye c
 
 typeGlobalValue :: TyEnv -> GlobalValue -> Type 
-typeGlobalValue tye (FunctionValue  n ty) = typeValueGen tye n ty "typeGlobalValue:FunctionValue"
-typeGlobalValue tye (GlobalAlias    n ty) = typeValueGen tye n ty "typeGlobalValue:GlobalAlias"
-typeGlobalValue tye (GlobalVariable n ty) = typeValueGen tye n ty "typeGlobalValue:GlobalVariable"
-
-typeValueGen :: TyEnv -> Identifier -> Type -> String -> Type
-typeValueGen tye v ty s = case M.lookup v tye of
-                            Nothing -> ty -- trace (s ++ ": " ++ show v ++ " is not in the context: " ++ show tye) $ ty
-                            Just t  -> if t == ty
-                                       then ty
-                                       else error $ s ++ ": Given " ++ show ty ++ ". Expected " ++ show t
+typeGlobalValue tye (FunctionValue  n ty) = typeValueGen tye n ty (==) "typeGlobalValue:FunctionValue"
+typeGlobalValue tye (GlobalAlias    n ty) = typeValueGen tye n ty (==) "typeGlobalValue:GlobalAlias"
+typeGlobalValue tye (GlobalVariable n ty) = typeValueGen tye n ty (==) "typeGlobalValue:GlobalVariable"
 
 -- Type Constant
 typeConstant :: NamedTyEnv -> TyEnv -> Constant -> Type

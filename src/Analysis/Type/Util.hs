@@ -61,6 +61,12 @@ insert k v m = case M.lookup k m of
 	                Nothing -> M.insert k v m
 	                Just _  -> error $ "insert: " ++ show k ++ " " ++ show v ++ " " ++ show m
 
+typeValueGen :: (Ord k, Show k, Show a) => M.Map k a -> k -> a -> (a -> a -> Bool) -> String -> a
+typeValueGen tye v ty op s = case M.lookup v tye of
+                              Nothing -> ty -- trace (s ++ ": " ++ show v ++ " is not in the context: " ++ show tye) $ ty
+                              Just t  -> if t `op` ty
+                                         then ty
+                                         else error $ s ++ ": Given " ++ show ty ++ ". Expected " ++ show t
 
 sizeof :: Type -> Int
 sizeof (TyInt        p         ) = p  

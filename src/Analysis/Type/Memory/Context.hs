@@ -20,7 +20,7 @@ type Constrs  = S.Set (Identifier, Identifier)
 type TyAnnEnv = M.Map Identifier TyAnn
 type Context  = (Constrs, TyAnnEnv)
 
-data RTyRes = RTyRes Name TyAnnEnv (M.Map Name Context)
+data RTyRes = RTyRes Name Context (M.Map Name Context)
 
 -- 
 instance Show RTyRes where
@@ -29,7 +29,7 @@ instance Show RTyRes where
 	  ++ "Module " ++ s ++ "\n"
 	  ++ del 
 	  ++ "Global Variables\n"
-	  ++ prettyTyAnnEnv gs ++ "\n"
+	  ++ prettyContext gs ++ "\n"
 	  ++ del 
 	  ++ foldr prettyFn del (M.toList fns)
 

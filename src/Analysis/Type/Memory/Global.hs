@@ -8,25 +8,28 @@
 module Analysis.Type.Memory.Global (tyanGlobal) where
 
 import qualified Data.Map as M
+import qualified Data.Set as S
 
 import Language.LLVMIR
 
 import Analysis.Type.Util
 import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.Context
-import Analysis.Type.Memory.Constant (typeConstant)
+import Analysis.Type.Memory.Constant (tyanConstant)
 --import Analysis.Type.Memory.TyAnn (TyAnn, TyAnnEnv)
---import qualified Analysis.Type.Memory.TyAnn as T
+import qualified Analysis.Type.Memory.TyAnn as T
 
 import Debug.Trace (trace)
 
 -- Incomplete
-tyanGlobal :: NamedTyEnv -> TyAnnEnv -> Global -> TyAnnEnv
-tyanGlobal nmdtye tye (GlobalVar i l False isUAddr ty Nothing  align) = insert i (liftTy ty) tye
-tyanGlobal nmdtye tye (GlobalVar i l True  isUAddr ty (Just c) align) = undefined
---  let t = typeConstant nmdtye tye c
---      tyt = liftTy ty
---  in if (<=>) nmdtye (TyPointer t TyAny) ty
---     then insert i ty tye
---     else error $ "tyanGlobal(1): " ++ show i ++ "\n" ++ show t ++ "\n" ++ show ty
-tyanGlobal nmdtye tye gv = error $ "tyanGlobal(2): " ++ show gv
+tyanGlobal :: NamedTyEnv -> Context -> Global -> Context
+tyanGlobal nmdtye (c,tye) (GlobalVar i l False isUAddr ty Nothing  align) = (c,insert i (liftTy ty) tye)
+tyanGlobal nmdtye (c,tye) (GlobalVar i l True  isUAddr ty (Just cn) align) =
+  let (t,li) = tyanConstant nmdtye tye cn           -- analyse the constant
+      qt  = T.TyDer $ T.TyPtr t T.TyAny             -- lift the type of the constant to a qualified pointer
+      qty = liftTy ty                               -- lift the type given 
+      nc  = S.union c $ S.fromList $ map ((,) i) li -- update the set of constraints
+  in if (<~=~>) nmdtye qt qty                       -- if qualified types are equal
+     then (nc, insert i qt tye)
+     else error $ "tyanGlobal(1): " ++ show i ++ "\n" ++ show t ++ "\n" ++ show ty
+tyanGlobal nmdtye con gv = error $ "tyanGlobal(2): " ++ show gv
