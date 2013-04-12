@@ -23,10 +23,10 @@ import Debug.Trace (trace)
 -- Incomplete
 tyanGlobal :: NamedTyEnv -> TyAnnEnv -> Global -> TyAnnEnv
 tyanGlobal nmdtye tye (GlobalVar i l False isUAddr ty Nothing  align) = insert i (liftTy ty) tye
-tyanGlobal nmdtye tye (GlobalVar i l True  isUAddr ty (Just c) align) = 
-  let t = typeConstant nmdtye tye c
-      tyt = liftTy ty
-  in if (<=>) nmdtye (TyPointer t TyAny) ty
-     then insert i ty tye
-     else error $ "tyanGlobal(1): " ++ show i ++ "\n" ++ show t ++ "\n" ++ show ty
+tyanGlobal nmdtye tye (GlobalVar i l True  isUAddr ty (Just c) align) = undefined
+--  let t = typeConstant nmdtye tye c
+--      tyt = liftTy ty
+--  in if (<=>) nmdtye (TyPointer t TyAny) ty
+--     then insert i ty tye
+--     else error $ "tyanGlobal(1): " ++ show i ++ "\n" ++ show t ++ "\n" ++ show ty
 tyanGlobal nmdtye tye gv = error $ "tyanGlobal(2): " ++ show gv
