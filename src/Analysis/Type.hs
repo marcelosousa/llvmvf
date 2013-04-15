@@ -9,12 +9,14 @@
 -------------------------------------------------------------------------------
 module Analysis.Type where
 
+import qualified Data.Map as M
+
+import Language.LLVMIR
+
 import Analysis.Type.Util (TyEnv)
 import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
 import Analysis.Type.Memory.Context (RTyRes)
 import Analysis.Type.Memory.Module (tyanModule)
-import Language.LLVMIR
-import qualified Data.Map as M
 
 typeCheck :: Module -> STyRes 
 typeCheck = typeCheckModule

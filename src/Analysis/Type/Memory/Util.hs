@@ -28,7 +28,7 @@ liftTy TyOpaque          = error "liftTy: TyOpaque"
 liftTy (TyInt s)         = T.TyPri $ T.TyInt s
 liftTy (TyArray s ty)    = T.TyDer $ T.TyAgg $ T.TyArr s $ liftTy ty
 liftTy (TyStruct n s ty) = T.TyDer $ T.TyAgg $ T.TyStr n s $ map liftTy ty
-liftTy (TyFunction a r iv)  = T.TyDer $ T.TyFun (map liftTy a) [liftTy r]
+liftTy (TyFunction a r iv)  = T.TyDer $ T.TyFun (map liftTy a) (liftTy r) iv
 liftTy (TyPointer ty)    = T.TyDer $ T.TyPtr (liftTy ty) T.TyAny
 liftTy (TyVector s ty)   = T.TyDer $ T.TyVec s $ liftTy ty
 
@@ -42,6 +42,14 @@ castTy = undefined
 (<:) :: TyAnn -> TyAnn -> Bool
 (T.TyDer (T.TyPtr t1 T.TyAny)) <: (T.TyDer (T.TyPtr t2 k)) = True
 t1 <: t2 = t1 == t2
+
+isAnnAgg :: TyAnn -> Bool
+isAnnAgg (T.TyDer (T.TyAgg _)) = True
+isAnnAgg _ = False
+
+isAnnInt :: TyAnn -> Bool
+isAnnInt (T.TyPri (T.TyInt _)) = True
+isAnnInt _ = False
 
 (<~=~>) :: NamedTyEnv -> TyAnn -> TyAnn -> Bool
 (<~=~>) nmdtye qtya qtyb = True
