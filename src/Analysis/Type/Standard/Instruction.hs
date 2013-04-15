@@ -7,11 +7,14 @@
 
 module Analysis.Type.Standard.Instruction where
 
+import qualified Data.Map as M
+import Data.Maybe
+
+import Language.LLVMIR
+
 import Analysis.Type.Util
 import Analysis.Type.Standard.Constant
-import Language.LLVMIR
-import Data.Maybe
-import qualified Data.Map as M
+
 import Debug.Trace (trace)
 
 -- Need to pattern match on the value here.

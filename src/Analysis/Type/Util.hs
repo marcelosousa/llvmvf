@@ -72,7 +72,12 @@ typeGlobalValue :: (Show a) => M.Map Identifier a -> (Type -> a) -> (a -> a -> B
 typeGlobalValue tye f op (FunctionValue  n ty) = typeValueGen tye n (f ty) op "typeGlobalValue:FunctionValue"
 typeGlobalValue tye f op (GlobalAlias    n ty) = typeValueGen tye n (f ty) op "typeGlobalValue:GlobalAlias"
 typeGlobalValue tye f op (GlobalVariable n ty) = typeValueGen tye n (f ty) op "typeGlobalValue:GlobalVariable"
-                                                                  
+                             
+findBasicBlock :: BasicBlocks -> Identifier -> Maybe BasicBlock
+findBasicBlock [] l = Nothing
+findBasicBlock (bb@(BasicBlock l _):bbs) i | i == l = Just bb
+                                           | otherwise = findBasicBlock bbs i
+                                                                               
 sizeof :: Type -> Int
 sizeof (TyInt        p         ) = p  
 sizeof (TyFloatPoint TyHalf    ) = 16

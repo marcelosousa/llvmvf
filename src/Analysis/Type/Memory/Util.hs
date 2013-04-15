@@ -31,6 +31,7 @@ liftTy (TyStruct n s ty) = T.TyDer $ T.TyAgg $ T.TyStr n s $ map liftTy ty
 liftTy (TyFunction a r iv)  = T.TyDer $ T.TyFun (map liftTy a) (liftTy r) iv
 liftTy (TyPointer ty)    = T.TyDer $ T.TyPtr (liftTy ty) T.TyAny
 liftTy (TyVector s ty)   = T.TyDer $ T.TyVec s $ liftTy ty
+liftTy (TyJumpTo i)      = T.TyJumpTo i
 
 unify :: TyAnn -> TyAnn -> TyAnn
 unify = undefined

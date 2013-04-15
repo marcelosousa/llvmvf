@@ -1,10 +1,10 @@
 !-!	./Language/LTL/Base.hs	201;"	v
 !~!	./Language/LTL/Base.hs	257;"	v
 <->	./Language/LTL/Base.hs	77;"	v
-<:	./Analysis/Type/Memory/Util.hs	43;"	v
-<=>	./Analysis/Type/Util.hs	98;"	v
+<:	./Analysis/Type/Memory/Util.hs	44;"	v
+<=>	./Analysis/Type/Util.hs	103;"	v
 <>	./Language/LLVMIR/Extractor/Opcode.hs	81;"	v
-<~=~>	./Analysis/Type/Memory/Util.hs	55;"	v
+<~=~>	./Analysis/Type/Memory/Util.hs	56;"	v
 AShr	./Language/LLVMIR/Extractor/Opcode.hs	30;"	d
 AShr	src/Language/LLVMIR.hs	273;"	d
 Acquire	src/Language/LLVMIR.hs	101;"	d
@@ -1201,7 +1201,6 @@ SIToFP	./Language/LLVMIR/Extractor/Opcode.hs	47;"	d
 SIToFP	src/Language/LLVMIR.hs	287;"	d
 SRem	./Language/LLVMIR/Extractor/Opcode.hs	26;"	d
 SRem	src/Language/LLVMIR.hs	269;"	d
-STyRes	./Analysis/Type/Standard/Module.hs	18;"	d	file:
 STyRes	./Analysis/Type/Standard/Module.hs	18;"	t
 Section	src/Language/LLVMIR.hs	424;"	d
 Section	src/Language/LLVMIR.hs	424;"	t
@@ -2435,53 +2434,54 @@ Transitions	./Concurrent/Model.hs	103;"	t
 Triplet	src/Language/LLVMIR.hs	439;"	t
 Trunc	./Language/LLVMIR/Extractor/Opcode.hs	41;"	d
 Trunc	src/Language/LLVMIR.hs	281;"	d
-TyAgg	./Analysis/Type/Memory/TyAnn.hs	26;"	d
-TyAgg	./Analysis/Type/Memory/TyAnn.hs	34;"	t
+TyAgg	./Analysis/Type/Memory/TyAnn.hs	27;"	d
+TyAgg	./Analysis/Type/Memory/TyAnn.hs	35;"	t
 TyAnn	./Analysis/Type/Memory/TyAnn.hs	13;"	t
 TyAnnEnv	./Analysis/Type/Memory/Context.hs	20;"	t
-TyAnnot	./Analysis/Type/Memory/TyAnn.hs	38;"	t
-TyAny	./Analysis/Type/Memory/TyAnn.hs	40;"	d
-TyArr	./Analysis/Type/Memory/TyAnn.hs	34;"	d
+TyAnnot	./Analysis/Type/Memory/TyAnn.hs	39;"	t
+TyAny	./Analysis/Type/Memory/TyAnn.hs	41;"	d
+TyArr	./Analysis/Type/Memory/TyAnn.hs	35;"	d
 TyArray	src/Language/LLVMIR.hs	456;"	d
 TyBot	./Analysis/Type/Memory/TyAnn.hs	13;"	d
 TyClass	./Analysis/Type/Util.hs	15;"	t
 TyClassFloat	./Analysis/Type/Util.hs	15;"	d
 TyClassInt	./Analysis/Type/Util.hs	15;"	d
 TyDer	./Analysis/Type/Memory/TyAnn.hs	16;"	d
-TyDer	./Analysis/Type/Memory/TyAnn.hs	26;"	t
+TyDer	./Analysis/Type/Memory/TyAnn.hs	27;"	t
 TyDouble	src/Language/LLVMIR.hs	443;"	d
 TyEnv	./Analysis/Type/Util.hs	12;"	t
 TyFP128	src/Language/LLVMIR.hs	444;"	d
-TyFloat	./Analysis/Type/Memory/TyAnn.hs	21;"	d
+TyFloat	./Analysis/Type/Memory/TyAnn.hs	22;"	d
 TyFloat	src/Language/LLVMIR.hs	442;"	d
 TyFloatPoint	src/Language/LLVMIR.hs	441;"	t
 TyFloatPoint	src/Language/LLVMIR.hs	455;"	d
-TyFun	./Analysis/Type/Memory/TyAnn.hs	28;"	d
+TyFun	./Analysis/Type/Memory/TyAnn.hs	29;"	d
 TyFunction	src/Language/LLVMIR.hs	457;"	d
 TyHalf	src/Language/LLVMIR.hs	441;"	d
-TyIOAddr	./Analysis/Type/Memory/TyAnn.hs	38;"	d
-TyInt	./Analysis/Type/Memory/TyAnn.hs	20;"	d
+TyIOAddr	./Analysis/Type/Memory/TyAnn.hs	39;"	d
+TyInt	./Analysis/Type/Memory/TyAnn.hs	21;"	d
 TyInt	src/Language/LLVMIR.hs	454;"	d
+TyJumpTo	./Analysis/Type/Memory/TyAnn.hs	17;"	d
 TyJumpTo	src/Language/LLVMIR.hs	462;"	d
 TyLIdPair	./Analysis/Type/Memory/Util.hs	17;"	t
-TyLabel	./Analysis/Type/Memory/TyAnn.hs	23;"	d
+TyLabel	./Analysis/Type/Memory/TyAnn.hs	24;"	d
 TyLabel	src/Language/LLVMIR.hs	451;"	d
-TyMetadata	./Analysis/Type/Memory/TyAnn.hs	22;"	d
+TyMetadata	./Analysis/Type/Memory/TyAnn.hs	23;"	d
 TyMetadata	src/Language/LLVMIR.hs	452;"	d
 TyOpaque	src/Language/LLVMIR.hs	453;"	d
 TyPPCFP128	src/Language/LLVMIR.hs	446;"	d
 TyPointer	src/Language/LLVMIR.hs	459;"	d
 TyPri	./Analysis/Type/Memory/TyAnn.hs	15;"	d
-TyPri	./Analysis/Type/Memory/TyAnn.hs	19;"	t
-TyPtr	./Analysis/Type/Memory/TyAnn.hs	29;"	d
-TyRegAddr	./Analysis/Type/Memory/TyAnn.hs	39;"	d
-TyStr	./Analysis/Type/Memory/TyAnn.hs	35;"	d
+TyPri	./Analysis/Type/Memory/TyAnn.hs	20;"	t
+TyPtr	./Analysis/Type/Memory/TyAnn.hs	30;"	d
+TyRegAddr	./Analysis/Type/Memory/TyAnn.hs	40;"	d
+TyStr	./Analysis/Type/Memory/TyAnn.hs	36;"	d
 TyStruct	src/Language/LLVMIR.hs	458;"	d
 TyUndef	./Analysis/Type/Memory/TyAnn.hs	14;"	d
 TyUndefined	src/Language/LLVMIR.hs	461;"	d
-TyVec	./Analysis/Type/Memory/TyAnn.hs	27;"	d
+TyVec	./Analysis/Type/Memory/TyAnn.hs	28;"	d
 TyVector	src/Language/LLVMIR.hs	460;"	d
-TyVoid	./Analysis/Type/Memory/TyAnn.hs	19;"	d
+TyVoid	./Analysis/Type/Memory/TyAnn.hs	20;"	d
 TyVoid	src/Language/LLVMIR.hs	449;"	d
 Type	./Language/LLVMIR/Extractor/Type.hs	31;"	t
 Type	Main.hs	55;"	d
@@ -2628,7 +2628,7 @@ cInt2Bool	./Language/LLVMIR/Extractor/Util.hs	20;"	v
 cUInt2Bool	./Language/LLVMIR/Extractor/Util.hs	16;"	v
 c_Value_Constant	src/Language/LLVMIR.hs	472;"	v
 callee_Instruction_Call	src/Language/LLVMIR.hs	296;"	v
-castTy	./Analysis/Type/Memory/Util.hs	39;"	v
+castTy	./Analysis/Type/Memory/Util.hs	40;"	v
 cc_Constant_CmpConst	src/Language/LLVMIR.hs	171;"	v
 ccfgMode	Main.hs	70;"	v
 cds_ComplexConstant_ConstantDataSequential	src/Language/LLVMIR.hs	161;"	v
@@ -2778,7 +2778,7 @@ entrypc_Syn_BasicBlocks	src/Concurrent/Model/Analysis/ControlFlow.hs	720;"	v
 entrypc_Syn_Function	src/Concurrent/Model/Analysis/ControlFlow.hs	1853;"	v
 entrypc_Syn_Instruction	src/Concurrent/Model/Analysis/ControlFlow.hs	2534;"	v
 entrypc_Syn_Instructions	src/Concurrent/Model/Analysis/ControlFlow.hs	6120;"	v
-eqStruct	./Analysis/Type/Util.hs	113;"	v
+eqStruct	./Analysis/Type/Util.hs	118;"	v
 errorMsg	./Analysis/Type/Standard/Constant.hs	87;"	v
 escaped	./src/Language/LLVMIR/Printer/Module.ag	324;"	v
 escaped	src/Language/LLVMIR/Printer/Module.ag	324;"	v
@@ -2795,15 +2795,15 @@ expr_Constant_ConstantExpr	src/Language/LLVMIR.hs	173;"	v
 extract	./Language/LLVMIR/Extractor/Module.hs	53;"	v
 extractMode	Main.hs	66;"	v
 extractModule	./Language/LLVMIR/Extractor/Module.hs	58;"	v	file:
-f	./Analysis/Type/Standard/Instruction.hs	210;"	v
+f	./Analysis/Type/Standard/Instruction.hs	213;"	v
 fStore	./Concurrent/Model.hs	68;"	v
 f_Instruction_Br	src/Language/LLVMIR.hs	255;"	v
 fails	./Concurrent/Model.hs	72;"	v
-findBasicBlock	./Analysis/Type/Standard/Function.hs	57;"	v	file:
+findBasicBlock	./Analysis/Type/Util.hs	77;"	v
 fname_Inh_BasicBlock	src/Concurrent/Model/Visualizer.hs	727;"	v
 fname_Inh_BasicBlocks	src/Concurrent/Model/Visualizer.hs	790;"	v
 fp_SimpleConstant_ConstantFP	src/Language/LLVMIR.hs	428;"	v
-fptoint	./Analysis/Type/Standard/Instruction.hs	153;"	v
+fptoint	./Analysis/Type/Standard/Instruction.hs	156;"	v
 fpv_ConstantFP_ConstantFPFloat	src/Language/LLVMIR.hs	192;"	v
 fromISExpr	./Concurrent/Model.hs	112;"	v
 funs_Module_Module	src/Language/LLVMIR.hs	376;"	v
@@ -2830,7 +2830,7 @@ getElemPtrArgs	./Language/LLVMIR/Extractor/Instruction.hs	58;"	v
 getElementPtrConstant	./Language/LLVMIR/Extractor/Value.hs	137;"	v
 getEntry	./src/Concurrent/Model/Analysis/ControlFlow.ag	98;"	v
 getEnv	./Language/LLVMIR/Extractor/Context.hs	38;"	v
-getFnType	./Analysis/Type/Standard/Instruction.hs	198;"	v
+getFnType	./Analysis/Type/Standard/Instruction.hs	201;"	v
 getFs	./Concurrent/Model.hs	34;"	v
 getFunction	./Language/LLVMIR/Extractor/Module.hs	142;"	v	file:
 getFuns	./Language/LLVMIR/Extractor/Module.hs	136;"	v	file:
@@ -2940,10 +2940,10 @@ input	Main.hs	50;"	v
 insert	./Analysis/Type/Util.hs	60;"	v
 instr	./Language/LLVMIR/Extractor/Context.hs	24;"	v
 instrs_BasicBlock_BasicBlock	src/Language/LLVMIR.hs	131;"	v
-inttofp	./Analysis/Type/Standard/Instruction.hs	167;"	v
+inttofp	./Analysis/Type/Standard/Instruction.hs	170;"	v
 isAgg	./Analysis/Type/Util.hs	41;"	v
-isAnnAgg	./Analysis/Type/Memory/Util.hs	47;"	v
-isAnnInt	./Analysis/Type/Memory/Util.hs	51;"	v
+isAnnAgg	./Analysis/Type/Memory/Util.hs	48;"	v
+isAnnInt	./Analysis/Type/Memory/Util.hs	52;"	v
 isComparableTypeAnnFloat	./Analysis/Type/Memory/Constant.hs	124;"	v
 isComparableTypeAnnInt	./Analysis/Type/Memory/Constant.hs	118;"	v
 isComparableTypeFloat	./Analysis/Type/Standard/Constant.hs	149;"	v
@@ -3274,6 +3274,7 @@ r_Instruction_Ret	src/Language/LLVMIR.hs	254;"	v
 retty_Function_FunctionDecl	src/Language/LLVMIR.hs	228;"	v
 retty_Function_FunctionDef	src/Language/LLVMIR.hs	227;"	v
 retty_Type_TyFunction	src/Language/LLVMIR.hs	457;"	v
+rtyanValue	./Analysis/Type/Memory/Instruction.hs	27;"	v
 runArch	Main.hs	141;"	v
 runBMC	Main.hs	150;"	v
 runCCFG	Main.hs	160;"	v
@@ -5645,7 +5646,7 @@ sem_Visibility_Protected	src/Concurrent/Model/PThread.hs	10576;"	v
 sem_Visibility_Protected	src/Concurrent/Model/Visualizer.hs	8337;"	v
 sem_Visibility_Protected	src/Language/LLVMIR/Printer/Module.hs	7701;"	v
 size	./Language/LTL/Base.hs	213;"	v
-sizeof	./Analysis/Type/Util.hs	77;"	v
+sizeof	./Analysis/Type/Util.hs	82;"	v
 sortEnv	./Concurrent/Model.hs	70;"	v
 states	./Language/LTL/Base.hs	159;"	v
 struct_ConstantExpr_GetElementPtrConstantExpr	src/Language/LLVMIR.hs	184;"	v
@@ -5755,36 +5756,41 @@ ty_Type_TyArray	src/Language/LLVMIR.hs	456;"	v
 ty_Type_TyPointer	src/Language/LLVMIR.hs	459;"	v
 ty_Type_TyVector	src/Language/LLVMIR.hs	460;"	v
 ty_Value_Id	src/Language/LLVMIR.hs	471;"	v
-tyanCheckParameter	./Analysis/Type/Memory/Function.hs	46;"	v	file:
-tyanCheckParameters	./Analysis/Type/Memory/Function.hs	40;"	v	file:
+tyanCheckBasicBlock	./Analysis/Type/Memory/Function.hs	57;"	v	file:
+tyanCheckBasicBlocks	./Analysis/Type/Memory/Function.hs	67;"	v	file:
+tyanCheckBinInstr	./Analysis/Type/Memory/Instruction.hs	151;"	v
+tyanCheckInstruction	./Analysis/Type/Memory/Instruction.hs	31;"	v
+tyanCheckInstructions	./Analysis/Type/Memory/Function.hs	76;"	v	file:
+tyanCheckParameter	./Analysis/Type/Memory/Function.hs	45;"	v	file:
+tyanCheckParameters	./Analysis/Type/Memory/Function.hs	39;"	v	file:
 tyanCompareConstantExpr	./Analysis/Type/Memory/Constant.hs	102;"	v
 tyanComplexConstant	./Analysis/Type/Memory/Constant.hs	36;"	v
 tyanConstant	./Analysis/Type/Memory/Constant.hs	26;"	v
 tyanExpression	./Analysis/Type/Memory/Constant.hs	64;"	v
-tyanFnSig	./Analysis/Type/Memory/Function.hs	26;"	v
-tyanFunction	./Analysis/Type/Memory/Function.hs	23;"	v
+tyanFnSig	./Analysis/Type/Memory/Function.hs	25;"	v
+tyanFunction	./Analysis/Type/Memory/Function.hs	51;"	v
 tyanFunctions	./Analysis/Type/Memory/Module.hs	30;"	v	file:
 tyanGetElementPtrConstantExpr	./Analysis/Type/Memory/Constant.hs	70;"	v
 tyanGlobal	./Analysis/Type/Memory/Global.hs	26;"	v
 tyanModule	./Analysis/Type/Memory/Module.hs	25;"	v
-tyanSignature	./Analysis/Type/Memory/Function.hs	34;"	v	file:
+tyanSignature	./Analysis/Type/Memory/Function.hs	33;"	v	file:
 tyanValue	./Analysis/Type/Memory/Constant.hs	22;"	v
 typeAnalysis	./Analysis/Type.hs	25;"	v
-typeCastOp	./Analysis/Type/Standard/Instruction.hs	144;"	v
+typeCastOp	./Analysis/Type/Standard/Instruction.hs	147;"	v
 typeCheck	./Analysis/Type.hs	22;"	v
 typeCheckBasicBlock	./Analysis/Type/Standard/Function.hs	46;"	v	file:
-typeCheckBasicBlocks	./Analysis/Type/Standard/Function.hs	62;"	v	file:
-typeCheckBinInstr	./Analysis/Type/Standard/Instruction.hs	207;"	v
-typeCheckBranch	./Analysis/Type/Standard/Instruction.hs	23;"	v
-typeCheckBranchs	./Analysis/Type/Standard/Instruction.hs	19;"	v
-typeCheckCall	./Analysis/Type/Standard/Instruction.hs	181;"	v
-typeCheckCmp	./Analysis/Type/Standard/Instruction.hs	215;"	v
+typeCheckBasicBlocks	./Analysis/Type/Standard/Function.hs	56;"	v	file:
+typeCheckBinInstr	./Analysis/Type/Standard/Instruction.hs	210;"	v
+typeCheckBranch	./Analysis/Type/Standard/Instruction.hs	26;"	v
+typeCheckBranchs	./Analysis/Type/Standard/Instruction.hs	22;"	v
+typeCheckCall	./Analysis/Type/Standard/Instruction.hs	184;"	v
+typeCheckCmp	./Analysis/Type/Standard/Instruction.hs	218;"	v
 typeCheckFunction	./Analysis/Type/Standard/Function.hs	26;"	v
 typeCheckFuns	./Analysis/Type/Standard/Module.hs	39;"	v	file:
 typeCheckGlo	./Analysis/Type/Standard/Module.hs	33;"	v	file:
 typeCheckGlobal	./Analysis/Type/Standard/Global.hs	18;"	v
-typeCheckInstruction	./Analysis/Type/Standard/Instruction.hs	27;"	v
-typeCheckInstructions	./Analysis/Type/Standard/Function.hs	71;"	v	file:
+typeCheckInstruction	./Analysis/Type/Standard/Instruction.hs	30;"	v
+typeCheckInstructions	./Analysis/Type/Standard/Function.hs	65;"	v	file:
 typeCheckMode	Main.hs	89;"	v
 typeCheckModule	./Analysis/Type/Standard/Module.hs	28;"	v
 typeCheckParameter	./Analysis/Type/Standard/Function.hs	43;"	v	file:
@@ -5813,7 +5819,7 @@ unPath	./Language/LTL/Base.hs	191;"	v
 unPathLasso	./Language/LTL/Base.hs	252;"	v
 unProc	./Concurrent/Model.hs	53;"	v
 unaryConstantExpr	./Language/LLVMIR/Extractor/Value.hs	129;"	v
-unify	./Analysis/Type/Memory/Util.hs	36;"	v
+unify	./Analysis/Type/Memory/Util.hs	37;"	v
 v	./Language/LTL/Base.hs	80;"	v
 v1_Instruction_Store	src/Language/LLVMIR.hs	278;"	v
 v2_Instruction_Store	src/Language/LLVMIR.hs	278;"	v

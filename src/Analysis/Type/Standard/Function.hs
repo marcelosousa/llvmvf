@@ -52,12 +52,6 @@ typeCheckBasicBlock nmdtye tye bbs (BasicBlock l instr) = -- trace ("typeCheckBa
         ty -> tye'
     Just ty -> tye 
 
-
-findBasicBlock :: BasicBlocks -> Identifier -> Maybe BasicBlock
-findBasicBlock [] l = Nothing
-findBasicBlock (bb@(BasicBlock l _):bbs) i | i == l = Just bb
-                                           | otherwise = findBasicBlock bbs i
-
 typeCheckBasicBlocks :: NamedTyEnv -> TyEnv -> BasicBlocks -> BasicBlocks -> TyEnv
 typeCheckBasicBlocks nmdtye tye bbs [bb] = typeCheckBasicBlock nmdtye tye bbs bb
 typeCheckBasicBlocks nmdtye tye bbs [bbt,bbf] = let tybbt = typeCheckBasicBlock nmdtye tye bbs bbt 

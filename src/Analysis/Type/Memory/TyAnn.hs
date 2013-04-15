@@ -6,7 +6,7 @@
 
 module Analysis.Type.Memory.TyAnn where
 
-import Language.LLVMIR (Identifier)
+import Language.LLVMIR (Identifier, Identifiers)
 
 type TysAnn = [TyAnn]
 
@@ -14,6 +14,7 @@ data TyAnn = TyBot
            | TyUndef
            | TyPri TyPri
            | TyDer TyDer
+           | TyJumpTo Identifiers
   deriving (Eq, Ord)
 
 data TyPri = TyVoid
@@ -31,7 +32,7 @@ data TyDer = TyAgg TyAgg
 --           | TyOpa String
   deriving (Eq, Ord)
 
-data TyAgg = TyArr  Int TyAnn         -- Derived + Aggregate  
+data TyAgg = TyArr  Int TyAnn        -- Derived + Aggregate  
            | TyStr String Int TysAnn -- Derived + Aggregate
   deriving (Eq, Ord)
 
