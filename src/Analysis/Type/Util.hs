@@ -56,8 +56,11 @@ isFstClass x = True
 notAggFstClass :: Type -> Bool
 notAggFstClass ty = (not $ isAgg ty) && isFstClass ty
 
-insert :: (Ord k, Show k, Show a) => k -> a -> M.Map k a -> M.Map k a
-insert k v m = case M.lookup k m of
+insert :: (Show a) => Identifier -> a -> M.Map Identifier a -> M.Map Identifier a
+insert k@(Global i) v m = case M.lookup k m of
+	                Nothing -> M.insert k v m
+	                Just _  -> m
+insert k@(Local i) v m = case M.lookup k m of
 	                Nothing -> M.insert k v m
 	                Just _  -> error $ "insert: " ++ show k ++ " " ++ show v ++ " " ++ show m
 
