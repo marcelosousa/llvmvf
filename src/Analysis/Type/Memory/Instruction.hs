@@ -17,6 +17,7 @@ import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.Constant
 import Analysis.Type.Memory.Context
 import Analysis.Type.Memory.TyAnn (TyAnn)
+import Analysis.Type.Standard.Constant
 import Analysis.Type.Standard.Instruction
 import qualified Analysis.Type.Memory.TyAnn as T
 
@@ -70,82 +71,137 @@ tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
  	FMul pc i ty op1 op2 -> tyanCheckBinInstr TyClassFloat nmdtye c i ty op1 op2
  	FDiv pc i ty op1 op2 -> tyanCheckBinInstr TyClassFloat nmdtye c i ty op1 op2
  	FRem pc i ty op1 op2 -> tyanCheckBinInstr TyClassFloat nmdtye c i ty op1 op2
- {-
   -- Cast Operations
-	Trunc    pc i v ty -> typeCastOp nmdtye tye i v ty isInt (>)    -- Truncate integers
-	ZExt     pc i v ty -> typeCastOp nmdtye tye i v ty isInt (<)    -- Zero extend integers
-	SExt     pc i v ty -> typeCastOp nmdtye tye i v ty isInt (<)    -- Sign extend integers
-	FPTrunc  pc i v ty -> typeCastOp nmdtye tye i v ty isFloat (>)  -- Truncate floating point
-	FPExt    pc i v ty -> typeCastOp nmdtye tye i v ty isFloat (<=) -- Extend floating point
-	FPToUI   pc i v ty -> fptoint    nmdtye tye i v ty              -- floating point -> UInt
-	FPToSI   pc i v ty -> fptoint    nmdtye tye i v ty              -- floating point -> SInt
-	UIToFP   pc i v ty -> inttofp    nmdtye tye i v ty              -- UInt -> floating point
-	SIToFP   pc i v ty -> inttofp    nmdtye tye i v ty              -- SInt -> floating point
+	Trunc    pc i v ty -> tyanCastOp nmdtye c i v ty isAnnInt (>)    -- Truncate integers
+	ZExt     pc i v ty -> tyanCastOp nmdtye c i v ty isAnnInt (<)    -- Zero extend integers
+	SExt     pc i v ty -> tyanCastOp nmdtye c i v ty isAnnInt (<)    -- Sign extend integers
+	FPTrunc  pc i v ty -> tyanCastOp nmdtye c i v ty isAnnFloat (>)  -- Truncate floating point
+	FPExt    pc i v ty -> tyanCastOp nmdtye c i v ty isAnnFloat (<=) -- Extend floating point
+	FPToUI   pc i v ty -> 
+	    let tyv = liftTy $ snd $ fptoint nmdtye (eraseEnv tye) i v ty              -- floating point -> UInt
+		in ((ctrs, insert i tyv tye), tyv)
+	FPToSI   pc i v ty -> 
+		let tyv = liftTy $ snd $ fptoint nmdtye (eraseEnv tye) i v ty              -- floating point -> SInt
+		in ((ctrs, insert i tyv tye), tyv)
+	UIToFP   pc i v ty -> 
+		let tyv = liftTy $ snd $ inttofp nmdtye (eraseEnv tye) i v ty              -- UInt -> floating point
+		in ((ctrs, insert i tyv tye), tyv)
+	SIToFP   pc i v ty -> 
+		let tyv = liftTy $ snd $ inttofp nmdtye (eraseEnv tye) i v ty              -- SInt -> floating point
+		in ((ctrs, insert i tyv tye), tyv)
 	PtrToInt pc i v ty ->                                           -- Pointer -> Integer
-		let tyv = typeUnaryExpression nmdtye tye "PtrToInt" 41 v ty
-	    in (insert i tyv tye, tyv)
+		let tyv = typeUnaryExpression nmdtye (eraseEnv tye) "PtrToInt" 41 v ty
+		    tyl = liftTy tyv
+	    in ((ctrs, insert i tyl tye), tyl)
 	IntToPtr pc i v ty -> 										-- Integer -> Pointer
-		let tyv = typeValue nmdtye tye v
+		let tyv = typeValue nmdtye (eraseEnv tye) v
+		    tyl = liftTy tyv
 	    in if isInt tyv && isPointer ty 
-	       then (insert i ty tye, ty)
+	       then ((ctrs, insert i tyl tye), tyl)
 	       else error $ "IntToPtr: Either type is not pointer or not int: " ++ show [tyv, ty] 
 	BitCast  pc i v ty ->                                       -- Type cast
-		let tyv = typeUnaryExpression nmdtye tye "BitCast" 43 v ty
-		in (insert i tyv tye, tyv)                
+		let tyv = liftTy $ typeUnaryExpression nmdtye (eraseEnv tye) "BitCast" 43 v ty
+		in ((ctrs, insert i tyv tye), tyv)                
   -- Other Operations
- 	ICmp pc i cond ty op1 op2 -> typeCheckCmp TyClassInt   tye i ty (typeValue nmdtye tye op1) (typeValue nmdtye tye op2)
- 	FCmp pc i cond ty op1 op2 -> typeCheckCmp TyClassFloat tye i ty (typeValue nmdtye tye op1) (typeValue nmdtye tye op2)
+ 	ICmp pc i cond ty op1 op2 -> 
+ 	    let tyv = liftTy $ snd $ typeCheckCmp TyClassInt   (eraseEnv tye) i ty (typeValue nmdtye (eraseEnv tye) op1) (typeValue nmdtye (eraseEnv tye) op2)
+ 	    in ((ctrs, insert i tyv tye), tyv) 
+ 	FCmp pc i cond ty op1 op2 -> 
+ 	    let tyv = liftTy $ snd $ typeCheckCmp TyClassFloat (eraseEnv tye) i ty (typeValue nmdtye (eraseEnv tye) op1) (typeValue nmdtye (eraseEnv tye) op2)
+ 	    in ((ctrs, insert i tyv tye), tyv) 
   -- Memory Operations
- 	Alloca pc i ty       align   -> (insert i (TyPointer ty) tye, ty)-- Alloca should receive a size integer too  
- 	Store  pc   ty v1 v2 align   -> 
- 	  case typeValue nmdtye tye v2 of
- 	  	TyPointer ty -> 
- 	  	  let tyv2 = typeValue nmdtye tye v1
- 	  	  in if ty == tyv2 && isFstClass ty
- 	  	     then (tye, TyVoid)
- 	  	     else error $ "typeCheckInstruction.Store: " ++ show ty 
- 	  	x -> error $ "typeCheck Store: " ++ show x
-	Load   pc i    v     align   -> 
-	  case typeValue nmdtye tye v of
-	  	TyPointer ty -> if isFstClass ty
-	  		            then (insert i ty tye, ty)
-	  		            else error $ "typeCheckInstruction.Load: " ++ show ty 
-	  	x -> error $ "typeCheck Load: " ++ show x
+ 	Alloca pc i ty align -> 
+ 		let tyv = T.TyDer $ T.TyPtr (liftTy ty) T.TyRegAddr
+ 		in ((ctrs, insert i tyv tye), tyv)-- Alloca should receive a size integer too  
+ 	Store  pc ty v1 v2 align ->
+ 		let (tyv2,cv2) = tyanValue nmdtye tye v2
+ 		    (tyv1,cv1) = tyanValue nmdtye tye v1
+ 		in case tyv2 of
+ 			T.TyDer (T.TyPtr ty T.TyRegAddr) -> 
+ 				if ty == tyv1 && isFstClass (erase ty)
+ 				then (c, T.TyPri $ T.TyVoid)
+ 				else error $ "tyanCheckInstruction.Store: " ++ show ty 
+ 	  		x -> error $ "tyanCheckInstruction Store: " ++ show x
+	Load   pc i    v     align   ->
+		let (tyv,cv) = rtyanValue nmdtye tye i v
+ 		in case tyv of
+ 			T.TyDer (T.TyPtr ty T.TyRegAddr) -> 
+ 				if isFstClass (erase ty)
+ 				then ((ctrs `S.union` cv, insert i tyv tye), T.TyPri $ T.TyVoid)
+ 				else error $ "tyanCheckInstruction.Load: " ++ show ty
+ 	  		x -> error $ "tyanCheckInstruction Load: " ++ show x
  	GetElementPtr pc i ty v idxs ->
- 	  let ety = typeGetElementPtrConstantExpr nmdtye tye v idxs
- 	  in if ety == ty
-      	 then (insert i ty tye, ty)
-      	 else error $ "typeCheckInstruction.GetElementPtr: " ++ show [ety,ty]
+ 	  let (ety,lid) = tyanGetElementPtrConstantExpr nmdtye tye v idxs
+ 	      nc = S.union ctrs $ S.fromList $ map (\j -> (i,j)) lid
+ 	  in if ety == liftTy ty
+      	 then ((nc,insert i ety tye), ety)
+      	 else error $ "typeCheckInstruction.GetElementPtr: " ++ show [ety]
   -- Call Operation
-  	Call pc i ty callee vs -> typeCheckCall nmdtye tye i ty callee vs
+  	Call pc i ty callee vs -> tyanCheckCall nmdtye c i ty callee vs
   -- Selection Operations
-  	Select pc i cv vt vf       -> error "select operation not supported."
+  	Select pc i cv vt vf       -> error "tyanCheckInstruction: select operation not supported."
   	ExtractValue pc i v idxs   -> 
-  	  let ty = typeValue nmdtye tye v
+  	  let ty = typeValue nmdtye (eraseEnv tye) v
   	  in if length idxs > 0
          then if isAgg ty
               then let t = getTypeAgg nmdtye ty idxs
-                   in (insert i t tye, t)
+                       tl = liftTy t
+                   in ((ctrs, insert i tl tye), tl)
               else error $ "ExtractValue: " ++ show ty ++ " is not aggregate."  
          else error $ "ExtractValue: empty list" 
-  	InsertValue pc i v vi idxs -> error "InsertValue operation not supported"
+  	InsertValue pc i v vi idxs -> error "tyanCheckInstruction: InsertValue operation not supported"
   -- Atomic Operations
-  	Cmpxchg   pc i mptr cval nval ord -> 
-  		case typeValue nmdtye tye mptr of
-  			TyPointer ty -> let cty = typeValue nmdtye tye cval
-  			                    nty = typeValue nmdtye tye nval
-                            in if ty == cty && cty == nty
-                               then (insert i ty tye, ty)
-                               else error $ "Cmpxchg: Types are not equal " ++ show [ty,cty,nty]
+  	Cmpxchg   pc i mptr cval nval ord ->
+  		let (tymptr,cmptr) = rtyanValue nmdtye tye i mptr
+  		    (tycval,ccval) = rtyanValue nmdtye tye i cval
+  		    (tynval,cnval) = rtyanValue nmdtye tye i nval
+  		    nc = ctrs `S.union` cmptr `S.union` ccval `S.union` cnval
+  		in case tymptr of
+  			T.TyDer (T.TyPtr ty T.TyRegAddr) -> 
+  				if ty == tycval && tycval == tynval
+  				then ((nc, insert i ty tye), ty)
+  				else error $ "Cmpxchg: Types are not equal " ++ show [ty,tycval,tynval]
   			x -> error $ "Cmpxchg: Type of first element is not pointer: " ++ show x
   	AtomicRMW pc i mptr val op ord -> 
-  		case typeValue nmdtye tye mptr of
-  			TyPointer ty -> let vty = typeValue nmdtye tye val
-                            in if ty == vty 
-                               then (insert i ty tye, ty)
-                               else error $ "AtomicRMW: Types are not equal " ++ show [ty,vty]
+  		let (tymptr,cmptr) = rtyanValue nmdtye tye i mptr
+  		    (tyval,cval)   = rtyanValue nmdtye tye i val
+  		    nc = ctrs `S.union` cmptr `S.union` cval
+  		in case tymptr of
+  			T.TyDer (T.TyPtr ty T.TyRegAddr) -> 
+  			    if ty == tyval
+  			    then ((nc, insert i ty tye), ty)
+  			    else error $ "AtomicRMW: Types are not equal " ++ show [ty,tyval]
   			x -> error $ "AtomicRMW: Type of first element is not pointer: " ++ show x
--}
+
+tyanCheckCall :: NamedTyEnv -> Context -> Identifier -> Type -> Identifier -> Values -> (Context, TyAnn)
+tyanCheckCall nmdtye c@(ctrs,tye) i rfnty ci args = 
+	let ty = getFnTyAnn tye ci 
+	in case ty of
+		T.TyDer (T.TyPtr fnty T.TyRegAddr) ->
+			case fnty of 
+				T.TyDer (T.TyFun tps rty iv) ->
+			  		let (tyargs, cns) = unzip $ map (rtyanValue nmdtye tye i) args
+			  		    nc = foldr S.union ctrs cns
+			  		in if (erase rty) == rfnty
+			  	       then if all (\(a,b) -> a == b) $ zip tyargs tps
+				 	  		then if iv || length tyargs == length tps
+					       		 then if i == Local "" 
+					       	     	  then (c, rty)
+					       	    	  else ((nc, insert i rty tye), rty)
+					       		 else error $ "tyanCheckCall: length mismatch in " ++ show ci
+					  		else error $ "tyanCheckCall: argument type mismatch " ++ show (zip tyargs tps)
+				 	   else error $ "tyanCheckCall: return type are different in " ++ show ci ++ "\n" ++ show [rty, ty]
+				x -> error $ "tyanCheckCall: Function has type: " ++ show x
+		x -> error $ "tyanCheckCall: Function has type: " ++ show x
+
+getFnTyAnn :: TyAnnEnv -> Identifier -> TyAnn
+getFnTyAnn tye ident@(Global i) =
+	case M.lookup ident tye of
+		Nothing -> case M.lookup (Local i) tye of
+			Nothing -> error $ "getFnTyAnn: Function " ++ show ident ++ " not in env: " ++ show tye
+			Just t  -> t
+		Just t -> t
+getFnTyAnn tye  (Local i) = error "getFnTyAnn: Local Identifier"
 
 tyanCheckBinInstr :: TyClass -> NamedTyEnv -> Context -> Identifier -> Type -> Value -> Value -> (Context, TyAnn)
 tyanCheckBinInstr TyClassInt  nmdtye (c,tye) i ty@(TyInt x) v1 v2 = 
@@ -161,3 +217,14 @@ tyanCheckBinInstr TyClassFloat nmdtye (c,tye) i ty@(TyFloatPoint x) v1 v2 =
         nc  = c `S.union` cv1 `S.union` cv2
     in ((nc,insert i tyl tye), f tyl tv1 tv2)
 tyanCheckBinInstr n _ _ _ _ _ _ = error "tyanCheckBinInstr"
+
+tyanCastOp :: NamedTyEnv -> Context -> Identifier -> Value -> Type -> (TyAnn -> Bool) -> (TyAnn -> TyAnn -> Bool) -> (Context, TyAnn)
+tyanCastOp nmdtye (c,tye) i v ty top op = 
+	let tyl = liftTy ty
+	    (tyv,cv) = rtyanValue nmdtye tye i v
+	    nc = c `S.union` cv
+	in if top tyv && top tyl
+	   then if op tyv tyl
+		    then ((nc,insert i tyl tye), tyl)
+		  	else error $ "tyanCastOp: op failed " ++ show [tyv,tyl]
+		else error $ "tyanCastOp: not int " ++ show [tyv,tyl]

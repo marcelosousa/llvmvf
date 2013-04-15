@@ -12,6 +12,7 @@ import Language.LLVMIR
 
 import Analysis.Type.Util
 import Analysis.Type.Memory.TyAnn (TyAnn)
+import Analysis.Type.Memory.Context
 import qualified Analysis.Type.Memory.TyAnn as T
 
 type TyLIdPair = (TyAnn, Identifiers)
@@ -33,6 +34,24 @@ liftTy (TyPointer ty)    = T.TyDer $ T.TyPtr (liftTy ty) T.TyAny
 liftTy (TyVector s ty)   = T.TyDer $ T.TyVec s $ liftTy ty
 liftTy (TyJumpTo i)      = T.TyJumpTo i
 
+erase :: TyAnn -> Type
+erase T.TyUndef                             = TyUndefined
+erase (T.TyPri T.TyVoid)                    = TyVoid
+erase (T.TyPri T.TyLabel)                   = TyLabel
+erase (T.TyPri T.TyMetadata)                = TyMetadata
+erase (T.TyPri T.TyFloat)                   = TyFloatPoint $ TyFloat
+erase (T.TyPri (T.TyInt s))                 = TyInt s
+erase (T.TyDer (T.TyAgg (T.TyArr s ty)))    = TyArray s $ erase ty
+erase (T.TyDer (T.TyAgg (T.TyStr n s tys))) = TyStruct n s $ map erase tys
+erase (T.TyDer (T.TyFun tys ty v))          = TyFunction (map erase tys) (erase ty) v
+erase (T.TyDer (T.TyPtr ty _))              = TyPointer $ erase ty
+erase (T.TyDer (T.TyVec s ty))              = TyVector s $ erase ty
+erase (T.TyJumpTo i)                        = TyJumpTo i
+erase x = error $ "erase " ++ show x 
+
+eraseEnv :: TyAnnEnv -> TyEnv
+eraseEnv = M.map erase
+
 unify :: TyAnn -> TyAnn -> TyAnn
 unify = undefined
 
@@ -51,6 +70,10 @@ isAnnAgg _ = False
 isAnnInt :: TyAnn -> Bool
 isAnnInt (T.TyPri (T.TyInt _)) = True
 isAnnInt _ = False
+
+isAnnFloat :: TyAnn -> Bool
+isAnnFloat (T.TyPri T.TyFloat) = True
+isAnnFloat _ = False
 
 (<~=~>) :: NamedTyEnv -> TyAnn -> TyAnn -> Bool
 (<~=~>) nmdtye qtya qtyb = True
