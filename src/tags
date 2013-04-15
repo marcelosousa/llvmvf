@@ -2851,7 +2851,7 @@ getInitVal	./Language/LLVMIR/Extractor/Module.hs	117;"	v	file:
 getInst	./Language/LLVMIR/Extractor/Module.hs	169;"	v	file:
 getInstruction	./Language/LLVMIR/Extractor/Instruction.hs	81;"	v
 getInstructionValue	./Language/LLVMIR/Extractor/Instruction.hs	70;"	v
-getIntValue	./Analysis/Type/Standard/Constant.hs	108;"	v
+getIntValue	./Analysis/Type/Standard/Constant.hs	107;"	v
 getLogicalOp	./Language/LLVMIR/Extractor/Instruction.hs	135;"	v
 getMemoryOp	./Language/LLVMIR/Extractor/Instruction.hs	144;"	v
 getModel	./Language/LTL/Base.hs	181;"	v
@@ -2867,7 +2867,7 @@ getStructTypeParams	./Language/LLVMIR/Extractor/Type.hs	89;"	v	file:
 getTargetData	./Language/LLVMIR/Extractor/Module.hs	83;"	v	file:
 getTerminatorOp	./Language/LLVMIR/Extractor/Instruction.hs	96;"	v
 getType	./Language/LLVMIR/Extractor/Type.hs	39;"	v
-getTypeAgg	./Analysis/Type/Standard/Constant.hs	112;"	v
+getTypeAgg	./Analysis/Type/Standard/Constant.hs	111;"	v
 getTypeNameWithKind	./Language/LLVMIR/Extractor/Type.hs	82;"	v	file:
 getTypeWithKind	./Language/LLVMIR/Extractor/Type.hs	43;"	v
 getValue	./Language/LLVMIR/Extractor/Value.hs	31;"	v
@@ -2941,8 +2941,10 @@ instr	./Language/LLVMIR/Extractor/Context.hs	24;"	v
 instrs_BasicBlock_BasicBlock	src/Language/LLVMIR.hs	131;"	v
 inttofp	./Analysis/Type/Standard/Instruction.hs	167;"	v
 isAgg	./Analysis/Type/Util.hs	41;"	v
-isComparableTypeFloat	./Analysis/Type/Standard/Constant.hs	150;"	v
-isComparableTypeInt	./Analysis/Type/Standard/Constant.hs	144;"	v
+isComparableTypeAnnFloat	./Analysis/Type/Memory/Constant.hs	124;"	v
+isComparableTypeAnnInt	./Analysis/Type/Memory/Constant.hs	118;"	v
+isComparableTypeFloat	./Analysis/Type/Standard/Constant.hs	149;"	v
+isComparableTypeInt	./Analysis/Type/Standard/Constant.hs	143;"	v
 isConst_Global_GlobalVar	src/Language/LLVMIR.hs	236;"	v
 isConstant	./Language/LLVMIR/Extractor/Module.hs	45;"	v	file:
 isFloat	./Analysis/Type/Util.hs	29;"	v
@@ -5750,7 +5752,10 @@ ty_Type_TyArray	src/Language/LLVMIR.hs	449;"	v
 ty_Type_TyPointer	src/Language/LLVMIR.hs	457;"	v
 ty_Type_TyVector	src/Language/LLVMIR.hs	460;"	v
 ty_Value_Id	src/Language/LLVMIR.hs	472;"	v
+tyanCompareConstantExpr	./Analysis/Type/Memory/Constant.hs	102;"	v
+tyanComplexConstant	./Analysis/Type/Memory/Constant.hs	36;"	v
 tyanConstant	./Analysis/Type/Memory/Constant.hs	26;"	v
+tyanExpression	./Analysis/Type/Memory/Constant.hs	64;"	v
 tyanFnSig	./Analysis/Type/Memory/Function.hs	20;"	v
 tyanFunction	./Analysis/Type/Memory/Function.hs	19;"	v
 tyanFunctions	./Analysis/Type/Memory/Module.hs	30;"	v	file:
@@ -5777,20 +5782,20 @@ typeCheckMode	Main.hs	89;"	v
 typeCheckModule	./Analysis/Type/Standard/Module.hs	28;"	v
 typeCheckParameter	./Analysis/Type/Standard/Function.hs	43;"	v	file:
 typeCheckParameters	./Analysis/Type/Standard/Function.hs	37;"	v	file:
-typeCompareConstantExpr	./Analysis/Type/Standard/Constant.hs	128;"	v
+typeCompareConstantExpr	./Analysis/Type/Standard/Constant.hs	127;"	v
 typeComplexConstant	./Analysis/Type/Standard/Constant.hs	52;"	v
 typeConstant	./Analysis/Type/Standard/Constant.hs	23;"	v
 typeConstantDataSequential	./Analysis/Type/Standard/Constant.hs	78;"	v
 typeConstantFP	./Analysis/Type/Standard/Constant.hs	46;"	v
 typeExpression	./Analysis/Type/Standard/Constant.hs	91;"	v
 typeFunction	./Analysis/Type/Standard/Function.hs	17;"	v
-typeGetElementPtrConstantExpr	./Analysis/Type/Standard/Constant.hs	98;"	v
+typeGetElementPtrConstantExpr	./Analysis/Type/Standard/Constant.hs	97;"	v
 typeGlobalValue	./Analysis/Type/Util.hs	72;"	v
 typeMode	Main.hs	86;"	v
 typeOf	./Language/LLVMIR/Extractor/Type.hs	35;"	v
 typeSignature	./Analysis/Type/Standard/Function.hs	32;"	v	file:
 typeSimpleConstant	./Analysis/Type/Standard/Constant.hs	34;"	v
-typeUnaryExpression	./Analysis/Type/Standard/Constant.hs	156;"	v
+typeUnaryExpression	./Analysis/Type/Standard/Constant.hs	155;"	v
 typeValue	./Analysis/Type/Standard/Constant.hs	18;"	v
 typeValueGen	./Analysis/Type/Util.hs	65;"	v
 types	./Language/LLVMIR/Printer/NamedTypes.hs	32;"	v

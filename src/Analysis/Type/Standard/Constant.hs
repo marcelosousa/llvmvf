@@ -51,7 +51,7 @@ typeConstantFP cfp = error $ "typeConstantFP: " ++ show cfp
 typeComplexConstant :: NamedTyEnv -> TyEnv -> ComplexConstant -> Type
 typeComplexConstant nmdtye tye c = case c of
   ConstantAggregateZero  ty  -> ty
-  ConstantDataSequential cds -> typeConstantDataSequential tye cds
+  ConstantDataSequential cds -> typeConstantDataSequential cds
   ConstantStruct     ty vals -> case ty of 
         (TyStruct _ n tys) -> let lty = map (typeValue nmdtye tye) vals -- TODO: Need to change this for named type
                                   zlty = zip tys lty 
@@ -74,8 +74,8 @@ typeComplexConstant nmdtye tye c = case c of
                                else error $ "typeComplexConstant: TyVector " ++ show vals ++ "-" ++ show n  
 
 -- typeConstantDataSequential
-typeConstantDataSequential :: TyEnv -> ConstantDataSequential -> Type
-typeConstantDataSequential tye c = case c of 
+typeConstantDataSequential :: ConstantDataSequential -> Type
+typeConstantDataSequential c = case c of 
   ConstantDataArray ty@(TyArray _ ety)  _ ->  if isSmpTy ety
                                               then ty
                                               else error $ errorMsg "ConstantDataArray" "TyArray" ty
@@ -92,7 +92,6 @@ typeExpression nmdtye tye (CompareConstantExpr ce)           = typeCompareConsta
 typeExpression nmdtye tye (GetElementPtrConstantExpr v idxs) = typeGetElementPtrConstantExpr nmdtye tye v idxs
 typeExpression nmdtye tye e@(UnaryConstantExpr name i v ty)  = typeUnaryExpression nmdtye tye name i v ty
 typeExpression nmdtye tye e = error $ "typeExpression: " ++ show e ++ " not supported."
-
 
 typeGetElementPtrConstantExpr :: NamedTyEnv -> TyEnv -> Value -> Values -> Type
 typeGetElementPtrConstantExpr nmdtye tye v idxs = --trace ("gep: " ++ show v ++ " " ++ show idxs) $
