@@ -14,7 +14,7 @@ import Language.LLVMIR.Printer
 import UU.PPrint 
 
 import Analysis.Type.Memory.TyAnn
-
+import Debug.Trace (trace)
 type Name = String
 type Constrs  = S.Set (Identifier, Identifier)
 type TyAnnEnv = M.Map Identifier TyAnn
@@ -60,6 +60,7 @@ prettyFn (n,ty) r = "Function " ++ n ++ "\n"
 prettyContext :: Context -> String
 prettyContext (c,e) = "Constraints\n"
                   ++ prettyConstrs c
+                  ++ "Type Environment\n"
                   ++ prettyTyAnnEnv e
 
 prettyConstrs :: Constrs -> String

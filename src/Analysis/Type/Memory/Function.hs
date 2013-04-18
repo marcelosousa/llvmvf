@@ -25,7 +25,7 @@ tyanFnSig :: TyAnnEnv -> Function -> TyAnnEnv
 tyanFnSig tye (FunctionDef  n l rty iv pms bbs) = 
     let (tysig, _) = tyanSignature tye pms (liftTy rty) iv
     in insert n tysig tye 
-tyanFnSig tye (FunctionDecl n l rty iv pms) = trace ("inserting " ++ show n) $ 
+tyanFnSig tye (FunctionDecl n l rty iv pms) = -- trace ("inserting " ++ show n) $ 
     let (tysig, _) = tyanSignature tye pms (liftTy rty) iv
     in insert n tysig tye 
 

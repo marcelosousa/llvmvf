@@ -9,6 +9,8 @@ module Analysis.Type.Util where
 import Language.LLVMIR
 import qualified Data.Map as M
 
+import Debug.Trace(trace)
+
 type TyEnv = M.Map Identifier Type
 type NamedTyEnv = M.Map Id Type
 
@@ -75,9 +77,9 @@ insert k@(Local i) v m = case M.lookup k m of
 
 typeValueGen :: (Ord k, Show k, Show a) => M.Map k a -> k -> a -> (a -> a -> Bool) -> String -> a
 typeValueGen tye v ty op s = case M.lookup v tye of
-                              Nothing -> ty -- trace (s ++ ": " ++ show v ++ " is not in the context: " ++ show tye) $ ty
+                              Nothing -> error $ "Type error: " ++ show v ++ " is not in the environment!" 
                               Just t  -> if t `op` ty
-                                         then t
+                                         then t -- trace ("typeValueGen: " ++ show v ++ ":" ++ show t) $ t
                                          else error $ s ++ ": Given " ++ show ty ++ ". Expected " ++ show t ++ " in " ++ show v
 
 typeGlobalValue :: (Show a) => M.Map Identifier a -> (Type -> a) -> (a -> a -> Bool) -> GlobalValue -> a 

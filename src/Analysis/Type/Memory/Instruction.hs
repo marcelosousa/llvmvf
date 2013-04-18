@@ -111,23 +111,26 @@ tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
  	    in ((ctrs, insert i tyv tye), tyv) 
   -- Memory Operations
  	Alloca pc i ty align -> 
- 		let tyv = T.TyDer $ T.TyPtr (liftTy ty) T.TyRegAddr
+ 		let tyv = T.TyDer $ T.TyPtr (liftTyGen ty T.TyRegAddr) T.TyRegAddr
  		in ((ctrs, insert i tyv tye), tyv)-- Alloca should receive a size integer too  
  	Store  pc ty v1 v2 align ->
  		let (tyv2,cv2) = tyanValue nmdtye tye v2
  		    (tyv1,cv1) = tyanValue nmdtye tye v1
  		in case tyv2 of
- 			T.TyDer (T.TyPtr ty T.TyRegAddr) -> 
- 				if ty == tyv1 && isFstClass (erase ty)
+ 			T.TyDer (T.TyPtr tyv T.TyRegAddr) -> 
+ 				if tyv == tyv1 && isFstClass (erase tyv)
  				then (c, T.TyPri $ T.TyVoid)
- 				else error $ "tyanCheckInstruction.Store(1): " ++ show ty 
+ 				else error $ "tyanCheckInstruction.Store(1): " ++ show [tyv,tyv1] ++ show [v1,v2] 
  	  		x -> error $ "tyanCheckInstruction Store(2): " ++ show x
 	Load   pc i    v     align   ->
 		let (tyv,cv) = rtyanValue nmdtye tye i v
+		    vi = case v of
+		    	  Id x _ -> x
+		    	  _ -> error "Load !!!!!"
  		in case tyv of
  			T.TyDer (T.TyPtr ty T.TyRegAddr) -> 
  				if isFstClass (erase ty)
- 				then ((ctrs `S.union` cv, insert i ty tye), T.TyPri $ T.TyVoid)
+ 				then ((S.fromList [(i,vi),(vi,i)] `S.union` ctrs `S.union` cv, insert i ty tye), T.TyPri $ T.TyVoid)
  				else error $ "tyanCheckInstruction.Load: " ++ show ty
  	  		x -> error $ "tyanCheckInstruction Load: " ++ show x
  	GetElementPtr pc i ty v idxs ->
@@ -197,6 +200,7 @@ tyanCheckCall nmdtye c@(ctrs,tye) i rfnty ci args =
 				 	   else error $ "tyanCheckCall: return type are different in " ++ show ci ++ "\n" ++ show [rty, ty]
 				x -> error $ "tyanCheckCall: Function has type: " ++ show x
 		x -> error $ "tyanCheckCall: Function has type: " ++ show x
+
 
 getIdValue :: [Value] -> Identifier
 getIdValue [Id v ty] = v

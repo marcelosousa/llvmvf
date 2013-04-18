@@ -156,7 +156,7 @@ typeUnaryExpression nmdtye tye n opcode val ty =
   case opcode of
     41 -> let tyv = typeValue nmdtye tye val
           in if isPointer tyv && isInt ty 
-             then ty
+             then trace ("typeUnaryExpression: " ++ show val) $ ty
              else error $ "PtrToInt(1): Either type is not pointer or not int: " ++ show [tyv, ty] ++ "\n" ++ show val
     43 -> let tyv = typeValue nmdtye tye val
           in if notAggFstClass tyv && notAggFstClass ty

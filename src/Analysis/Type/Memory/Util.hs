@@ -11,7 +11,7 @@ import qualified Data.Map as M
 import Language.LLVMIR
 
 import Analysis.Type.Util
-import Analysis.Type.Memory.TyAnn (TyAnn)
+import Analysis.Type.Memory.TyAnn (TyAnn,TyAnnot)
 import Analysis.Type.Memory.Context
 import qualified Analysis.Type.Memory.TyAnn as T
 
@@ -19,20 +19,25 @@ type TyLIdPair = (TyAnn, Identifiers)
 
 -- Lift a LLVM IR Type to the most generic Type Annotation
 liftTy :: Type -> TyAnn
-liftTy TyUndefined       = T.TyUndef
-liftTy TyVoid            = T.TyPri T.TyVoid
-liftTy TyLabel           = T.TyPri T.TyLabel
-liftTy TyMetadata        = T.TyPri T.TyMetadata
-liftTy (TyFloatPoint f)  = T.TyPri T.TyFloat
-liftTy Tyx86MMX          = error "liftTy: Tyx86MMX not supported"
-liftTy TyOpaque          = error "liftTy: TyOpaque"
-liftTy (TyInt s)         = T.TyPri $ T.TyInt s
-liftTy (TyArray s ty)    = T.TyDer $ T.TyAgg $ T.TyArr s $ liftTy ty
-liftTy (TyStruct n s ty) = T.TyDer $ T.TyAgg $ T.TyStr n s $ map liftTy ty
-liftTy (TyFunction a r iv)  = T.TyDer $ T.TyFun (map liftTy a) (liftTy r) iv
-liftTy (TyPointer ty)    = T.TyDer $ T.TyPtr (liftTy ty) T.TyAny
-liftTy (TyVector s ty)   = T.TyDer $ T.TyVec s $ liftTy ty
-liftTy (TyJumpTo i)      = T.TyJumpTo i
+liftTy ty = liftTyGen ty T.TyAny
+
+
+liftTyGen :: Type -> TyAnnot -> TyAnn
+liftTyGen TyUndefined         a = T.TyUndef
+liftTyGen TyVoid              a = T.TyPri T.TyVoid
+liftTyGen TyLabel             a = T.TyPri T.TyLabel
+liftTyGen TyMetadata          a = T.TyPri T.TyMetadata
+liftTyGen (TyFloatPoint f)    a = T.TyPri T.TyFloat
+liftTyGen Tyx86MMX            a = error "liftTy: Tyx86MMX not supported"
+liftTyGen TyOpaque            a = error "liftTy: TyOpaque"
+liftTyGen (TyInt s)           a = T.TyPri $ T.TyInt s
+liftTyGen (TyArray s ty)      a = T.TyDer $ T.TyAgg $ T.TyArr s $ liftTyGen ty a
+liftTyGen (TyStruct n s ty)   a = T.TyDer $ T.TyAgg $ T.TyStr n s $ map (flip liftTyGen a) ty
+liftTyGen (TyFunction as r iv) a = T.TyDer $ T.TyFun (map (flip liftTyGen a) as) (liftTyGen r a) iv
+liftTyGen (TyPointer ty)      a = T.TyDer $ T.TyPtr (liftTyGen ty a) a
+liftTyGen (TyVector s ty)     a = T.TyDer $ T.TyVec s $ liftTyGen ty a
+liftTyGen (TyJumpTo i)        a = T.TyJumpTo i
+
 
 erase :: TyAnn -> Type
 erase T.TyUndef                             = TyUndefined
