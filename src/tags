@@ -2,7 +2,7 @@
 !~!	./Language/LTL/Base.hs	257;"	v
 <->	./Language/LTL/Base.hs	77;"	v
 <:	./Analysis/Type/Memory/Util.hs	63;"	v
-<=>	./Analysis/Type/Util.hs	103;"	v
+<=>	./Analysis/Type/Util.hs	106;"	v
 <>	./Language/LLVMIR/Extractor/Opcode.hs	81;"	v
 <~=~>	./Analysis/Type/Memory/Util.hs	79;"	v
 AShr	./Language/LLVMIR/Extractor/Opcode.hs	30;"	d
@@ -1201,7 +1201,6 @@ SIToFP	./Language/LLVMIR/Extractor/Opcode.hs	47;"	d
 SIToFP	src/Language/LLVMIR.hs	287;"	d
 SRem	./Language/LLVMIR/Extractor/Opcode.hs	26;"	d
 SRem	src/Language/LLVMIR.hs	269;"	d
-STyRes	./Analysis/Type/Standard/Module.hs	18;"	d	file:
 STyRes	./Analysis/Type/Standard/Module.hs	18;"	t
 Section	src/Language/LLVMIR.hs	424;"	d
 Section	src/Language/LLVMIR.hs	424;"	t
@@ -2779,7 +2778,7 @@ entrypc_Syn_BasicBlocks	src/Concurrent/Model/Analysis/ControlFlow.hs	720;"	v
 entrypc_Syn_Function	src/Concurrent/Model/Analysis/ControlFlow.hs	1853;"	v
 entrypc_Syn_Instruction	src/Concurrent/Model/Analysis/ControlFlow.hs	2534;"	v
 entrypc_Syn_Instructions	src/Concurrent/Model/Analysis/ControlFlow.hs	6120;"	v
-eqStruct	./Analysis/Type/Util.hs	118;"	v
+eqStruct	./Analysis/Type/Util.hs	121;"	v
 erase	./Analysis/Type/Memory/Util.hs	38;"	v
 eraseEnv	./Analysis/Type/Memory/Util.hs	53;"	v
 errorMsg	./Analysis/Type/Standard/Constant.hs	87;"	v
@@ -2802,7 +2801,7 @@ f	./Analysis/Type/Standard/Instruction.hs	213;"	v
 fStore	./Concurrent/Model.hs	68;"	v
 f_Instruction_Br	src/Language/LLVMIR.hs	255;"	v
 fails	./Concurrent/Model.hs	72;"	v
-findBasicBlock	./Analysis/Type/Util.hs	77;"	v
+findBasicBlock	./Analysis/Type/Util.hs	80;"	v
 fname_Inh_BasicBlock	src/Concurrent/Model/Visualizer.hs	727;"	v
 fname_Inh_BasicBlocks	src/Concurrent/Model/Visualizer.hs	790;"	v
 fp_SimpleConstant_ConstantFP	src/Language/LLVMIR.hs	428;"	v
@@ -5651,7 +5650,7 @@ sem_Visibility_Protected	src/Concurrent/Model/PThread.hs	10576;"	v
 sem_Visibility_Protected	src/Concurrent/Model/Visualizer.hs	8337;"	v
 sem_Visibility_Protected	src/Language/LLVMIR/Printer/Module.hs	7701;"	v
 size	./Language/LTL/Base.hs	213;"	v
-sizeof	./Analysis/Type/Util.hs	82;"	v
+sizeof	./Analysis/Type/Util.hs	85;"	v
 sortEnv	./Concurrent/Model.hs	70;"	v
 states	./Language/LTL/Base.hs	159;"	v
 struct_ConstantExpr_GetElementPtrConstantExpr	src/Language/LLVMIR.hs	184;"	v
@@ -5810,14 +5809,14 @@ typeConstantFP	./Analysis/Type/Standard/Constant.hs	46;"	v
 typeExpression	./Analysis/Type/Standard/Constant.hs	91;"	v
 typeFunction	./Analysis/Type/Standard/Function.hs	17;"	v
 typeGetElementPtrConstantExpr	./Analysis/Type/Standard/Constant.hs	97;"	v
-typeGlobalValue	./Analysis/Type/Util.hs	72;"	v
+typeGlobalValue	./Analysis/Type/Util.hs	75;"	v
 typeMode	Main.hs	86;"	v
 typeOf	./Language/LLVMIR/Extractor/Type.hs	35;"	v
 typeSignature	./Analysis/Type/Standard/Function.hs	32;"	v	file:
 typeSimpleConstant	./Analysis/Type/Standard/Constant.hs	34;"	v
 typeUnaryExpression	./Analysis/Type/Standard/Constant.hs	155;"	v
 typeValue	./Analysis/Type/Standard/Constant.hs	18;"	v
-typeValueGen	./Analysis/Type/Util.hs	65;"	v
+typeValueGen	./Analysis/Type/Util.hs	68;"	v
 types	./Language/LLVMIR/Printer/NamedTypes.hs	32;"	v
 types'	./Language/LLVMIR/Printer/NamedTypes.hs	39;"	v
 tys_Type_TyStruct	src/Language/LLVMIR.hs	458;"	v

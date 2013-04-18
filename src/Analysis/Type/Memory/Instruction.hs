@@ -120,14 +120,14 @@ tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
  			T.TyDer (T.TyPtr ty T.TyRegAddr) -> 
  				if ty == tyv1 && isFstClass (erase ty)
  				then (c, T.TyPri $ T.TyVoid)
- 				else error $ "tyanCheckInstruction.Store: " ++ show ty 
- 	  		x -> error $ "tyanCheckInstruction Store: " ++ show x
+ 				else error $ "tyanCheckInstruction.Store(1): " ++ show ty 
+ 	  		x -> error $ "tyanCheckInstruction Store(2): " ++ show x
 	Load   pc i    v     align   ->
 		let (tyv,cv) = rtyanValue nmdtye tye i v
  		in case tyv of
  			T.TyDer (T.TyPtr ty T.TyRegAddr) -> 
  				if isFstClass (erase ty)
- 				then ((ctrs `S.union` cv, insert i tyv tye), T.TyPri $ T.TyVoid)
+ 				then ((ctrs `S.union` cv, insert i ty tye), T.TyPri $ T.TyVoid)
  				else error $ "tyanCheckInstruction.Load: " ++ show ty
  	  		x -> error $ "tyanCheckInstruction Load: " ++ show x
  	GetElementPtr pc i ty v idxs ->

@@ -46,6 +46,7 @@ instance Show TyAnn where
   show TyUndef = "undef"
   show (TyPri t) = show t
   show (TyDer t) = show t
+  show (TyJumpTo ids) = "{#" ++ show ids ++ "}"
 
 instance Show TyPri where
   show TyVoid     = "void"

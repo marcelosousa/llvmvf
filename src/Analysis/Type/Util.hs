@@ -68,8 +68,8 @@ typeValueGen :: (Ord k, Show k, Show a) => M.Map k a -> k -> a -> (a -> a -> Boo
 typeValueGen tye v ty op s = case M.lookup v tye of
                               Nothing -> ty -- trace (s ++ ": " ++ show v ++ " is not in the context: " ++ show tye) $ ty
                               Just t  -> if t `op` ty
-                                         then ty
-                                         else error $ s ++ ": Given " ++ show ty ++ ". Expected " ++ show t
+                                         then t
+                                         else error $ s ++ ": Given " ++ show ty ++ ". Expected " ++ show t ++ " in " ++ show v
 
 typeGlobalValue :: (Show a) => M.Map Identifier a -> (Type -> a) -> (a -> a -> Bool) -> GlobalValue -> a 
 typeGlobalValue tye f op (FunctionValue  n ty) = typeValueGen tye n (f ty) op "typeGlobalValue:FunctionValue"
