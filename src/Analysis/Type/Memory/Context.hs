@@ -9,7 +9,7 @@ module Analysis.Type.Memory.Context where
 import qualified Data.Map as M
 import qualified Data.Set as S
 
-import Language.LLVMIR (Identifier)
+import Language.LLVMIR (Identifier, Identifiers)
 import Language.LLVMIR.Printer
 import UU.PPrint 
 
@@ -21,6 +21,22 @@ type TyAnnEnv = M.Map Identifier TyAnn
 type Context  = (Constrs, TyAnnEnv)
 
 data RTyRes = RTyRes Name Context (M.Map Name Context)
+
+filterIContext :: Context -> Identifier -> Context
+filterIContext (cnstrs, tyen) i = let c = S.toList cnstrs
+                                      idxs = splitConstrs c i [i] c
+                                      tyen' = M.filterWithKey (\k _ -> not $ elem k idxs) tyen
+                                  in (cnstrs,tyen')
+
+
+splitConstrs :: [(Identifier, Identifier)] -> Identifier -> Identifiers -> [(Identifier, Identifier)] -> Identifiers
+splitConstrs [] i li ol = li
+splitConstrs ((a,b):xs) i li ol | i == b = if a `elem` li 
+	                                       then splitConstrs xs i li ol
+	                                       else let l1 = splitConstrs ol a (a:li) ol
+	                                                l2 = splitConstrs xs i (a:li) ol
+	                                            in l1++l2	                                           
+splitConstrs ((a,b):xs) i li ol | otherwise = splitConstrs xs i li ol 
 
 -- 
 instance Show RTyRes where

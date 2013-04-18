@@ -16,7 +16,7 @@ import Analysis.Type.Util
 import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.Constant
 import Analysis.Type.Memory.Context
-import Analysis.Type.Memory.TyAnn (TyAnn)
+import Analysis.Type.Memory.TyAnn (TyAnn, TyAnnot)
 import Analysis.Type.Standard.Constant
 import Analysis.Type.Standard.Instruction
 import qualified Analysis.Type.Memory.TyAnn as T
@@ -182,19 +182,34 @@ tyanCheckCall nmdtye c@(ctrs,tye) i rfnty ci args =
 				T.TyDer (T.TyFun tps rty iv) ->
 			  		let (tyargs, cns) = unzip $ map (rtyanValue nmdtye tye i) args
 			  		    nc = foldr S.union ctrs cns
+			  		    ii = getIdValue args
 			  		in if (erase rty) == rfnty
 			  	       then if all (\(a,b) -> a == b) $ zip tyargs tps
 				 	  		then if iv || length tyargs == length tps
-					       		 then if i == Local "" 
-					       	     	  then (c, rty)
-					       	    	  else ((nc, insert i rty tye), rty)
+					       		 then case ci of 
+					       		 	Global "vfree"   -> (filterIContext (nc,tye) ii, rty)
+					       		 	Global "iounmap" -> (filterIContext (nc,tye) ii, rty)
+					       		 	_ -> if i == Local "" 
+					       		 		 then (c, rty)
+					       		 		 else ((nc, insert i rty tye), rty)
 					       		 else error $ "tyanCheckCall: length mismatch in " ++ show ci
 					  		else error $ "tyanCheckCall: argument type mismatch " ++ show (zip tyargs tps)
 				 	   else error $ "tyanCheckCall: return type are different in " ++ show ci ++ "\n" ++ show [rty, ty]
 				x -> error $ "tyanCheckCall: Function has type: " ++ show x
 		x -> error $ "tyanCheckCall: Function has type: " ++ show x
 
+getIdValue :: [Value] -> Identifier
+getIdValue [Id v ty] = v
+getIdValue _         = error $ "getIdValue: Args "
+
+ptrtoMem :: TyAnnot -> TyAnn
+ptrtoMem a = T.TyDer $ T.TyPtr (T.TyPri $ T.TyInt 8) a
+
 getFnTyAnn :: TyAnnEnv -> Identifier -> TyAnn
+getFnTyAnn tye (Global "vmalloc") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64] (ptrtoMem T.TyRegAddr) False)) T.TyRegAddr)
+getFnTyAnn tye (Global "vfree")   = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyRegAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr)
+getFnTyAnn tye (Global "ioremap") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64,T.TyPri $ T.TyInt 64] (ptrtoMem T.TyIOAddr) False)) T.TyRegAddr)
+getFnTyAnn tye (Global "iounmap") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyIOAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr)
 getFnTyAnn tye ident@(Global i) =
 	case M.lookup ident tye of
 		Nothing -> case M.lookup (Local i) tye of

@@ -51,7 +51,16 @@ isTyOrVecOfTy _ _ = False
 
 -- TODO: Complete this definition
 isFstClass :: Type -> Bool
-isFstClass x = True
+isFstClass (TyInt _)        = True
+isFstClass (TyFloatPoint _) = True
+isFstClass (TyPointer _)    = True
+isFstClass (TyVector _ _)   = True
+isFstClass (TyStruct _ _ _) = True
+isFstClass (TyArray _ _)    = True
+isFstClass TyLabel          = True
+isFstClass TyMetadata       = True
+isFstClass _ = False
+
 
 notAggFstClass :: Type -> Bool
 notAggFstClass ty = (not $ isAgg ty) && isFstClass ty

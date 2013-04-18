@@ -52,12 +52,6 @@ erase x = error $ "erase " ++ show x
 eraseEnv :: TyAnnEnv -> TyEnv
 eraseEnv = M.map erase
 
-unify :: TyAnn -> TyAnn -> TyAnn
-unify = undefined
-
-castTy :: TyAnn -> TyAnn -> TyAnn
-castTy = undefined
-
 -- Subtyping relation 
 (<:) :: TyAnn -> TyAnn -> Bool
 (T.TyDer (T.TyPtr t1 T.TyAny)) <: (T.TyDer (T.TyPtr t2 k)) = True
