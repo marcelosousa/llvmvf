@@ -100,8 +100,11 @@ tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
 	       then ((ctrs, insert i tyl tye), tyl)
 	       else error $ "IntToPtr: Either type is not pointer or not int: " ++ show [tyv, ty] 
 	BitCast  pc i v ty ->                                       -- Type cast
-		let tyv = liftTy $ typeUnaryExpression nmdtye (eraseEnv tye) "BitCast" 43 v ty
-		in ((ctrs, insert i tyv tye), tyv)                
+		let tyv = tyanUnaryExpression nmdtye tye "BitCast" 43 v ty
+		    vi = case v of
+		    	  Id x _ -> x
+		    	  _ -> error "Bitcast !!!!!"
+		in ((S.fromList [(i,vi),(vi,i)] `S.union` ctrs, insert i tyv tye), tyv)                
   -- Other Operations
  	ICmp pc i cond ty op1 op2 -> 
  	    let tyv = liftTy $ snd $ typeCheckCmp TyClassInt   (eraseEnv tye) i ty (typeValue nmdtye (eraseEnv tye) op1) (typeValue nmdtye (eraseEnv tye) op2)
@@ -190,6 +193,7 @@ tyanCheckCall nmdtye c@(ctrs,tye) i rfnty ci args =
 			  	       then if all (\(a,b) -> a == b) $ zip tyargs tps
 				 	  		then if iv || length tyargs == length tps
 					       		 then case ci of 
+					       		 	Global "free"   -> (filterIContext (nc,tye) ii, rty)
 					       		 	Global "vfree"   -> (filterIContext (nc,tye) ii, rty)
 					       		 	Global "iounmap" -> (filterIContext (nc,tye) ii, rty)
 					       		 	_ -> if i == Local "" 
@@ -212,6 +216,8 @@ ptrtoMem a = T.TyDer $ T.TyPtr (T.TyPri $ T.TyInt 8) a
 getFnTyAnn :: TyAnnEnv -> Identifier -> TyAnn
 getFnTyAnn tye (Global "vmalloc") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64] (ptrtoMem T.TyRegAddr) False)) T.TyRegAddr)
 getFnTyAnn tye (Global "vfree")   = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyRegAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr)
+getFnTyAnn tye (Global "malloc") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64] (ptrtoMem T.TyRegAddr) False)) T.TyRegAddr)
+getFnTyAnn tye (Global "free")   = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyRegAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr)
 getFnTyAnn tye (Global "ioremap") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64,T.TyPri $ T.TyInt 64] (ptrtoMem T.TyIOAddr) False)) T.TyRegAddr)
 getFnTyAnn tye (Global "iounmap") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyIOAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr)
 getFnTyAnn tye ident@(Global i) =

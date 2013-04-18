@@ -17,6 +17,8 @@ import Analysis.Type.Memory.TyAnn (TyAnn, TyAnnot)
 import Analysis.Type.Standard.Constant
 import qualified Analysis.Type.Memory.TyAnn as T
 
+import Debug.Trace (trace)
+
 -- type analyse value
 tyanValue :: NamedTyEnv -> TyAnnEnv -> Value -> TyLIdPair
 tyanValue nmdtye tye (Id v ty)    = (typeValueGen tye v (liftTy ty) ((<~=~>) nmdtye) "tyanValue:Id", [])
@@ -126,19 +128,21 @@ isComparableTypeAnnFloat (T.TyDer (T.TyVec _ (T.TyPri T.TyFloat))) = (True,1)
 isComparableTypeAnnFloat (T.TyDer (T.TyPtr _ _)) = (True,0) -- Suspicious
 isComparableTypeAnnFloat _ = (False, 0)
 
-{-
-typeUnaryExpression :: NamedTyEnv -> TyEnv -> String -> Int -> Value -> Type -> Type
-typeUnaryExpression nmdtye tye n opcode val ty =
+tyanUnaryExpression :: NamedTyEnv -> TyAnnEnv -> String -> Int -> Value -> Type -> TyAnn
+tyanUnaryExpression nmdtye tye n opcode val ty =
   case opcode of
-    41 -> let tyv = typeValue nmdtye tye val
-          in if isPointer tyv && isInt ty 
-             then ty
-             else error $ "PtrToInt(1): Either type is not pointer or not int: " ++ show [tyv, ty] ++ "\n" ++ show val
-    43 -> let tyv = typeValue nmdtye tye val
+    41 -> let (tyv,_) = tyanValue nmdtye tye val
+              tyv' = erase tyv
+          in if isPointer tyv' && isInt ty 
+             then trace ("tyanUnaryExpression: " ++ show val) $ liftTy ty
+             else error $ "PtrToInt(1): Either type is not pointer or not int: " ++ show tyv ++ "\n" ++ show val
+    43 -> let (tyv',_) = tyanValue nmdtye tye val
+              tyv = erase tyv'
           in if notAggFstClass tyv && notAggFstClass ty
              then if sizeof tyv == sizeof ty
-                  then ty
+                  then case tyv' of
+                        T.TyDer (T.TyPtr tyr a) -> liftTyGen ty a
+                        _ -> liftTy ty
                   else error $ "bitcast: types with different bit sizes:" ++ show tyv ++ "\n" ++ show ty
      else error $ "bitcast: One of the types " ++ show [tyv, ty] ++ " is aggregate or not fst class" 
-    x  -> error $ "typeUnaryExpression: " ++ show n ++ " not supported."
--}
+    x  -> error $ "tyanUnaryExpression: " ++ show n ++ " not supported."
