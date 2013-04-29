@@ -1,18 +1,7 @@
 
 
--- UUAGC 0.9.42.2 (src/Language/LLVMIR/Converter/Module.ag)
+-- UUAGC 0.9.42.3 (src/Language/LLVMIR/Converter/Module.ag)
 module Language.LLVMIR.Converter.Module where
-
-{-# LINE 15 "./src/Language/LLVMIR/Converter/Module.ag" #-}
-
-import Language.HTm.Base
-import Language.LLVMIR
-import Data.Maybe
-import Control.Monad
-import Data.Map (Map)
-import qualified Data.Map as M
-import Debug.Trace (trace)
-{-# LINE 16 "src/Language/LLVMIR/Converter/Module.hs" #-}
 
 {-# LINE 11 "src/Language/LLVMIR/Grammar/Base.ag" #-}
 
@@ -26,7 +15,49 @@ import Data.Map hiding (foldr)
 #else
 import Data.Map 
 #endif
+{-# LINE 19 "src/Language/LLVMIR/Converter/Module.hs" #-}
+
+{-# LINE 15 "./src/Language/LLVMIR/Converter/Module.ag" #-}
+
+import Language.HTm.Base
+import Language.LLVMIR
+import Data.Maybe
+import Control.Monad
+import Data.Map (Map)
+import qualified Data.Map as M
+import Debug.Trace (trace)
 {-# LINE 30 "src/Language/LLVMIR/Converter/Module.hs" #-}
+{-# LINE 1 "src/Language/LLVMIR/Grammar/Instruction.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Grammar.Instruction
+-- Copyright :  (c) 2013 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 37 "src/Language/LLVMIR/Converter/Module.hs" #-}
+
+{-# LINE 1 "src/Language/LLVMIR/Grammar/Base.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Base
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 45 "src/Language/LLVMIR/Converter/Module.hs" #-}
+
+{-# LINE 153 "src/Language/LLVMIR/Grammar/Base.ag" #-}
+
+emptyFunction :: Function
+emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid False [] []
+{-# LINE 51 "src/Language/LLVMIR/Converter/Module.hs" #-}
+
+{-# LINE 1 "src/Language/LLVMIR/Type/Type.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Type.Type
+-- Copyright :  (c) 2012 Marcelo Sousa
+-- Standard LLVM IR Types
+-------------------------------------------------------------------------------
+{-# LINE 60 "src/Language/LLVMIR/Converter/Module.hs" #-}
+
 {-# LINE 1 "./src/Language/LLVMIR/Converter/Module.ag" #-}
 
 -------------------------------------------------------------------------------
@@ -34,7 +65,7 @@ import Data.Map
 -- Copyright :  (c) 2013 Marcelo Sousa
 -- BETA * SSA -> ANF
 -------------------------------------------------------------------------------
-{-# LINE 38 "src/Language/LLVMIR/Converter/Module.hs" #-}
+{-# LINE 69 "src/Language/LLVMIR/Converter/Module.hs" #-}
 
 {-# LINE 167 "./src/Language/LLVMIR/Converter/Module.ag" #-}
 
@@ -58,37 +89,6 @@ buildbb n m = case M.lookup n m of
                Just (l, f) -> let x = Prelude.map (\e -> buildbb e m) l
                               in trace (show n ++ ": " ++ show x) $ f x
                Nothing  -> error $ n ++ " not in map:" 
-{-# LINE 62 "src/Language/LLVMIR/Converter/Module.hs" #-}
-
-{-# LINE 1 "src/Language/LLVMIR/Grammar/Base.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Base
--- Copyright :  (c) 2012 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 70 "src/Language/LLVMIR/Converter/Module.hs" #-}
-
-{-# LINE 153 "src/Language/LLVMIR/Grammar/Base.ag" #-}
-
-emptyFunction :: Function
-emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid False [] []
-{-# LINE 76 "src/Language/LLVMIR/Converter/Module.hs" #-}
-
-{-# LINE 1 "src/Language/LLVMIR/Grammar/Instruction.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Grammar.Instruction
--- Copyright :  (c) 2013 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 84 "src/Language/LLVMIR/Converter/Module.hs" #-}
-
-{-# LINE 1 "src/Language/LLVMIR/Type/Type.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Type.Type
--- Copyright :  (c) 2012 Marcelo Sousa
--- Standard LLVM IR Types
--------------------------------------------------------------------------------
 {-# LINE 93 "src/Language/LLVMIR/Converter/Module.hs" #-}
 -- Alias -------------------------------------------------------
 -- cata

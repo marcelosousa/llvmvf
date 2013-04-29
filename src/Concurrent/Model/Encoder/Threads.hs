@@ -1,8 +1,28 @@
 
 
 {-#LANGUAGE RecordWildCards #-}
--- UUAGC 0.9.42.2 (src/Concurrent/Model/Encoder/Threads.ag)
+-- UUAGC 0.9.42.3 (src/Concurrent/Model/Encoder/Threads.ag)
 module Concurrent.Model.Encoder.Threads where
+
+{-# LINE 11 "src/Language/LLVMIR/Grammar/Base.ag" #-}
+
+import Prelude              hiding (sequence)
+import Data.Char            (chr)
+import qualified Data.Map as Data.Map
+import qualified Data.Map as Map
+import Data.Maybe (fromMaybe)
+#if __GLASGOW_HASKELL__ >= 704
+import Data.Map hiding (foldr)
+#else
+import Data.Map 
+#endif
+{-# LINE 20 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 11 "./src/Concurrent/Model/Encoder/Global.ag" #-}
+
+import Control.Applicative ((<$>))
+import Control.Monad       (mplus)
+{-# LINE 26 "src/Concurrent/Model/Encoder/Threads.hs" #-}
 
 {-# LINE 23 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
 
@@ -24,34 +44,222 @@ import Numeric
 
 import Debug.Trace (trace)
 
-{-# LINE 28 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 11 "src/Language/LLVMIR/Grammar/Base.ag" #-}
-
-import Prelude              hiding (sequence)
-import Data.Char            (chr)
-import qualified Data.Map as Data.Map
-import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
-#if __GLASGOW_HASKELL__ >= 704
-import Data.Map hiding (foldr)
-#else
-import Data.Map 
-#endif
-{-# LINE 42 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 11 "./src/Concurrent/Model/Encoder/Global.ag" #-}
-
-import Control.Applicative ((<$>))
-import Control.Monad       (mplus)
 {-# LINE 48 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+{-# LINE 1 "src/Language/LLVMIR/Grammar/Instruction.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Grammar.Instruction
+-- Copyright :  (c) 2013 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 55 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 1 "src/Language/LLVMIR/Grammar/Base.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Base
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 63 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 153 "src/Language/LLVMIR/Grammar/Base.ag" #-}
+
+emptyFunction :: Function
+emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid False [] []
+{-# LINE 69 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 1 "src/Language/LLVMIR/Type/Type.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Type.Type
+-- Copyright :  (c) 2012 Marcelo Sousa
+-- Standard LLVM IR Types
+-------------------------------------------------------------------------------
+{-# LINE 78 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 1 "./src/Concurrent/Model/Encoder/Types.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.Types
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 86 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 107 "./src/Concurrent/Model/Encoder/Types.ag" #-}
+
+errormessage = error "enc type not supported"
+
+fstu  (a,b,c) = a
+sndu (a,b,c) = b
+trdu (a,b,c) = c
+
+getIdxN :: Type -> [Int]
+getIdxN (TyArray  ne ty) = (getBSize ne):(getIdxN ty)
+getIdxN (TyVector ne ty) = (getBSize ne):(getIdxN ty)
+getIdxN (TyPointer ty)   = getIdxN ty
+getIdxN _ = []
+
+getBSize :: Int -> Int
+getBSize n =length $  showIntAtBase 2 intToDigit n ""
+
+getIdxSize :: Type -> Int
+getIdxSize (TyArray  n _) = getBSize n
+getIdxSize (TyVector n _) = getBSize n
+getIdxSize (TyPointer ty) = getIdxSize ty
+getIdxSize _ = error "getIdxSize"
+
+getISize :: Type -> Int
+getISize (TyInt p) = p
+getISize (TyPointer t) = getISize t
+getISize _ = 0
+
+-- TODO - Define a new sort for each element of the struct
+encTypes :: Types -> TypeEnv -> (TypeEnv, SExpressions, SSortExpr) 
+encTypes []     _   = error "empty struct"
+encTypes [x]    mts = encType x Nothing mts
+encTypes (x:xs) mts = let (mts', sexprs, sort) = encType x Nothing mts
+                      in  encTypes' (sexprs,sort) xs mts' 
+  where encTypes' (sexprs,ssort) []     mts = (mts, sexprs, ssort)
+        encTypes' (sexprs,ssort) (x:xs) mts = let (mts', sexprs', ssort') = encType x Nothing mts
+                                              in  encTypes' (sexprs ++ sexprs', PairSort ssort ssort') xs mts'
+
+encType :: Type -> Maybe SSort -> TypeEnv -> (TypeEnv, SExpressions, SSortExpr)
+encType ty s mts = let tw = wrap_Type (sem_Type ty) $ Inh_Type { mn_Inh_Type = s, mts_Inh_Type = mts }
+                   in case Map.lookup ty mts of
+                           Nothing -> (mts_Syn_Type tw, sexprs_Syn_Type tw, sort_Syn_Type tw) 
+                           Just tsn  -> case s of
+                                        Nothing -> (mts, [], fst tsn)
+                                        Just sn -> if sn == snd tsn
+                                                   then (mts, [], SymSort sn)
+                                                   else (mts, [ defsort sn (snd tsn) ], SymSort sn)
+
+{-# LINE 136 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 1 "./src/Concurrent/Model/Encoder/Global.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.Global
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 144 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 52 "./src/Concurrent/Model/Encoder/Global.ag" #-}
+
+getIdName :: Identifier -> String
+getIdName (Global n) = n
+getIdName (Local  n) = n
+
+wrap :: (SExpr -> SExpr -> SExpr) -> [SExpr] -> SExpr
+wrap f []     = error "wrap SExprs"
+wrap f [x]    = x
+wrap f (x:xs) = f x $ wrap f xs
+
+sAnd :: SExpr -> SExpr -> SExpr
+sAnd a b = sFn "and" a b
+
+sOr :: SExpr -> SExpr -> SExpr
+sOr a b = sFn "or" a b
+
+sFn :: String -> SExpr -> SExpr -> SExpr
+sFn f s1 s2 = FnAppExpr (SymIdent $ SimpleSym f) [s1, s2]
+
+-- | Encode Global Variables
+encGlobalVars :: Globals -> GlobalState -> (GlobalState, SExpressions)
+encGlobalVars gvars gs = let gw = wrap_Globals (sem_Globals gvars) $ Inh_Globals { gs_Inh_Globals = gs, mn_Inh_Globals = undefined, sortexpr_Inh_Globals = undefined, tn_Inh_Globals = undefined, val_Inh_Globals = undefined}
+                             me  = case sexpr_Syn_Globals gw of
+                                        []  -> []
+                                        [e] -> [assert e]
+                                        _        -> error "encGlobalVars" 
+                         in (gs_Syn_Globals gw, sexprs_Syn_Globals gw ++ me)
+
+{-# LINE 175 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 1 "./src/Concurrent/Model/Encoder/Value.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.Value
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 183 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 300 "./src/Concurrent/Model/Encoder/Value.ag" #-}
+
+init' :: [a] -> [a]
+init' [] = []
+init' [x] = [x]
+init' [x,y] = [x]
+init' (x:y:ys) = x:(init' (y:ys))
+
+verrormessage = error "value instance not supported"
+
+bv :: Int -> SSymbol
+bv n = SimpleSym $ "bv" ++ show n
+
+changeN :: SExpr -> Int -> SExpr
+changeN (IdentExpr (IdxIdent s _)) n = IdentExpr $ IdxIdent s [n]
+changeN _ _ = error "changeN"
+
+getGValueId :: Value -> Maybe Id
+getGValueId (Id (Global i) _) = Just i
+getGValueId (Constant (GlobalValue (GlobalVariable (Global i) _))) = Just i
+getGValueId _ = Nothing
+
+getValueId :: Value -> Maybe Id
+getValueId (Id (Global i) _) = Just i
+getValueId (Id (Local  i) _) = Just i
+getValueId (Constant (GlobalValue (GlobalVariable (Global i) _))) = Just i
+getValueId _ = Nothing
+
+getParameterId :: Parameter -> String -> Id
+getParameterId (Parameter i _) s = s ++ (getIdName i)
+
+ivalueId :: Valuation -> Id -> Maybe Id
+ivalueId vals i = case Map.lookup i vals of
+                       Nothing        -> Nothing -- error $ "Global var " ++ show i ++ " not found in the env"
+                       Just (Right v) -> Just i
+                       Just (Left  j) -> case ivalueId vals j of
+                                              Nothing -> Just j
+                                              Just h  -> Just h
+
+encValue :: Value -> TypeEnv -> Map.Map Id (Type, [PC]) -> String -> (TypeEnv, SExpressions, [SExpr]) 
+encValue v mts val tn = let vw = wrap_Value (sem_Value v) $ Inh_Value {mts_Inh_Value = mts, tn_Inh_Value = tn, val_Inh_Value = val, mn_Inh_Value = undefined, sortexpr_Inh_Value = undefined}
+                        in (mts_Syn_Value vw, sexprs_Syn_Value vw, sexpr_Syn_Value vw)
+
+encParameter :: Parameter -> TypeEnv -> String -> (TypeEnv, SExpressions, SExpr)
+encParameter p mts tn = let pw = wrap_Parameter (sem_Parameter p) $ Inh_Parameter {mts_Inh_Parameter = mts, tn_Inh_Parameter = tn, sortexpr_Inh_Parameter=undefined}
+                        in (mts_Syn_Parameter pw, sexprs_Syn_Parameter pw, sexpr_Syn_Parameter pw)
+
+
+getValueType :: Value -> Type 
+getValueType v = vtype_Syn_Value $ wrap_Value (sem_Value v) $ Inh_Value {mts_Inh_Value = undefined, tn_Inh_Value = undefined, val_Inh_Value = undefined, mn_Inh_Value = undefined, sortexpr_Inh_Value = undefined}
+
+getFnValueName :: Value -> Id
+getFnValueName (Constant (GlobalValue (FunctionValue (Global n) _))) = n
+getFnValueName _ = error "getFnValueName failed"
+{-# LINE 239 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 1 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Encoder.Identifier
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 247 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
+{-# LINE 38 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
+
+
+freshId :: Id -> Id
+freshId x = x ++ "0"
+
+{-# LINE 255 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+
 {-# LINE 5 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
 
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Encoder.Threads
 -- Copyright :  (c) 2012 Marcelo Sousa
 -------------------------------------------------------------------------------
-{-# LINE 55 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+{-# LINE 263 "src/Concurrent/Model/Encoder/Threads.hs" #-}
 
 {-# LINE 332 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
 
@@ -159,214 +367,6 @@ encPhi _    [] = error "encPhi 2"
 encPhi cpcs fs = let fsexpr = Prelude.map (\f -> IdentExpr $ IdxIdent (bv f) [32]) fs
                      exprs  = Prelude.concatMap (\cpc -> Prelude.map (\fe -> sFn "=" cpc fe) fsexpr) cpcs
                  in wrap sOr exprs
-{-# LINE 163 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 1 "src/Language/LLVMIR/Grammar/Base.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Base
--- Copyright :  (c) 2012 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 171 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 153 "src/Language/LLVMIR/Grammar/Base.ag" #-}
-
-emptyFunction :: Function
-emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid False [] []
-{-# LINE 177 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 1 "src/Language/LLVMIR/Grammar/Instruction.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Grammar.Instruction
--- Copyright :  (c) 2013 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 185 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 1 "src/Language/LLVMIR/Type/Type.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Type.Type
--- Copyright :  (c) 2012 Marcelo Sousa
--- Standard LLVM IR Types
--------------------------------------------------------------------------------
-{-# LINE 194 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 1 "./src/Concurrent/Model/Encoder/Types.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Concurrent.Model.Encoder.Types
--- Copyright :  (c) 2012 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 202 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 107 "./src/Concurrent/Model/Encoder/Types.ag" #-}
-
-errormessage = error "enc type not supported"
-
-fstu  (a,b,c) = a
-sndu (a,b,c) = b
-trdu (a,b,c) = c
-
-getIdxN :: Type -> [Int]
-getIdxN (TyArray  ne ty) = (getBSize ne):(getIdxN ty)
-getIdxN (TyVector ne ty) = (getBSize ne):(getIdxN ty)
-getIdxN (TyPointer ty)   = getIdxN ty
-getIdxN _ = []
-
-getBSize :: Int -> Int
-getBSize n =length $  showIntAtBase 2 intToDigit n ""
-
-getIdxSize :: Type -> Int
-getIdxSize (TyArray  n _) = getBSize n
-getIdxSize (TyVector n _) = getBSize n
-getIdxSize (TyPointer ty) = getIdxSize ty
-getIdxSize _ = error "getIdxSize"
-
-getISize :: Type -> Int
-getISize (TyInt p) = p
-getISize (TyPointer t) = getISize t
-getISize _ = 0
-
--- TODO - Define a new sort for each element of the struct
-encTypes :: Types -> TypeEnv -> (TypeEnv, SExpressions, SSortExpr) 
-encTypes []     _   = error "empty struct"
-encTypes [x]    mts = encType x Nothing mts
-encTypes (x:xs) mts = let (mts', sexprs, sort) = encType x Nothing mts
-                      in  encTypes' (sexprs,sort) xs mts' 
-  where encTypes' (sexprs,ssort) []     mts = (mts, sexprs, ssort)
-        encTypes' (sexprs,ssort) (x:xs) mts = let (mts', sexprs', ssort') = encType x Nothing mts
-                                              in  encTypes' (sexprs ++ sexprs', PairSort ssort ssort') xs mts'
-
-encType :: Type -> Maybe SSort -> TypeEnv -> (TypeEnv, SExpressions, SSortExpr)
-encType ty s mts = let tw = wrap_Type (sem_Type ty) $ Inh_Type { mn_Inh_Type = s, mts_Inh_Type = mts }
-                   in case Map.lookup ty mts of
-                           Nothing -> (mts_Syn_Type tw, sexprs_Syn_Type tw, sort_Syn_Type tw) 
-                           Just tsn  -> case s of
-                                        Nothing -> (mts, [], fst tsn)
-                                        Just sn -> if sn == snd tsn
-                                                   then (mts, [], SymSort sn)
-                                                   else (mts, [ defsort sn (snd tsn) ], SymSort sn)
-
-{-# LINE 252 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 1 "./src/Concurrent/Model/Encoder/Global.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Concurrent.Model.Encoder.Global
--- Copyright :  (c) 2012 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 260 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 52 "./src/Concurrent/Model/Encoder/Global.ag" #-}
-
-getIdName :: Identifier -> String
-getIdName (Global n) = n
-getIdName (Local  n) = n
-
-wrap :: (SExpr -> SExpr -> SExpr) -> [SExpr] -> SExpr
-wrap f []     = error "wrap SExprs"
-wrap f [x]    = x
-wrap f (x:xs) = f x $ wrap f xs
-
-sAnd :: SExpr -> SExpr -> SExpr
-sAnd a b = sFn "and" a b
-
-sOr :: SExpr -> SExpr -> SExpr
-sOr a b = sFn "or" a b
-
-sFn :: String -> SExpr -> SExpr -> SExpr
-sFn f s1 s2 = FnAppExpr (SymIdent $ SimpleSym f) [s1, s2]
-
--- | Encode Global Variables
-encGlobalVars :: Globals -> GlobalState -> (GlobalState, SExpressions)
-encGlobalVars gvars gs = let gw = wrap_Globals (sem_Globals gvars) $ Inh_Globals { gs_Inh_Globals = gs, mn_Inh_Globals = undefined, sortexpr_Inh_Globals = undefined, tn_Inh_Globals = undefined, val_Inh_Globals = undefined}
-                             me  = case sexpr_Syn_Globals gw of
-                                        []  -> []
-                                        [e] -> [assert e]
-                                        _        -> error "encGlobalVars" 
-                         in (gs_Syn_Globals gw, sexprs_Syn_Globals gw ++ me)
-
-{-# LINE 291 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 1 "./src/Concurrent/Model/Encoder/Value.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Concurrent.Model.Encoder.Value
--- Copyright :  (c) 2012 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 299 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 300 "./src/Concurrent/Model/Encoder/Value.ag" #-}
-
-init' :: [a] -> [a]
-init' [] = []
-init' [x] = [x]
-init' [x,y] = [x]
-init' (x:y:ys) = x:(init' (y:ys))
-
-verrormessage = error "value instance not supported"
-
-bv :: Int -> SSymbol
-bv n = SimpleSym $ "bv" ++ show n
-
-changeN :: SExpr -> Int -> SExpr
-changeN (IdentExpr (IdxIdent s _)) n = IdentExpr $ IdxIdent s [n]
-changeN _ _ = error "changeN"
-
-getGValueId :: Value -> Maybe Id
-getGValueId (Id (Global i) _) = Just i
-getGValueId (Constant (GlobalValue (GlobalVariable (Global i) _))) = Just i
-getGValueId _ = Nothing
-
-getValueId :: Value -> Maybe Id
-getValueId (Id (Global i) _) = Just i
-getValueId (Id (Local  i) _) = Just i
-getValueId (Constant (GlobalValue (GlobalVariable (Global i) _))) = Just i
-getValueId _ = Nothing
-
-getParameterId :: Parameter -> String -> Id
-getParameterId (Parameter i _) s = s ++ (getIdName i)
-
-ivalueId :: Valuation -> Id -> Maybe Id
-ivalueId vals i = case Map.lookup i vals of
-                       Nothing        -> Nothing -- error $ "Global var " ++ show i ++ " not found in the env"
-                       Just (Right v) -> Just i
-                       Just (Left  j) -> case ivalueId vals j of
-                                              Nothing -> Just j
-                                              Just h  -> Just h
-
-encValue :: Value -> TypeEnv -> Map.Map Id (Type, [PC]) -> String -> (TypeEnv, SExpressions, [SExpr]) 
-encValue v mts val tn = let vw = wrap_Value (sem_Value v) $ Inh_Value {mts_Inh_Value = mts, tn_Inh_Value = tn, val_Inh_Value = val, mn_Inh_Value = undefined, sortexpr_Inh_Value = undefined}
-                        in (mts_Syn_Value vw, sexprs_Syn_Value vw, sexpr_Syn_Value vw)
-
-encParameter :: Parameter -> TypeEnv -> String -> (TypeEnv, SExpressions, SExpr)
-encParameter p mts tn = let pw = wrap_Parameter (sem_Parameter p) $ Inh_Parameter {mts_Inh_Parameter = mts, tn_Inh_Parameter = tn, sortexpr_Inh_Parameter=undefined}
-                        in (mts_Syn_Parameter pw, sexprs_Syn_Parameter pw, sexpr_Syn_Parameter pw)
-
-
-getValueType :: Value -> Type 
-getValueType v = vtype_Syn_Value $ wrap_Value (sem_Value v) $ Inh_Value {mts_Inh_Value = undefined, tn_Inh_Value = undefined, val_Inh_Value = undefined, mn_Inh_Value = undefined, sortexpr_Inh_Value = undefined}
-
-getFnValueName :: Value -> Id
-getFnValueName (Constant (GlobalValue (FunctionValue (Global n) _))) = n
-getFnValueName _ = error "getFnValueName failed"
-{-# LINE 355 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 1 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Concurrent.Model.Encoder.Identifier
--- Copyright :  (c) 2012 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 363 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-
-{-# LINE 38 "./src/Concurrent/Model/Encoder/Identifier.ag" #-}
-
-
-freshId :: Id -> Id
-freshId x = x ++ "0"
-
 {-# LINE 371 "src/Concurrent/Model/Encoder/Threads.hs" #-}
 -- Alias -------------------------------------------------------
 -- cata
@@ -14744,10 +14744,7 @@ sem_Module_Module :: String ->
                      T_NamedTypes ->
                      T_Module
 sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
-    (let _funsOcfg :: (Map.Map Identifier CF)
-         _funsOcte :: (Map.Map Identifier PC)
-         _funsOmutexes :: ([[(SExpr, Maybe SExpr)]])
-         _gvarsOgs :: GlobalState
+    (let _gvarsOgs :: GlobalState
          _gvarsOsortexpr :: (Maybe SSortExpr)
          _gvarsOmn :: (Maybe SSort)
          _gvarsOtn :: String
@@ -14760,6 +14757,9 @@ sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
          _nmdtysOmn :: (Maybe SSort)
          _nmdtysOmts :: TypeEnv
          _nmdtysOval :: (Map.Map Id (Type, [PC]))
+         _funsOcfg :: (Map.Map Identifier CF)
+         _funsOcte :: (Map.Map Identifier PC)
+         _funsOmutexes :: ([[(SExpr, Maybe SExpr)]])
          _lhsOself :: Module
          _layoutIself :: DataLayout
          _targetIself :: TargetData
@@ -14770,84 +14770,84 @@ sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
          _funsIself :: Functions
          _funsIts :: ([Map.Map String (SExpr, Maybe SExpr) -> Int -> [(SExpr, Maybe SExpr)] -> SExpr])
          _nmdtysIself :: NamedTypes
-         _funsOcfg =
-             ({-# LINE 46 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
-              Map.empty
-              {-# LINE 14777 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-              )
-         _funsOcte =
-             ({-# LINE 47 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
-              Map.empty
-              {-# LINE 14782 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-              )
-         _funsOmutexes =
-             ({-# LINE 48 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
-              []
-              {-# LINE 14787 "src/Concurrent/Model/Encoder/Threads.hs" #-}
-              )
          _gvarsOgs =
              ({-# LINE 82 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               undefined
-              {-# LINE 14792 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14777 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _gvarsOsortexpr =
              ({-# LINE 83 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Nothing
-              {-# LINE 14797 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14782 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _gvarsOmn =
              ({-# LINE 84 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Nothing
-              {-# LINE 14802 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14787 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _gvarsOtn =
              ({-# LINE 85 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               ""
-              {-# LINE 14807 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14792 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _gvarsOval =
              ({-# LINE 86 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Map.empty
-              {-# LINE 14812 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14797 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOmn =
              ({-# LINE 87 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Nothing
-              {-# LINE 14817 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14802 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOmts =
              ({-# LINE 88 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Map.empty
-              {-# LINE 14822 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14807 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOval =
              ({-# LINE 89 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Map.empty
-              {-# LINE 14827 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14812 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOprenc =
              ({-# LINE 91 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               undefined
-              {-# LINE 14832 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14817 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _funsOsortexpr =
              ({-# LINE 92 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Nothing
-              {-# LINE 14837 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14822 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _nmdtysOmn =
              ({-# LINE 93 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Nothing
-              {-# LINE 14842 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14827 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _nmdtysOmts =
              ({-# LINE 94 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Map.empty
-              {-# LINE 14847 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              {-# LINE 14832 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _nmdtysOval =
              ({-# LINE 95 "./src/Concurrent/Model/Encoder/Value.ag" #-}
               Map.empty
+              {-# LINE 14837 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              )
+         _funsOcfg =
+             ({-# LINE 46 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
+              Map.empty
+              {-# LINE 14842 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              )
+         _funsOcte =
+             ({-# LINE 47 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
+              Map.empty
+              {-# LINE 14847 "src/Concurrent/Model/Encoder/Threads.hs" #-}
+              )
+         _funsOmutexes =
+             ({-# LINE 48 "./src/Concurrent/Model/Encoder/Threads.ag" #-}
+              []
               {-# LINE 14852 "src/Concurrent/Model/Encoder/Threads.hs" #-}
               )
          _self =

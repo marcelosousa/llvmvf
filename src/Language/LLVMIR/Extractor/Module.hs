@@ -1,4 +1,4 @@
-{-#LANGUAGE FlexibleContexts #-}
+{-#LANGUAGE FlexibleContexts, Rank2Types #-}
 {-#LANGUAGE DoAndIfThenElse, RecordWildCards #-}
 -------------------------------------------------------------------------------
 -- Module    :  Language.LLVMIR.Extractor.Module
