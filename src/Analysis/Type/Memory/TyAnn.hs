@@ -64,6 +64,7 @@ instance Show TyDer where
 
 instance Show TyAgg where
   show (TyArr n t) = "[" ++ show n ++ " x " ++ show t ++ "]"
+  show (TyStr nm n []) = "{" ++ nm ++ "}"
   show (TyStr nm n t) = "{" ++ (foldr (\x s -> show x ++ ", " ++ show s) (show $ last t) (init t)) ++ "}"
 
 instance Show TyAnnot where
