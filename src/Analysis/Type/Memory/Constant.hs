@@ -69,11 +69,13 @@ tyanExpression nmdtye tye e@(UnaryConstantExpr name i v ty)  = undefined --typeU
 tyanExpression nmdtye tye e = error $ "typeExpression: " ++ show e ++ " not supported."
 
 tyanGetElementPtrConstantExpr :: NamedTyEnv -> TyAnnEnv -> Value -> Values -> TyLIdPair
-tyanGetElementPtrConstantExpr nmdtye tye v idxs = trace ("gep analysis: " ++ show v ++ " " ++ show idxs) $
+tyanGetElementPtrConstantExpr nmdtye tye v idxs = --trace ("gep analysis: " ++ show v ++ "\n" ++ show idxs ++ "\n" ++ show tye ++ "\n============\n") $
   let (ty,li) = tyanValue nmdtye tye v
       c = and $ map (isAnnInt . fst . tyanValue nmdtye tye) idxs
   in case ty of
-      T.TyDer (T.TyPtr typ ann) -> if c
+      T.TyDer (T.TyPtr typ T.TyIOAddr) -> error $ "tyanGetElementPtrConstantExpr: Trying to gep an IO memory address"
+      T.TyDer (T.TyPtr typ ann) -> -- trace ("gep stuff: " ++ show typ) $ 
+                                   if c
                                    then if isAnnAgg typ
                                         then (getTypeAnnAgg nmdtye typ ann $ map getIntValue $ tail idxs,[])
                                         else error $ "tyanGetElementPtrConstantExpr: " ++ show ty ++ " is not aggregate."  
@@ -95,7 +97,7 @@ getTypeAnnAgg nmdtye ty ann (x:xs) = case ty of
                          Nothing -> t !! x
                          Just (TyStruct _ r t') -> 
                           if r == s 
-                          then liftTy $ t' !! x
+                          then liftTyGen (t' !! x) ann
                           else error $ "getTypeAnnAgg: Should not happen"
               in getTypeAnnAgg nmdtye nt ann xs
       _  -> error $ "getTypeAnnAgg: " ++ show ty ++ " is not aggregate. (3)"   

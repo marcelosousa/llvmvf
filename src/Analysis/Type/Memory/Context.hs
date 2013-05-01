@@ -62,6 +62,7 @@ prettyContext (c,e) = "Constraints\n"
                   ++ prettyConstrs c
                   ++ "Type Environment\n"
                   ++ prettyTyAnnEnv e
+                  ++ "\n-----------------------\n"
 
 prettyConstrs :: Constrs -> String
 prettyConstrs = foldr prettyC "" . S.toList
