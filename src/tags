@@ -2833,7 +2833,7 @@ getElemPtrArgs	./Language/LLVMIR/Extractor/Instruction.hs	58;"	v
 getElementPtrConstant	./Language/LLVMIR/Extractor/Value.hs	137;"	v
 getEntry	./src/Concurrent/Model/Analysis/ControlFlow.ag	98;"	v
 getEnv	./Language/LLVMIR/Extractor/Context.hs	38;"	v
-getFnTyAnn	./Analysis/Type/Memory/Instruction.hs	217;"	v
+getFnTyAnn	./Analysis/Type/Memory/Instruction.hs	223;"	v
 getFnType	./Analysis/Type/Standard/Instruction.hs	201;"	v
 getFs	./Concurrent/Model.hs	34;"	v
 getFunction	./Language/LLVMIR/Extractor/Module.hs	142;"	v	file:
@@ -5766,20 +5766,20 @@ ty_Type_TyPointer	src/Language/LLVMIR.hs	459;"	v
 ty_Type_TyVector	src/Language/LLVMIR.hs	460;"	v
 ty_Value_Id	src/Language/LLVMIR.hs	471;"	v
 tyanCastOp	./Analysis/Type/Memory/Instruction.hs	247;"	v
-tyanCheckBasicBlock	./Analysis/Type/Memory/Function.hs	57;"	v	file:
-tyanCheckBasicBlocks	./Analysis/Type/Memory/Function.hs	67;"	v	file:
+tyanCheckBasicBlock	./Analysis/Type/Memory/Function.hs	66;"	v	file:
+tyanCheckBasicBlocks	./Analysis/Type/Memory/Function.hs	76;"	v	file:
 tyanCheckBinInstr	./Analysis/Type/Memory/Instruction.hs	232;"	v
 tyanCheckCall	./Analysis/Type/Memory/Instruction.hs	183;"	v
 tyanCheckInstruction	./Analysis/Type/Memory/Instruction.hs	32;"	v
-tyanCheckInstructions	./Analysis/Type/Memory/Function.hs	76;"	v	file:
-tyanCheckParameter	./Analysis/Type/Memory/Function.hs	45;"	v	file:
-tyanCheckParameters	./Analysis/Type/Memory/Function.hs	39;"	v	file:
+tyanCheckInstructions	./Analysis/Type/Memory/Function.hs	85;"	v	file:
+tyanCheckParameter	./Analysis/Type/Memory/Function.hs	54;"	v	file:
+tyanCheckParameters	./Analysis/Type/Memory/Function.hs	48;"	v	file:
 tyanCompareConstantExpr	./Analysis/Type/Memory/Constant.hs	104;"	v
 tyanComplexConstant	./Analysis/Type/Memory/Constant.hs	38;"	v
 tyanConstant	./Analysis/Type/Memory/Constant.hs	28;"	v
 tyanExpression	./Analysis/Type/Memory/Constant.hs	66;"	v
 tyanFnSig	./Analysis/Type/Memory/Function.hs	25;"	v
-tyanFunction	./Analysis/Type/Memory/Function.hs	51;"	v
+tyanFunction	./Analysis/Type/Memory/Function.hs	60;"	v
 tyanFunctions	./Analysis/Type/Memory/Module.hs	30;"	v	file:
 tyanGetElementPtrConstantExpr	./Analysis/Type/Memory/Constant.hs	72;"	v
 tyanGlobal	./Analysis/Type/Memory/Global.hs	26;"	v

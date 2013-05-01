@@ -123,7 +123,7 @@ tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
  			T.TyDer (T.TyPtr tyv T.TyRegAddr) -> 
  				if tyv == tyv1 && isFstClass (erase tyv)
  				then (c, T.TyPri $ T.TyVoid)
- 				else error $ "tyanCheckInstruction.Store(1): " ++ show [tyv,tyv1] ++ show [v1,v2] 
+ 				else error $ "tyanCheckInstruction.Store(1): " ++ show [tyv,tyv1,tyv2] ++ show [v1,v2] 
  	  		x -> error $ "tyanCheckInstruction Store(2): " ++ show x
 	Load   pc i    v     align   ->
 		let (tyv,cv) = rtyanValue nmdtye tye i v
@@ -139,9 +139,9 @@ tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
  	GetElementPtr pc i ty v idxs ->
  	  let (ety,lid) = tyanGetElementPtrConstantExpr nmdtye tye v idxs
  	      nc = S.union ctrs $ S.fromList $ map (\j -> (i,j)) lid
- 	  in if ety == liftTy ty
+ 	  in if ety <: liftTy ty
       	 then ((nc,insert i ety tye), ety)
-      	 else error $ "typeCheckInstruction.GetElementPtr: " ++ show [ety]
+      	 else error $ "tyanCheckInstruction.GetElementPtr: " ++ show [ety, liftTy ty]
   -- Call Operation
   	Call pc i ty callee vs -> tyanCheckCall nmdtye c i ty callee vs
   -- Selection Operations
@@ -192,7 +192,7 @@ tyanCheckCall nmdtye c@(ctrs,tye) i rfnty ci args =
 			  		in if (erase rty) == rfnty
 			  	       then if all (\(a,b) -> a == b) $ zip tyargs tps
 				 	  		then if iv || length tyargs == length tps
-					       		 then case ci of 
+					       		 then case ci of -- TODO: Only if they are imported functions 
 					       		 	Global "free"   -> (filterIContext (nc,tye) ii, rty)
 					       		 	Global "vfree"   -> (filterIContext (nc,tye) ii, rty)
 					       		 	Global "iounmap" -> (filterIContext (nc,tye) ii, rty)
@@ -214,12 +214,6 @@ ptrtoMem :: TyAnnot -> TyAnn
 ptrtoMem a = T.TyDer $ T.TyPtr (T.TyPri $ T.TyInt 8) a
 
 getFnTyAnn :: TyAnnEnv -> Identifier -> TyAnn
-getFnTyAnn tye (Global "vmalloc") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64] (ptrtoMem T.TyRegAddr) False)) T.TyRegAddr)
-getFnTyAnn tye (Global "vfree")   = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyRegAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr)
-getFnTyAnn tye (Global "malloc") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64] (ptrtoMem T.TyRegAddr) False)) T.TyRegAddr)
-getFnTyAnn tye (Global "free")   = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyRegAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr)
-getFnTyAnn tye (Global "ioremap") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64,T.TyPri $ T.TyInt 64] (ptrtoMem T.TyIOAddr) False)) T.TyRegAddr)
-getFnTyAnn tye (Global "iounmap") = T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyIOAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr)
 getFnTyAnn tye ident@(Global i) =
 	case M.lookup ident tye of
 		Nothing -> case M.lookup (Local i) tye of

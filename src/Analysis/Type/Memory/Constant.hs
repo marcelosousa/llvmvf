@@ -69,12 +69,12 @@ tyanExpression nmdtye tye e@(UnaryConstantExpr name i v ty)  = undefined --typeU
 tyanExpression nmdtye tye e = error $ "typeExpression: " ++ show e ++ " not supported."
 
 tyanGetElementPtrConstantExpr :: NamedTyEnv -> TyAnnEnv -> Value -> Values -> TyLIdPair
-tyanGetElementPtrConstantExpr nmdtye tye v idxs = -- trace ("gep analysis: " ++ show v ++ " " ++ show idxs) $
+tyanGetElementPtrConstantExpr nmdtye tye v idxs = trace ("gep analysis: " ++ show v ++ " " ++ show idxs) $
   let (ty,li) = tyanValue nmdtye tye v
       c = and $ map (isAnnInt . fst . tyanValue nmdtye tye) idxs
   in case ty of
       T.TyDer (T.TyPtr typ ann) -> if c
-                                   then if isAnnAgg ty
+                                   then if isAnnAgg typ
                                         then (getTypeAnnAgg nmdtye typ ann $ map getIntValue $ tail idxs,[])
                                         else error $ "tyanGetElementPtrConstantExpr: " ++ show ty ++ " is not aggregate."  
                                    else error $ "tyanGetElementPtrConstantExpr: not all indices are integers" 

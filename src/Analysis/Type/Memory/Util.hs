@@ -59,7 +59,7 @@ eraseEnv = M.map erase
 
 -- Subtyping relation 
 (<:) :: TyAnn -> TyAnn -> Bool
-(T.TyDer (T.TyPtr t1 T.TyAny)) <: (T.TyDer (T.TyPtr t2 k)) = True
+(T.TyDer (T.TyPtr t2 k)) <: (T.TyDer (T.TyPtr t1 T.TyAny)) = True
 t1 <: t2 = t1 == t2
 
 isAnnAgg :: TyAnn -> Bool

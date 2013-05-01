@@ -58,8 +58,9 @@ instance Show TyPri where
 instance Show TyDer where
   show (TyAgg t) = show t
   show (TyVec n t) = "<" ++ show n ++ " x " ++ show t ++ ">"
-  show (TyFun tys t _) = "fn :: " ++ (foldr (\x s -> show x ++ " -> " ++ show s) "" tys) ++ show " -> " ++ show t
-  show (TyPtr ty tya) = "* (" ++ show ty ++ ")" ++ show tya
+  show (TyFun [] t _) = "fn :: " ++ show t
+  show (TyFun tys t _) = "fn :: " ++ (foldr (\x s -> show x ++ " -> " ++ s) (show t) tys)
+  show (TyPtr ty tya) = "*(" ++ show ty ++ ") " ++ show tya
 --  show (TyOpa s) = "{" ++ s ++ "}"
 
 instance Show TyAgg where

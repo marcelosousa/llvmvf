@@ -23,17 +23,26 @@ import Debug.Trace (trace)
 
 tyanFnSig :: TyAnnEnv -> Function -> TyAnnEnv
 tyanFnSig tye (FunctionDef  n l rty iv pms bbs) = 
-    let (tysig, _) = tyanSignature tye pms (liftTy rty) iv
+    let (tysig, _) = tyanSignature tye n pms (liftTy rty) iv
     in insert n tysig tye 
 tyanFnSig tye (FunctionDecl n l rty iv pms) = -- trace ("inserting " ++ show n) $ 
-    let (tysig, _) = tyanSignature tye pms (liftTy rty) iv
+    let (tysig, _) = tyanSignature tye n pms (liftTy rty) iv
     in insert n tysig tye 
 
-tyanSignature :: TyAnnEnv -> Parameters -> TyAnn -> Bool -> (TyAnn, TyAnnEnv)
-tyanSignature tye ps rty iv = let (tps, ntye) = tyanCheckParameters tye ps
-                                  fnty = T.TyDer $ T.TyFun tps rty iv
-                                  fty = T.TyDer $ T.TyPtr fnty T.TyRegAddr
-                              in (fty, ntye)
+tyanSignature :: TyAnnEnv -> Identifier -> Parameters -> TyAnn -> Bool -> (TyAnn, TyAnnEnv)
+tyanSignature tye (Global n) ps rty iv = 
+    case n of 
+      "vmalloc" -> (T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64] (ptrtoMem T.TyRegAddr) False)) T.TyRegAddr), tye)
+      "vfree"   -> (T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyRegAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr), tye)
+      "malloc"  -> (T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64] (ptrtoMem T.TyRegAddr) False)) T.TyRegAddr), tye)
+      "free"    -> (T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyRegAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr), tye)
+      "ioremap" -> (T.TyDer (T.TyPtr (T.TyDer (T.TyFun [T.TyPri $ T.TyInt 64,T.TyPri $ T.TyInt 64] (ptrtoMem T.TyIOAddr) False)) T.TyRegAddr), tye)
+      "iounmap" -> (T.TyDer (T.TyPtr (T.TyDer (T.TyFun [ptrtoMem T.TyIOAddr] (T.TyPri T.TyVoid) False)) T.TyRegAddr), tye)
+      _ -> let (tps, ntye) = tyanCheckParameters tye ps
+               fnty = T.TyDer $ T.TyFun tps rty iv
+               fty = T.TyDer $ T.TyPtr fnty T.TyRegAddr
+           in (fty, ntye)
+tyanSignature tye (Local n) ps rty iv = error $ "tyanSignature: Local Identifier " ++ n
 
 tyanCheckParameters :: TyAnnEnv -> Parameters -> ([TyAnn], TyAnnEnv)
 tyanCheckParameters tye [] = ([], tye)
@@ -49,7 +58,7 @@ tyanCheckParameter tye (Parameter i ty) = let tya = liftTy ty
 -- Analyse a function
 tyanFunction :: NamedTyEnv -> Context -> Function -> Context
 tyanFunction nmdtye (c,tye) (FunctionDef  n l rty iv pms bbs) = 
-    let (tysig, ntye) = tyanSignature tye pms (liftTy rty) iv
+    let (tysig, ntye) = tyanSignature tye n pms (liftTy rty) iv
     in tyanCheckBasicBlock nmdtye (c,ntye) bbs (head bbs) -- assuming that head bbs is the entry block 
 tyanFunction nmdtye c (FunctionDecl n l rty iv pms) = c
 
