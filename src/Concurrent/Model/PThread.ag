@@ -90,13 +90,15 @@ getIdName (Global n) = n
 getIdName (Local  n) = n
 
 buildProcess :: Int -> String -> Values -> Map.Map String Function -> (Bool, IM.IntMap Process)
-buildProcess c "pthread_create" v m = case v !! 2 of
-                                        Constant (GlobalValue (FunctionValue i _)) -> let vn = getIdName i
-                                                                                          f  = fromMaybe (error "buildProcess 1") $ Map.lookup vn m
-                                                                                          f' = annotated_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function { counter_Inh_Function = undefined, mfun_Inh_Function = undefined }
-                                                                                      in (True, IM.singleton c $ Process vn f')
-                                        _ -> error "buildProcess 2"  
-buildProcess c _                _ _ = (False, IM.empty)
+buildProcess c "pthread_create" v m = 
+  case v !! 2 of
+    Constant (GlobalValue (FunctionValue i _)) -> 
+      let vn = getIdName i
+          f  = fromMaybe (error "buildProcess 1") $ Map.lookup vn m
+          f' = annotated_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function { counter_Inh_Function = undefined, mfun_Inh_Function = undefined }
+      in (True, IM.singleton c $ Process vn f')
+    _ -> error "buildProcess 2"  
+buildProcess c _ _ _ = (False, IM.empty)
  
 -- PThread
 data PThread

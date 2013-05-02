@@ -120,9 +120,9 @@ data Instruction
       op  :: BinOp
       ord :: AtomicOrdering
   -- Concurrent Operations Added
-  | CreateThread
-      pc   :: PC 
-      args :: Values
+  | CreateThread pc :: PC args :: Values
+  | JoinThread   pc :: PC id :: Identifier
+  | ExitThread   pc :: PC
   | MutexInit
       pc    :: PC
       rv    :: Identifier

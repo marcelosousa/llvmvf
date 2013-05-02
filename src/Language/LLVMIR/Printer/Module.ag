@@ -76,7 +76,7 @@ sem RetInst
   | VoidRet  lhs.pp = text "void"
 
 sem Instruction
-  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue InsertValue AtomicRMW Cmpxchg CreateThread MutexInit MutexLock MutexUnlock
+  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue InsertValue AtomicRMW Cmpxchg CreateThread JoinThread ExitThread MutexInit MutexLock MutexUnlock
            lhs.pp = @pp
   | Ret    loc.pp = text "ret" <+> @r.pp 
   | Alloca loc.pp = @id.pp <+> char '=' <+> text "alloca" <+> @ty.pp <> char ',' <+> @align.pp
@@ -126,6 +126,8 @@ sem Instruction
   | Cmpxchg loc.pp = @id.pp <+> char '=' <+> text "cmpxchg" <+> @mptr.pp <+> @cval.pp <+> @nval.pp <+> @ord.pp
   | AtomicRMW loc.pp = @id.pp <+> char '=' <+> text "atomicrmw" <+> @mptr.pp <+> @opval.pp <+> @ord.pp
   | CreateThread loc.pp = text "create_thread" <+> parens @args.pp
+  | JoinThread   loc.pp = text "join_thread" <+> parens @id.pp
+  | ExitThread   loc.pp = text "exit_thread" 
   | MutexInit    loc.pp = text "mutex_init"    <+> @mutex.pp 
   | MutexLock    loc.pp = text "mutex_lock"    <+> @mutex.pp
   | MutexUnlock  loc.pp = text "mutex_unlock"  <+> @mutex.pp
