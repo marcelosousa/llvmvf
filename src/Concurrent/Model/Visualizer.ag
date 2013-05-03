@@ -72,6 +72,10 @@ sem Instruction
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
   | CreateThread
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "create_thread")
+  | JoinThread
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "join_thread") <+> @id.ppccfg
+  | ExitThread
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "exit_thread")
   | MutexInit 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_init")
   | MutexLock 

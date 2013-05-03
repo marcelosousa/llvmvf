@@ -188,7 +188,7 @@ tyanCheckCall nmdtye c@(ctrs,tye) i rfnty ci args =
 				T.TyDer (T.TyFun tps rty iv) ->
 			  		let (tyargs, cns) = unzip $ map (rtyanValue nmdtye tye i) args
 			  		    nc = foldr S.union ctrs cns
-			  		    ii = getIdValue args
+			  		    ii = getIdValueAux args
 			  		in if (erase rty) == rfnty
 			  	       then if all (\(a,b) -> a == b) $ zip tyargs tps
 				 	  		then if iv || length tyargs == length tps
@@ -206,9 +206,9 @@ tyanCheckCall nmdtye c@(ctrs,tye) i rfnty ci args =
 		x -> error $ "tyanCheckCall: Function has type: " ++ show x
 
 
-getIdValue :: [Value] -> Identifier
-getIdValue [Id v ty] = v
-getIdValue _         = error $ "getIdValue: Args "
+getIdValueAux :: [Value] -> Identifier
+getIdValueAux [Id v ty] = v
+getIdValueAux _         = error $ "getIdValueAux: Args "
 
 ptrtoMem :: TyAnnot -> TyAnn
 ptrtoMem a = T.TyDer $ T.TyPtr (T.TyPri $ T.TyInt 8) a

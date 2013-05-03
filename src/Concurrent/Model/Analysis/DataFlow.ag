@@ -19,7 +19,7 @@ import Data.Maybe
 
 import Debug.Trace
 
-import Language.LLVMIR
+import Language.LLVMIR hiding (nextUnique)
 }
 
 attr Value Constant ConstantDataSequential GlobalValue Functions BasicBlocks BasicBlock Instructions Instruction RetInst Argument Arguments CompareConstantExpr SimpleConstant ComplexConstant  ConstantExpr ValId MValue PValue PValueIdx Values Global PValues Function Globals MConstant ValIdL ValueIdxs
@@ -142,9 +142,6 @@ sem GlobalValue
                                 else Map.empty 
                    loc.counter :: uniqueref counter
 {
-nextUnique :: Int -> (Int, Int)
-nextUnique u = (u+1, u)
-
 type DataFlow = Map.Map String (Map.Map Identifier Type)
 
 dflowfs :: Functions -> DataFlow

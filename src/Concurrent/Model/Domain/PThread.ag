@@ -4,12 +4,12 @@ optpragmas {
 
 {
 -------------------------------------------------------------------------------
--- Module    :  Concurrent.Model.PThread
--- Copyright :  (c) 2012 Marcelo Sousa
+-- Module    :  Concurrent.Model.Domain.PThread
+-- Copyright :  (c) 2012-2013 Marcelo Sousa
 -------------------------------------------------------------------------------
 }
 
-module {Concurrent.Model.PThread}{}{}
+module {Concurrent.Model.Domain.PThread}{}{}
 
 include "Base.ag"
 include "Type.ag"
@@ -59,9 +59,10 @@ sem Functions
 
 sem Function
   | FunctionDef  lhs.pmdl = @body.pmdl
-                 lhs.decls = Map.singleton (getIdName @name.self) (@retty.self, @params.self)
+                 lhs.decls = let i = valueIdentifier' "Pthread:FunctionDef" @name.self
+                             in  Map.singleton i (@retty.self, @params.self)
   | FunctionDecl lhs.pmdl = IM.empty 
-                    +decls = Map.union (Map.singleton (getIdName @name.self) (@retty.self, @params.self))
+                    +decls = Map.union (Map.singleton (valueIdentifier' "Pthread:FunctionDecl"  @name.self) (@retty.self, @params.self))
 
 sem BasicBlock
   | BasicBlock lhs.pmdl = @instrs.pmdl
@@ -71,9 +72,11 @@ sem Instruction
     +pmdl = IM.union (snd @loc.proc)
     lhs.annotated = case @loc.calleename of
                          "pthread_create"       -> CreateThread @pc.self @args.self
+                         "pthread_exit"         -> ExitThread   @pc.self
                          "pthread_mutex_init"   -> MutexInit    @pc.self @mres.self (@args.self !! 0)
                          "pthread_mutex_lock"   -> MutexLock    @pc.self @mres.self (@args.self !! 0)
                          "pthread_mutex_unlock" -> MutexUnlock  @pc.self @mres.self (@args.self !! 0)
+                         "pthread_join"         -> JoinThread   @pc.self $ getIdValue $ @args.self !! 0 
                          x                      -> Call         @pc.self @mres.self @ty.self @callee.self @args.self   
     loc.proc = buildProcess @loc.counter @loc.calleename @args.self @lhs.mfun
     loc.calleename = getIdName @callee.self
@@ -81,13 +84,6 @@ sem Instruction
 
 {
 type ThreadLabel = Int
-
-nextUnique :: Int -> (Int, Int)
-nextUnique u = (u+1, u)
-
-getIdName :: Identifier -> String
-getIdName (Global n) = n
-getIdName (Local  n) = n
 
 buildProcess :: Int -> String -> Values -> Map.Map String Function -> (Bool, IM.IntMap Process)
 buildProcess c "pthread_create" v m = 

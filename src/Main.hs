@@ -25,7 +25,7 @@ import UU.PPrint
 import Language.SMTLib2.Printer    (prettyprint)
 
 import qualified Concurrent.Model as M
-import Concurrent.Model.PThread
+import Concurrent.Model.Domain.PThread
 -- import Concurrent.Model.SystemC
 import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    

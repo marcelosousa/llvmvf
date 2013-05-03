@@ -22,6 +22,7 @@ import Data.Map
 }
 
 include "Instruction.ag"
+include "Util.ag"
 
 -------------------------------------------------------------------------------
 -- Module - LLVM IR Module
@@ -150,11 +151,6 @@ data Function
 --          optAlign   :: MAlign          
 --          gcName     :: MGCName
 
-{
-emptyFunction :: Function
-emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid False [] []
-}
-          
 data BasicBlock
   | BasicBlock 
       label  :: Identifier
