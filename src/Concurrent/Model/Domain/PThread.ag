@@ -22,6 +22,7 @@ import Data.Maybe
 
 import Concurrent.Model
 import Language.LLVMIR
+import Language.LLVMIR.Util
 import UU.PPrint
 
 import Debug.Trace (trace)
@@ -59,10 +60,11 @@ sem Functions
 
 sem Function
   | FunctionDef  lhs.pmdl = @body.pmdl
-                 lhs.decls = let i = valueIdentifier' "Pthread:FunctionDef" @name.self
+                 lhs.decls = let i = identifierName @name.self
                              in  Map.singleton i (@retty.self, @params.self)
   | FunctionDecl lhs.pmdl = IM.empty 
-                    +decls = Map.union (Map.singleton (valueIdentifier' "Pthread:FunctionDecl"  @name.self) (@retty.self, @params.self))
+                    +decls = let i = identifierName @name.self 
+                             in Map.union (Map.singleton i (@retty.self, @params.self))
 
 sem BasicBlock
   | BasicBlock lhs.pmdl = @instrs.pmdl
@@ -76,20 +78,18 @@ sem Instruction
                          "pthread_mutex_init"   -> MutexInit    @pc.self @mres.self (@args.self !! 0)
                          "pthread_mutex_lock"   -> MutexLock    @pc.self @mres.self (@args.self !! 0)
                          "pthread_mutex_unlock" -> MutexUnlock  @pc.self @mres.self (@args.self !! 0)
-                         "pthread_join"         -> JoinThread   @pc.self $ getIdValue $ @args.self !! 0 
+                         "pthread_join"         -> JoinThread   @pc.self $ valueIdentifier' "PThread.ag Instruction:" $ @args.self !! 0 
                          x                      -> Call         @pc.self @mres.self @ty.self @callee.self @args.self   
     loc.proc = buildProcess @loc.counter @loc.calleename @args.self @lhs.mfun
-    loc.calleename = getIdName @callee.self
+    loc.calleename = identifierName @callee.self
     loc.counter :: uniqueref counter
 
 {
-type ThreadLabel = Int
-
 buildProcess :: Int -> String -> Values -> Map.Map String Function -> (Bool, IM.IntMap Process)
 buildProcess c "pthread_create" v m = 
   case v !! 2 of
     Constant (GlobalValue (FunctionValue i _)) -> 
-      let vn = getIdName i
+      let vn = identifierName i
           f  = fromMaybe (error "buildProcess 1") $ Map.lookup vn m
           f' = annotated_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function { counter_Inh_Function = undefined, mfun_Inh_Function = undefined }
       in (True, IM.singleton c $ Process vn f')

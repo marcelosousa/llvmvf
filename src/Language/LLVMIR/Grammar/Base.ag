@@ -22,7 +22,6 @@ import Data.Map
 }
 
 include "Instruction.ag"
-include "Util.ag"
 
 -------------------------------------------------------------------------------
 -- Module - LLVM IR Module

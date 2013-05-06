@@ -1,13 +1,12 @@
-{
 -------------------------------------------------------------------------------
 -- Module    :  Language.LLVMIR.Util
 -- Copyright :  (c) 2013 Marcelo Sousa
 -------------------------------------------------------------------------------
-}
 
-module {Language.LLVMIR.Grammar.Util}{}{}
+module Language.LLVMIR.Util where
 
-{
+import Language.LLVMIR
+
 nextUnique :: Int -> (Int, Int)
 nextUnique u = (u+1, u)
 
@@ -29,5 +28,5 @@ identifierName :: Identifier -> String
 identifierName (Global n) = n
 identifierName (Local  n) = n
 
-}
+
 

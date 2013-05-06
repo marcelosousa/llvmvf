@@ -9,7 +9,8 @@ module Concurrent.Model where
 import qualified Data.IntMap as IM
 import qualified Data.Map as Map
 
-import Language.LLVMIR hiding (emptyFunction)
+import Language.LLVMIR
+import Language.LLVMIR.Util
 import Language.LLVMIR.Printer.Module
 
 import Language.SMTLib2.Base
@@ -58,6 +59,7 @@ emptyProcess = Process "undefined" emptyFunction
 type Declarations = Map.Map String (Type, Parameters) 
 type Processes = IM.IntMap Process
 
+type ThreadLabel = Int
 type Bound = Int
 type TypeEnv   = Map.Map Type (SSortExpr, SSort)
 

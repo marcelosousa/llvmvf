@@ -19,7 +19,8 @@ import Data.Maybe
 
 import Debug.Trace
 
-import Language.LLVMIR hiding (nextUnique)
+import Language.LLVMIR
+import Language.LLVMIR.Util
 }
 
 attr Value Constant ConstantDataSequential GlobalValue Functions BasicBlocks BasicBlock Instructions Instruction RetInst Argument Arguments CompareConstantExpr SimpleConstant ComplexConstant  ConstantExpr ValId MValue PValue PValueIdx Values Global PValues Function Globals MConstant ValIdL ValueIdxs
