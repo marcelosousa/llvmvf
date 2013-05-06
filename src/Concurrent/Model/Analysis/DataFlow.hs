@@ -13,6 +13,9 @@ type TypeEnv   = M.Map Type () --(SSortExpr, SSort)
 
 type DataFlow = M.Map String (M.Map Identifier Type)
 
+eDF :: DataFlow
+eDF = M.empty
+
 emptyPreEncoder :: PreEncoder
 emptyPreEncoder = PreEncoder M.empty M.empty [] M.empty M.empty []
 -- 

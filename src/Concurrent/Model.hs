@@ -11,6 +11,9 @@ import qualified Data.Map    as M
 
 import Language.LLVMIR
 import Language.LLVMIR.Printer.Module
+import Concurrent.Model.Analysis.ControlFlow
+import Concurrent.Model.Analysis.DataFlow
+import Concurrent.Model.Analysis.Module
 
 import Language.SMTLib2.Base
 
@@ -29,6 +32,11 @@ data Model t = Model Module
 
 instance Show (Model t) where
   show (Model mod) = show mod
+
+analyse :: (SCModel t) => String  -> Model t -> (Model t, ControlFlow, DataFlow)
+analyse ep (Model m) = 
+	let (m', cf, df) = analyseModule ep m
+	in (Model m', cf, df)
 
 ---------------------------------------------------
 -- REMOVE THIS PART FROM THIS FILE

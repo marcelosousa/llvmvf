@@ -7,7 +7,7 @@ module Concurrent.Model.Analysis.ControlFlow where
 
 import Language.LLVMIR
 
-import qualified Data.Map    as M
+import qualified Data.Map as M
 
 -- TODO: Join back the threads to the function that called them
 type CF = [(Int,Int)]
@@ -23,3 +23,6 @@ data ControlFlow =
                 , cfg :: M.Map Identifier CF     -- ^ Control Flow for Ti
             --  , cgv  :: Map.Map Id ([Int], [Int]) --  ^ Data Flow Points where we use global variables - The pair ([Int],[Int]) is for Read and Write
                 }
+
+eCFG :: ControlFlow 
+eCFG = ControlFlow M.empty M.empty

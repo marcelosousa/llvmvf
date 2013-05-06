@@ -1,3 +1,4 @@
+{-#LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Analysis.Context
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -31,13 +32,13 @@ data Env = Env
   }
 
 newtype Context a = Context { unContext :: State Env a }
-    deriving (Monad, MonadIO, MonadPlus, Functor, Applicative)
+    deriving (Monad, Functor, Applicative)
 
 evalContext :: Context a -> Env -> Env
 evalContext = execState . unContext
 
 getEnv :: Context Env
-getEnv = Context . get
+getEnv = Context get
 
 putEnv :: Env -> Context ()
 putEnv = Context . put

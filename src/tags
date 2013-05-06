@@ -47,7 +47,7 @@ BitCast	./Language/LLVMIR/Extractor/Opcode.hs	52;"	d
 BitCast	src/Language/LLVMIR.hs	253;"	d
 BlockAddr	./Language/LLVMIR/Extractor/ConstantClass.hs	11;"	d
 BlockAddr	src/Language/LLVMIR.hs	161;"	d
-Bound	./Concurrent/Model.hs	35;"	t
+Bound	./Concurrent/Model.hs	43;"	t
 Bound	./Language/LTL/Base.hs	286;"	t
 Br	./Language/LLVMIR/Extractor/Opcode.hs	10;"	d
 Br	src/Language/LLVMIR.hs	254;"	d
@@ -105,15 +105,20 @@ ConstantVector	./Language/LLVMIR/Extractor/ConstantClass.hs	20;"	d
 ConstantVector	src/Language/LLVMIR.hs	158;"	d
 Constrs	./Analysis/Type/Memory/Context.hs	19;"	t
 Context	./Analysis/Type/Memory/Context.hs	21;"	t
+Context	./Concurrent/Model/Analysis/Context.hs	34;"	d
+Context	./Concurrent/Model/Analysis/Context.hs	34;"	t
 Context	./Language/LLVMIR/Extractor/Context.hs	28;"	d
 Context	./Language/LLVMIR/Extractor/Context.hs	28;"	t
 ControlFlow	./Concurrent/Model/Analysis/ControlFlow.hs	21;"	t
 ControlFlow	./Concurrent/Model/Analysis/ControlFlow.hs	22;"	d
 Convert	Main.hs	54;"	d
+Core	./Concurrent/Model/Analysis/Context.hs	18;"	d
+Core	./Concurrent/Model/Analysis/Context.hs	18;"	t
 CreateThread	src/Language/LLVMIR.hs	257;"	d
 DLLExportLinkage	src/Language/LLVMIR.hs	326;"	d
 DLLImportLinkage	src/Language/LLVMIR.hs	327;"	d
 DLayout	src/Language/LLVMIR.hs	190;"	t
+DataFlow	./Concurrent/Model/Analysis/DataFlow.hs	14;"	t
 DataLayout	src/Language/LLVMIR.hs	192;"	d
 DataLayout	src/Language/LLVMIR.hs	192;"	t
 Default	src/Language/LLVMIR.hs	475;"	d
@@ -130,6 +135,8 @@ ENum	./Language/HTm/Base.hs	12;"	d
 ETm	./Language/HTm/Base.hs	11;"	t
 EVar	./Language/HTm/Base.hs	13;"	d
 End	./Language/LTL/Base.hs	174;"	d
+Env	./Concurrent/Model/Analysis/Context.hs	27;"	d
+Env	./Concurrent/Model/Analysis/Context.hs	27;"	t
 Env	./Language/LLVMIR/Extractor/Context.hs	21;"	d
 Env	./Language/LLVMIR/Extractor/Context.hs	21;"	t
 ExitThread	src/Language/LLVMIR.hs	258;"	d
@@ -765,8 +772,8 @@ MVisibility	src/Language/LLVMIR.hs	368;"	t
 MacOs	src/Language/LLVMIR.hs	429;"	d
 MapTyInt	src/Language/LLVMIR.hs	370;"	t
 Memory	./Language/LLVMIR/Extractor/Opcode.hs	75;"	d
-Model	./Concurrent/Model.hs	28;"	d
-Model	./Concurrent/Model.hs	28;"	t
+Model	./Concurrent/Model.hs	31;"	d
+Model	./Concurrent/Model.hs	31;"	t
 Model	./Language/LTL/Base.hs	159;"	d
 Model	./Language/LTL/Base.hs	159;"	t
 Model	Main.hs	52;"	d
@@ -846,6 +853,8 @@ Path	./Language/LTL/Base.hs	191;"	t
 PathLasso	./Language/LTL/Base.hs	252;"	d
 PathLasso	./Language/LTL/Base.hs	252;"	t
 PoisonValue	src/Language/LLVMIR.hs	165;"	d
+PreEncoder	./Concurrent/Model/Analysis/DataFlow.hs	22;"	d
+PreEncoder	./Concurrent/Model/Analysis/DataFlow.hs	22;"	t
 PrivateLinkage	src/Language/LLVMIR.hs	337;"	d
 Protected	src/Language/LLVMIR.hs	477;"	d
 PtrToInt	./Language/LLVMIR/Extractor/Opcode.hs	50;"	d
@@ -865,7 +874,7 @@ Ret	src/Language/LLVMIR.hs	285;"	d
 RetInst	src/Language/LLVMIR.hs	416;"	t
 ReturnsTwice	src/Language/LLVMIR.hs	213;"	d
 SAT	./Language/LTL/Base.hs	287;"	t
-SCModel	./Concurrent/Model.hs	23;"	t
+SCModel	./Concurrent/Model.hs	26;"	t
 SDiv	./Language/LLVMIR/Extractor/Opcode.hs	23;"	d
 SDiv	src/Language/LLVMIR.hs	286;"	d
 SExt	./Language/LLVMIR/Extractor/Opcode.hs	43;"	d
@@ -1685,6 +1694,7 @@ Type	./Language/LLVMIR/Extractor/Type.hs	31;"	t
 Type	Main.hs	55;"	d
 Type	src/Language/LLVMIR.hs	445;"	t
 TypeCheck	Main.hs	56;"	d
+TypeEnv	./Concurrent/Model/Analysis/DataFlow.hs	12;"	t
 TypeKind	./Language/LLVMIR/Extractor/Type.hs	32;"	t	file:
 Types	src/Language/LLVMIR.hs	461;"	t
 TysAnn	./Analysis/Type/Memory/TyAnn.hs	11;"	t
@@ -1747,6 +1757,9 @@ align_Global_GlobalVar	src/Language/LLVMIR.hs	230;"	v
 align_Instruction_Alloca	src/Language/LLVMIR.hs	250;"	v
 align_Instruction_Load	src/Language/LLVMIR.hs	276;"	v
 align_Instruction_Store	src/Language/LLVMIR.hs	292;"	v
+analyse	./Concurrent/Model.hs	37;"	v
+analyseModule	./Concurrent/Model/Analysis/Module.hs	15;"	v
+analyseModule'	./Concurrent/Model/Analysis/Module.hs	25;"	v
 annotated_Syn_Align	src/Concurrent/Model/Domain/PThread.hs	159;"	v
 annotated_Syn_Argument	src/Concurrent/Model/Domain/PThread.hs	195;"	v
 annotated_Syn_Arguments	src/Concurrent/Model/Domain/PThread.hs	235;"	v
@@ -1803,6 +1816,7 @@ annotated_Syn_ValIdL	src/Concurrent/Model/Domain/PThread.hs	8976;"	v
 annotated_Syn_Value	src/Concurrent/Model/Domain/PThread.hs	9042;"	v
 annotated_Syn_Values	src/Concurrent/Model/Domain/PThread.hs	9151;"	v
 annotated_Syn_Visibility	src/Concurrent/Model/Domain/PThread.hs	9219;"	v
+argToPar	./Concurrent/Model/Analysis/DataFlow.hs	22;"	v
 arg_Argument_Argument	src/Language/LLVMIR.hs	87;"	v
 args_Instruction_Call	src/Language/LLVMIR.hs	255;"	v
 args_Instruction_CreateThread	src/Language/LLVMIR.hs	257;"	v
@@ -1817,6 +1831,7 @@ cUInt2Bool	./Language/LLVMIR/Extractor/Util.hs	16;"	v
 c_Value_Constant	src/Language/LLVMIR.hs	467;"	v
 callee_Instruction_Call	src/Language/LLVMIR.hs	255;"	v
 cc_Constant_CmpConst	src/Language/LLVMIR.hs	162;"	v
+ccfg	./Concurrent/Model/Analysis/Context.hs	30;"	v
 ccfgMode	Main.hs	70;"	v
 cds_ComplexConstant_ConstantDataSequential	src/Language/LLVMIR.hs	156;"	v
 cfg	./Concurrent/Model/Analysis/ControlFlow.hs	23;"	v
@@ -1829,23 +1844,31 @@ cond_Instruction_ICmp	src/Language/LLVMIR.hs	271;"	v
 cond_Instruction_Select	src/Language/LLVMIR.hs	290;"	v
 convOps	./Language/LLVMIR/Extractor/Instruction.hs	269;"	v
 convertLinkage	./Language/LLVMIR/Extractor/Linkage.hs	13;"	v
+corein	./Concurrent/Model/Analysis/Context.hs	28;"	v
+coreout	./Concurrent/Model/Analysis/Context.hs	29;"	v
 cte	./Concurrent/Model/Analysis/ControlFlow.hs	22;"	v
 cval_Instruction_Cmpxchg	src/Language/LLVMIR.hs	256;"	v
 d_Instruction_UBr	src/Language/LLVMIR.hs	296;"	v
 dbv_ConstantFP_ConstantFPDouble	src/Language/LLVMIR.hs	186;"	v
 del	./Analysis/Type/Memory/Context.hs	53;"	v
 del	./Analysis/Type/Standard/Module.hs	53;"	v	file:
+df	./Concurrent/Model/Analysis/Context.hs	31;"	v
 domain	Main.hs	51;"	v
 dotLabel	src/Concurrent/Model/Visualizer.ag	98;"	v
+eCFG	./Concurrent/Model/Analysis/ControlFlow.hs	28;"	v
+eCore	./Concurrent/Model/Analysis/Context.hs	25;"	v
+eDF	./Concurrent/Model/Analysis/DataFlow.hs	17;"	v
 elDiv	./Language/LLVMIR/Printer/NamedTypes.hs	42;"	v
 elems_Instruction_Switch	src/Language/LLVMIR.hs	294;"	v
 emptyFunction	./Language/LLVMIR/Util.hs	14;"	v
+emptyPreEncoder	./Concurrent/Model/Analysis/DataFlow.hs	20;"	v
 eqStruct	./Analysis/Type/Util.hs	132;"	v
 erase	./Analysis/Type/Memory/Util.hs	43;"	v
 eraseEnv	./Analysis/Type/Memory/Util.hs	58;"	v
 errorMsg	./Analysis/Type/Standard/Constant.hs	87;"	v
 escaped	src/Language/LLVMIR/Printer/Module.ag	326;"	v
 escaped	src/Language/LLVMIR/Printer/Module.ag	326;"	v
+evalContext	./Concurrent/Model/Analysis/Context.hs	38;"	v
 evalP	./Language/LTL/Base.hs	186;"	v
 event_Instruction_NotifyEvent	src/Language/LLVMIR.hs	281;"	v
 event_Instruction_WaitEvent	src/Language/LLVMIR.hs	301;"	v
@@ -1856,7 +1879,9 @@ extractMode	Main.hs	66;"	v
 extractModel	Main.hs	140;"	v
 extractModule	./Language/LLVMIR/Extractor/Module.hs	58;"	v	file:
 f	./Analysis/Type/Standard/Instruction.hs	213;"	v
+fStore	./Concurrent/Model/Analysis/DataFlow.hs	23;"	v
 f_Instruction_Br	src/Language/LLVMIR.hs	254;"	v
+fails	./Concurrent/Model/Analysis/DataFlow.hs	27;"	v
 filterIContext	./Analysis/Type/Memory/Context.hs	26;"	v
 findBasicBlock	./Analysis/Type/Util.hs	91;"	v
 fname_Inh_BasicBlock	src/Concurrent/Model/Visualizer.hs	721;"	v
@@ -1864,6 +1889,7 @@ fname_Inh_BasicBlocks	src/Concurrent/Model/Visualizer.hs	784;"	v
 fp_SimpleConstant_ConstantFP	src/Language/LLVMIR.hs	423;"	v
 fptoint	./Analysis/Type/Standard/Instruction.hs	156;"	v
 fpv_ConstantFP_ConstantFPFloat	src/Language/LLVMIR.hs	187;"	v
+funs	./Concurrent/Model/Analysis/Context.hs	21;"	v
 funs_Module_Module	src/Language/LLVMIR.hs	372;"	v
 gep	./Test/Example.hs	9;"	v
 getBasicBlock	./Language/LLVMIR/Extractor/Module.hs	164;"	v	file:
@@ -1886,6 +1912,7 @@ getConstantVector	./Language/LLVMIR/Extractor/Value.hs	171;"	v
 getDataLayout	./Language/LLVMIR/Extractor/Module.hs	91;"	v	file:
 getElemPtrArgs	./Language/LLVMIR/Extractor/Instruction.hs	58;"	v
 getElementPtrConstant	./Language/LLVMIR/Extractor/Value.hs	137;"	v
+getEnv	./Concurrent/Model/Analysis/Context.hs	41;"	v
 getEnv	./Language/LLVMIR/Extractor/Context.hs	38;"	v
 getFnTyAnn	./Analysis/Type/Memory/Instruction.hs	217;"	v
 getFnType	./Analysis/Type/Standard/Instruction.hs	201;"	v
@@ -2030,9 +2057,10 @@ linkage_Function_FunctionDef	src/Language/LLVMIR.hs	222;"	v
 linkage_Global_GlobalVar	src/Language/LLVMIR.hs	230;"	v
 livePEx	./Language/LTL/Base.hs	93;"	v
 llvmir2Htm	./Language/LLVMIR/Converter.hs	13;"	v
+locals	./Concurrent/Model/Analysis/DataFlow.hs	26;"	v
 main	Main.hs	99;"	v
 mdl	./Language/LLVMIR/Extractor/Context.hs	22;"	v
-model	./Concurrent/Model.hs	24;"	v
+model	./Concurrent/Model.hs	27;"	v
 modelMode	Main.hs	75;"	v
 mptr_Instruction_AtomicRMW	src/Language/LLVMIR.hs	252;"	v
 mptr_Instruction_Cmpxchg	src/Language/LLVMIR.hs	256;"	v
@@ -2040,6 +2068,7 @@ mres_Instruction_Call	src/Language/LLVMIR.hs	255;"	v
 mutex_Instruction_MutexInit	src/Language/LLVMIR.hs	278;"	v
 mutex_Instruction_MutexLock	src/Language/LLVMIR.hs	279;"	v
 mutex_Instruction_MutexUnlock	src/Language/LLVMIR.hs	280;"	v
+mutexes	./Concurrent/Model/Analysis/DataFlow.hs	24;"	v
 n_Align_Align	src/Language/LLVMIR.hs	84;"	v
 n_CConv_Cc	src/Language/LLVMIR.hs	143;"	v
 n_FunAttr_Alignstack	src/Language/LLVMIR.hs	200;"	v
@@ -2058,6 +2087,7 @@ name_Type_TyStruct	src/Language/LLVMIR.hs	454;"	v
 namedRef	./Language/LLVMIR/Printer/NamedTypes.hs	29;"	v
 namedRefs	./Language/LLVMIR/Printer/NamedTypes.hs	26;"	v
 nextUnique	./Language/LLVMIR/Util.hs	11;"	v
+nmdtys	./Concurrent/Model/Analysis/Context.hs	19;"	v
 nmdtys	./Language/LLVMIR/Extractor/Context.hs	23;"	v
 nmdtys_Module_Module	src/Language/LLVMIR.hs	372;"	v
 nnf	./Language/LTL/Base.hs	141;"	v
@@ -2295,6 +2325,7 @@ prettyTy	./Analysis/Type/Standard/Module.hs	61;"	v	file:
 prettyTyAnnEnv	./Analysis/Type/Memory/Context.hs	71;"	v
 progModes	Main.hs	92;"	v
 ptrtoMem	./Analysis/Type/Memory/Instruction.hs	214;"	v
+putEnv	./Concurrent/Model/Analysis/Context.hs	44;"	v
 putEnv	./Language/LLVMIR/Extractor/Context.hs	41;"	v
 r_Instruction_Ret	src/Language/LLVMIR.hs	285;"	v
 retty_Function_FunctionDecl	src/Language/LLVMIR.hs	221;"	v
@@ -3752,6 +3783,7 @@ sem_Visibility_Protected	src/Concurrent/Model/Visualizer.hs	8399;"	v
 sem_Visibility_Protected	src/Language/LLVMIR/Printer/Module.hs	7750;"	v
 size	./Language/LTL/Base.hs	213;"	v
 sizeof	./Analysis/Type/Util.hs	96;"	v
+sortEnv	./Concurrent/Model/Analysis/DataFlow.hs	25;"	v
 splitConstrs	./Analysis/Type/Memory/Context.hs	33;"	v
 states	./Language/LTL/Base.hs	159;"	v
 struct_ConstantExpr_GetElementPtrConstantExpr	src/Language/LLVMIR.hs	178;"	v
@@ -3892,6 +3924,7 @@ typeValueGen	./Analysis/Type/Util.hs	79;"	v
 types	./Language/LLVMIR/Printer/NamedTypes.hs	32;"	v
 types'	./Language/LLVMIR/Printer/NamedTypes.hs	39;"	v
 tys_Type_TyStruct	src/Language/LLVMIR.hs	454;"	v
+unContext	./Concurrent/Model/Analysis/Context.hs	34;"	v
 unContext	./Language/LLVMIR/Extractor/Context.hs	28;"	v
 unPath	./Language/LTL/Base.hs	191;"	v
 unPathLasso	./Language/LTL/Base.hs	252;"	v
@@ -3928,6 +3961,7 @@ valt_Instruction_Select	src/Language/LLVMIR.hs	290;"	v
 valueIdentifier	./Language/LLVMIR/Util.hs	17;"	v
 valueIdentifier'	./Language/LLVMIR/Util.hs	22;"	v
 var_Parameter_Parameter	src/Language/LLVMIR.hs	393;"	v
+vars	./Concurrent/Model/Analysis/Context.hs	20;"	v
 withContext	./Language/LLVMIR/Extractor/Context.hs	35;"	v
 wrap_Alias	src/Concurrent/Model/Domain/PThread.hs	94;"	v
 wrap_Alias	src/Concurrent/Model/Visualizer.hs	156;"	v

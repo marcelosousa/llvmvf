@@ -13,8 +13,13 @@ import Concurrent.Model.Analysis.Context
 -- Use the State Monad
 analyseModule :: String -> Module -> (Module, ControlFlow, DataFlow)
 analyseModule ep (Module id layout target gvars funs nmdtys) =
-  let env = Env mdl Map.empty Nothing 1
-  in runContext extractModule env
+  let env = Env eCore eCore eCFG eDF
+      oenv  = evalContext analyseModule' env
+      (Core tys vars fs) = coreout oenv
+      fcfg  = ccfg oenv
+      fdf   = df oenv 
+      m     = Module id layout target vars fs tys
+  in (m, fcfg, fdf)
 
 analyseModule' :: Context ()
 analyseModule' = return ()
