@@ -8,9 +8,7 @@ src/Language/LLVMIR/Printer/Module.hs
 src/Concurrent/Model/Encoder/Model.hs
 src/Concurrent/Model/PThread.hs
 src/Concurrent/Model/Domain/PThread.hs
-src/Concurrent/Model/Analysis/DataFlow.hs
 src/ConCurrent/Model/Visualizer.hs
-src/Concurrent/Model/Analysis/ControlFlow.hs
 src/Concurrent/Model/SystemC.hs
 src/Concurrent/Model/Analysis/SystemC.hs
 

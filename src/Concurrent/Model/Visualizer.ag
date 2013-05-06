@@ -22,6 +22,7 @@ import UU.PPrint as P
 import Concurrent.Model
 import Concurrent.Model.Analysis.ControlFlow (ControlFlow(..))
 import Language.LLVMIR
+import Language.LLVMIR.Util
 }
 
 attr Functions Function BasicBlocks BasicBlock
@@ -93,20 +94,18 @@ sem Instruction
 {
 type ILabel = Int
 
-nextUnique :: Int -> (Int, Int)
-nextUnique u = (u+1, u)
-
 dotLabel :: Int -> Doc -> Doc
 dotLabel i d = text "[label=\"" <> int i <+> d <> text "\"];"
 
 instance (Pretty t, SCModel t) => Pretty (Model t)  where
   --pretty :: Model -> Doc
-  pretty mdl = text "digraph structs {" </>
+  pretty mdl = undefined 
+{-text "digraph structs {" </>
                text "bgcolor=transparent;" </>
                text "node [shape=Mrecord];" </>
                text "-1 [label=\"||\", shape=Mdiamond];" </>
-               pretty (mainf mdl) </>
-               vsep (Prelude.map pretty (IM.elems $ procs mdl)) </>
+             --  pretty (mainf mdl) </>
+             --  vsep (Prelude.map pretty (IM.elems $ procs mdl)) </>
                pretty' (controlflow mdl) </>
                text "}"
 
@@ -122,5 +121,6 @@ instance Pretty' ControlFlow where
 
 instance Pretty' (Int,Int) where
   pretty' (a,b) = int a <+> text "->" <+> int b <> char ';'
+-}
  
 }

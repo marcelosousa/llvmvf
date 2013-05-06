@@ -14,13 +14,14 @@ import UU.PPrint as P
 import Concurrent.Model
 import Concurrent.Model.Analysis.ControlFlow (ControlFlow(..))
 import Language.LLVMIR
-{-# LINE 18 "src/Concurrent/Model/Visualizer.hs" #-}
+import Language.LLVMIR.Util
+{-# LINE 19 "src/Concurrent/Model/Visualizer.hs" #-}
 
 {-# LINE 14 "src/Language/LLVMIR/Printer/Module.ag" #-}
 
 import UU.PPrint as P
 import Language.LLVMIR
-{-# LINE 24 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 25 "src/Concurrent/Model/Visualizer.hs" #-}
 
 {-# LINE 11 "src/Language/LLVMIR/Grammar/Base.ag" #-}
 
@@ -34,33 +35,31 @@ import Data.Map hiding (foldr)
 #else
 import Data.Map 
 #endif
-{-# LINE 38 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 39 "src/Concurrent/Model/Visualizer.hs" #-}
 {-# LINE 5 "src/Concurrent/Model/Visualizer.ag" #-}
 
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Visualizer
 -- Copyright :  (c) 2012 Marcelo Sousa
 -------------------------------------------------------------------------------
-{-# LINE 45 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 46 "src/Concurrent/Model/Visualizer.hs" #-}
 
-{-# LINE 93 "src/Concurrent/Model/Visualizer.ag" #-}
+{-# LINE 94 "src/Concurrent/Model/Visualizer.ag" #-}
 
 type ILabel = Int
-
-nextUnique :: Int -> (Int, Int)
-nextUnique u = (u+1, u)
 
 dotLabel :: Int -> Doc -> Doc
 dotLabel i d = text "[label=\"" <> int i <+> d <> text "\"];"
 
 instance (Pretty t, SCModel t) => Pretty (Model t)  where
   --pretty :: Model -> Doc
-  pretty mdl = text "digraph structs {" </>
+  pretty mdl = undefined 
+{-text "digraph structs {" </>
                text "bgcolor=transparent;" </>
                text "node [shape=Mrecord];" </>
                text "-1 [label=\"||\", shape=Mdiamond];" </>
-               pretty (mainf mdl) </>
-               vsep (Prelude.map pretty (IM.elems $ procs mdl)) </>
+             --  pretty (mainf mdl) </>
+             --  vsep (Prelude.map pretty (IM.elems $ procs mdl)) </>
                pretty' (controlflow mdl) </>
                text "}"
 
@@ -76,6 +75,7 @@ instance Pretty' ControlFlow where
 
 instance Pretty' (Int,Int) where
   pretty' (a,b) = int a <+> text "->" <+> int b <> char ';'
+-}
  
 {-# LINE 81 "src/Concurrent/Model/Visualizer.hs" #-}
 
@@ -744,7 +744,7 @@ sem_BasicBlock_BasicBlock label_ instrs_ =
               _instrsIppccfg :: Doc
               _instrsIself :: Instructions
               _lhsOppccfg =
-                  ({-# LINE 59 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 60 "src/Concurrent/Model/Visualizer.ag" #-}
                    text "subgraph cluster_" <> text _lhsIfname <> int _ilabel <+> text "{" </>
                    text "style=filled;" </>
                    text "color=gray;" </>
@@ -758,7 +758,7 @@ sem_BasicBlock_BasicBlock label_ instrs_ =
                    {-# LINE 759 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               (_lhsOilabel,_ilabel) =
-                  ({-# LINE 64 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 65 "src/Concurrent/Model/Visualizer.ag" #-}
                    let __cont = _lhsIilabel in seq __cont ( case nextUnique __cont of { (__cont, ilabel) -> (__cont,ilabel)} )
                    {-# LINE 764 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -817,7 +817,7 @@ sem_BasicBlocks_Cons hd_ tl_ =
                    {-# LINE 818 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _lhsOppccfg =
-                  ({-# LINE 31 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
                    _hdIppccfg <$> _tlIppccfg
                    {-# LINE 823 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -826,27 +826,27 @@ sem_BasicBlocks_Cons hd_ tl_ =
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 28 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _tlIilabel
                    {-# LINE 832 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _hdOfname =
-                  ({-# LINE 34 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 35 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIfname
                    {-# LINE 837 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _hdOilabel =
-                  ({-# LINE 28 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
                    {-# LINE 842 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _tlOfname =
-                  ({-# LINE 34 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 35 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIfname
                    {-# LINE 847 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _tlOilabel =
-                  ({-# LINE 28 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _hdIilabel
                    {-# LINE 852 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -869,7 +869,7 @@ sem_BasicBlocks_Nil =
                    {-# LINE 870 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _lhsOppccfg =
-                  ({-# LINE 31 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
                    P.empty
                    {-# LINE 875 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -878,7 +878,7 @@ sem_BasicBlocks_Nil =
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 28 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
                    {-# LINE 884 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -2202,7 +2202,7 @@ sem_Function_FunctionDecl name_ linkage_ retty_ isVar_ params_ =
               _paramsIpp :: Doc
               _paramsIself :: Parameters
               _lhsOppccfg =
-                  ({-# LINE 45 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 46 "src/Concurrent/Model/Visualizer.ag" #-}
                    P.empty
                    {-# LINE 2208 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -2216,7 +2216,7 @@ sem_Function_FunctionDecl name_ linkage_ retty_ isVar_ params_ =
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 28 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
                    {-# LINE 2222 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -2259,7 +2259,7 @@ sem_Function_FunctionDef name_ linkage_ retty_ isVar_ params_ body_ =
               _bodyIppccfg :: Doc
               _bodyIself :: BasicBlocks
               _lhsOppccfg =
-                  ({-# LINE 47 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 48 "src/Concurrent/Model/Visualizer.ag" #-}
                    text "subgraph cluster_" <> _nameIppccfg <+> text "{" </>
                    text "style=filled;" </>
                    text "color=lightblue;" </>
@@ -2268,7 +2268,7 @@ sem_Function_FunctionDef name_ linkage_ retty_ isVar_ params_ body_ =
                    {-# LINE 2269 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _bodyOfname =
-                  ({-# LINE 53 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 54 "src/Concurrent/Model/Visualizer.ag" #-}
                    case _nameIself of
                      Global x -> x
                      Local  y -> error "Visualizer: Function should always be a Global"
@@ -2280,7 +2280,7 @@ sem_Function_FunctionDef name_ linkage_ retty_ isVar_ params_ body_ =
                    {-# LINE 2281 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               (_bodyOilabel,_ilabel) =
-                  ({-# LINE 52 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 53 "src/Concurrent/Model/Visualizer.ag" #-}
                    let __cont = _lhsIilabel in seq __cont ( case nextUnique __cont of { (__cont, ilabel) -> (__cont,ilabel)} )
                    {-# LINE 2286 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -2289,7 +2289,7 @@ sem_Function_FunctionDef name_ linkage_ retty_ isVar_ params_ body_ =
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 28 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _ilabel
                    {-# LINE 2295 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -2340,7 +2340,7 @@ sem_Functions_Entry key_ val_ tl_ =
               _tlIpp :: Doc
               _tlIself :: Functions
               _valOilabel =
-                  ({-# LINE 42 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 43 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
                    {-# LINE 2346 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -2354,12 +2354,12 @@ sem_Functions_Entry key_ val_ tl_ =
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 28 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _tlIilabel
                    {-# LINE 2360 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _tlOilabel =
-                  ({-# LINE 28 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _valIilabel
                    {-# LINE 2365 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -2384,7 +2384,7 @@ sem_Functions_Nil =
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 28 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
                    {-# LINE 2390 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -2672,7 +2672,7 @@ sem_Identifier_Global name_ =
          _lhsOself :: Identifier
          _nameIself :: Id
          _lhsOppccfg =
-             ({-# LINE 68 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 69 "src/Concurrent/Model/Visualizer.ag" #-}
               text _nameIself
               {-# LINE 2678 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -2696,7 +2696,7 @@ sem_Identifier_Local name_ =
          _lhsOself :: Identifier
          _nameIself :: Id
          _lhsOppccfg =
-             ({-# LINE 67 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 68 "src/Concurrent/Model/Visualizer.ag" #-}
               text _nameIself
               {-# LINE 2702 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -2903,7 +2903,7 @@ sem_Instruction_AShr pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 2909 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -2953,7 +2953,7 @@ sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 2959 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3000,7 +3000,7 @@ sem_Instruction_Alloca pc_ id_ ty_ align_ =
          _alignIpp :: Doc
          _alignIself :: Align
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3006 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3048,7 +3048,7 @@ sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3054 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3101,7 +3101,7 @@ sem_Instruction_AtomicRMW pc_ id_ mptr_ opval_ op_ ord_ =
          _ordIpp :: Doc
          _ordIself :: AtomicOrdering
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3107 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3150,7 +3150,7 @@ sem_Instruction_BitCast pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3156 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3194,7 +3194,7 @@ sem_Instruction_Br pc_ v_ t_ f_ =
          _fIpp :: Doc
          _fIself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3200 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3243,7 +3243,7 @@ sem_Instruction_Call pc_ mres_ ty_ callee_ args_ =
          _argsIpp :: Doc
          _argsIself :: Values
          _lhsOppccfg =
-             ({-# LINE 92 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 93 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "call" <+> _calleeIppccfg)
               {-# LINE 3249 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3306,7 +3306,7 @@ sem_Instruction_Cmpxchg pc_ id_ mptr_ cval_ nval_ ord_ =
               {-# LINE 3307 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
-             ({-# LINE 31 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
               _idIppccfg
               {-# LINE 3312 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3338,7 +3338,7 @@ sem_Instruction_CreateThread pc_ args_ =
          _argsIpp :: Doc
          _argsIself :: Values
          _lhsOppccfg =
-             ({-# LINE 74 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 75 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "create_thread")
               {-# LINE 3344 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3369,7 +3369,7 @@ sem_Instruction_ExitThread pc_ =
          _lhsOself :: Instruction
          _pcIself :: PC
          _lhsOppccfg =
-             ({-# LINE 78 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 79 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "exit_thread")
               {-# LINE 3375 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3408,7 +3408,7 @@ sem_Instruction_ExtractValue pc_ id_ aggr_ idxs_ =
          _idxsIpp :: Doc
          _idxsIself :: Ints
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3414 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3456,7 +3456,7 @@ sem_Instruction_FAdd pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3462 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3509,7 +3509,7 @@ sem_Instruction_FCmp pc_ id_ cond_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3515 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3561,7 +3561,7 @@ sem_Instruction_FDiv pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3567 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3611,7 +3611,7 @@ sem_Instruction_FMul pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3617 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3658,7 +3658,7 @@ sem_Instruction_FPExt pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3664 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3703,7 +3703,7 @@ sem_Instruction_FPToSI pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3709 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3748,7 +3748,7 @@ sem_Instruction_FPToUI pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3754 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3793,7 +3793,7 @@ sem_Instruction_FPTrunc pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3799 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3841,7 +3841,7 @@ sem_Instruction_FRem pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3847 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3891,7 +3891,7 @@ sem_Instruction_FSub pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3897 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3941,7 +3941,7 @@ sem_Instruction_GetElementPtr pc_ id_ ty_ struct_ idxs_ =
          _idxsIpp :: Doc
          _idxsIself :: Values
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 3947 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -3994,7 +3994,7 @@ sem_Instruction_ICmp pc_ id_ cond_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4000 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4056,7 +4056,7 @@ sem_Instruction_InsertValue pc_ id_ aggr_ ival_ idxs_ =
               {-# LINE 4057 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
-             ({-# LINE 31 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
               _idIppccfg
               {-# LINE 4062 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4093,7 +4093,7 @@ sem_Instruction_IntToPtr pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4099 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4132,7 +4132,7 @@ sem_Instruction_JoinThread pc_ id_ =
          _idIppccfg :: Doc
          _idIself :: Identifier
          _lhsOppccfg =
-             ({-# LINE 76 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 77 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "join_thread") <+> _idIppccfg
               {-# LINE 4138 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4176,7 +4176,7 @@ sem_Instruction_LShr pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4182 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4223,7 +4223,7 @@ sem_Instruction_Load pc_ id_ v_ align_ =
          _alignIpp :: Doc
          _alignIself :: Align
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4229 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4271,7 +4271,7 @@ sem_Instruction_Mul pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4277 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4315,7 +4315,7 @@ sem_Instruction_MutexInit pc_ rv_ mutex_ =
          _mutexIpp :: Doc
          _mutexIself :: Value
          _lhsOppccfg =
-             ({-# LINE 80 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 81 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "mutex_init")
               {-# LINE 4321 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4355,7 +4355,7 @@ sem_Instruction_MutexLock pc_ rv_ mutex_ =
          _mutexIpp :: Doc
          _mutexIself :: Value
          _lhsOppccfg =
-             ({-# LINE 82 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 83 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "mutex_lock")
               {-# LINE 4361 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4395,7 +4395,7 @@ sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
          _mutexIpp :: Doc
          _mutexIself :: Value
          _lhsOppccfg =
-             ({-# LINE 84 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 85 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "mutex_unlock")
               {-# LINE 4401 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4429,7 +4429,7 @@ sem_Instruction_NotifyEvent pc_ event_ =
          _lhsOself :: Instruction
          _pcIself :: PC
          _lhsOppccfg =
-             ({-# LINE 90 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 91 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "notify_event")
               {-# LINE 4435 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4471,7 +4471,7 @@ sem_Instruction_Or pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4477 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4518,7 +4518,7 @@ sem_Instruction_PHI pc_ id_ ty_ vals_ =
          _valsIpp :: Doc
          _valsIself :: PValues
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4524 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4563,7 +4563,7 @@ sem_Instruction_PtrToInt pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4569 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4601,7 +4601,7 @@ sem_Instruction_Ret pc_ r_ =
          _rIpp :: Doc
          _rIself :: RetInst
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4607 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4645,7 +4645,7 @@ sem_Instruction_SDiv pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4651 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4692,7 +4692,7 @@ sem_Instruction_SExt pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4698 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4737,7 +4737,7 @@ sem_Instruction_SIToFP pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4743 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4785,7 +4785,7 @@ sem_Instruction_SRem pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4791 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4835,7 +4835,7 @@ sem_Instruction_Select pc_ id_ cond_ valt_ valf_ =
          _valfIpp :: Doc
          _valfIself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4841 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4885,7 +4885,7 @@ sem_Instruction_Shl pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4891 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4934,7 +4934,7 @@ sem_Instruction_Store pc_ ty_ v1_ v2_ align_ =
          _alignIpp :: Doc
          _alignIself :: Align
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4940 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -4984,7 +4984,7 @@ sem_Instruction_Sub pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 4990 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5034,7 +5034,7 @@ sem_Instruction_Switch pc_ ty_ v_ elems_ =
               {-# LINE 5035 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
-             ({-# LINE 31 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
               P.empty
               {-# LINE 5040 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5069,7 +5069,7 @@ sem_Instruction_Trunc pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 5075 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5107,7 +5107,7 @@ sem_Instruction_UBr pc_ d_ =
          _dIpp :: Doc
          _dIself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 5113 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5151,7 +5151,7 @@ sem_Instruction_UDiv pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 5157 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5198,7 +5198,7 @@ sem_Instruction_UIToFP pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 5204 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5246,7 +5246,7 @@ sem_Instruction_URem pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 5252 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5283,7 +5283,7 @@ sem_Instruction_Unreachable pc_ =
          _lhsOself :: Instruction
          _pcIself :: PC
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 5289 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5313,7 +5313,7 @@ sem_Instruction_WaitEvent pc_ event_ =
          _lhsOself :: Instruction
          _pcIself :: PC
          _lhsOppccfg =
-             ({-# LINE 86 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 87 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "wait_event")
               {-# LINE 5319 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5345,7 +5345,7 @@ sem_Instruction_WaitTime pc_ time_ =
          _timeIpp :: Doc
          _timeIself :: Value
          _lhsOppccfg =
-             ({-# LINE 88 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 89 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "wait_time")
               {-# LINE 5351 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5389,7 +5389,7 @@ sem_Instruction_Xor pc_ id_ ty_ op1_ op2_ =
          _op2Ipp :: Doc
          _op2Iself :: Value
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 5395 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5436,7 +5436,7 @@ sem_Instruction_ZExt pc_ id_ v_ ty_ =
          _tyIpp :: Doc
          _tyIself :: Type
          _lhsOppccfg =
-             ({-# LINE 72 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
               {-# LINE 5442 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5498,7 +5498,7 @@ sem_Instructions_Cons hd_ tl_ =
               {-# LINE 5499 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
-             ({-# LINE 31 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
               _hdIppccfg <$> _tlIppccfg
               {-# LINE 5504 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5522,7 +5522,7 @@ sem_Instructions_Nil =
               {-# LINE 5523 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
-             ({-# LINE 31 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
               P.empty
               {-# LINE 5528 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -6682,7 +6682,7 @@ sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
          _nmdtysIpp :: Doc
          _nmdtysIself :: NamedTypes
          _funsOilabel =
-             ({-# LINE 38 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 39 "src/Concurrent/Model/Visualizer.ag" #-}
               0
               {-# LINE 6688 "src/Concurrent/Model/Visualizer.hs" #-}
               )
