@@ -43,6 +43,14 @@ isWhEndTh :: Where -> Bool
 isWhEndTh (EndTh _) = True
 isWhEndTh _         = False
 
+isLocEndFn :: Loc -> Bool
+isLocEndFn (ExitLoc l w) = isWhEndFn w
+isLocEndFn (SyncLoc l i) = False
+
+isWhEndFn :: Where -> Bool
+isWhEndFn EndFn = True
+isWhEndFn _     = False
+
 pcLoc :: Loc -> PC
 pcLoc (ExitLoc l@Location{..} _) = lpc
 pcLoc (SyncLoc l@Location{..} _) = lpc
@@ -85,6 +93,13 @@ getThreadExits i m = case M.lookup i m of
     Nothing -> error "getThreadExits:" -- ++ show i ++ " " ++ show m
     Just bb -> let bbi = concat $ M.elems bb
                    bbi' = filter isLocEndTh bbi
+               in map pcLoc bbi'
+
+getFunctionExits :: Identifier -> Locs -> [PC]
+getFunctionExits i m = case M.lookup i m of
+    Nothing -> error "getFunctionExits:" -- ++ show i ++ " " ++ show m
+    Just bb -> let bbi = concat $ M.elems bb
+                   bbi' = filter isLocEndFn bbi
                in map pcLoc bbi'
                
 newtype Context a = Context { unContext :: State Env a }

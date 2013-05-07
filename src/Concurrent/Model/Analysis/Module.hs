@@ -7,6 +7,8 @@
 module Concurrent.Model.Analysis.Module where
 
 import Language.LLVMIR hiding (Switch)
+import Language.LLVMIR.Util
+
 import Concurrent.Model.Analysis.ControlFlow
 import Concurrent.Model.Analysis.Instruction
 import Concurrent.Model.Analysis.DataFlow
@@ -49,6 +51,7 @@ analyseLoc :: Loc -> Context ()
 analyseLoc loc = do 
     e@Env{..} <- getEnv
     let ci@Core{..} = corein
+        ploc@Location{..} = ploc
     case loc of
         SyncLoc l@Location{..} i -> do  -- WaitThread
             let fi = MB.fromJust $ M.lookup i funs -- Retrieve which function its waiting for
@@ -58,8 +61,40 @@ analyseLoc loc = do
                 c = foldr (\l1 r -> (Switch l1 lpc):r) ccfg p 
             putEnv $ o {ccfg = c}
         ExitLoc l@Location{..} w -> case w of
-            _ -> return ()
-            
+            EndFn   -> return () -- Its the job of the caller to
+            EndTh _ -> return () -- findout the exit locations of the callee
+            BBLoc bbi -> do let fnf = MB.fromJust $ M.lookup fn funs
+                                bba = findBasicBlock bbi fnf
+                                pc = entryPCBB bba
+                                c  = flow pc l ccfg
+                                e' = e {ccfg = c}
+                            putEnv e'
+                            analyseBB bba
+            FnLoc fni -> do let fn = MB.fromMaybe (errorMsg (show fni) $ M.keys funs) $ M.lookup fni funs 
+                                bb = MB.fromMaybe (errorMsg (show fni) fn) $ entryBBFunction fn 
+                                pc = MB.fromMaybe (errorMsg (show bb) fn) $ entryPCFunction fn 
+                                iLoc  = Location fni bb pc True
+                                c = iflow pc l ccfg
+                                e' = e {ccfg = c, ploc = iLoc}
+                            putEnv e'
+                            analyseFunction fn
+                            o@Env{..} <- getEnv -- Retrieve the new env
+                            let p = getFunctionExits fni efloc
+                                c' = foldr (\l1 r -> (Inter l1 lpc):r) ccfg p 
+                            putEnv $ o {ccfg = c'}
+            ThLoc tni -> do let th = MB.fromMaybe (errorMsg (show tni) $ M.keys funs) $ M.lookup tni funs 
+                                bb = MB.fromMaybe (errorMsg (show tni) fn) $ entryBBFunction th
+                                pc = MB.fromMaybe (errorMsg (show bb) fn) $ entryPCFunction th
+                                iLoc  = Location tni bb pc True
+                                c = tflow pc l ccfg
+                                e' = e {ccfg = c, ploc = iLoc}
+                            putEnv e'
+                            analyseFunction th
+                            o@Env{..} <- getEnv -- Retrieve the new env
+                            let p = getThreadExits tni efloc
+                                c' = foldr (\l1 r -> (Switch l1 lpc):r) ccfg p 
+                            putEnv $ o {ccfg = c'}
+                          
 -- Add to seen
 analyseBB :: BasicBlock -> Context ()
 analyseBB (BasicBlock i instrs) = mapM_ analyseInstr instrs

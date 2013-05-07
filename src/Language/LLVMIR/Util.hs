@@ -6,6 +6,8 @@
 module Language.LLVMIR.Util where
 
 import Language.LLVMIR
+import Data.Maybe
+import Data.List
 
 nextUnique :: Int -> (Int, Int)
 nextUnique u = (u+1, u)
@@ -27,3 +29,12 @@ valueIdentifier' e v =
 identifierName :: Identifier -> String
 identifierName (Global n) = n
 identifierName (Local  n) = n
+
+findBasicBlock :: Identifier -> Function -> BasicBlock
+findBasicBlock i (FunctionDecl _ _ _ _ _) = error $ "findBasicBlock: " ++ show i ++ " not found."
+findBasicBlock i (FunctionDef  _ _ _ _ _ body) =
+    fromMaybe (error $ "findBasicBlock: " ++ show i ++ " not found.") $
+    find (isBasicBlock i) body
+
+isBasicBlock :: Identifier -> BasicBlock -> Bool
+isBasicBlock i (BasicBlock j _) = i==j

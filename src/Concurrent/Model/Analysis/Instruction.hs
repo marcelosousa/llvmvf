@@ -6,7 +6,7 @@
 
 module Concurrent.Model.Analysis.Instruction where
 
-import Language.LLVMIR
+import Language.LLVMIR hiding (Switch)
 import Language.LLVMIR.Util
 import Concurrent.Model.Analysis.ControlFlow
 import Concurrent.Model.Analysis.DataFlow
@@ -167,3 +167,9 @@ flow pc l@Location{..} cfg =
     if ise
     then cfg
     else (Intra lpc pc):cfg                          
+
+iflow :: PC -> Location -> ControlFlow -> ControlFlow
+iflow pc l@Location{..} cfg = (Inter lpc pc):cfg
+    
+tflow :: PC -> Location -> ControlFlow -> ControlFlow
+tflow pc l@Location{..} cfg = (Switch lpc pc):cfg
