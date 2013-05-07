@@ -99,7 +99,19 @@ fnWasAnalyzed i c@Core{..} seen =
             Just bbsids -> 
                 let bbids = fnBasicBlockIds fn
                 in bbsids == bbids
+
+bbWasAnalyzed :: Identifier -> Identifier -> Seen -> Bool
+bbWasAnalyzed fni bbi seen =
+    case M.lookup fni seen of
+        Nothing -> False
+        Just fn -> bbi `elem` fn
             
+addToSeen :: Identifier -> Identifier -> Seen -> Seen
+addToSeen fni bbi seen = 
+    M.alter f fni seen where
+        f Nothing = Just [bbi]
+        f (Just n) = Just $ bbi:n
+        
 updateLocs :: Location -> Loc -> Locs -> Locs
 updateLocs l@Location{..} loc locs = 
     M.alter f fn locs where

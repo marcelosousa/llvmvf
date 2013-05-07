@@ -100,6 +100,12 @@ analyseLoc loc = do
                           
 -- Add to seen
 analyseBB :: BasicBlock -> Context ()
-analyseBB (BasicBlock i instrs) = mapM_ analyseInstr instrs
-
+analyseBB (BasicBlock i instrs) = do
+    e@Env{..} <- getEnv
+    let fni = fn ploc
+    if bbWasAnalyzed fni i seen
+    then return ()
+    else do mapM_ analyseInstr instrs
+            let seen' = addToSeen fni i seen
+            putEnv $ e {seen = seen'}
          
