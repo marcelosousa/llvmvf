@@ -18,10 +18,22 @@ import Concurrent.Model.Analysis.ControlFlow
 import Concurrent.Model.Analysis.DataFlow
 
 data Location = Location 
-  { fn :: String
-  , bb :: Identifier
-  , pc :: PC
+  { fn  :: String
+  , bb  :: Identifier
+  , lpc :: PC
+  , ise :: Bool
   }
+
+type Locations = [Location]
+
+data Where = BBLoc Identifier
+           | FnLoc Identifier
+           | ThLoc Identifier
+           | End
+
+data ExitLoc = ExitLoc Location Where
+
+type ExitLocs = [ExitLoc]
 
 data Core = Core
   { nmdtys :: NamedTypes
@@ -37,7 +49,9 @@ data Env = Env
   , coreout :: Core
   , ccfg    :: ControlFlow
   , df      :: DataFlow
-  , loc     :: Location
+  , ploc    :: Location
+  , pfloc   :: Locations
+  , eloc    :: ExitLocs
   }
 
 newtype Context a = Context { unContext :: State Env a }

@@ -27,6 +27,3 @@ valueIdentifier' e v =
 identifierName :: Identifier -> String
 identifierName (Global n) = n
 identifierName (Local  n) = n
-
-
-

@@ -19,9 +19,9 @@ analyseModule ep (Module id layout target gvars funs nmdtys) =
   let fn = MB.fromMaybe (errorMsg ep $ M.keys funs) $ M.lookup ep funs 
       bb = MB.fromMaybe (errorMsg ep fn) $ entryBBFunction fn 
       pc = MB.fromMaybe (errorMsg (show bb) fn) $ entryPCFunction fn 
-      iLoc  = Location ep bb pc
+      iLoc  = Location ep bb pc True
       iCore = Core nmdtys gvars funs
-      env = Env iCore eCore eCFG eDF iLoc
+      env = Env iCore eCore eCFG eDF iLoc [] []
       oenv  = evalContext (analyseFunction fn) env
       Core tys vars fs = coreout oenv
       fcfg  = ccfg oenv
@@ -37,5 +37,7 @@ analyseFunction fn = case fn of
   FunctionDecl name _ rty iv pms -> return ()
   FunctionDef  name _ rty iv pms body -> analyseBB $ head body
 
+-- This is going to give me a context
+-- Then I need to decide if I should go somewhere or not.
 analyseBB :: BasicBlock -> Context ()
 analyseBB (BasicBlock i instrs) = mapM_ analyseInstr instrs
