@@ -14,6 +14,7 @@ import Control.Monad.State
 import qualified Data.Map as M
 
 import Language.LLVMIR
+import Language.LLVMIR.Util
 import Concurrent.Model.Analysis.ControlFlow
 import Concurrent.Model.Analysis.DataFlow
 
@@ -80,6 +81,25 @@ data Env = Env
   , seen    :: Seen
   }
 
+getLocs :: Location -> Locs -> LocList
+getLocs l@Location{..} m =
+    case M.lookup fn m of
+        Nothing -> error "getLocs: FN"
+        Just fnt -> case M.lookup bb fnt of
+            Nothing -> error "getLocs: BB"
+            Just bbt -> bbt
+
+fnWasAnalyzed :: Identifier -> Core -> Seen -> Bool
+fnWasAnalyzed i c@Core{..} seen =
+    let ms = M.lookup i seen
+    in case M.lookup i funs of
+        Nothing -> error "fnWasAnalyzed"
+        Just fn -> case ms of
+            Nothing -> False
+            Just bbsids -> 
+                let bbids = fnBasicBlockIds fn
+                in bbsids == bbids
+            
 updateLocs :: Location -> Loc -> Locs -> Locs
 updateLocs l@Location{..} loc locs = 
     M.alter f fn locs where

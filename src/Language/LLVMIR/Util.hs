@@ -38,3 +38,10 @@ findBasicBlock i (FunctionDef  _ _ _ _ _ body) =
 
 isBasicBlock :: Identifier -> BasicBlock -> Bool
 isBasicBlock i (BasicBlock j _) = i==j
+
+fnBasicBlockIds :: Function -> [Identifier]
+fnBasicBlockIds (FunctionDecl _ _ _ _ _) = []
+fnBasicBlockIds (FunctionDef  _ _ _ _ _ body) = map getBBId body
+
+getBBId :: BasicBlock -> Identifier
+getBBId (BasicBlock i _) = i

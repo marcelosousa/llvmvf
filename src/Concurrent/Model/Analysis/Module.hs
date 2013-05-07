@@ -40,10 +40,13 @@ errorMsg msg b = error $ "analyseModule: " ++ msg ++ " " ++ show b
 analyseFunction :: Function -> Context ()
 analyseFunction fn = case fn of
   FunctionDecl name _ rty iv pms -> return ()
-  FunctionDef  name _ rty iv pms body -> do 
-      analyseBB $ head body
+  FunctionDef  name _ rty iv pms body -> do
       e@Env{..} <- getEnv
-      mapM_ analyseLoc undefined 
+      if fnWasAnalyzed name corein seen
+      then return ()
+      else do analyseBB $ head body
+              o@Env{..} <- getEnv
+              mapM_ analyseLoc $ getLocs ploc efloc
 
 -- Analyse a special location
 -- VIF
