@@ -6,7 +6,7 @@ module Concurrent.Model.Visualizer where
 
 {-# LINE 16 "src/Concurrent/Model/Visualizer.ag" #-}
 
-import qualified Data.Map as Map
+import qualified Data.Map as M
 import qualified Data.IntMap as IM
 import Data.Maybe 
 
@@ -51,33 +51,20 @@ type ILabel = Int
 dotLabel :: Int -> Doc -> Doc
 dotLabel i d = text "[label=\"" <> int i <+> d <> text "\"];"
 
-instance (Pretty t, SCModel t) => Pretty (Model t)  where
-  --pretty :: Model -> Doc
-  pretty mdl = undefined 
-{-text "digraph structs {" </>
-               text "bgcolor=transparent;" </>
-               text "node [shape=Mrecord];" </>
-               text "-1 [label=\"||\", shape=Mdiamond];" </>
-             --  pretty (mainf mdl) </>
-             --  vsep (Prelude.map pretty (IM.elems $ procs mdl)) </>
-               pretty' (controlflow mdl) </>
-               text "}"
+dumpccfg :: (Pretty t, SCModel t) => Model t -> ControlFlow -> Doc 
+dumpccfg (Model mdl) ccfg = 
+    text "digraph structs {" </>
+    text "bgcolor=transparent;" </>
+    text "node [shape=Mrecord];" </>
+    text "-1 [label=\"||\", shape=Mdiamond];" </>
+    vsep (Prelude.map dotFunction $ M.elems $ getModFns mdl) </>
+    vsep (Prelude.map pretty ccfg) </>
+    text "}"
 
-instance Pretty Process where
-  --pretty :: Process -> Doc
-  pretty (Process i f) = ppccfg_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function { ilabel_Inh_Function = 0 }
+dotFunction :: Function -> Doc
+dotFunction f = ppccfg_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function { ilabel_Inh_Function = 0 }
 
-class Pretty' t where
-  pretty' :: t -> Doc
-
-instance Pretty' ControlFlow where
-  pretty' (ControlFlow _ cfg) = vsep $ Prelude.map pretty' $ concat $ Map.elems cfg
-
-instance Pretty' (Int,Int) where
-  pretty' (a,b) = int a <+> text "->" <+> int b <> char ';'
--}
- 
-{-# LINE 81 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 68 "src/Concurrent/Model/Visualizer.hs" #-}
 
 {-# LINE 1 "src/Language/LLVMIR/Printer/Module.ag" #-}
 
@@ -85,7 +72,7 @@ instance Pretty' (Int,Int) where
 -- Module    :  Language.LLVMIR.Printer
 -- Copyright :  (c) 2012 Marcelo Sousa
 -------------------------------------------------------------------------------
-{-# LINE 89 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 76 "src/Concurrent/Model/Visualizer.hs" #-}
 
 {-# LINE 138 "src/Language/LLVMIR/Printer/Module.ag" #-}
 
@@ -97,7 +84,7 @@ pBinOp ty id c op1 op2 = ty <+> id <+> char '=' <+> text c <+> op1 <> char ',' <
 
 pBitBinOp :: Doc -> Doc -> String -> Doc -> Doc -> Doc
 pBitBinOp ty id c op1 op2 = id <+> char '=' <+> text c <+> ty <+> op1 <> char ',' <+> op2
-{-# LINE 101 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 88 "src/Concurrent/Model/Visualizer.hs" #-}
 
 {-# LINE 319 "src/Language/LLVMIR/Printer/Module.ag" #-}
 
@@ -114,7 +101,7 @@ escaped []        = P.empty
 ppKeyword :: Bool -> String -> Doc
 ppKeyword True s = text s
 ppKeyword _    _ = P.empty
-{-# LINE 118 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 105 "src/Concurrent/Model/Visualizer.hs" #-}
 
 {-# LINE 1 "src/Language/LLVMIR/Grammar/Base.ag" #-}
 
@@ -122,7 +109,7 @@ ppKeyword _    _ = P.empty
 -- Module    :  Language.LLVMIR.Base
 -- Copyright :  (c) 2012 Marcelo Sousa
 -------------------------------------------------------------------------------
-{-# LINE 126 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 113 "src/Concurrent/Model/Visualizer.hs" #-}
 
 {-# LINE 1 "src/Language/LLVMIR/Grammar/Instruction.ag" #-}
 
@@ -130,7 +117,7 @@ ppKeyword _    _ = P.empty
 -- Module    :  Language.LLVMIR.Grammar.Instruction
 -- Copyright :  (c) 2013 Marcelo Sousa
 -------------------------------------------------------------------------------
-{-# LINE 134 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 121 "src/Concurrent/Model/Visualizer.hs" #-}
 
 {-# LINE 1 "src/Language/LLVMIR/Type/Type.ag" #-}
 
@@ -139,7 +126,7 @@ ppKeyword _    _ = P.empty
 -- Copyright :  (c) 2012 Marcelo Sousa
 -- Standard LLVM IR Types
 -------------------------------------------------------------------------------
-{-# LINE 143 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 130 "src/Concurrent/Model/Visualizer.hs" #-}
 -- Alias -------------------------------------------------------
 -- cata
 sem_Alias :: Alias ->
@@ -165,7 +152,7 @@ sem_Alias_Alias name_ =
          _lhsOpp =
              ({-# LINE 150 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "%" <> text (show _nameIself)
-              {-# LINE 169 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 156 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Alias _nameIself
@@ -203,7 +190,7 @@ sem_Aliases_Cons hd_ tl_ =
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _hdIpp <$> _tlIpp
-              {-# LINE 207 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 194 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -221,7 +208,7 @@ sem_Aliases_Nil =
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 225 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 212 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              []
@@ -252,7 +239,7 @@ sem_Align_Align n_ =
          _lhsOpp =
              ({-# LINE 232 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "align" <+> text (show n_)
-              {-# LINE 256 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 243 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Align n_
@@ -363,7 +350,7 @@ sem_AtomicOrdering_Acquire =
          _lhsOpp =
              ({-# LINE 177 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "acquire"
-              {-# LINE 367 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 354 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Acquire
@@ -377,7 +364,7 @@ sem_AtomicOrdering_AcquireRelease =
          _lhsOpp =
              ({-# LINE 179 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "acq_rel"
-              {-# LINE 381 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 368 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              AcquireRelease
@@ -391,7 +378,7 @@ sem_AtomicOrdering_Monotonic =
          _lhsOpp =
              ({-# LINE 176 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "monotonic"
-              {-# LINE 395 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 382 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Monotonic
@@ -405,7 +392,7 @@ sem_AtomicOrdering_NotAtomic =
          _lhsOpp =
              ({-# LINE 174 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "non_atomic"
-              {-# LINE 409 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 396 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              NotAtomic
@@ -419,7 +406,7 @@ sem_AtomicOrdering_Release =
          _lhsOpp =
              ({-# LINE 178 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "release"
-              {-# LINE 423 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 410 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Release
@@ -433,7 +420,7 @@ sem_AtomicOrdering_SequentiallyConsistent =
          _lhsOpp =
              ({-# LINE 180 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "seq_cst"
-              {-# LINE 437 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 424 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              SequentiallyConsistent
@@ -447,7 +434,7 @@ sem_AtomicOrdering_Unordered =
          _lhsOpp =
              ({-# LINE 175 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "unordered"
-              {-# LINE 451 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 438 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Unordered
@@ -750,17 +737,17 @@ sem_BasicBlock_BasicBlock label_ instrs_ =
                    text "color=gray;" </>
                    _instrsIppccfg </>
                    text "label = \"basic block" <+> _labelIpp <> text "\"; }"
-                   {-# LINE 754 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 741 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _lhsOpp =
                   ({-# LINE 72 "src/Language/LLVMIR/Printer/Module.ag" #-}
                    text "; <label>:" <> _labelIpp <$> _instrsIpp
-                   {-# LINE 759 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 746 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               (_lhsOilabel,_ilabel) =
                   ({-# LINE 65 "src/Concurrent/Model/Visualizer.ag" #-}
                    let __cont = _lhsIilabel in seq __cont ( case nextUnique __cont of { (__cont, ilabel) -> (__cont,ilabel)} )
-                   {-# LINE 764 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 751 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _self =
                   BasicBlock _labelIself _instrsIself
@@ -814,12 +801,12 @@ sem_BasicBlocks_Cons hd_ tl_ =
               _lhsOpp =
                   ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
                    _hdIpp <$> _tlIpp
-                   {-# LINE 818 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 805 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _lhsOppccfg =
                   ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
                    _hdIppccfg <$> _tlIppccfg
-                   {-# LINE 823 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 810 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _self =
                   (:) _hdIself _tlIself
@@ -828,27 +815,27 @@ sem_BasicBlocks_Cons hd_ tl_ =
               _lhsOilabel =
                   ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _tlIilabel
-                   {-# LINE 832 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 819 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _hdOfname =
                   ({-# LINE 35 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIfname
-                   {-# LINE 837 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 824 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _hdOilabel =
                   ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
-                   {-# LINE 842 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 829 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _tlOfname =
                   ({-# LINE 35 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIfname
-                   {-# LINE 847 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 834 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _tlOilabel =
                   ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _hdIilabel
-                   {-# LINE 852 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 839 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               ( _hdIilabel,_hdIpp,_hdIppccfg,_hdIself) =
                   hd_ _hdOfname _hdOilabel
@@ -866,12 +853,12 @@ sem_BasicBlocks_Nil =
               _lhsOpp =
                   ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
                    P.empty
-                   {-# LINE 870 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 857 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _lhsOppccfg =
                   ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
                    P.empty
-                   {-# LINE 875 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 862 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _self =
                   []
@@ -880,7 +867,7 @@ sem_BasicBlocks_Nil =
               _lhsOilabel =
                   ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
-                   {-# LINE 884 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 871 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
           in  ( _lhsOilabel,_lhsOpp,_lhsOppccfg,_lhsOself)))
 -- BinOp -------------------------------------------------------
@@ -926,7 +913,7 @@ sem_BinOp_OpAdd =
          _lhsOpp =
              ({-# LINE 162 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "add"
-              {-# LINE 930 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 917 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpAdd
@@ -940,7 +927,7 @@ sem_BinOp_OpAnd =
          _lhsOpp =
              ({-# LINE 164 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "and"
-              {-# LINE 944 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 931 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpAnd
@@ -954,7 +941,7 @@ sem_BinOp_OpMax =
          _lhsOpp =
              ({-# LINE 168 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "max"
-              {-# LINE 958 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 945 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpMax
@@ -968,7 +955,7 @@ sem_BinOp_OpMin =
          _lhsOpp =
              ({-# LINE 169 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "min"
-              {-# LINE 972 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 959 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpMin
@@ -982,7 +969,7 @@ sem_BinOp_OpNand =
          _lhsOpp =
              ({-# LINE 165 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "nand"
-              {-# LINE 986 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 973 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpNand
@@ -996,7 +983,7 @@ sem_BinOp_OpOr =
          _lhsOpp =
              ({-# LINE 166 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "or"
-              {-# LINE 1000 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 987 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpOr
@@ -1010,7 +997,7 @@ sem_BinOp_OpSub =
          _lhsOpp =
              ({-# LINE 163 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "sub"
-              {-# LINE 1014 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1001 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpSub
@@ -1024,7 +1011,7 @@ sem_BinOp_OpUMax =
          _lhsOpp =
              ({-# LINE 170 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "umax"
-              {-# LINE 1028 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1015 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpUMax
@@ -1038,7 +1025,7 @@ sem_BinOp_OpUMin =
          _lhsOpp =
              ({-# LINE 171 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "umin"
-              {-# LINE 1042 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1029 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpUMin
@@ -1052,7 +1039,7 @@ sem_BinOp_OpXchg =
          _lhsOpp =
              ({-# LINE 161 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "xchg"
-              {-# LINE 1056 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1043 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpXchg
@@ -1066,7 +1053,7 @@ sem_BinOp_OpXor =
          _lhsOpp =
              ({-# LINE 167 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "xor"
-              {-# LINE 1070 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1057 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpXor
@@ -1175,7 +1162,7 @@ sem_CompareConstantExpr_FCmpExpr cond_ ty_ op1_ op2_ =
          _lhsOpp =
              ({-# LINE 289 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "icmp" <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
-              {-# LINE 1179 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1166 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FCmpExpr _condIself _tyIself _op1Iself _op2Iself
@@ -1209,7 +1196,7 @@ sem_CompareConstantExpr_ICmpExpr cond_ ty_ op1_ op2_ =
          _lhsOpp =
              ({-# LINE 288 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "icmp" <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
-              {-# LINE 1213 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1200 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ICmpExpr _condIself _tyIself _op1Iself _op2Iself
@@ -1258,7 +1245,7 @@ sem_ComplexConstant_ConstantAggregateZero ty_ =
          _lhsOpp =
              ({-# LINE 261 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> text "zeroinitializer"
-              {-# LINE 1262 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1249 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantAggregateZero _tyIself
@@ -1280,7 +1267,7 @@ sem_ComplexConstant_ConstantArray ty_ vals_ =
          _lhsOpp =
              ({-# LINE 262 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> brackets _valsIpp
-              {-# LINE 1284 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1271 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantArray _tyIself _valsIself
@@ -1301,7 +1288,7 @@ sem_ComplexConstant_ConstantDataSequential cds_ =
          _lhsOpp =
              ({-# LINE 263 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _cdsIpp
-              {-# LINE 1305 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1292 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantDataSequential _cdsIself
@@ -1323,7 +1310,7 @@ sem_ComplexConstant_ConstantStruct ty_ vals_ =
          _lhsOpp =
              ({-# LINE 264 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> braces _valsIpp
-              {-# LINE 1327 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1314 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantStruct _tyIself _valsIself
@@ -1347,7 +1334,7 @@ sem_ComplexConstant_ConstantVector ty_ vals_ =
          _lhsOpp =
              ({-# LINE 265 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ConstantVector"
-              {-# LINE 1351 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1338 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantVector _tyIself _valsIself
@@ -1393,7 +1380,7 @@ sem_Constant_BlockAddr =
          _lhsOpp =
              ({-# LINE 248 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "blockaddr"
-              {-# LINE 1397 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1384 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              BlockAddr
@@ -1410,7 +1397,7 @@ sem_Constant_CmpConst cc_ =
          _lhsOpp =
              ({-# LINE 251 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _ccIpp
-              {-# LINE 1414 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1401 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              CmpConst _ccIself
@@ -1429,7 +1416,7 @@ sem_Constant_ConstantExpr expr_ =
          _lhsOpp =
              ({-# LINE 252 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _exprIpp
-              {-# LINE 1433 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1420 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantExpr _exprIself
@@ -1448,7 +1435,7 @@ sem_Constant_GlobalValue gv_ =
          _lhsOpp =
              ({-# LINE 253 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _gvIpp
-              {-# LINE 1452 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1439 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              GlobalValue _gvIself
@@ -1464,7 +1451,7 @@ sem_Constant_PoisonValue =
          _lhsOpp =
              ({-# LINE 249 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "poison"
-              {-# LINE 1468 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1455 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              PoisonValue
@@ -1481,7 +1468,7 @@ sem_Constant_SmpConst sc_ =
          _lhsOpp =
              ({-# LINE 250 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _scIpp
-              {-# LINE 1485 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1472 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              SmpConst _scIself
@@ -1497,7 +1484,7 @@ sem_Constant_UndefValue =
          _lhsOpp =
              ({-# LINE 247 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "undef"
-              {-# LINE 1501 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1488 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              UndefValue
@@ -1533,7 +1520,7 @@ sem_ConstantDataSequential_ConstantDataArray ty_ val_ =
          _lhsOpp =
              ({-# LINE 272 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> text "c" <> dquotes (escaped val_)
-              {-# LINE 1537 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1524 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantDataArray _tyIself val_
@@ -1553,7 +1540,7 @@ sem_ConstantDataSequential_ConstantDataVector ty_ val_ =
          _lhsOpp =
              ({-# LINE 273 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> text "c" <> dquotes (escaped val_)
-              {-# LINE 1557 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1544 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantDataVector _tyIself val_
@@ -1603,7 +1590,7 @@ sem_ConstantExpr_BinaryConstantExpr =
          _lhsOpp =
              ({-# LINE 276 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "BinaryConstantExpr"
-              {-# LINE 1607 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1594 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              BinaryConstantExpr
@@ -1620,7 +1607,7 @@ sem_ConstantExpr_CompareConstantExpr cmpExpr_ =
          _lhsOpp =
              ({-# LINE 277 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _cmpExprIpp
-              {-# LINE 1624 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1611 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              CompareConstantExpr _cmpExprIself
@@ -1636,7 +1623,7 @@ sem_ConstantExpr_ExtractElementConstantExpr =
          _lhsOpp =
              ({-# LINE 278 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ExtractElementConstantExpr"
-              {-# LINE 1640 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1627 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ExtractElementConstantExpr
@@ -1650,7 +1637,7 @@ sem_ConstantExpr_ExtractValueConstantExpr =
          _lhsOpp =
              ({-# LINE 279 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ExtractValueConstantExpr"
-              {-# LINE 1654 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1641 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ExtractValueConstantExpr
@@ -1670,7 +1657,7 @@ sem_ConstantExpr_GetElementPtrConstantExpr struct_ idxs_ =
          _lhsOpp =
              ({-# LINE 280 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "getelementptr" <> parens (_structIpp <> char ',' <+> _idxsIpp)
-              {-# LINE 1674 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1661 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              GetElementPtrConstantExpr _structIself _idxsIself
@@ -1688,7 +1675,7 @@ sem_ConstantExpr_InsertElementConstantExpr =
          _lhsOpp =
              ({-# LINE 281 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "InsertElementConstantExpr"
-              {-# LINE 1692 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1679 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              InsertElementConstantExpr
@@ -1702,7 +1689,7 @@ sem_ConstantExpr_InsertValueConstantExpr =
          _lhsOpp =
              ({-# LINE 282 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "InsertValueConstantExpr"
-              {-# LINE 1706 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1693 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              InsertValueConstantExpr
@@ -1716,7 +1703,7 @@ sem_ConstantExpr_SelectConstantExpr =
          _lhsOpp =
              ({-# LINE 283 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "SelectConstantExpr"
-              {-# LINE 1720 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1707 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              SelectConstantExpr
@@ -1730,7 +1717,7 @@ sem_ConstantExpr_ShuffleVectorConstantExpr =
          _lhsOpp =
              ({-# LINE 284 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ShuffleVectorConstantExpr"
-              {-# LINE 1734 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1721 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ShuffleVectorConstantExpr
@@ -1752,7 +1739,7 @@ sem_ConstantExpr_UnaryConstantExpr name_ op_ val_ ty_ =
          _lhsOpp =
              ({-# LINE 285 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> text name_ <+> _valIpp
-              {-# LINE 1756 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1743 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              UnaryConstantExpr name_ op_ _valIself _tyIself
@@ -1792,7 +1779,7 @@ sem_ConstantFP_ConstantFPDouble dbv_ ty_ =
          _lhsOpp =
              ({-# LINE 269 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> double dbv_
-              {-# LINE 1796 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1783 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantFPDouble dbv_ _tyIself
@@ -1812,7 +1799,7 @@ sem_ConstantFP_ConstantFPFloat fpv_ ty_ =
          _lhsOpp =
              ({-# LINE 268 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> float fpv_
-              {-# LINE 1816 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1803 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantFPFloat fpv_ _tyIself
@@ -1883,7 +1870,7 @@ sem_DataLayout_DataLayout s_ =
          _lhsOpp =
              ({-# LINE 48 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "target datalayout =" <+> dquotes (Prelude.foldr1 (\x y -> x <> char '-' <> y) (Prelude.map text _sIself))
-              {-# LINE 1887 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1874 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              DataLayout _sIself
@@ -2204,12 +2191,12 @@ sem_Function_FunctionDecl name_ linkage_ retty_ isVar_ params_ =
               _lhsOppccfg =
                   ({-# LINE 46 "src/Concurrent/Model/Visualizer.ag" #-}
                    P.empty
-                   {-# LINE 2208 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2195 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _lhsOpp =
                   ({-# LINE 66 "src/Language/LLVMIR/Printer/Module.ag" #-}
                    text "declare" <+> _linkageIpp <+> _rettyIpp <+> _nameIpp <> parens _paramsIpp
-                   {-# LINE 2213 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2200 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _self =
                   FunctionDecl _nameIself _linkageIself _rettyIself isVar_ _paramsIself
@@ -2218,7 +2205,7 @@ sem_Function_FunctionDecl name_ linkage_ retty_ isVar_ params_ =
               _lhsOilabel =
                   ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
-                   {-# LINE 2222 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2209 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               ( _nameIpp,_nameIppccfg,_nameIself) =
                   name_
@@ -2265,24 +2252,24 @@ sem_Function_FunctionDef name_ linkage_ retty_ isVar_ params_ body_ =
                    text "color=lightblue;" </>
                    _bodyIppccfg </>
                    text "label = \"function" <+> _nameIppccfg <> text "\"; }"
-                   {-# LINE 2269 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2256 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _bodyOfname =
                   ({-# LINE 54 "src/Concurrent/Model/Visualizer.ag" #-}
                    case _nameIself of
                      Global x -> x
                      Local  y -> error "Visualizer: Function should always be a Global"
-                   {-# LINE 2276 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2263 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _lhsOpp =
                   ({-# LINE 65 "src/Language/LLVMIR/Printer/Module.ag" #-}
                    text "define"  <+> _linkageIpp <+> _rettyIpp <+> _nameIpp <> parens _paramsIpp <> char '{' <$> _bodyIpp <$> char '}'
-                   {-# LINE 2281 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2268 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               (_bodyOilabel,_ilabel) =
                   ({-# LINE 53 "src/Concurrent/Model/Visualizer.ag" #-}
                    let __cont = _lhsIilabel in seq __cont ( case nextUnique __cont of { (__cont, ilabel) -> (__cont,ilabel)} )
-                   {-# LINE 2286 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2273 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _self =
                   FunctionDef _nameIself _linkageIself _rettyIself isVar_ _paramsIself _bodyIself
@@ -2291,7 +2278,7 @@ sem_Function_FunctionDef name_ linkage_ retty_ isVar_ params_ body_ =
               _lhsOilabel =
                   ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _ilabel
-                   {-# LINE 2295 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2282 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               ( _nameIpp,_nameIppccfg,_nameIself) =
                   name_
@@ -2342,12 +2329,12 @@ sem_Functions_Entry key_ val_ tl_ =
               _valOilabel =
                   ({-# LINE 43 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
-                   {-# LINE 2346 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2333 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _lhsOpp =
                   ({-# LINE 158 "src/Language/LLVMIR/Printer/Module.ag" #-}
                    _valIpp <$> _tlIpp
-                   {-# LINE 2351 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2338 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _self =
                   Data.Map.insert key_ _valIself _tlIself
@@ -2356,12 +2343,12 @@ sem_Functions_Entry key_ val_ tl_ =
               _lhsOilabel =
                   ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _tlIilabel
-                   {-# LINE 2360 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2347 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _tlOilabel =
                   ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _valIilabel
-                   {-# LINE 2365 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2352 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               ( _valIilabel,_valIpp,_valIppccfg,_valIself) =
                   val_ _valOilabel
@@ -2377,7 +2364,7 @@ sem_Functions_Nil =
               _lhsOpp =
                   ({-# LINE 157 "src/Language/LLVMIR/Printer/Module.ag" #-}
                    P.empty
-                   {-# LINE 2381 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2368 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _self =
                   Data.Map.empty
@@ -2386,7 +2373,7 @@ sem_Functions_Nil =
               _lhsOilabel =
                   ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
-                   {-# LINE 2390 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2377 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
           in  ( _lhsOilabel,_lhsOpp,_lhsOself)))
 -- GCName ------------------------------------------------------
@@ -2455,7 +2442,7 @@ sem_Global_GlobalVar name_ linkage_ isConst_ isUaddr_ ty_ ival_ align_ =
          _lhsOpp =
              ({-# LINE 62 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _nameIpp <+> text "=" <+>  _linkageIpp <+> ppKeyword isUaddr_ "unnamed_addr" <+> ppKeyword isConst_ "constant" <+> text "," <+> _ivalIpp <> text "," <+> _alignIpp
-              {-# LINE 2459 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2446 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              GlobalVar _nameIself _linkageIself isConst_ isUaddr_ _tyIself _ivalIself _alignIself
@@ -2506,7 +2493,7 @@ sem_GlobalValue_FunctionValue n_ ty_ =
          _lhsOpp =
              ({-# LINE 292 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> _nIpp
-              {-# LINE 2510 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2497 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FunctionValue _nIself _tyIself
@@ -2531,7 +2518,7 @@ sem_GlobalValue_GlobalAlias n_ ty_ =
          _lhsOpp =
              ({-# LINE 293 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> _nIpp
-              {-# LINE 2535 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2522 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              GlobalAlias _nIself _tyIself
@@ -2556,7 +2543,7 @@ sem_GlobalValue_GlobalVariable n_ ty_ =
          _lhsOpp =
              ({-# LINE 294 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> _nIpp
-              {-# LINE 2560 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2547 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              GlobalVariable _nIself _tyIself
@@ -2596,7 +2583,7 @@ sem_Globals_Cons hd_ tl_ =
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _hdIpp <$> _tlIpp
-              {-# LINE 2600 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2587 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -2614,7 +2601,7 @@ sem_Globals_Nil =
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 2618 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2605 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              []
@@ -2674,12 +2661,12 @@ sem_Identifier_Global name_ =
          _lhsOppccfg =
              ({-# LINE 69 "src/Concurrent/Model/Visualizer.ag" #-}
               text _nameIself
-              {-# LINE 2678 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2665 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 43 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '@' <> text _nameIself
-              {-# LINE 2683 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2670 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Global _nameIself
@@ -2698,12 +2685,12 @@ sem_Identifier_Local name_ =
          _lhsOppccfg =
              ({-# LINE 68 "src/Concurrent/Model/Visualizer.ag" #-}
               text _nameIself
-              {-# LINE 2702 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2689 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 44 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '%' <> text _nameIself
-              {-# LINE 2707 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2694 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Local _nameIself
@@ -2905,17 +2892,17 @@ sem_Instruction_AShr pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 2909 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2896 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 2914 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2901 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 118 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBitBinOp _tyIpp _idIpp "ashr" _op1Ipp _op2Ipp
-              {-# LINE 2919 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2906 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              AShr _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2955,17 +2942,17 @@ sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 2959 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2946 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 2964 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2951 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 104 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "add"  _op1Ipp _op2Ipp
-              {-# LINE 2969 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2956 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Add _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3002,17 +2989,17 @@ sem_Instruction_Alloca pc_ id_ ty_ align_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3006 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2993 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3011 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 2998 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 82 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "alloca" <+> _tyIpp <> char ',' <+> _alignIpp
-              {-# LINE 3016 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3003 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Alloca _pcIself _idIself _tyIself _alignIself
@@ -3050,17 +3037,17 @@ sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3054 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3041 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3059 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3046 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 119 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBitBinOp _tyIpp _idIpp "and"  _op1Ipp _op2Ipp
-              {-# LINE 3064 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3051 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              And _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3103,17 +3090,17 @@ sem_Instruction_AtomicRMW pc_ id_ mptr_ opval_ op_ ord_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3107 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3094 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3112 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3099 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 127 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "atomicrmw" <+> _mptrIpp <+> _opvalIpp <+> _ordIpp
-              {-# LINE 3117 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3104 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              AtomicRMW _pcIself _idIself _mptrIself _opvalIself _opIself _ordIself
@@ -3152,17 +3139,17 @@ sem_Instruction_BitCast pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3156 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3143 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3161 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3148 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 102 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "bitcast"  _vIpp _tyIpp
-              {-# LINE 3166 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3153 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              BitCast _pcIself _idIself _vIself _tyIself
@@ -3196,17 +3183,17 @@ sem_Instruction_Br pc_ v_ t_ f_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3200 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3187 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3205 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3192 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 88 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "br" <+> _vIpp <> comma <+> _tIpp <> comma <+> _fIpp
-              {-# LINE 3210 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3197 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Br _pcIself _vIself _tIself _fIself
@@ -3245,17 +3232,17 @@ sem_Instruction_Call pc_ mres_ ty_ callee_ args_ =
          _lhsOppccfg =
              ({-# LINE 93 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "call" <+> _calleeIppccfg)
-              {-# LINE 3249 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3236 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3254 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3241 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 89 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _mresIpp <+> char '=' <+> text "call" <+> _tyIpp <+> _calleeIpp <> char '(' <> _argsIpp <> char ')'
-              {-# LINE 3259 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3246 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Call _pcIself _mresIself _tyIself _calleeIself _argsIself
@@ -3298,17 +3285,17 @@ sem_Instruction_Cmpxchg pc_ id_ mptr_ cval_ nval_ ord_ =
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3302 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3289 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 126 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "cmpxchg" <+> _mptrIpp <+> _cvalIpp <+> _nvalIpp <+> _ordIpp
-              {-# LINE 3307 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3294 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
              ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
               _idIppccfg
-              {-# LINE 3312 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3299 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Cmpxchg _pcIself _idIself _mptrIself _cvalIself _nvalIself _ordIself
@@ -3340,17 +3327,17 @@ sem_Instruction_CreateThread pc_ args_ =
          _lhsOppccfg =
              ({-# LINE 75 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "create_thread")
-              {-# LINE 3344 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3331 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3349 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3336 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 128 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "create_thread" <+> parens _argsIpp
-              {-# LINE 3354 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3341 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              CreateThread _pcIself _argsIself
@@ -3371,17 +3358,17 @@ sem_Instruction_ExitThread pc_ =
          _lhsOppccfg =
              ({-# LINE 79 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "exit_thread")
-              {-# LINE 3375 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3362 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3380 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3367 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 130 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "exit_thread"
-              {-# LINE 3385 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3372 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ExitThread _pcIself
@@ -3410,17 +3397,17 @@ sem_Instruction_ExtractValue pc_ id_ aggr_ idxs_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3414 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3401 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3419 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3406 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 124 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "extractvalue" <+> _aggrIpp <> char ',' <+> _idxsIpp
-              {-# LINE 3424 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3411 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ExtractValue _pcIself _idIself _aggrIself _idxsIself
@@ -3458,17 +3445,17 @@ sem_Instruction_FAdd pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3462 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3449 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3467 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3454 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 105 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "fadd" _op1Ipp _op2Ipp
-              {-# LINE 3472 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3459 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FAdd _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3511,17 +3498,17 @@ sem_Instruction_FCmp pc_ id_ cond_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3515 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3502 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3520 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3507 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 86 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "icmp"   <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
-              {-# LINE 3525 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3512 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FCmp _pcIself _idIself _condIself _tyIself _op1Iself _op2Iself
@@ -3563,17 +3550,17 @@ sem_Instruction_FDiv pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3567 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3554 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3572 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3559 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 112 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "fdiv" _op1Ipp _op2Ipp
-              {-# LINE 3577 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3564 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3613,17 +3600,17 @@ sem_Instruction_FMul pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3617 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3604 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3622 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3609 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 109 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "fmul" _op1Ipp _op2Ipp
-              {-# LINE 3627 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3614 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FMul _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3660,17 +3647,17 @@ sem_Instruction_FPExt pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3664 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3651 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3669 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3656 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 99 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "fpext"    _vIpp _tyIpp
-              {-# LINE 3674 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3661 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FPExt _pcIself _idIself _vIself _tyIself
@@ -3705,17 +3692,17 @@ sem_Instruction_FPToSI pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3709 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3696 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3714 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3701 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 95 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "fptosi"   _vIpp _tyIpp
-              {-# LINE 3719 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3706 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FPToSI _pcIself _idIself _vIself _tyIself
@@ -3750,17 +3737,17 @@ sem_Instruction_FPToUI pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3754 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3741 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3759 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3746 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 94 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "fptoui"   _vIpp _tyIpp
-              {-# LINE 3764 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3751 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FPToUI _pcIself _idIself _vIself _tyIself
@@ -3795,17 +3782,17 @@ sem_Instruction_FPTrunc pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3799 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3786 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3804 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3791 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 98 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "fptrunc"  _vIpp _tyIpp
-              {-# LINE 3809 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3796 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FPTrunc _pcIself _idIself _vIself _tyIself
@@ -3843,17 +3830,17 @@ sem_Instruction_FRem pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3847 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3834 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3852 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3839 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 115 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "frem" _op1Ipp _op2Ipp
-              {-# LINE 3857 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3844 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FRem _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3893,17 +3880,17 @@ sem_Instruction_FSub pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3897 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3884 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3902 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3889 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 107 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "fsub" _op1Ipp _op2Ipp
-              {-# LINE 3907 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3894 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              FSub _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -3943,17 +3930,17 @@ sem_Instruction_GetElementPtr pc_ id_ ty_ struct_ idxs_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3947 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3934 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3952 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3939 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 103 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "getelementptr" <+> _structIpp <> char ',' <+> _idxsIpp
-              {-# LINE 3957 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3944 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              GetElementPtr _pcIself _idIself _tyIself _structIself _idxsIself
@@ -3996,17 +3983,17 @@ sem_Instruction_ICmp pc_ id_ cond_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4000 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3987 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4005 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3992 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 85 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "icmp"   <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
-              {-# LINE 4010 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3997 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ICmp _pcIself _idIself _condIself _tyIself _op1Iself _op2Iself
@@ -4048,17 +4035,17 @@ sem_Instruction_InsertValue pc_ id_ aggr_ ival_ idxs_ =
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4052 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4039 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 125 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "insertvalue" <+> _aggrIpp <> char ',' <+> _ivalIpp <> char ',' <+> _idxsIpp
-              {-# LINE 4057 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4044 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
              ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
               _idIppccfg
-              {-# LINE 4062 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4049 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              InsertValue _pcIself _idIself _aggrIself _ivalIself _idxsIself
@@ -4095,17 +4082,17 @@ sem_Instruction_IntToPtr pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4099 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4086 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4104 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4091 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 101 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "inttoptr" _vIpp _tyIpp
-              {-# LINE 4109 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4096 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntToPtr _pcIself _idIself _vIself _tyIself
@@ -4134,17 +4121,17 @@ sem_Instruction_JoinThread pc_ id_ =
          _lhsOppccfg =
              ({-# LINE 77 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "join_thread") <+> _idIppccfg
-              {-# LINE 4138 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4125 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4143 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4130 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 129 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "join_thread" <+> parens _idIpp
-              {-# LINE 4148 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4135 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              JoinThread _pcIself _idIself
@@ -4178,17 +4165,17 @@ sem_Instruction_LShr pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4182 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4169 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4187 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4174 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 117 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBitBinOp _tyIpp _idIpp "lshr" _op1Ipp _op2Ipp
-              {-# LINE 4192 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4179 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LShr _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -4225,17 +4212,17 @@ sem_Instruction_Load pc_ id_ v_ align_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4229 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4216 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4234 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4221 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 83 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "load"   <+> _vIpp  <> char ',' <+> _alignIpp
-              {-# LINE 4239 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4226 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Load _pcIself _idIself _vIself _alignIself
@@ -4273,17 +4260,17 @@ sem_Instruction_Mul pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4277 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4264 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4282 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4269 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 108 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "mul"  _op1Ipp _op2Ipp
-              {-# LINE 4287 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4274 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Mul _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -4317,17 +4304,17 @@ sem_Instruction_MutexInit pc_ rv_ mutex_ =
          _lhsOppccfg =
              ({-# LINE 81 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "mutex_init")
-              {-# LINE 4321 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4308 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4326 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4313 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 131 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "mutex_init"    <+> _mutexIpp
-              {-# LINE 4331 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4318 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              MutexInit _pcIself _rvIself _mutexIself
@@ -4357,17 +4344,17 @@ sem_Instruction_MutexLock pc_ rv_ mutex_ =
          _lhsOppccfg =
              ({-# LINE 83 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "mutex_lock")
-              {-# LINE 4361 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4348 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4366 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4353 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 132 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "mutex_lock"    <+> _mutexIpp
-              {-# LINE 4371 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4358 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              MutexLock _pcIself _rvIself _mutexIself
@@ -4397,17 +4384,17 @@ sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
          _lhsOppccfg =
              ({-# LINE 85 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "mutex_unlock")
-              {-# LINE 4401 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4388 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4406 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4393 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 133 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "mutex_unlock"  <+> _mutexIpp
-              {-# LINE 4411 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4398 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              MutexUnlock _pcIself _rvIself _mutexIself
@@ -4431,17 +4418,17 @@ sem_Instruction_NotifyEvent pc_ event_ =
          _lhsOppccfg =
              ({-# LINE 91 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "notify_event")
-              {-# LINE 4435 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4422 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 135 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "notify_event"  <+> int event_
-              {-# LINE 4440 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4427 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4445 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4432 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              NotifyEvent _pcIself event_
@@ -4473,17 +4460,17 @@ sem_Instruction_Or pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4477 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4464 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4482 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4469 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 120 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBitBinOp _tyIpp _idIpp "or"   _op1Ipp _op2Ipp
-              {-# LINE 4487 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4474 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Or _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -4520,17 +4507,17 @@ sem_Instruction_PHI pc_ id_ ty_ vals_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4524 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4511 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4529 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4516 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 122 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "phi" <+> _tyIpp <+> _valsIpp
-              {-# LINE 4534 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4521 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              PHI _pcIself _idIself _tyIself _valsIself
@@ -4565,17 +4552,17 @@ sem_Instruction_PtrToInt pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4569 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4556 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4574 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4561 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 100 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "ptrtoint" _vIpp _tyIpp
-              {-# LINE 4579 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4566 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              PtrToInt _pcIself _idIself _vIself _tyIself
@@ -4603,17 +4590,17 @@ sem_Instruction_Ret pc_ r_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4607 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4594 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4612 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4599 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 81 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ret" <+> _rIpp
-              {-# LINE 4617 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4604 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Ret _pcIself _rIself
@@ -4647,17 +4634,17 @@ sem_Instruction_SDiv pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4651 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4638 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4656 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4643 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 111 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "sdiv" _op1Ipp _op2Ipp
-              {-# LINE 4661 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4648 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              SDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -4694,17 +4681,17 @@ sem_Instruction_SExt pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4698 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4685 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4703 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4690 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 93 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "sext"     _vIpp _tyIpp
-              {-# LINE 4708 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4695 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              SExt _pcIself _idIself _vIself _tyIself
@@ -4739,17 +4726,17 @@ sem_Instruction_SIToFP pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4743 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4730 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4748 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4735 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 97 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "sitofp"   _vIpp _tyIpp
-              {-# LINE 4753 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4740 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              SIToFP _pcIself _idIself _vIself _tyIself
@@ -4787,17 +4774,17 @@ sem_Instruction_SRem pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4791 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4778 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4796 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4783 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 114 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "srem" _op1Ipp _op2Ipp
-              {-# LINE 4801 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4788 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              SRem _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -4837,17 +4824,17 @@ sem_Instruction_Select pc_ id_ cond_ valt_ valf_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4841 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4828 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4846 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4833 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 123 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> _condIpp <> char ',' <+> _valtIpp <> char ',' <+> _valfIpp
-              {-# LINE 4851 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4838 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Select _pcIself _idIself _condIself _valtIself _valfIself
@@ -4887,17 +4874,17 @@ sem_Instruction_Shl pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4891 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4878 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4896 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4883 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 116 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBitBinOp _tyIpp _idIpp "shl"  _op1Ipp _op2Ipp
-              {-# LINE 4901 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4888 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Shl _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -4936,17 +4923,17 @@ sem_Instruction_Store pc_ ty_ v1_ v2_ align_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4940 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4927 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4945 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4932 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 84 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> text "store" <+> _v1Ipp <> char ',' <+> _v2Ipp <> char ',' <+> _alignIpp
-              {-# LINE 4950 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4937 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Store _pcIself _tyIself _v1Iself _v2Iself _alignIself
@@ -4986,17 +4973,17 @@ sem_Instruction_Sub pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4990 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4977 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4995 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4982 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 106 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "sub"  _op1Ipp _op2Ipp
-              {-# LINE 5000 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4987 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Sub _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -5031,12 +5018,12 @@ sem_Instruction_Switch pc_ ty_ v_ elems_ =
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <$> _vIpp
-              {-# LINE 5035 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5022 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
              ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
               P.empty
-              {-# LINE 5040 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5027 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Switch _pcIself _tyIself _vIself _elemsIself
@@ -5071,17 +5058,17 @@ sem_Instruction_Trunc pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5075 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5062 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5080 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5067 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 91 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "trunc"    _vIpp _tyIpp
-              {-# LINE 5085 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5072 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Trunc _pcIself _idIself _vIself _tyIself
@@ -5109,17 +5096,17 @@ sem_Instruction_UBr pc_ d_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5113 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5100 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5118 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5105 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 87 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "br" <+> _dIpp
-              {-# LINE 5123 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5110 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              UBr _pcIself _dIself
@@ -5153,17 +5140,17 @@ sem_Instruction_UDiv pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5157 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5144 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5162 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5149 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 110 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "udiv" _op1Ipp _op2Ipp
-              {-# LINE 5167 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5154 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              UDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -5200,17 +5187,17 @@ sem_Instruction_UIToFP pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5204 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5191 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5209 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5196 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 96 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "uitofp"   _vIpp _tyIpp
-              {-# LINE 5214 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5201 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              UIToFP _pcIself _idIself _vIself _tyIself
@@ -5248,17 +5235,17 @@ sem_Instruction_URem pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5252 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5239 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5257 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5244 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 113 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBinOp _tyIpp _idIpp "urem" _op1Ipp _op2Ipp
-              {-# LINE 5262 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5249 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              URem _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -5285,17 +5272,17 @@ sem_Instruction_Unreachable pc_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5289 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5276 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5294 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5281 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 90 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "unreachable"
-              {-# LINE 5299 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5286 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Unreachable _pcIself
@@ -5315,17 +5302,17 @@ sem_Instruction_WaitEvent pc_ event_ =
          _lhsOppccfg =
              ({-# LINE 87 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "wait_event")
-              {-# LINE 5319 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5306 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 134 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "wait_event"    <+> int event_
-              {-# LINE 5324 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5311 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5329 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5316 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              WaitEvent _pcIself event_
@@ -5347,17 +5334,17 @@ sem_Instruction_WaitTime pc_ time_ =
          _lhsOppccfg =
              ({-# LINE 89 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself (text "wait_time")
-              {-# LINE 5351 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5338 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 136 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "wait_time"     <+> _timeIpp
-              {-# LINE 5356 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5343 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5361 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5348 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              WaitTime _pcIself _timeIself
@@ -5391,17 +5378,17 @@ sem_Instruction_Xor pc_ id_ ty_ op1_ op2_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5395 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5382 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5400 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5387 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 121 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBitBinOp _tyIpp _idIpp "xor"  _op1Ipp _op2Ipp
-              {-# LINE 5405 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5392 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Xor _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -5438,17 +5425,17 @@ sem_Instruction_ZExt pc_ id_ v_ ty_ =
          _lhsOppccfg =
              ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
               int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5442 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5429 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5447 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5434 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 92 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "zext"     _vIpp _tyIpp
-              {-# LINE 5452 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5439 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ZExt _pcIself _idIself _vIself _tyIself
@@ -5495,12 +5482,12 @@ sem_Instructions_Cons hd_ tl_ =
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _hdIpp <$> _tlIpp
-              {-# LINE 5499 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5486 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
              ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
               _hdIppccfg <$> _tlIppccfg
-              {-# LINE 5504 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5491 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -5519,12 +5506,12 @@ sem_Instructions_Nil =
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 5523 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5510 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
              ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
               P.empty
-              {-# LINE 5528 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5515 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              []
@@ -5572,7 +5559,7 @@ sem_IntPredicate_IntEQ =
          _lhsOpp =
              ({-# LINE 183 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "eq"
-              {-# LINE 5576 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5563 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntEQ
@@ -5586,7 +5573,7 @@ sem_IntPredicate_IntNE =
          _lhsOpp =
              ({-# LINE 184 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ne"
-              {-# LINE 5590 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5577 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntNE
@@ -5600,7 +5587,7 @@ sem_IntPredicate_IntSGE =
          _lhsOpp =
              ({-# LINE 190 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "sge"
-              {-# LINE 5604 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5591 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntSGE
@@ -5614,7 +5601,7 @@ sem_IntPredicate_IntSGT =
          _lhsOpp =
              ({-# LINE 189 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "sgt"
-              {-# LINE 5618 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5605 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntSGT
@@ -5628,7 +5615,7 @@ sem_IntPredicate_IntSLE =
          _lhsOpp =
              ({-# LINE 192 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "sle"
-              {-# LINE 5632 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5619 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntSLE
@@ -5642,7 +5629,7 @@ sem_IntPredicate_IntSLT =
          _lhsOpp =
              ({-# LINE 191 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "slt"
-              {-# LINE 5646 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5633 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntSLT
@@ -5656,7 +5643,7 @@ sem_IntPredicate_IntUGE =
          _lhsOpp =
              ({-# LINE 186 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "uge"
-              {-# LINE 5660 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5647 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntUGE
@@ -5670,7 +5657,7 @@ sem_IntPredicate_IntUGT =
          _lhsOpp =
              ({-# LINE 185 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ugt"
-              {-# LINE 5674 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5661 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntUGT
@@ -5684,7 +5671,7 @@ sem_IntPredicate_IntULE =
          _lhsOpp =
              ({-# LINE 188 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ule"
-              {-# LINE 5688 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5675 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntULE
@@ -5698,7 +5685,7 @@ sem_IntPredicate_IntULT =
          _lhsOpp =
              ({-# LINE 187 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ult"
-              {-# LINE 5702 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5689 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntULT
@@ -5734,7 +5721,7 @@ sem_Ints_Cons hd_ tl_ =
               if (length _tlIself == 0)
               then int hd_
               else int hd_ <> char ',' <+> _tlIpp
-              {-# LINE 5738 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5725 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (:) hd_ _tlIself
@@ -5750,7 +5737,7 @@ sem_Ints_Nil =
          _lhsOpp =
              ({-# LINE 29 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 5754 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5741 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              []
@@ -5812,7 +5799,7 @@ sem_Linkage_AppendingLinkage =
          _lhsOpp =
              ({-# LINE 219 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "appending"
-              {-# LINE 5816 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5803 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              AppendingLinkage
@@ -5826,7 +5813,7 @@ sem_Linkage_AvailableExternallyLinkage =
          _lhsOpp =
              ({-# LINE 214 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "available_externally"
-              {-# LINE 5830 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5817 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              AvailableExternallyLinkage
@@ -5840,7 +5827,7 @@ sem_Linkage_CommonLinkage =
          _lhsOpp =
              ({-# LINE 226 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "common"
-              {-# LINE 5844 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5831 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              CommonLinkage
@@ -5854,7 +5841,7 @@ sem_Linkage_DLLExportLinkage =
          _lhsOpp =
              ({-# LINE 223 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "dllexport"
-              {-# LINE 5858 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5845 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              DLLExportLinkage
@@ -5868,7 +5855,7 @@ sem_Linkage_DLLImportLinkage =
          _lhsOpp =
              ({-# LINE 222 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "dllimport"
-              {-# LINE 5872 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5859 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              DLLImportLinkage
@@ -5882,7 +5869,7 @@ sem_Linkage_ExternalLinkage =
          _lhsOpp =
              ({-# LINE 213 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "external"
-              {-# LINE 5886 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5873 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ExternalLinkage
@@ -5896,7 +5883,7 @@ sem_Linkage_ExternalWeakLinkage =
          _lhsOpp =
              ({-# LINE 224 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "external"
-              {-# LINE 5900 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5887 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ExternalWeakLinkage
@@ -5910,7 +5897,7 @@ sem_Linkage_GhostLinkage =
          _lhsOpp =
              ({-# LINE 225 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ghost"
-              {-# LINE 5914 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5901 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              GhostLinkage
@@ -5924,7 +5911,7 @@ sem_Linkage_InternalLinkage =
          _lhsOpp =
              ({-# LINE 220 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "internal"
-              {-# LINE 5928 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5915 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              InternalLinkage
@@ -5938,7 +5925,7 @@ sem_Linkage_LinkOnceAnyLinkage =
          _lhsOpp =
              ({-# LINE 215 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "linkonce"
-              {-# LINE 5942 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5929 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LinkOnceAnyLinkage
@@ -5952,7 +5939,7 @@ sem_Linkage_LinkOnceODRLinkage =
          _lhsOpp =
              ({-# LINE 216 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "linkonce_odr"
-              {-# LINE 5956 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5943 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LinkOnceODRLinkage
@@ -5966,7 +5953,7 @@ sem_Linkage_LinkerPrivateLinkage =
          _lhsOpp =
              ({-# LINE 227 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "linker_private"
-              {-# LINE 5970 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5957 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LinkerPrivateLinkage
@@ -5980,7 +5967,7 @@ sem_Linkage_LinkerPrivateWeakDefAutoLinkage =
          _lhsOpp =
              ({-# LINE 229 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "linker_private_weak_def_auto"
-              {-# LINE 5984 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5971 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LinkerPrivateWeakDefAutoLinkage
@@ -5994,7 +5981,7 @@ sem_Linkage_LinkerPrivateWeakLinkage =
          _lhsOpp =
              ({-# LINE 228 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "linker_private_weak"
-              {-# LINE 5998 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5985 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LinkerPrivateWeakLinkage
@@ -6008,7 +5995,7 @@ sem_Linkage_PrivateLinkage =
          _lhsOpp =
              ({-# LINE 221 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "private"
-              {-# LINE 6012 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5999 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              PrivateLinkage
@@ -6022,7 +6009,7 @@ sem_Linkage_WeakAnyLinkage =
          _lhsOpp =
              ({-# LINE 217 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "weak"
-              {-# LINE 6026 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6013 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              WeakAnyLinkage
@@ -6036,7 +6023,7 @@ sem_Linkage_WeakODRLinkage =
          _lhsOpp =
              ({-# LINE 218 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "weak_odr"
-              {-# LINE 6040 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6027 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              WeakODRLinkage
@@ -6186,7 +6173,7 @@ sem_MConstant_Just just_ =
          _lhsOpp =
              ({-# LINE 240 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _justIpp
-              {-# LINE 6190 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6177 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Just _justIself
@@ -6202,7 +6189,7 @@ sem_MConstant_Nothing =
          _lhsOpp =
              ({-# LINE 239 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 6206 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6193 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Nothing
@@ -6541,7 +6528,7 @@ sem_MValue_Just just_ =
          _lhsOpp =
              ({-# LINE 236 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _justIpp
-              {-# LINE 6545 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6532 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Just _justIself
@@ -6557,7 +6544,7 @@ sem_MValue_Nothing =
          _lhsOpp =
              ({-# LINE 235 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 6561 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6548 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Nothing
@@ -6684,12 +6671,12 @@ sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
          _funsOilabel =
              ({-# LINE 39 "src/Concurrent/Model/Visualizer.ag" #-}
               0
-              {-# LINE 6688 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6675 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 59 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text ("; ModuleID ='" ++ id_ ++ "'") <$> _layoutIpp <$> _targetIpp <$> P.empty <$>  _nmdtysIpp <$> _gvarsIpp <$> _funsIpp
-              {-# LINE 6693 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6680 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Module id_ _layoutIself _targetIself _gvarsIself _funsIself _nmdtysIself
@@ -6801,7 +6788,7 @@ sem_NamedTypes_Entry key_ val_ tl_ =
          _lhsOpp =
              ({-# LINE 154 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _valIpp <$> _tlIpp
-              {-# LINE 6805 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6792 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Data.Map.insert key_ _valIself _tlIself
@@ -6819,7 +6806,7 @@ sem_NamedTypes_Nil =
          _lhsOpp =
              ({-# LINE 153 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 6823 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6810 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Data.Map.empty
@@ -6950,7 +6937,7 @@ sem_PValue_Tuple x1_ x2_ =
          _lhsOpp =
              ({-# LINE 34 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '[' <+> _x1Ipp <> char ',' <+> _x2Ipp <+> char ']'
-              {-# LINE 6954 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 6941 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (_x1Iself,_x2Iself)
@@ -7022,7 +7009,7 @@ sem_PValues_Cons hd_ tl_ =
               if (length _tlIself == 0)
               then _hdIpp
               else _hdIpp <> char ',' <+> _tlIpp
-              {-# LINE 7026 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7013 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -7040,7 +7027,7 @@ sem_PValues_Nil =
          _lhsOpp =
              ({-# LINE 23 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 7044 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7031 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              []
@@ -7077,7 +7064,7 @@ sem_Parameter_Parameter var_ ty_ =
          _lhsOpp =
              ({-# LINE 69 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <> _varIpp
-              {-# LINE 7081 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7068 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Parameter _varIself _tyIself
@@ -7119,7 +7106,7 @@ sem_Parameters_Cons hd_ tl_ =
               if (length _tlIself == 0)
               then _hdIpp
               else _hdIpp <> char ',' <+> _tlIpp
-              {-# LINE 7123 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7110 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -7137,7 +7124,7 @@ sem_Parameters_Nil =
          _lhsOpp =
              ({-# LINE 23 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 7141 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7128 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              []
@@ -7197,7 +7184,7 @@ sem_RealPredicate_LLVMRealOEQ =
          _lhsOpp =
              ({-# LINE 196 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "oeq"
-              {-# LINE 7201 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7188 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealOEQ
@@ -7211,7 +7198,7 @@ sem_RealPredicate_LLVMRealOGE =
          _lhsOpp =
              ({-# LINE 198 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "oge"
-              {-# LINE 7215 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7202 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealOGE
@@ -7225,7 +7212,7 @@ sem_RealPredicate_LLVMRealOGT =
          _lhsOpp =
              ({-# LINE 197 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ogt"
-              {-# LINE 7229 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7216 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealOGT
@@ -7239,7 +7226,7 @@ sem_RealPredicate_LLVMRealOLE =
          _lhsOpp =
              ({-# LINE 200 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ole"
-              {-# LINE 7243 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7230 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealOLE
@@ -7253,7 +7240,7 @@ sem_RealPredicate_LLVMRealOLT =
          _lhsOpp =
              ({-# LINE 199 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "olt"
-              {-# LINE 7257 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7244 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealOLT
@@ -7267,7 +7254,7 @@ sem_RealPredicate_LLVMRealONE =
          _lhsOpp =
              ({-# LINE 201 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "one"
-              {-# LINE 7271 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7258 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealONE
@@ -7281,7 +7268,7 @@ sem_RealPredicate_LLVMRealORD =
          _lhsOpp =
              ({-# LINE 202 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ord"
-              {-# LINE 7285 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7272 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealORD
@@ -7295,7 +7282,7 @@ sem_RealPredicate_LLVMRealPredicateFalse =
          _lhsOpp =
              ({-# LINE 195 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "false"
-              {-# LINE 7299 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7286 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealPredicateFalse
@@ -7309,7 +7296,7 @@ sem_RealPredicate_LLVMRealPredicateTrue =
          _lhsOpp =
              ({-# LINE 210 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "true"
-              {-# LINE 7313 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7300 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealPredicateTrue
@@ -7323,7 +7310,7 @@ sem_RealPredicate_LLVMRealUEQ =
          _lhsOpp =
              ({-# LINE 204 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ueq"
-              {-# LINE 7327 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7314 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealUEQ
@@ -7337,7 +7324,7 @@ sem_RealPredicate_LLVMRealUGE =
          _lhsOpp =
              ({-# LINE 206 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "uge"
-              {-# LINE 7341 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7328 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealUGE
@@ -7351,7 +7338,7 @@ sem_RealPredicate_LLVMRealUGT =
          _lhsOpp =
              ({-# LINE 205 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ugt"
-              {-# LINE 7355 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7342 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealUGT
@@ -7365,7 +7352,7 @@ sem_RealPredicate_LLVMRealULE =
          _lhsOpp =
              ({-# LINE 208 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ule"
-              {-# LINE 7369 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7356 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealULE
@@ -7379,7 +7366,7 @@ sem_RealPredicate_LLVMRealULT =
          _lhsOpp =
              ({-# LINE 207 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ult"
-              {-# LINE 7383 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7370 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealULT
@@ -7393,7 +7380,7 @@ sem_RealPredicate_LLVMRealUNE =
          _lhsOpp =
              ({-# LINE 209 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "une"
-              {-# LINE 7397 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7384 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealUNE
@@ -7407,7 +7394,7 @@ sem_RealPredicate_LLVMRealUNO =
          _lhsOpp =
              ({-# LINE 203 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "uno"
-              {-# LINE 7411 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7398 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealUNO
@@ -7442,7 +7429,7 @@ sem_RetInst_ValueRet v_ =
          _lhsOpp =
              ({-# LINE 75 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _vIpp
-              {-# LINE 7446 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7433 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ValueRet _vIself
@@ -7458,7 +7445,7 @@ sem_RetInst_VoidRet =
          _lhsOpp =
              ({-# LINE 76 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "void"
-              {-# LINE 7462 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7449 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              VoidRet
@@ -7520,7 +7507,7 @@ sem_SimpleConstant_ConstantFP fp_ =
          _lhsOpp =
              ({-# LINE 257 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _fpIpp
-              {-# LINE 7524 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7511 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantFP _fpIself
@@ -7540,7 +7527,7 @@ sem_SimpleConstant_ConstantInt iv_ ty_ =
          _lhsOpp =
              ({-# LINE 256 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> int   iv_
-              {-# LINE 7544 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7531 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantInt iv_ _tyIself
@@ -7559,7 +7546,7 @@ sem_SimpleConstant_ConstantPointerNull ty_ =
          _lhsOpp =
              ({-# LINE 258 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> text "null"
-              {-# LINE 7563 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7550 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantPointerNull _tyIself
@@ -7593,7 +7580,7 @@ sem_Target_Linux =
          _lhsOpp =
              ({-# LINE 56 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "Linux"
-              {-# LINE 7597 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7584 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Linux
@@ -7607,7 +7594,7 @@ sem_Target_MacOs =
          _lhsOpp =
              ({-# LINE 55 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "MacOs"
-              {-# LINE 7611 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7598 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              MacOs
@@ -7641,7 +7628,7 @@ sem_TargetData_TargetData s_ t_ =
          _lhsOpp =
              ({-# LINE 52 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "target triple =" <+> dquotes (text s_)
-              {-# LINE 7645 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7632 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TargetData s_ _tIself
@@ -7710,7 +7697,7 @@ sem_TyFloatPoint_TyDouble =
          _lhsOpp =
              ({-# LINE 314 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "double"
-              {-# LINE 7714 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7701 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyDouble
@@ -7724,7 +7711,7 @@ sem_TyFloatPoint_TyFP128 =
          _lhsOpp =
              ({-# LINE 315 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "fp128"
-              {-# LINE 7728 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7715 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyFP128
@@ -7738,7 +7725,7 @@ sem_TyFloatPoint_TyFloat =
          _lhsOpp =
              ({-# LINE 313 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "float"
-              {-# LINE 7742 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7729 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyFloat
@@ -7752,7 +7739,7 @@ sem_TyFloatPoint_TyHalf =
          _lhsOpp =
              ({-# LINE 312 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "half"
-              {-# LINE 7756 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7743 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyHalf
@@ -7766,7 +7753,7 @@ sem_TyFloatPoint_TyPPCFP128 =
          _lhsOpp =
              ({-# LINE 317 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ppc_fp128"
-              {-# LINE 7770 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7757 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyPPCFP128
@@ -7780,7 +7767,7 @@ sem_TyFloatPoint_Tyx86FP80 =
          _lhsOpp =
              ({-# LINE 316 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "x86_fp80"
-              {-# LINE 7784 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7771 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Tyx86FP80
@@ -7840,7 +7827,7 @@ sem_Type_TyArray numEl_ ty_ =
          _lhsOpp =
              ({-# LINE 304 "src/Language/LLVMIR/Printer/Module.ag" #-}
               brackets $ int numEl_ <+> char 'x' <+> _tyIpp
-              {-# LINE 7844 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7831 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyArray numEl_ _tyIself
@@ -7859,7 +7846,7 @@ sem_Type_TyFloatPoint p_ =
          _lhsOpp =
              ({-# LINE 303 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pIpp
-              {-# LINE 7863 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7850 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyFloatPoint _pIself
@@ -7882,7 +7869,7 @@ sem_Type_TyFunction party_ retty_ isVar_ =
          _lhsOpp =
              ({-# LINE 305 "src/Language/LLVMIR/Printer/Module.ag" #-}
               parens $ _partyIpp <+> text "->" <+> _rettyIpp
-              {-# LINE 7886 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7873 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyFunction _partyIself _rettyIself isVar_
@@ -7901,7 +7888,7 @@ sem_Type_TyInt p_ =
          _lhsOpp =
              ({-# LINE 302 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char 'i' <> int p_
-              {-# LINE 7905 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7892 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyInt p_
@@ -7917,7 +7904,7 @@ sem_Type_TyJumpTo lb_ =
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 7921 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7908 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyJumpTo _lbIself
@@ -7933,7 +7920,7 @@ sem_Type_TyLabel =
          _lhsOpp =
              ({-# LINE 299 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "label"
-              {-# LINE 7937 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7924 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyLabel
@@ -7947,7 +7934,7 @@ sem_Type_TyMetadata =
          _lhsOpp =
              ({-# LINE 300 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "metadata"
-              {-# LINE 7951 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7938 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyMetadata
@@ -7961,7 +7948,7 @@ sem_Type_TyOpaque =
          _lhsOpp =
              ({-# LINE 301 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "opaque"
-              {-# LINE 7965 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7952 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyOpaque
@@ -7978,7 +7965,7 @@ sem_Type_TyPointer ty_ =
          _lhsOpp =
              ({-# LINE 307 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <> char '*'
-              {-# LINE 7982 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7969 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyPointer _tyIself
@@ -7999,7 +7986,7 @@ sem_Type_TyStruct name_ numEl_ tys_ =
          _lhsOpp =
              ({-# LINE 306 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '%' <> text name_ <+> int numEl_ <+> braces _tysIpp
-              {-# LINE 8003 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7990 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyStruct name_ numEl_ _tysIself
@@ -8015,7 +8002,7 @@ sem_Type_TyUndefined =
          _lhsOpp =
              ({-# LINE 309 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "TODO TYPE UNDEFINED"
-              {-# LINE 8019 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8006 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyUndefined
@@ -8033,7 +8020,7 @@ sem_Type_TyVector numEl_ ty_ =
          _lhsOpp =
              ({-# LINE 308 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '<' <> int numEl_ <+> char 'x' <+> _tyIpp <> char '>'
-              {-# LINE 8037 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8024 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyVector numEl_ _tyIself
@@ -8049,7 +8036,7 @@ sem_Type_TyVoid =
          _lhsOpp =
              ({-# LINE 297 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "void"
-              {-# LINE 8053 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8040 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyVoid
@@ -8063,7 +8050,7 @@ sem_Type_Tyx86MMX =
          _lhsOpp =
              ({-# LINE 298 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "x86mmx"
-              {-# LINE 8067 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8054 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Tyx86MMX
@@ -8101,7 +8088,7 @@ sem_Types_Cons hd_ tl_ =
               if (length _tlIself == 0)
               then _hdIpp
               else _hdIpp <> char ',' <+> _tlIpp
-              {-# LINE 8105 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8092 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -8119,7 +8106,7 @@ sem_Types_Nil =
          _lhsOpp =
              ({-# LINE 23 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 8123 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8110 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              []
@@ -8229,7 +8216,7 @@ sem_Value_Constant c_ =
          _lhsOpp =
              ({-# LINE 244 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _cIpp
-              {-# LINE 8233 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8220 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Constant _cIself
@@ -8252,7 +8239,7 @@ sem_Value_Id v_ ty_ =
          _lhsOpp =
              ({-# LINE 243 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> _vIpp
-              {-# LINE 8256 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8243 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Id _vIself _tyIself
@@ -8334,7 +8321,7 @@ sem_Values_Cons hd_ tl_ =
               if (length _tlIself == 0)
               then _hdIpp
               else _hdIpp <> char ',' <+> _tlIpp
-              {-# LINE 8338 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8325 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              (:) _hdIself _tlIself
@@ -8352,7 +8339,7 @@ sem_Values_Nil =
          _lhsOpp =
              ({-# LINE 23 "src/Language/LLVMIR/Printer/Module.ag" #-}
               P.empty
-              {-# LINE 8356 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8343 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              []

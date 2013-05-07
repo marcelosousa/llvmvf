@@ -45,3 +45,6 @@ fnBasicBlockIds (FunctionDef  _ _ _ _ _ body) = map getBBId body
 
 getBBId :: BasicBlock -> Identifier
 getBBId (BasicBlock i _) = i
+
+getModFns :: Module -> Functions
+getModFns (Module id layout target gvars funs nmdtys) = funs

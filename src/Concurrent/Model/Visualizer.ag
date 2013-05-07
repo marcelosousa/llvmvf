@@ -14,7 +14,7 @@ module {Concurrent.Model.Visualizer}{}{}
 include "Module.ag"
 
 imports{
-import qualified Data.Map as Map
+import qualified Data.Map as M
 import qualified Data.IntMap as IM
 import Data.Maybe 
 
@@ -97,30 +97,17 @@ type ILabel = Int
 dotLabel :: Int -> Doc -> Doc
 dotLabel i d = text "[label=\"" <> int i <+> d <> text "\"];"
 
-instance (Pretty t, SCModel t) => Pretty (Model t)  where
-  --pretty :: Model -> Doc
-  pretty mdl = undefined 
-{-text "digraph structs {" </>
-               text "bgcolor=transparent;" </>
-               text "node [shape=Mrecord];" </>
-               text "-1 [label=\"||\", shape=Mdiamond];" </>
-             --  pretty (mainf mdl) </>
-             --  vsep (Prelude.map pretty (IM.elems $ procs mdl)) </>
-               pretty' (controlflow mdl) </>
-               text "}"
+dumpccfg :: (Pretty t, SCModel t) => Model t -> ControlFlow -> Doc 
+dumpccfg (Model mdl) ccfg = 
+    text "digraph structs {" </>
+    text "bgcolor=transparent;" </>
+    text "node [shape=Mrecord];" </>
+    text "-1 [label=\"||\", shape=Mdiamond];" </>
+    vsep (Prelude.map dotFunction $ M.elems $ getModFns mdl) </>
+    vsep (Prelude.map pretty ccfg) </>
+    text "}"
 
-instance Pretty Process where
-  --pretty :: Process -> Doc
-  pretty (Process i f) = ppccfg_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function { ilabel_Inh_Function = 0 }
+dotFunction :: Function -> Doc
+dotFunction f = ppccfg_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function { ilabel_Inh_Function = 0 }
 
-class Pretty' t where
-  pretty' :: t -> Doc
-
-instance Pretty' ControlFlow where
-  pretty' (ControlFlow _ cfg) = vsep $ Prelude.map pretty' $ concat $ Map.elems cfg
-
-instance Pretty' (Int,Int) where
-  pretty' (a,b) = int a <+> text "->" <+> int b <> char ';'
--}
- 
 }
