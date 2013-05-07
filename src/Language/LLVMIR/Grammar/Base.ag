@@ -32,7 +32,7 @@ type Id = (String)
 type MId = maybe Id
 type MIdentifier = maybe Identifier
 
-type Functions = map {String} Function
+type Functions = map {Identifier} Function
 type Globals = [Global]
 type Identifiers = [Identifier]
 type Arguments = [Argument]

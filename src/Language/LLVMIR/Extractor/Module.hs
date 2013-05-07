@@ -138,7 +138,9 @@ getFuns = do e@Env{..} <- getEnv
              l <- forM funs getFunction
              return $ Map.fromList l
 
-getFunction :: (String, Value) -> Context IO (String, LL.Function)
+-- NEED TO CHANGE THIS - THIS IDENTIFIER IS BEING
+-- INSERTED POSSIBLY WRONG
+getFunction :: (String, Value) -> Context IO (LL.Identifier, LL.Function)
 getFunction (fname, fval) = do b     <- liftIO $ FFI.isDeclaration fval
                                rty   <- (liftIO $ FFI.getFunctionReturnType fval) >>= getType
                                link  <- liftIO $ FFI.getLinkage fval
@@ -150,10 +152,10 @@ getFunction (fname, fval) = do b     <- liftIO $ FFI.isDeclaration fval
                                let lllink = convertLinkage $ FFI.toLinkage link
                                    isFnVar = cInt2Bool isVar
                                if cInt2Bool b
-                               then return (fname', LL.FunctionDecl (LL.Global fname') lllink rty isFnVar params)
+                               then return (LL.Global fname', LL.FunctionDecl (LL.Global fname') lllink rty isFnVar params)
                                else do bbs <- liftIO $ getBasicBlocks fval
                                        llbbs <- forM bbs getBasicBlock 
-                                       return (fname', LL.FunctionDef (LL.Global fname') lllink rty isFnVar params llbbs)
+                                       return (LL.Global fname', LL.FunctionDef (LL.Global fname') lllink rty isFnVar params llbbs)
 
 getParam :: (String, Value) -> Context IO LL.Parameter
 getParam (pname, pval) = do ty <- typeOf pval

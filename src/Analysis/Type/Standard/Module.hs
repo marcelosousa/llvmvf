@@ -15,7 +15,7 @@ import Language.LLVMIR.Printer
 import UU.PPrint 
 import qualified Data.Map as M
 
-data STyRes = STyRes String TyEnv (M.Map String TyEnv)
+data STyRes = STyRes String TyEnv (M.Map Identifier TyEnv)
 
 initenv :: TyEnv
 initenv = M.insert    (Global "llvm.lifetime.start") (TyPointer $ TyFunction [TyInt 64, TyPointer $ TyInt 8] TyVoid False) $ 
@@ -35,7 +35,7 @@ typeCheckGlo nmdtye tye (x:xs) =
 	let tye' = typeCheckGlobal nmdtye tye x
     in typeCheckGlo nmdtye tye' xs 
 
-typeCheckFuns :: NamedTyEnv -> TyEnv -> Functions -> M.Map String TyEnv
+typeCheckFuns :: NamedTyEnv -> TyEnv -> Functions -> M.Map Identifier TyEnv
 typeCheckFuns nmdtye tye funs = let ntye =  M.fold (\f r -> typeFunction r f) tye funs
                                 in M.map (typeCheckFunction nmdtye ntye) funs
 
@@ -52,8 +52,8 @@ instance Show STyRes where
 del :: String 
 del = "========================\n"
 
-prettyFn :: (String, TyEnv) -> String -> String
-prettyFn (n,ty) r = "Function " ++ n ++ "\n"
+prettyFn :: (Identifier, TyEnv) -> String -> String
+prettyFn (n,ty) r = "Function " ++ show n ++ "\n"
 	  		   ++ prettyTy ty
 	  		   ++ r 
 

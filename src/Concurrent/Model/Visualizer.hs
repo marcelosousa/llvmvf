@@ -2321,7 +2321,7 @@ wrap_Functions :: T_Functions ->
 wrap_Functions sem (Inh_Functions _lhsIilabel) =
     (let ( _lhsOilabel,_lhsOpp,_lhsOself) = sem _lhsIilabel
      in  (Syn_Functions _lhsOilabel _lhsOpp _lhsOself))
-sem_Functions_Entry :: String ->
+sem_Functions_Entry :: Identifier ->
                        T_Function ->
                        T_Functions ->
                        T_Functions

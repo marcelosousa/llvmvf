@@ -54,6 +54,7 @@ data Env = Env
   , ploc    :: Location
   , pfloc   :: Locations
   , eloc    :: Locs
+  , efloc   :: M.Map Identifier Locs
   }
 
 newtype Context a = Context { unContext :: State Env a }

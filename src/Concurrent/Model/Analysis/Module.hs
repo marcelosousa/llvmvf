@@ -1,3 +1,4 @@
+{-#LANGUAGE RecordWildCards #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Analysis.Module
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -16,12 +17,13 @@ import qualified Data.Maybe as MB
 
 analyseModule :: String -> Module -> (Module, ControlFlow, DataFlow)
 analyseModule ep (Module id layout target gvars funs nmdtys) =
-  let fn = MB.fromMaybe (errorMsg ep $ M.keys funs) $ M.lookup ep funs 
+  let fname = Global ep
+      fn = MB.fromMaybe (errorMsg ep $ M.keys funs) $ M.lookup fname funs 
       bb = MB.fromMaybe (errorMsg ep fn) $ entryBBFunction fn 
       pc = MB.fromMaybe (errorMsg (show bb) fn) $ entryPCFunction fn 
-      iLoc  = Location (Global ep) bb pc True
+      iLoc  = Location fname bb pc True
       iCore = Core nmdtys gvars funs
-      env = Env iCore eCore eCFG eDF iLoc [] []
+      env = Env iCore eCore eCFG eDF iLoc [] [] M.empty
       oenv  = evalContext (analyseFunction fn) env
       Core tys vars fs = coreout oenv
       fcfg  = ccfg oenv
@@ -35,9 +37,26 @@ errorMsg msg b = error $ "analyseModule: " ++ msg ++ " " ++ show b
 analyseFunction :: Function -> Context ()
 analyseFunction fn = case fn of
   FunctionDecl name _ rty iv pms -> return ()
-  FunctionDef  name _ rty iv pms body -> analyseBB $ head body
+  FunctionDef  name _ rty iv pms body -> do 
+      analyseBB $ head body
+      e@Env{..} <- getEnv
+      mapM_ analyseLoc eloc 
 
+analyseLoc :: Loc -> Context ()
+analyseLoc loc = do 
+    e@Env{..} <- getEnv
+    let ci@Core{..} = corein
+    case loc of
+        SyncLoc l@Location{..} i -> do 
+            let fi = MB.fromJust $ M.lookup i funs
+            analyseFunction fi
+            o@Env{..} <- getEnv
+            return ()
+        ExitLoc l@Location{..} w -> return ()
+            
 -- This is going to give me a context
 -- Then I need to decide if I should go somewhere or not.
 analyseBB :: BasicBlock -> Context ()
 analyseBB (BasicBlock i instrs) = mapM_ analyseInstr instrs
+
+         

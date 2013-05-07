@@ -105,8 +105,8 @@ ConstantVector	./Language/LLVMIR/Extractor/ConstantClass.hs	20;"	d
 ConstantVector	src/Language/LLVMIR.hs	158;"	d
 Constrs	./Analysis/Type/Memory/Context.hs	19;"	t
 Context	./Analysis/Type/Memory/Context.hs	21;"	t
-Context	./Concurrent/Model/Analysis/Context.hs	59;"	d
-Context	./Concurrent/Model/Analysis/Context.hs	59;"	t
+Context	./Concurrent/Model/Analysis/Context.hs	60;"	d
+Context	./Concurrent/Model/Analysis/Context.hs	60;"	t
 Context	./Language/LLVMIR/Extractor/Context.hs	28;"	d
 Context	./Language/LLVMIR/Extractor/Context.hs	28;"	t
 ControlFlow	./Concurrent/Model/Analysis/ControlFlow.hs	14;"	t
@@ -2159,10 +2159,11 @@ align_Instruction_Alloca	src/Language/LLVMIR.hs	250;"	v
 align_Instruction_Load	src/Language/LLVMIR.hs	276;"	v
 align_Instruction_Store	src/Language/LLVMIR.hs	292;"	v
 analyse	./Concurrent/Model.hs	37;"	v
-analyseBB	./Concurrent/Model/Analysis/Module.hs	43;"	v
-analyseFunction	./Concurrent/Model/Analysis/Module.hs	36;"	v
+analyseBB	./Concurrent/Model/Analysis/Module.hs	60;"	v
+analyseFunction	./Concurrent/Model/Analysis/Module.hs	38;"	v
 analyseInstr	./Concurrent/Model/Analysis/Instruction.hs	19;"	v
-analyseModule	./Concurrent/Model/Analysis/Module.hs	18;"	v
+analyseLoc	./Concurrent/Model/Analysis/Module.hs	46;"	v
+analyseModule	./Concurrent/Model/Analysis/Module.hs	19;"	v
 analyseNInstr	./Concurrent/Model/Analysis/Instruction.hs	153;"	v
 analyseRetValue	./Concurrent/Model/Analysis/Instruction.hs	143;"	v
 analyseType	./Concurrent/Model/Analysis/Instruction.hs	150;"	v
@@ -2264,6 +2265,7 @@ dotLabel	src/Concurrent/Model/Visualizer.ag	98;"	v
 eCFG	./Concurrent/Model/Analysis/ControlFlow.hs	17;"	v
 eCore	./Concurrent/Model/Analysis/Context.hs	47;"	v
 eDF	./Concurrent/Model/Analysis/DataFlow.hs	23;"	v
+efloc	./Concurrent/Model/Analysis/Context.hs	57;"	v
 elDiv	./Language/LLVMIR/Printer/NamedTypes.hs	42;"	v
 elems_Instruction_Switch	src/Language/LLVMIR.hs	294;"	v
 eloc	./Concurrent/Model/Analysis/Context.hs	56;"	v
@@ -2276,10 +2278,10 @@ eqStruct	./Analysis/Type/Util.hs	132;"	v
 erase	./Analysis/Type/Memory/Util.hs	43;"	v
 eraseEnv	./Analysis/Type/Memory/Util.hs	58;"	v
 errorMsg	./Analysis/Type/Standard/Constant.hs	87;"	v
-errorMsg	./Concurrent/Model/Analysis/Module.hs	33;"	v
+errorMsg	./Concurrent/Model/Analysis/Module.hs	35;"	v
 escaped	src/Language/LLVMIR/Printer/Module.ag	326;"	v
 escaped	src/Language/LLVMIR/Printer/Module.ag	326;"	v
-evalContext	./Concurrent/Model/Analysis/Context.hs	63;"	v
+evalContext	./Concurrent/Model/Analysis/Context.hs	64;"	v
 evalP	./Language/LTL/Base.hs	186;"	v
 event_Instruction_NotifyEvent	src/Language/LLVMIR.hs	281;"	v
 event_Instruction_WaitEvent	src/Language/LLVMIR.hs	301;"	v
@@ -2304,8 +2306,7 @@ fptoint	./Analysis/Type/Standard/Instruction.hs	156;"	v
 fpv_ConstantFP_ConstantFPFloat	src/Language/LLVMIR.hs	187;"	v
 funs	./Concurrent/Model/Analysis/Context.hs	43;"	v
 funs_Module_Module	src/Language/LLVMIR.hs	372;"	v
-gep	./Test/Example.hs	9;"	v
-getBasicBlock	./Language/LLVMIR/Extractor/Module.hs	164;"	v	file:
+getBasicBlock	./Language/LLVMIR/Extractor/Module.hs	166;"	v	file:
 getBinaryOp	./Language/LLVMIR/Extractor/Instruction.hs	120;"	v
 getBlockAddr	./Language/LLVMIR/Extractor/Value.hs	59;"	v
 getCallArgs	./Language/LLVMIR/Extractor/Instruction.hs	50;"	v
@@ -2325,11 +2326,11 @@ getConstantVector	./Language/LLVMIR/Extractor/Value.hs	171;"	v
 getDataLayout	./Language/LLVMIR/Extractor/Module.hs	91;"	v	file:
 getElemPtrArgs	./Language/LLVMIR/Extractor/Instruction.hs	58;"	v
 getElementPtrConstant	./Language/LLVMIR/Extractor/Value.hs	137;"	v
-getEnv	./Concurrent/Model/Analysis/Context.hs	66;"	v
+getEnv	./Concurrent/Model/Analysis/Context.hs	67;"	v
 getEnv	./Language/LLVMIR/Extractor/Context.hs	38;"	v
 getFnTyAnn	./Analysis/Type/Memory/Instruction.hs	217;"	v
 getFnType	./Analysis/Type/Standard/Instruction.hs	201;"	v
-getFunction	./Language/LLVMIR/Extractor/Module.hs	142;"	v	file:
+getFunction	./Language/LLVMIR/Extractor/Module.hs	144;"	v	file:
 getFuns	./Language/LLVMIR/Extractor/Module.hs	136;"	v	file:
 getGlobal	./Language/LLVMIR/Extractor/Module.hs	123;"	v	file:
 getGlobalValue	./Language/LLVMIR/Extractor/Value.hs	175;"	v
@@ -2339,7 +2340,7 @@ getIdValueAux	./Analysis/Type/Memory/Instruction.hs	210;"	v
 getIdent	./Language/LLVMIR/Extractor/Ident.hs	18;"	v
 getIdentValue	./Language/LLVMIR/Extractor/Value.hs	37;"	v
 getInitVal	./Language/LLVMIR/Extractor/Module.hs	117;"	v	file:
-getInst	./Language/LLVMIR/Extractor/Module.hs	169;"	v	file:
+getInst	./Language/LLVMIR/Extractor/Module.hs	171;"	v	file:
 getInstruction	./Language/LLVMIR/Extractor/Instruction.hs	81;"	v
 getInstructionValue	./Language/LLVMIR/Extractor/Instruction.hs	70;"	v
 getIntValue	./Analysis/Type/Standard/Constant.hs	107;"	v
@@ -2351,7 +2352,7 @@ getOperands	./Language/LLVMIR/Extractor/Context.hs	44;"	v
 getOtherOp	./Language/LLVMIR/Extractor/Instruction.hs	202;"	v
 getPC	./Language/LLVMIR/Extractor/Instruction.hs	74;"	v
 getPHIArgs	./Language/LLVMIR/Extractor/Instruction.hs	35;"	v
-getParam	./Language/LLVMIR/Extractor/Module.hs	159;"	v	file:
+getParam	./Language/LLVMIR/Extractor/Module.hs	161;"	v	file:
 getState	./Language/LTL/Base.hs	178;"	v
 getStructType	./Language/LLVMIR/Extractor/Type.hs	94;"	v	file:
 getStructTypeParams	./Language/LLVMIR/Extractor/Type.hs	89;"	v	file:
@@ -2744,7 +2745,7 @@ prettyTy	./Analysis/Type/Standard/Module.hs	61;"	v	file:
 prettyTyAnnEnv	./Analysis/Type/Memory/Context.hs	71;"	v
 progModes	Main.hs	92;"	v
 ptrtoMem	./Analysis/Type/Memory/Instruction.hs	214;"	v
-putEnv	./Concurrent/Model/Analysis/Context.hs	69;"	v
+putEnv	./Concurrent/Model/Analysis/Context.hs	70;"	v
 putEnv	./Language/LLVMIR/Extractor/Context.hs	41;"	v
 r_Instruction_Ret	src/Language/LLVMIR.hs	285;"	v
 retty_Function_FunctionDecl	src/Language/LLVMIR.hs	221;"	v
@@ -4661,7 +4662,6 @@ struct_Instruction_GetElementPtr	src/Language/LLVMIR.hs	270;"	v
 t_Instruction_Br	src/Language/LLVMIR.hs	254;"	v
 t_TargetData_TargetData	src/Language/LLVMIR.hs	432;"	v
 target_Module_Module	src/Language/LLVMIR.hs	372;"	v
-test	./Test/Example.hs	6;"	v
 time_Instruction_WaitTime	src/Language/LLVMIR.hs	302;"	v
 toAtomicOrdering	./Language/LLVMIR/Extractor/Atomic.hs	11;"	v
 toBinOp	./Language/LLVMIR/Extractor/Atomic.hs	21;"	v
@@ -4794,7 +4794,7 @@ typeValueGen	./Analysis/Type/Util.hs	79;"	v
 types	./Language/LLVMIR/Printer/NamedTypes.hs	32;"	v
 types'	./Language/LLVMIR/Printer/NamedTypes.hs	39;"	v
 tys_Type_TyStruct	src/Language/LLVMIR.hs	454;"	v
-unContext	./Concurrent/Model/Analysis/Context.hs	59;"	v
+unContext	./Concurrent/Model/Analysis/Context.hs	60;"	v
 unContext	./Language/LLVMIR/Extractor/Context.hs	28;"	v
 unPath	./Language/LTL/Base.hs	191;"	v
 unPathLasso	./Language/LTL/Base.hs	252;"	v

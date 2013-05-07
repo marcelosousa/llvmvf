@@ -1886,7 +1886,7 @@ wrap_Functions :: T_Functions ->
 wrap_Functions sem (Inh_Functions) =
     (let ( _lhsOetm,_lhsOself) = sem
      in  (Syn_Functions _lhsOetm _lhsOself))
-sem_Functions_Entry :: String ->
+sem_Functions_Entry :: Identifier ->
                        T_Function ->
                        T_Functions ->
                        T_Functions

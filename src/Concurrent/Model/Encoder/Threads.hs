@@ -4529,7 +4529,7 @@ wrap_Functions :: T_Functions ->
 wrap_Functions sem (Inh_Functions _lhsIcfg _lhsIcte _lhsImn _lhsImts _lhsImutexes _lhsIprenc _lhsIsortexpr _lhsIval) =
     (let ( _lhsOself,_lhsOts) = sem _lhsIcfg _lhsIcte _lhsImn _lhsImts _lhsImutexes _lhsIprenc _lhsIsortexpr _lhsIval
      in  (Syn_Functions _lhsOself _lhsOts))
-sem_Functions_Entry :: String ->
+sem_Functions_Entry :: Identifier ->
                        T_Function ->
                        T_Functions ->
                        T_Functions
