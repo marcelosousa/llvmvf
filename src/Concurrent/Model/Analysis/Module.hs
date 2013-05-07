@@ -7,13 +7,13 @@ module Concurrent.Model.Analysis.Module where
 
 import Language.LLVMIR
 import Concurrent.Model.Analysis.ControlFlow
+import Concurrent.Model.Analysis.Instruction
 import Concurrent.Model.Analysis.DataFlow
 import Concurrent.Model.Analysis.Context
 import Concurrent.Model.Analysis.Util
 import qualified Data.Map   as M
 import qualified Data.Maybe as MB
 
--- Use the State Monad
 analyseModule :: String -> Module -> (Module, ControlFlow, DataFlow)
 analyseModule ep (Module id layout target gvars funs nmdtys) =
   let fn = MB.fromMaybe (errorMsg ep $ M.keys funs) $ M.lookup ep funs 
@@ -38,21 +38,4 @@ analyseFunction fn = case fn of
   FunctionDef  name _ rty iv pms body -> analyseBB $ head body
 
 analyseBB :: BasicBlock -> Context ()
-analyseBB (BasicBlock i instrs) = undefined
-
-entryPCFunction :: Function -> Maybe PC
-entryPCFunction fn = case fn of
-  FunctionDecl name _ rty iv pms -> Nothing
-  FunctionDef  name _ rty iv pms bbs -> 
-    Just $ entryPCBB $ head bbs
-
-entryBBFunction :: Function -> Maybe Identifier
-entryBBFunction fn = case fn of
-  FunctionDecl name _ rty iv pms -> Nothing
-  FunctionDef  name _ rty iv pms bbs -> 
-    case bbs of
-	   [] -> Nothing
-	   ((BasicBlock i _):_) -> Just i
-
-entryPCBB :: BasicBlock -> PC
-entryPCBB (BasicBlock _ instrs) = instrpc $ head instrs 
+analyseBB (BasicBlock i instrs) = mapM_ analyseInstr instrs
