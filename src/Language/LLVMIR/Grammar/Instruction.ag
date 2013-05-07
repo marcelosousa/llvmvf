@@ -123,27 +123,12 @@ data Instruction
   | CreateThread pc :: PC args :: Values
   | JoinThread   pc :: PC id :: Identifier
   | ExitThread   pc :: PC
-  | MutexInit
-      pc    :: PC
-      rv    :: Identifier
-      mutex :: Value     
-  | MutexLock
-      pc    :: PC
-      rv    :: Identifier
-      mutex :: Value
-  | MutexUnlock
-      pc    :: PC
-      rv    :: Identifier
-      mutex :: Value
-  | WaitEvent
-      pc    :: PC
-      event :: Int
-  | NotifyEvent
-      pc    :: PC
-      event :: Int
-  | WaitTime
-      pc    :: PC
-      time  :: Value
+  | MutexInit    pc :: PC rv :: Identifier mutex :: Value     
+  | MutexLock    pc :: PC rv :: Identifier mutex :: Value
+  | MutexUnlock  pc :: PC rv :: Identifier mutex :: Value
+  | WaitEvent    pc :: PC event :: Int
+  | NotifyEvent  pc :: PC event :: Int
+  | WaitTime     pc :: PC time :: Value
 
 data BinOp
   | OpXchg

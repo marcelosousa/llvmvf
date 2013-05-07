@@ -23,14 +23,14 @@ analyseInstr i = do
     -- Terminators
     Ret pc v -> do let l' = Location fn bb pc False
                        c  = flow pc ploc ccfg
-                       el = ExitLoc l' End
+                       el = ExitLoc l' $ EndFn fn
                        el' = el:eloc
                        e' = e {ccfg = c, ploc = l', eloc = el'}
                    putEnv e'
                    analyseRetValue v
     Unreachable pc -> let l' = Location fn bb pc False
                           c  = flow pc ploc ccfg
-                          el = ExitLoc l' End
+                          el = ExitLoc l' $ EndFn fn
                           el' = el:eloc
                           e' = e {ccfg = c, ploc = l', eloc = el'}
                       in putEnv e'
@@ -48,37 +48,96 @@ analyseInstr i = do
                     el = (ExitLoc l' $ BBLoc di):eloc
                     e' = e {ccfg = c, ploc = l', eloc = el}
                 in putEnv e'
+    -- Call Operation
+    Call pc i ty callee vs -> do let l' = Location fn bb pc False
+                                     c  = flow pc ploc ccfg
+                                     el = (ExitLoc l' $ FnLoc callee):eloc
+                                     e' = e {ccfg = c, ploc = l', eloc = el}
+                                 putEnv e'
+                                 mapM_ analyseValue vs
+                                 analyseType ty
     -- Phi Instructions
-    PHI pc i ty vals -> do let l' = Location fn bb pc False
-                               c  = flow pc ploc ccfg
-                               e' = e {ccfg = c, ploc = l'}
-                               (v,t) = unzip vals
-                           putEnv e'
-                           mapM_ analyseValue $ v ++ t 
-                           analyseType ty
+    PHI pc i ty vals -> let (v,t) = unzip vals
+                        in analyseNInstr pc [ty] $ v ++ t 
     -- Standard Binary Operations
     -- Integer Operations
-    Add  pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    Sub  pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    Mul  pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    UDiv pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    SDiv pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    URem pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    SRem pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
+    Add  pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    Sub  pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    Mul  pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    UDiv pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    SDiv pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    URem pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    SRem pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
     -- Bitwise Binary Operations
-    Shl  pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    LShr pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    AShr pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    And  pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    Or   pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
-    Xor  pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2 
+    Shl  pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    LShr pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    AShr pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    And  pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    Or   pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
+    Xor  pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
     -- Float Operations
-    FAdd pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2
-    FSub pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2
-    FMul pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2
-    FDiv pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2
-    FRem pc i ty op1 op2 -> analyseBinInstr pc ty op1 op2
-    _ -> error $ "analyseInstr: " ++ show i ++ " not supported."
+    FAdd pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2]
+    FSub pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2]
+    FMul pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2]
+    FDiv pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2]
+    FRem pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2]
+    -- Cast Operations
+    Trunc    pc i v ty -> analyseNInstr pc [ty] [v]
+    ZExt     pc i v ty -> analyseNInstr pc [ty] [v]
+    SExt     pc i v ty -> analyseNInstr pc [ty] [v]
+    FPTrunc  pc i v ty -> analyseNInstr pc [ty] [v]
+    FPExt    pc i v ty -> analyseNInstr pc [ty] [v]
+    FPToUI   pc i v ty -> analyseNInstr pc [ty] [v]
+    FPToSI   pc i v ty -> analyseNInstr pc [ty] [v]
+    UIToFP   pc i v ty -> analyseNInstr pc [ty] [v]
+    SIToFP   pc i v ty -> analyseNInstr pc [ty] [v]
+    PtrToInt pc i v ty -> analyseNInstr pc [ty] [v]
+    IntToPtr pc i v ty -> analyseNInstr pc [ty] [v]                                    
+    BitCast  pc i v ty -> analyseNInstr pc [ty] [v] 
+    -- Other Operations
+    ICmp pc i cond ty op1 op2 -> analyseNInstr pc [ty] [op1,op2]
+    FCmp pc i cond ty op1 op2 -> analyseNInstr pc [ty] [op1,op2]
+    -- Selection Operations
+    Select pc i cv vt vf       -> analyseNInstr pc [] [cv,vt,vf]
+    ExtractValue pc i v idxs   -> analyseNInstr pc [] [v]
+    InsertValue pc i v vi idxs -> analyseNInstr pc [] [v,vi]
+    -- Memory Operations
+    Alloca pc i ty       align   -> analyseNInstr pc [ty] []
+    Store  pc   ty v1 v2 align   -> analyseNInstr pc [ty] [v1,v2]
+    Load   pc i    v     align   -> analyseNInstr pc []   [v]
+    GetElementPtr pc i ty v idxs -> analyseNInstr pc [ty] (v:idxs)
+    -- Atomic Operations
+    Cmpxchg   pc i mptr cval nval ord -> analyseNInstr pc [] [mptr,cval,nval]
+    AtomicRMW pc i mptr val op ord -> analyseNInstr pc [] [mptr,val]
+    -- Concurrent Operations Added
+    CreateThread pc args -> do let t = valueIdentifier' "" $ args !! 2 
+                                   l' = Location fn bb pc False
+                                   c  = flow pc ploc ccfg
+                                   el = ExitLoc l' $ EndTh fn
+                                   el' = el:eloc
+                                   e' = e {ccfg = c, ploc = l', eloc = el'}
+                               mapM_ analyseValue args  
+    JoinThread   pc i -> do let l' = Location fn bb pc False
+                                c  = flow pc ploc ccfg
+                                el = SyncLoc l' i
+                                el' = el:eloc
+                                e' = e {ccfg = c, ploc = l', eloc = el'}
+                            putEnv e'
+    ExitThread   pc -> do let l' = Location fn bb pc False
+                              c  = flow pc ploc ccfg
+                              el = ExitLoc l' $ EndTh fn
+                              el' = el:eloc
+                              e' = e {ccfg = c, ploc = l', eloc = el'}
+                          putEnv e'
+    _ -> error $ "analyseInstr: " ++ show i ++ " not supported."    
+{-    MutexInit    pc :: PC rv :: Identifier mutex :: Value     
+    MutexLock    pc :: PC rv :: Identifier mutex :: Value
+    MutexUnlock  pc :: PC rv :: Identifier mutex :: Value
+    WaitEvent    pc :: PC event :: Int
+    NotifyEvent  pc :: PC event :: Int
+    WaitTime     pc :: PC time :: Value    
+-}
+
 
 analyseRetValue :: RetInst -> Context ()
 analyseRetValue VoidRet = return ()
@@ -90,98 +149,19 @@ analyseValue v = return ()
 analyseType :: Type -> Context ()
 analyseType ty = return ()
 
-analyseBinInstr :: PC -> Type -> Value -> Value -> Context ()
-analyseBinInstr pc ty v1 v2 = do
+analyseNInstr :: PC -> [Type] -> [Value] -> Context ()
+analyseNInstr pc ty v = do
     e@Env{..} <- getEnv
     let l@Location{..} = ploc
         l' = Location fn bb pc False
         c  = flow pc ploc ccfg
         e' = e {ccfg = c, ploc = l'}
     putEnv e'
-    analyseValue v1
-    analyseValue v2
-    analyseType ty
+    mapM_ analyseValue v
+    mapM_ analyseType ty
 	
 flow :: PC -> Location -> ControlFlow -> ControlFlow
 flow pc l@Location{..} cfg = 
     if ise
     then cfg
-    else (Intra lpc pc):cfg
-                          
-
-{-
-  -- Cast Operations
-    Trunc    pc i v ty -> typeCastOp nmdtye tye i v ty isInt (>)    -- Truncate integers
-    ZExt     pc i v ty -> typeCastOp nmdtye tye i v ty isInt (<)    -- Zero extend integers
-    SExt     pc i v ty -> typeCastOp nmdtye tye i v ty isInt (<)    -- Sign extend integers
-    FPTrunc  pc i v ty -> typeCastOp nmdtye tye i v ty isFloat (>)  -- Truncate floating point
-    FPExt    pc i v ty -> typeCastOp nmdtye tye i v ty isFloat (<=) -- Extend floating point
-    FPToUI   pc i v ty -> fptoint    nmdtye tye i v ty              -- floating point -> UInt
-    FPToSI   pc i v ty -> fptoint    nmdtye tye i v ty              -- floating point -> SInt
-    UIToFP   pc i v ty -> inttofp    nmdtye tye i v ty              -- UInt -> floating point
-    SIToFP   pc i v ty -> inttofp    nmdtye tye i v ty              -- SInt -> floating point
-    PtrToInt pc i v ty ->                                           -- Pointer -> Integer
-        let tyv = typeUnaryExpression nmdtye tye "PtrToInt" 41 v ty
-        in (insert i tyv tye, tyv)
-    IntToPtr pc i v ty ->                                         -- Integer -> Pointer
-        let tyv = typeValue nmdtye tye v
-        in if isInt tyv && isPointer ty 
-           then (insert i ty tye, ty)
-           else error $ "IntToPtr: Either type is not pointer or not int: " ++ show [tyv, ty] 
-    BitCast  pc i v ty ->                                       -- Type cast
-        let tyv = typeUnaryExpression nmdtye tye "BitCast" 43 v ty
-        in (insert i tyv tye, tyv)                
-  -- Other Operations
-     ICmp pc i cond ty op1 op2 -> typeCheckCmp TyClassInt   tye i ty (typeValue nmdtye tye op1) (typeValue nmdtye tye op2)
-     FCmp pc i cond ty op1 op2 -> typeCheckCmp TyClassFloat tye i ty (typeValue nmdtye tye op1) (typeValue nmdtye tye op2)
-  -- Memory Operations
-     Alloca pc i ty       align   -> (insert i (TyPointer ty) tye, ty)-- Alloca should receive a size integer too  
-     Store  pc   ty v1 v2 align   -> 
-       case typeValue nmdtye tye v2 of
-           TyPointer ty -> 
-             let tyv2 = typeValue nmdtye tye v1
-             in if ty == tyv2 && isFstClass ty
-                then (tye, TyVoid)
-                else error $ "typeCheckInstruction.Store: " ++ show ty 
-           x -> error $ "typeCheck Store: " ++ show x
-    Load   pc i    v     align   -> 
-      case typeValue nmdtye tye v of
-          TyPointer ty -> if isFstClass ty
-                          then (insert i ty tye, ty)
-                          else error $ "typeCheckInstruction.Load: " ++ show ty 
-          x -> error $ "typeCheck Load: " ++ show x
-     GetElementPtr pc i ty v idxs ->
-       let ety = typeGetElementPtrConstantExpr nmdtye tye v idxs
-       in if ety == ty
-           then (insert i ty tye, ty)
-           else error $ "typeCheckInstruction.GetElementPtr: " ++ show [ety,ty]
-  -- Call Operation
-      Call pc i ty callee vs -> typeCheckCall nmdtye tye i ty callee vs
-  -- Selection Operations
-      Select pc i cv vt vf       -> error "select operation not supported."
-      ExtractValue pc i v idxs   -> 
-        let ty = typeValue nmdtye tye v
-        in if length idxs > 0
-         then if isAgg ty
-              then let t = getTypeAgg nmdtye ty idxs
-                   in (insert i t tye, t)
-              else error $ "ExtractValue: " ++ show ty ++ " is not aggregate."  
-         else error $ "ExtractValue: empty list" 
-      InsertValue pc i v vi idxs -> error "InsertValue operation not supported"
-  -- Atomic Operations
-      Cmpxchg   pc i mptr cval nval ord -> 
-          case typeValue nmdtye tye mptr of
-              TyPointer ty -> let cty = typeValue nmdtye tye cval
-                                  nty = typeValue nmdtye tye nval
-                            in if ty == cty && cty == nty
-                               then (insert i ty tye, ty)
-                               else error $ "Cmpxchg: Types are not equal " ++ show [ty,cty,nty]
-              x -> error $ "Cmpxchg: Type of first element is not pointer: " ++ show x
-      AtomicRMW pc i mptr val op ord -> 
-          case typeValue nmdtye tye mptr of
-              TyPointer ty -> let vty = typeValue nmdtye tye val
-                            in if ty == vty 
-                               then (insert i ty tye, ty)
-                               else error $ "AtomicRMW: Types are not equal " ++ show [ty,vty]
-              x -> error $ "AtomicRMW: Type of first element is not pointer: " ++ show x
--}  
+    else (Intra lpc pc):cfg                          
