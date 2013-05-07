@@ -17,10 +17,19 @@ data CS = ReadS
         | Wait
 -}
 
-type DataFlow = M.Map String (M.Map Identifier Type)
+type LoadMap = M.Map Identifier (M.Map Identifier Identifier)
+data DataFlow = 
+  DataFlow { loadMap :: LoadMap 
+           }
 
 eDF :: DataFlow
-eDF = M.empty
+eDF = DataFlow M.empty
+
+
+updateLoadMap :: Identifier -> (Identifier, Identifier) -> LoadMap -> LoadMap
+updateLoadMap i (a,b) lm = M.alter f i lm where
+    f Nothing = Just $ M.singleton a b
+    f (Just ln) = Just $ M.insert a b ln
 
 emptyPreEncoder :: PreEncoder
 emptyPreEncoder = PreEncoder M.empty M.empty [] M.empty M.empty []

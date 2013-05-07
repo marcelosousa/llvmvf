@@ -106,22 +106,31 @@ analyseInstr i = do
     -- Memory Operations
     Alloca pc i ty       align   -> analyseNInstr pc [ty] []
     Store  pc   ty v1 v2 align   -> analyseNInstr pc [ty] [v1,v2]
-    Load   pc i    v     align   -> analyseNInstr pc []   [v]
+    Load   pc i    v     align   -> do analyseNInstr pc []   [v]
+                                       o@Env{..} <- getEnv
+                                       let iv = valueIdentifier' "" v
+                                           d@DataFlow{..} = df
+                                           d' = d { loadMap = updateLoadMap fn (i,iv) loadMap }
+                                           o' = o { df = d' }
+                                       putEnv o' 
     GetElementPtr pc i ty v idxs -> analyseNInstr pc [ty] (v:idxs)
     -- Atomic Operations
     Cmpxchg   pc i mptr cval nval ord -> analyseNInstr pc [] [mptr,cval,nval]
     AtomicRMW pc i mptr val op ord -> analyseNInstr pc [] [mptr,val]
     -- Concurrent Operations Added
-    CreateThread pc args -> do let t = valueIdentifier' "" $ args !! 2 
+    CreateThread pc args -> do let ti = valueIdentifier' "" $ args !! 0 
+                                   t = valueIdentifier' "" $ args !! 2 
                                    l' = Location fn bb pc False
                                    c  = flow pc ploc ccfg
-                                   el = ExitLoc l' $ EndTh fn
+                                   el = ExitLoc l' $ ThLoc t
                                    el' = updateLocs l' el efloc
-                                   e' = e {ccfg = c, ploc = l', efloc = el'}
+                                   ths = updateThreads fn (ti,t) threads
+                                   e' = e {ccfg = c, ploc = l', efloc = el', threads = ths}
                                mapM_ analyseValue args  
     JoinThread   pc i -> do let l' = Location fn bb pc False
                                 c  = flow pc ploc ccfg
-                                el = SyncLoc l' i
+                                ti = findThread fn i df threads
+                                el = SyncLoc l' ti
                                 el' = updateLocs l' el efloc
                                 e' = e {ccfg = c, ploc = l', efloc = el'}
                             putEnv e'

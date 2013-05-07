@@ -17,6 +17,8 @@ import Concurrent.Model.Analysis.Util
 import qualified Data.Map   as M
 import qualified Data.Maybe as MB
 
+import Debug.Trace (trace)
+
 analyseModule :: String -> Module -> (Module, ControlFlow, DataFlow)
 analyseModule ep (Module id layout target gvars funs nmdtys) =
   let fname = Global ep
@@ -25,7 +27,7 @@ analyseModule ep (Module id layout target gvars funs nmdtys) =
       pc = MB.fromMaybe (errorMsg (show bb) fn) $ entryPCFunction fn 
       iLoc  = Location fname bb pc True
       iCore = Core nmdtys gvars funs
-      env = Env iCore eCore eCFG eDF iLoc M.empty M.empty
+      env = Env iCore eCore eCFG eDF iLoc M.empty M.empty M.empty
       oenv  = evalContext (analyseFunction fn) env
       Core tys vars fs = coreout oenv
       fcfg  = ccfg oenv
@@ -40,7 +42,7 @@ errorMsg msg b = error $ "analyseModule: " ++ msg ++ " " ++ show b
 analyseFunction :: Function -> Context ()
 analyseFunction fn = case fn of
   FunctionDecl name _ rty iv pms -> return ()
-  FunctionDef  name _ rty iv pms body -> do
+  FunctionDef  name _ rty iv pms body -> trace ("Analyzing " ++ show name) $ do
       e@Env{..} <- getEnv
       if fnWasAnalyzed name corein seen
       then return ()
@@ -57,7 +59,7 @@ analyseLoc loc = do
         ploc@Location{..} = ploc
     case loc of
         SyncLoc l@Location{..} i -> do  -- WaitThread
-            let fi = MB.fromJust $ M.lookup i funs -- Retrieve which function its waiting for
+            let fi = MB.fromMaybe (error $ "SycnLoc " ++ show i ++ show funs) $ M.lookup i funs -- Retrieve which function its waiting for
             analyseFunction fi -- Analyze it !! Improve this
             o@Env{..} <- getEnv -- Retrieve the new env
             let p = getThreadExits i efloc
@@ -66,7 +68,7 @@ analyseLoc loc = do
         ExitLoc l@Location{..} w -> case w of
             EndFn   -> return () -- Its the job of the caller to
             EndTh _ -> return () -- findout the exit locations of the callee
-            BBLoc bbi -> do let fnf = MB.fromJust $ M.lookup fn funs
+            BBLoc bbi -> do let fnf = MB.fromMaybe (error $ "ExitLoc " ++ show fn ++ show funs) $ M.lookup fn funs
                                 bba = findBasicBlock bbi fnf
                                 pc = entryPCBB bba
                                 c  = flow pc l ccfg
@@ -100,12 +102,13 @@ analyseLoc loc = do
                           
 -- Add to seen
 analyseBB :: BasicBlock -> Context ()
-analyseBB (BasicBlock i instrs) = do
+analyseBB (BasicBlock i instrs) = trace ("analyseBB " ++ show i) $ do
     e@Env{..} <- getEnv
     let fni = fn ploc
     if bbWasAnalyzed fni i seen
     then return ()
-    else do mapM_ analyseInstr instrs
+    else do trace ("Analyzing " ++ show fni ++ " " ++ show i) $ mapM_ analyseInstr instrs
+            o@Env{..} <- getEnv
             let seen' = addToSeen fni i seen
-            putEnv $ e {seen = seen'}
+            putEnv $ o {seen = seen'}
          

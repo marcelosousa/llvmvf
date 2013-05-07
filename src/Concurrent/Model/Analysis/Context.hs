@@ -12,6 +12,8 @@ import Control.Applicative
 import Control.Monad.State
 
 import qualified Data.Map as M
+import qualified Data.Maybe as MB
+import Data.List 
 
 import Language.LLVMIR
 import Language.LLVMIR.Util
@@ -24,6 +26,7 @@ data Location = Location
   , lpc :: PC
   , ise :: Bool
   }
+  deriving Show
 
 type Locations = [Location]
 
@@ -32,9 +35,11 @@ data Where = BBLoc Identifier
            | ThLoc Identifier
            | EndFn 
            | EndTh Identifier 
+  deriving Show
 
 data Loc = ExitLoc Location Where
          | SyncLoc Location Identifier
+  deriving Show
              
 isLocEndTh :: Loc -> Bool
 isLocEndTh (ExitLoc l w) = isWhEndTh w
@@ -70,6 +75,7 @@ eCore = Core M.empty [] M.empty
 type Locs = M.Map Identifier (M.Map Identifier LocList)
 
 type Seen = M.Map Identifier [Identifier]
+type Threads = M.Map Identifier [(Identifier,Identifier)]
 
 data Env = Env
   { corein  :: Core
@@ -79,12 +85,32 @@ data Env = Env
   , ploc    :: Location
   , efloc   :: Locs
   , seen    :: Seen
+  , threads :: Threads
   }
+
+
+findThread :: Identifier -> Identifier -> DataFlow -> Threads -> Identifier
+findThread fn reg df@DataFlow{..} threads = 
+  let fnLoadMap = MB.fromMaybe (error "fnLoadMap in findThread") $ M.lookup fn loadMap
+      fnThreads = MB.fromMaybe (error $ "fnThreads in findThread " ++ show fn ++ " " ++ show threads) $ M.lookup fn threads
+  -- It can be that reg is the actual identifier
+  in case findInThreads reg fnThreads of
+      Just t -> t
+      Nothing -> 
+        -- Check if it was the register that reg loaded from
+        case M.lookup reg fnLoadMap of
+          Nothing -> error $ "findThread failed " ++ show fn ++ " " ++ show reg
+          Just reg' -> case findInThreads reg' fnThreads of
+            Nothing -> error $ "findThread failed"
+            Just t -> t
+
+findInThreads :: Identifier -> [(Identifier, Identifier)] -> Maybe Identifier
+findInThreads i l = snd <$> find (\x -> fst x == i) l
 
 getLocs :: Location -> Locs -> LocList
 getLocs l@Location{..} m =
     case M.lookup fn m of
-        Nothing -> error "getLocs: FN"
+        Nothing -> error $ "getLocs: FN: " ++ show fn ++ " " ++ show m
         Just fnt -> case M.lookup bb fnt of
             Nothing -> error "getLocs: BB"
             Just bbt -> bbt
@@ -119,6 +145,12 @@ updateLocs l@Location{..} loc locs =
         f (Just m) = Just $ M.alter g bb m
         g Nothing = Just [loc]
         g (Just l) = Just $ loc:l
+
+updateThreads :: Identifier -> (Identifier, Identifier) -> Threads -> Threads
+updateThreads fn ti t = 
+    M.alter f fn t where
+        f Nothing = Just [ti]
+        f (Just m) = Just $ ti:m
         
 getThreadExits :: Identifier -> Locs -> [PC]
 getThreadExits i m = case M.lookup i m of
