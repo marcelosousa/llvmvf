@@ -1,27 +1,8 @@
 
 
 {-#LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
--- UUAGC 0.9.40.3 (src/Concurrent/Model/Visualizer.ag)
+-- UUAGC 0.9.42.3 (src/Concurrent/Model/Visualizer.ag)
 module Concurrent.Model.Visualizer where
-
-{-# LINE 16 "src/Concurrent/Model/Visualizer.ag" #-}
-
-import qualified Data.Map as M
-import qualified Data.IntMap as IM
-import Data.Maybe 
-
-import UU.PPrint as P
-import Concurrent.Model
-import Concurrent.Model.Analysis.ControlFlow (ControlFlow(..))
-import Language.LLVMIR
-import Language.LLVMIR.Util
-{-# LINE 19 "src/Concurrent/Model/Visualizer.hs" #-}
-
-{-# LINE 14 "src/Language/LLVMIR/Printer/Module.ag" #-}
-
-import UU.PPrint as P
-import Language.LLVMIR
-{-# LINE 25 "src/Concurrent/Model/Visualizer.hs" #-}
 
 {-# LINE 11 "src/Language/LLVMIR/Grammar/Base.ag" #-}
 
@@ -35,16 +16,97 @@ import Data.Map hiding (foldr)
 #else
 import Data.Map 
 #endif
+{-# LINE 20 "src/Concurrent/Model/Visualizer.hs" #-}
+
+{-# LINE 14 "src/Language/LLVMIR/Printer/Module.ag" #-}
+
+import UU.PPrint as P
+import Language.LLVMIR
+{-# LINE 26 "src/Concurrent/Model/Visualizer.hs" #-}
+
+{-# LINE 16 "./src/Concurrent/Model/Visualizer.ag" #-}
+
+import qualified Data.Map as M
+import qualified Data.IntMap as IM
+import Data.Maybe 
+
+import UU.PPrint as P
+import Concurrent.Model
+import Concurrent.Model.Analysis.ControlFlow (ControlFlow(..))
+import Language.LLVMIR
+import Language.LLVMIR.Util
 {-# LINE 39 "src/Concurrent/Model/Visualizer.hs" #-}
-{-# LINE 5 "src/Concurrent/Model/Visualizer.ag" #-}
+{-# LINE 1 "src/Language/LLVMIR/Grammar/Instruction.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Grammar.Instruction
+-- Copyright :  (c) 2013 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 46 "src/Concurrent/Model/Visualizer.hs" #-}
+
+{-# LINE 1 "src/Language/LLVMIR/Grammar/Base.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Base
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 54 "src/Concurrent/Model/Visualizer.hs" #-}
+
+{-# LINE 1 "src/Language/LLVMIR/Type/Type.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Type.Type
+-- Copyright :  (c) 2012 Marcelo Sousa
+-- Standard LLVM IR Types
+-------------------------------------------------------------------------------
+{-# LINE 63 "src/Concurrent/Model/Visualizer.hs" #-}
+
+{-# LINE 1 "src/Language/LLVMIR/Printer/Module.ag" #-}
+
+-------------------------------------------------------------------------------
+-- Module    :  Language.LLVMIR.Printer
+-- Copyright :  (c) 2012 Marcelo Sousa
+-------------------------------------------------------------------------------
+{-# LINE 71 "src/Concurrent/Model/Visualizer.hs" #-}
+
+{-# LINE 138 "src/Language/LLVMIR/Printer/Module.ag" #-}
+
+pConvOp :: Doc -> String -> Doc -> Doc -> Doc
+pConvOp id c v ty = id <+> char '=' <+> text c <+> v <+> text "to" <+> ty
+
+pBinOp :: Doc -> Doc -> String -> Doc -> Doc -> Doc
+pBinOp ty id c op1 op2 = ty <+> id <+> char '=' <+> text c <+> op1 <> char ',' <+> op2
+
+pBitBinOp :: Doc -> Doc -> String -> Doc -> Doc -> Doc
+pBitBinOp ty id c op1 op2 = id <+> char '=' <+> text c <+> ty <+> op1 <> char ',' <+> op2
+{-# LINE 83 "src/Concurrent/Model/Visualizer.hs" #-}
+
+{-# LINE 319 "src/Language/LLVMIR/Printer/Module.ag" #-}
+
+ppPName :: String -> Doc
+ppPName s = if (take 2 s == "0x")
+            then P.empty
+            else space <> char '%' <> text s
+
+escaped :: String -> Doc
+escaped ('\n':xs) = text "\\0A\\00" <> escaped xs
+escaped (c:xs)    = char c <> escaped xs
+escaped []        = P.empty
+
+ppKeyword :: Bool -> String -> Doc
+ppKeyword True s = text s
+ppKeyword _    _ = P.empty
+{-# LINE 100 "src/Concurrent/Model/Visualizer.hs" #-}
+
+{-# LINE 5 "./src/Concurrent/Model/Visualizer.ag" #-}
 
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Visualizer
 -- Copyright :  (c) 2012 Marcelo Sousa
 -------------------------------------------------------------------------------
-{-# LINE 46 "src/Concurrent/Model/Visualizer.hs" #-}
+{-# LINE 108 "src/Concurrent/Model/Visualizer.hs" #-}
 
-{-# LINE 94 "src/Concurrent/Model/Visualizer.ag" #-}
+{-# LINE 94 "./src/Concurrent/Model/Visualizer.ag" #-}
 
 type ILabel = Int
 
@@ -64,68 +126,6 @@ dumpccfg (Model mdl) ccfg =
 dotFunction :: Function -> Doc
 dotFunction f = ppccfg_Syn_Function $ wrap_Function (sem_Function f) $ Inh_Function { ilabel_Inh_Function = 0 }
 
-{-# LINE 68 "src/Concurrent/Model/Visualizer.hs" #-}
-
-{-# LINE 1 "src/Language/LLVMIR/Printer/Module.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Printer
--- Copyright :  (c) 2012 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 76 "src/Concurrent/Model/Visualizer.hs" #-}
-
-{-# LINE 138 "src/Language/LLVMIR/Printer/Module.ag" #-}
-
-pConvOp :: Doc -> String -> Doc -> Doc -> Doc
-pConvOp id c v ty = id <+> char '=' <+> text c <+> v <+> text "to" <+> ty
-
-pBinOp :: Doc -> Doc -> String -> Doc -> Doc -> Doc
-pBinOp ty id c op1 op2 = ty <+> id <+> char '=' <+> text c <+> op1 <> char ',' <+> op2
-
-pBitBinOp :: Doc -> Doc -> String -> Doc -> Doc -> Doc
-pBitBinOp ty id c op1 op2 = id <+> char '=' <+> text c <+> ty <+> op1 <> char ',' <+> op2
-{-# LINE 88 "src/Concurrent/Model/Visualizer.hs" #-}
-
-{-# LINE 319 "src/Language/LLVMIR/Printer/Module.ag" #-}
-
-ppPName :: String -> Doc
-ppPName s = if (take 2 s == "0x")
-            then P.empty
-            else space <> char '%' <> text s
-
-escaped :: String -> Doc
-escaped ('\n':xs) = text "\\0A\\00" <> escaped xs
-escaped (c:xs)    = char c <> escaped xs
-escaped []        = P.empty
-
-ppKeyword :: Bool -> String -> Doc
-ppKeyword True s = text s
-ppKeyword _    _ = P.empty
-{-# LINE 105 "src/Concurrent/Model/Visualizer.hs" #-}
-
-{-# LINE 1 "src/Language/LLVMIR/Grammar/Base.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Base
--- Copyright :  (c) 2012 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 113 "src/Concurrent/Model/Visualizer.hs" #-}
-
-{-# LINE 1 "src/Language/LLVMIR/Grammar/Instruction.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Grammar.Instruction
--- Copyright :  (c) 2013 Marcelo Sousa
--------------------------------------------------------------------------------
-{-# LINE 121 "src/Concurrent/Model/Visualizer.hs" #-}
-
-{-# LINE 1 "src/Language/LLVMIR/Type/Type.ag" #-}
-
--------------------------------------------------------------------------------
--- Module    :  Language.LLVMIR.Type.Type
--- Copyright :  (c) 2012 Marcelo Sousa
--- Standard LLVM IR Types
--------------------------------------------------------------------------------
 {-# LINE 130 "src/Concurrent/Model/Visualizer.hs" #-}
 -- Alias -------------------------------------------------------
 -- cata
@@ -319,20 +319,20 @@ sem_Arguments_Nil =
 -- cata
 sem_AtomicOrdering :: AtomicOrdering ->
                       T_AtomicOrdering
-sem_AtomicOrdering (Acquire) =
-    (sem_AtomicOrdering_Acquire)
-sem_AtomicOrdering (AcquireRelease) =
-    (sem_AtomicOrdering_AcquireRelease)
-sem_AtomicOrdering (Monotonic) =
-    (sem_AtomicOrdering_Monotonic)
 sem_AtomicOrdering (NotAtomic) =
     (sem_AtomicOrdering_NotAtomic)
-sem_AtomicOrdering (Release) =
-    (sem_AtomicOrdering_Release)
-sem_AtomicOrdering (SequentiallyConsistent) =
-    (sem_AtomicOrdering_SequentiallyConsistent)
 sem_AtomicOrdering (Unordered) =
     (sem_AtomicOrdering_Unordered)
+sem_AtomicOrdering (Monotonic) =
+    (sem_AtomicOrdering_Monotonic)
+sem_AtomicOrdering (Acquire) =
+    (sem_AtomicOrdering_Acquire)
+sem_AtomicOrdering (Release) =
+    (sem_AtomicOrdering_Release)
+sem_AtomicOrdering (AcquireRelease) =
+    (sem_AtomicOrdering_AcquireRelease)
+sem_AtomicOrdering (SequentiallyConsistent) =
+    (sem_AtomicOrdering_SequentiallyConsistent)
 -- semantic domain
 type T_AtomicOrdering = ( Doc,AtomicOrdering)
 data Inh_AtomicOrdering = Inh_AtomicOrdering {}
@@ -343,31 +343,31 @@ wrap_AtomicOrdering :: T_AtomicOrdering ->
 wrap_AtomicOrdering sem (Inh_AtomicOrdering) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_AtomicOrdering _lhsOpp _lhsOself))
-sem_AtomicOrdering_Acquire :: T_AtomicOrdering
-sem_AtomicOrdering_Acquire =
+sem_AtomicOrdering_NotAtomic :: T_AtomicOrdering
+sem_AtomicOrdering_NotAtomic =
     (let _lhsOpp :: Doc
          _lhsOself :: AtomicOrdering
          _lhsOpp =
-             ({-# LINE 177 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "acquire"
+             ({-# LINE 174 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "non_atomic"
               {-# LINE 354 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             Acquire
+             NotAtomic
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_AtomicOrdering_AcquireRelease :: T_AtomicOrdering
-sem_AtomicOrdering_AcquireRelease =
+sem_AtomicOrdering_Unordered :: T_AtomicOrdering
+sem_AtomicOrdering_Unordered =
     (let _lhsOpp :: Doc
          _lhsOself :: AtomicOrdering
          _lhsOpp =
-             ({-# LINE 179 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "acq_rel"
+             ({-# LINE 175 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "unordered"
               {-# LINE 368 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             AcquireRelease
+             Unordered
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -385,17 +385,17 @@ sem_AtomicOrdering_Monotonic =
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_AtomicOrdering_NotAtomic :: T_AtomicOrdering
-sem_AtomicOrdering_NotAtomic =
+sem_AtomicOrdering_Acquire :: T_AtomicOrdering
+sem_AtomicOrdering_Acquire =
     (let _lhsOpp :: Doc
          _lhsOself :: AtomicOrdering
          _lhsOpp =
-             ({-# LINE 174 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "non_atomic"
+             ({-# LINE 177 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "acquire"
               {-# LINE 396 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             NotAtomic
+             Acquire
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -413,6 +413,20 @@ sem_AtomicOrdering_Release =
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
+sem_AtomicOrdering_AcquireRelease :: T_AtomicOrdering
+sem_AtomicOrdering_AcquireRelease =
+    (let _lhsOpp :: Doc
+         _lhsOself :: AtomicOrdering
+         _lhsOpp =
+             ({-# LINE 179 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "acq_rel"
+              {-# LINE 424 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             AcquireRelease
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
 sem_AtomicOrdering_SequentiallyConsistent :: T_AtomicOrdering
 sem_AtomicOrdering_SequentiallyConsistent =
     (let _lhsOpp :: Doc
@@ -420,24 +434,10 @@ sem_AtomicOrdering_SequentiallyConsistent =
          _lhsOpp =
              ({-# LINE 180 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "seq_cst"
-              {-# LINE 424 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             SequentiallyConsistent
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_AtomicOrdering_Unordered :: T_AtomicOrdering
-sem_AtomicOrdering_Unordered =
-    (let _lhsOpp :: Doc
-         _lhsOself :: AtomicOrdering
-         _lhsOpp =
-             ({-# LINE 175 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "unordered"
               {-# LINE 438 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             Unordered
+             SequentiallyConsistent
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -445,46 +445,46 @@ sem_AtomicOrdering_Unordered =
 -- cata
 sem_Attribute :: Attribute ->
                  T_Attribute
-sem_Attribute (AlwaysInlineAttribute) =
-    (sem_Attribute_AlwaysInlineAttribute)
-sem_Attribute (ByValAttribute) =
-    (sem_Attribute_ByValAttribute)
-sem_Attribute (InRegAttribute) =
-    (sem_Attribute_InRegAttribute)
-sem_Attribute (NakedAttribute) =
-    (sem_Attribute_NakedAttribute)
-sem_Attribute (NestAttribute) =
-    (sem_Attribute_NestAttribute)
-sem_Attribute (NoAliasAttribute) =
-    (sem_Attribute_NoAliasAttribute)
-sem_Attribute (NoCaptureAttribute) =
-    (sem_Attribute_NoCaptureAttribute)
-sem_Attribute (NoImplicitFloatAttribute) =
-    (sem_Attribute_NoImplicitFloatAttribute)
-sem_Attribute (NoInlineAttribute) =
-    (sem_Attribute_NoInlineAttribute)
-sem_Attribute (NoRedZoneAttribute) =
-    (sem_Attribute_NoRedZoneAttribute)
+sem_Attribute (ZExtAttribute) =
+    (sem_Attribute_ZExtAttribute)
+sem_Attribute (SExtAttribute) =
+    (sem_Attribute_SExtAttribute)
 sem_Attribute (NoReturnAttribute) =
     (sem_Attribute_NoReturnAttribute)
+sem_Attribute (InRegAttribute) =
+    (sem_Attribute_InRegAttribute)
+sem_Attribute (StructRetAttribute) =
+    (sem_Attribute_StructRetAttribute)
 sem_Attribute (NoUnwindAttribute) =
     (sem_Attribute_NoUnwindAttribute)
-sem_Attribute (OptimizeForSizeAttribute) =
-    (sem_Attribute_OptimizeForSizeAttribute)
+sem_Attribute (NoAliasAttribute) =
+    (sem_Attribute_NoAliasAttribute)
+sem_Attribute (ByValAttribute) =
+    (sem_Attribute_ByValAttribute)
+sem_Attribute (NestAttribute) =
+    (sem_Attribute_NestAttribute)
 sem_Attribute (ReadNoneAttribute) =
     (sem_Attribute_ReadNoneAttribute)
 sem_Attribute (ReadOnlyAttribute) =
     (sem_Attribute_ReadOnlyAttribute)
-sem_Attribute (SExtAttribute) =
-    (sem_Attribute_SExtAttribute)
+sem_Attribute (NoInlineAttribute) =
+    (sem_Attribute_NoInlineAttribute)
+sem_Attribute (AlwaysInlineAttribute) =
+    (sem_Attribute_AlwaysInlineAttribute)
+sem_Attribute (OptimizeForSizeAttribute) =
+    (sem_Attribute_OptimizeForSizeAttribute)
 sem_Attribute (StackProtectAttribute) =
     (sem_Attribute_StackProtectAttribute)
 sem_Attribute (StackProtectReqAttribute) =
     (sem_Attribute_StackProtectReqAttribute)
-sem_Attribute (StructRetAttribute) =
-    (sem_Attribute_StructRetAttribute)
-sem_Attribute (ZExtAttribute) =
-    (sem_Attribute_ZExtAttribute)
+sem_Attribute (NoCaptureAttribute) =
+    (sem_Attribute_NoCaptureAttribute)
+sem_Attribute (NoRedZoneAttribute) =
+    (sem_Attribute_NoRedZoneAttribute)
+sem_Attribute (NoImplicitFloatAttribute) =
+    (sem_Attribute_NoImplicitFloatAttribute)
+sem_Attribute (NakedAttribute) =
+    (sem_Attribute_NakedAttribute)
 -- semantic domain
 type T_Attribute = ( Attribute)
 data Inh_Attribute = Inh_Attribute {}
@@ -495,83 +495,19 @@ wrap_Attribute :: T_Attribute ->
 wrap_Attribute sem (Inh_Attribute) =
     (let ( _lhsOself) = sem
      in  (Syn_Attribute _lhsOself))
-sem_Attribute_AlwaysInlineAttribute :: T_Attribute
-sem_Attribute_AlwaysInlineAttribute =
+sem_Attribute_ZExtAttribute :: T_Attribute
+sem_Attribute_ZExtAttribute =
     (let _lhsOself :: Attribute
          _self =
-             AlwaysInlineAttribute
+             ZExtAttribute
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Attribute_ByValAttribute :: T_Attribute
-sem_Attribute_ByValAttribute =
+sem_Attribute_SExtAttribute :: T_Attribute
+sem_Attribute_SExtAttribute =
     (let _lhsOself :: Attribute
          _self =
-             ByValAttribute
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_Attribute_InRegAttribute :: T_Attribute
-sem_Attribute_InRegAttribute =
-    (let _lhsOself :: Attribute
-         _self =
-             InRegAttribute
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_Attribute_NakedAttribute :: T_Attribute
-sem_Attribute_NakedAttribute =
-    (let _lhsOself :: Attribute
-         _self =
-             NakedAttribute
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_Attribute_NestAttribute :: T_Attribute
-sem_Attribute_NestAttribute =
-    (let _lhsOself :: Attribute
-         _self =
-             NestAttribute
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_Attribute_NoAliasAttribute :: T_Attribute
-sem_Attribute_NoAliasAttribute =
-    (let _lhsOself :: Attribute
-         _self =
-             NoAliasAttribute
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_Attribute_NoCaptureAttribute :: T_Attribute
-sem_Attribute_NoCaptureAttribute =
-    (let _lhsOself :: Attribute
-         _self =
-             NoCaptureAttribute
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_Attribute_NoImplicitFloatAttribute :: T_Attribute
-sem_Attribute_NoImplicitFloatAttribute =
-    (let _lhsOself :: Attribute
-         _self =
-             NoImplicitFloatAttribute
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_Attribute_NoInlineAttribute :: T_Attribute
-sem_Attribute_NoInlineAttribute =
-    (let _lhsOself :: Attribute
-         _self =
-             NoInlineAttribute
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_Attribute_NoRedZoneAttribute :: T_Attribute
-sem_Attribute_NoRedZoneAttribute =
-    (let _lhsOself :: Attribute
-         _self =
-             NoRedZoneAttribute
+             SExtAttribute
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -583,6 +519,22 @@ sem_Attribute_NoReturnAttribute =
          _lhsOself =
              _self
      in  ( _lhsOself))
+sem_Attribute_InRegAttribute :: T_Attribute
+sem_Attribute_InRegAttribute =
+    (let _lhsOself :: Attribute
+         _self =
+             InRegAttribute
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Attribute_StructRetAttribute :: T_Attribute
+sem_Attribute_StructRetAttribute =
+    (let _lhsOself :: Attribute
+         _self =
+             StructRetAttribute
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 sem_Attribute_NoUnwindAttribute :: T_Attribute
 sem_Attribute_NoUnwindAttribute =
     (let _lhsOself :: Attribute
@@ -591,11 +543,27 @@ sem_Attribute_NoUnwindAttribute =
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Attribute_OptimizeForSizeAttribute :: T_Attribute
-sem_Attribute_OptimizeForSizeAttribute =
+sem_Attribute_NoAliasAttribute :: T_Attribute
+sem_Attribute_NoAliasAttribute =
     (let _lhsOself :: Attribute
          _self =
-             OptimizeForSizeAttribute
+             NoAliasAttribute
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Attribute_ByValAttribute :: T_Attribute
+sem_Attribute_ByValAttribute =
+    (let _lhsOself :: Attribute
+         _self =
+             ByValAttribute
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Attribute_NestAttribute :: T_Attribute
+sem_Attribute_NestAttribute =
+    (let _lhsOself :: Attribute
+         _self =
+             NestAttribute
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -615,11 +583,27 @@ sem_Attribute_ReadOnlyAttribute =
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Attribute_SExtAttribute :: T_Attribute
-sem_Attribute_SExtAttribute =
+sem_Attribute_NoInlineAttribute :: T_Attribute
+sem_Attribute_NoInlineAttribute =
     (let _lhsOself :: Attribute
          _self =
-             SExtAttribute
+             NoInlineAttribute
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Attribute_AlwaysInlineAttribute :: T_Attribute
+sem_Attribute_AlwaysInlineAttribute =
+    (let _lhsOself :: Attribute
+         _self =
+             AlwaysInlineAttribute
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Attribute_OptimizeForSizeAttribute :: T_Attribute
+sem_Attribute_OptimizeForSizeAttribute =
+    (let _lhsOself :: Attribute
+         _self =
+             OptimizeForSizeAttribute
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -639,19 +623,35 @@ sem_Attribute_StackProtectReqAttribute =
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Attribute_StructRetAttribute :: T_Attribute
-sem_Attribute_StructRetAttribute =
+sem_Attribute_NoCaptureAttribute :: T_Attribute
+sem_Attribute_NoCaptureAttribute =
     (let _lhsOself :: Attribute
          _self =
-             StructRetAttribute
+             NoCaptureAttribute
          _lhsOself =
              _self
      in  ( _lhsOself))
-sem_Attribute_ZExtAttribute :: T_Attribute
-sem_Attribute_ZExtAttribute =
+sem_Attribute_NoRedZoneAttribute :: T_Attribute
+sem_Attribute_NoRedZoneAttribute =
     (let _lhsOself :: Attribute
          _self =
-             ZExtAttribute
+             NoRedZoneAttribute
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Attribute_NoImplicitFloatAttribute :: T_Attribute
+sem_Attribute_NoImplicitFloatAttribute =
+    (let _lhsOself :: Attribute
+         _self =
+             NoImplicitFloatAttribute
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_Attribute_NakedAttribute :: T_Attribute
+sem_Attribute_NakedAttribute =
+    (let _lhsOself :: Attribute
+         _self =
+             NakedAttribute
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -719,8 +719,8 @@ sem_BasicBlock_BasicBlock :: T_Identifier ->
 sem_BasicBlock_BasicBlock label_ instrs_ =
     (\ _lhsIfname
        _lhsIilabel ->
-         (let _lhsOppccfg :: Doc
-              _lhsOpp :: Doc
+         (let _lhsOpp :: Doc
+              _lhsOppccfg :: Doc
               _lhsOilabel :: ILabel
               _ilabel :: ILabel
               _lhsOself :: BasicBlock
@@ -730,22 +730,22 @@ sem_BasicBlock_BasicBlock label_ instrs_ =
               _instrsIpp :: Doc
               _instrsIppccfg :: Doc
               _instrsIself :: Instructions
+              _lhsOpp =
+                  ({-# LINE 72 "src/Language/LLVMIR/Printer/Module.ag" #-}
+                   text "; <label>:" <> _labelIpp <$> _instrsIpp
+                   {-# LINE 737 "src/Concurrent/Model/Visualizer.hs" #-}
+                   )
               _lhsOppccfg =
-                  ({-# LINE 60 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 60 "./src/Concurrent/Model/Visualizer.ag" #-}
                    text "subgraph cluster_" <> text _lhsIfname <> int _ilabel <+> text "{" </>
                    text "style=filled;" </>
                    text "color=gray;" </>
                    _instrsIppccfg </>
                    text "label = \"basic block" <+> _labelIpp <> text "\"; }"
-                   {-# LINE 741 "src/Concurrent/Model/Visualizer.hs" #-}
-                   )
-              _lhsOpp =
-                  ({-# LINE 72 "src/Language/LLVMIR/Printer/Module.ag" #-}
-                   text "; <label>:" <> _labelIpp <$> _instrsIpp
                    {-# LINE 746 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               (_lhsOilabel,_ilabel) =
-                  ({-# LINE 65 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 65 "./src/Concurrent/Model/Visualizer.ag" #-}
                    let __cont = _lhsIilabel in seq __cont ( case nextUnique __cont of { (__cont, ilabel) -> (__cont,ilabel)} )
                    {-# LINE 751 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -804,7 +804,7 @@ sem_BasicBlocks_Cons hd_ tl_ =
                    {-# LINE 805 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _lhsOppccfg =
-                  ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 32 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _hdIppccfg <$> _tlIppccfg
                    {-# LINE 810 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -813,27 +813,27 @@ sem_BasicBlocks_Cons hd_ tl_ =
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _tlIilabel
                    {-# LINE 819 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _hdOfname =
-                  ({-# LINE 35 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 35 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIfname
                    {-# LINE 824 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _hdOilabel =
-                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
                    {-# LINE 829 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _tlOfname =
-                  ({-# LINE 35 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 35 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIfname
                    {-# LINE 834 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _tlOilabel =
-                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _hdIilabel
                    {-# LINE 839 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -856,7 +856,7 @@ sem_BasicBlocks_Nil =
                    {-# LINE 857 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _lhsOppccfg =
-                  ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 32 "./src/Concurrent/Model/Visualizer.ag" #-}
                    P.empty
                    {-# LINE 862 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -865,7 +865,7 @@ sem_BasicBlocks_Nil =
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
                    {-# LINE 871 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -874,28 +874,28 @@ sem_BasicBlocks_Nil =
 -- cata
 sem_BinOp :: BinOp ->
              T_BinOp
+sem_BinOp (OpXchg) =
+    (sem_BinOp_OpXchg)
 sem_BinOp (OpAdd) =
     (sem_BinOp_OpAdd)
+sem_BinOp (OpSub) =
+    (sem_BinOp_OpSub)
 sem_BinOp (OpAnd) =
     (sem_BinOp_OpAnd)
-sem_BinOp (OpMax) =
-    (sem_BinOp_OpMax)
-sem_BinOp (OpMin) =
-    (sem_BinOp_OpMin)
 sem_BinOp (OpNand) =
     (sem_BinOp_OpNand)
 sem_BinOp (OpOr) =
     (sem_BinOp_OpOr)
-sem_BinOp (OpSub) =
-    (sem_BinOp_OpSub)
+sem_BinOp (OpXor) =
+    (sem_BinOp_OpXor)
+sem_BinOp (OpMax) =
+    (sem_BinOp_OpMax)
+sem_BinOp (OpMin) =
+    (sem_BinOp_OpMin)
 sem_BinOp (OpUMax) =
     (sem_BinOp_OpUMax)
 sem_BinOp (OpUMin) =
     (sem_BinOp_OpUMin)
-sem_BinOp (OpXchg) =
-    (sem_BinOp_OpXchg)
-sem_BinOp (OpXor) =
-    (sem_BinOp_OpXor)
 -- semantic domain
 type T_BinOp = ( Doc,BinOp)
 data Inh_BinOp = Inh_BinOp {}
@@ -906,6 +906,20 @@ wrap_BinOp :: T_BinOp ->
 wrap_BinOp sem (Inh_BinOp) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_BinOp _lhsOpp _lhsOself))
+sem_BinOp_OpXchg :: T_BinOp
+sem_BinOp_OpXchg =
+    (let _lhsOpp :: Doc
+         _lhsOself :: BinOp
+         _lhsOpp =
+             ({-# LINE 161 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "xchg"
+              {-# LINE 917 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             OpXchg
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
 sem_BinOp_OpAdd :: T_BinOp
 sem_BinOp_OpAdd =
     (let _lhsOpp :: Doc
@@ -913,10 +927,24 @@ sem_BinOp_OpAdd =
          _lhsOpp =
              ({-# LINE 162 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "add"
-              {-# LINE 917 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 931 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpAdd
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_BinOp_OpSub :: T_BinOp
+sem_BinOp_OpSub =
+    (let _lhsOpp :: Doc
+         _lhsOself :: BinOp
+         _lhsOpp =
+             ({-# LINE 163 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "sub"
+              {-# LINE 945 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             OpSub
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -927,38 +955,10 @@ sem_BinOp_OpAnd =
          _lhsOpp =
              ({-# LINE 164 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "and"
-              {-# LINE 931 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             OpAnd
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_BinOp_OpMax :: T_BinOp
-sem_BinOp_OpMax =
-    (let _lhsOpp :: Doc
-         _lhsOself :: BinOp
-         _lhsOpp =
-             ({-# LINE 168 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "max"
-              {-# LINE 945 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             OpMax
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_BinOp_OpMin :: T_BinOp
-sem_BinOp_OpMin =
-    (let _lhsOpp :: Doc
-         _lhsOself :: BinOp
-         _lhsOpp =
-             ({-# LINE 169 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "min"
               {-# LINE 959 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             OpMin
+             OpAnd
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -990,17 +990,45 @@ sem_BinOp_OpOr =
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_BinOp_OpSub :: T_BinOp
-sem_BinOp_OpSub =
+sem_BinOp_OpXor :: T_BinOp
+sem_BinOp_OpXor =
     (let _lhsOpp :: Doc
          _lhsOself :: BinOp
          _lhsOpp =
-             ({-# LINE 163 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "sub"
+             ({-# LINE 167 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "xor"
               {-# LINE 1001 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             OpSub
+             OpXor
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_BinOp_OpMax :: T_BinOp
+sem_BinOp_OpMax =
+    (let _lhsOpp :: Doc
+         _lhsOself :: BinOp
+         _lhsOpp =
+             ({-# LINE 168 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "max"
+              {-# LINE 1015 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             OpMax
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_BinOp_OpMin :: T_BinOp
+sem_BinOp_OpMin =
+    (let _lhsOpp :: Doc
+         _lhsOself :: BinOp
+         _lhsOpp =
+             ({-# LINE 169 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "min"
+              {-# LINE 1029 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             OpMin
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -1011,7 +1039,7 @@ sem_BinOp_OpUMax =
          _lhsOpp =
              ({-# LINE 170 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "umax"
-              {-# LINE 1015 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1043 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              OpUMax
@@ -1025,38 +1053,10 @@ sem_BinOp_OpUMin =
          _lhsOpp =
              ({-# LINE 171 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "umin"
-              {-# LINE 1029 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             OpUMin
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_BinOp_OpXchg :: T_BinOp
-sem_BinOp_OpXchg =
-    (let _lhsOpp :: Doc
-         _lhsOself :: BinOp
-         _lhsOpp =
-             ({-# LINE 161 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "xchg"
-              {-# LINE 1043 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             OpXchg
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_BinOp_OpXor :: T_BinOp
-sem_BinOp_OpXor =
-    (let _lhsOpp :: Doc
-         _lhsOself :: BinOp
-         _lhsOpp =
-             ({-# LINE 167 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "xor"
               {-# LINE 1057 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             OpXor
+             OpUMin
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -1064,16 +1064,16 @@ sem_BinOp_OpXor =
 -- cata
 sem_CConv :: CConv ->
              T_CConv
-sem_CConv (Cc _n) =
-    (sem_CConv_Cc _n)
-sem_CConv (Cc10) =
-    (sem_CConv_Cc10)
 sem_CConv (Ccc) =
     (sem_CConv_Ccc)
-sem_CConv (Coldcc) =
-    (sem_CConv_Coldcc)
 sem_CConv (Fastcc) =
     (sem_CConv_Fastcc)
+sem_CConv (Coldcc) =
+    (sem_CConv_Coldcc)
+sem_CConv (Cc10) =
+    (sem_CConv_Cc10)
+sem_CConv (Cc _n) =
+    (sem_CConv_Cc _n)
 -- semantic domain
 type T_CConv = ( CConv)
 data Inh_CConv = Inh_CConv {}
@@ -1084,36 +1084,11 @@ wrap_CConv :: T_CConv ->
 wrap_CConv sem (Inh_CConv) =
     (let ( _lhsOself) = sem
      in  (Syn_CConv _lhsOself))
-sem_CConv_Cc :: Int ->
-                T_CConv
-sem_CConv_Cc n_ =
-    (let _lhsOself :: CConv
-         _self =
-             Cc n_
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_CConv_Cc10 :: T_CConv
-sem_CConv_Cc10 =
-    (let _lhsOself :: CConv
-         _self =
-             Cc10
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
 sem_CConv_Ccc :: T_CConv
 sem_CConv_Ccc =
     (let _lhsOself :: CConv
          _self =
              Ccc
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_CConv_Coldcc :: T_CConv
-sem_CConv_Coldcc =
-    (let _lhsOself :: CConv
-         _self =
-             Coldcc
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -1125,14 +1100,39 @@ sem_CConv_Fastcc =
          _lhsOself =
              _self
      in  ( _lhsOself))
+sem_CConv_Coldcc :: T_CConv
+sem_CConv_Coldcc =
+    (let _lhsOself :: CConv
+         _self =
+             Coldcc
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_CConv_Cc10 :: T_CConv
+sem_CConv_Cc10 =
+    (let _lhsOself :: CConv
+         _self =
+             Cc10
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_CConv_Cc :: Int ->
+                T_CConv
+sem_CConv_Cc n_ =
+    (let _lhsOself :: CConv
+         _self =
+             Cc n_
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 -- CompareConstantExpr -----------------------------------------
 -- cata
 sem_CompareConstantExpr :: CompareConstantExpr ->
                            T_CompareConstantExpr
-sem_CompareConstantExpr (FCmpExpr _cond _ty _op1 _op2) =
-    (sem_CompareConstantExpr_FCmpExpr (sem_RealPredicate _cond) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
 sem_CompareConstantExpr (ICmpExpr _cond _ty _op1 _op2) =
     (sem_CompareConstantExpr_ICmpExpr (sem_IntPredicate _cond) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_CompareConstantExpr (FCmpExpr _cond _ty _op1 _op2) =
+    (sem_CompareConstantExpr_FCmpExpr (sem_RealPredicate _cond) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
 -- semantic domain
 type T_CompareConstantExpr = ( Doc,CompareConstantExpr)
 data Inh_CompareConstantExpr = Inh_CompareConstantExpr {}
@@ -1143,40 +1143,6 @@ wrap_CompareConstantExpr :: T_CompareConstantExpr ->
 wrap_CompareConstantExpr sem (Inh_CompareConstantExpr) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_CompareConstantExpr _lhsOpp _lhsOself))
-sem_CompareConstantExpr_FCmpExpr :: T_RealPredicate ->
-                                    T_Type ->
-                                    T_Value ->
-                                    T_Value ->
-                                    T_CompareConstantExpr
-sem_CompareConstantExpr_FCmpExpr cond_ ty_ op1_ op2_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: CompareConstantExpr
-         _condIpp :: Doc
-         _condIself :: RealPredicate
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOpp =
-             ({-# LINE 289 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "icmp" <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
-              {-# LINE 1166 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FCmpExpr _condIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _condIpp,_condIself) =
-             cond_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOself))
 sem_CompareConstantExpr_ICmpExpr :: T_IntPredicate ->
                                     T_Type ->
                                     T_Value ->
@@ -1196,10 +1162,44 @@ sem_CompareConstantExpr_ICmpExpr cond_ ty_ op1_ op2_ =
          _lhsOpp =
              ({-# LINE 288 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "icmp" <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
-              {-# LINE 1200 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1166 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ICmpExpr _condIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _condIpp,_condIself) =
+             cond_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOself))
+sem_CompareConstantExpr_FCmpExpr :: T_RealPredicate ->
+                                    T_Type ->
+                                    T_Value ->
+                                    T_Value ->
+                                    T_CompareConstantExpr
+sem_CompareConstantExpr_FCmpExpr cond_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: CompareConstantExpr
+         _condIpp :: Doc
+         _condIself :: RealPredicate
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 289 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "icmp" <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
+              {-# LINE 1200 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FCmpExpr _condIself _tyIself _op1Iself _op2Iself
          _lhsOself =
              _self
          ( _condIpp,_condIself) =
@@ -1217,12 +1217,12 @@ sem_ComplexConstant :: ComplexConstant ->
                        T_ComplexConstant
 sem_ComplexConstant (ConstantAggregateZero _ty) =
     (sem_ComplexConstant_ConstantAggregateZero (sem_Type _ty))
-sem_ComplexConstant (ConstantArray _ty _vals) =
-    (sem_ComplexConstant_ConstantArray (sem_Type _ty) (sem_Values _vals))
 sem_ComplexConstant (ConstantDataSequential _cds) =
     (sem_ComplexConstant_ConstantDataSequential (sem_ConstantDataSequential _cds))
 sem_ComplexConstant (ConstantStruct _ty _vals) =
     (sem_ComplexConstant_ConstantStruct (sem_Type _ty) (sem_Values _vals))
+sem_ComplexConstant (ConstantArray _ty _vals) =
+    (sem_ComplexConstant_ConstantArray (sem_Type _ty) (sem_Values _vals))
 sem_ComplexConstant (ConstantVector _ty _vals) =
     (sem_ComplexConstant_ConstantVector (sem_Type _ty) (sem_Values _vals))
 -- semantic domain
@@ -1254,30 +1254,6 @@ sem_ComplexConstant_ConstantAggregateZero ty_ =
          ( _tyIpp,_tyIself) =
              ty_
      in  ( _lhsOpp,_lhsOself))
-sem_ComplexConstant_ConstantArray :: T_Type ->
-                                     T_Values ->
-                                     T_ComplexConstant
-sem_ComplexConstant_ConstantArray ty_ vals_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: ComplexConstant
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _valsIpp :: Doc
-         _valsIself :: Values
-         _lhsOpp =
-             ({-# LINE 262 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _tyIpp <+> brackets _valsIpp
-              {-# LINE 1271 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             ConstantArray _tyIself _valsIself
-         _lhsOself =
-             _self
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _valsIpp,_valsIself) =
-             vals_
-     in  ( _lhsOpp,_lhsOself))
 sem_ComplexConstant_ConstantDataSequential :: T_ConstantDataSequential ->
                                               T_ComplexConstant
 sem_ComplexConstant_ConstantDataSequential cds_ =
@@ -1288,7 +1264,7 @@ sem_ComplexConstant_ConstantDataSequential cds_ =
          _lhsOpp =
              ({-# LINE 263 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _cdsIpp
-              {-# LINE 1292 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1268 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantDataSequential _cdsIself
@@ -1310,10 +1286,34 @@ sem_ComplexConstant_ConstantStruct ty_ vals_ =
          _lhsOpp =
              ({-# LINE 264 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> braces _valsIpp
-              {-# LINE 1314 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1290 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantStruct _tyIself _valsIself
+         _lhsOself =
+             _self
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _valsIpp,_valsIself) =
+             vals_
+     in  ( _lhsOpp,_lhsOself))
+sem_ComplexConstant_ConstantArray :: T_Type ->
+                                     T_Values ->
+                                     T_ComplexConstant
+sem_ComplexConstant_ConstantArray ty_ vals_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: ComplexConstant
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _valsIpp :: Doc
+         _valsIself :: Values
+         _lhsOpp =
+             ({-# LINE 262 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _tyIpp <+> brackets _valsIpp
+              {-# LINE 1314 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             ConstantArray _tyIself _valsIself
          _lhsOself =
              _self
          ( _tyIpp,_tyIself) =
@@ -1349,20 +1349,20 @@ sem_ComplexConstant_ConstantVector ty_ vals_ =
 -- cata
 sem_Constant :: Constant ->
                 T_Constant
-sem_Constant (BlockAddr) =
-    (sem_Constant_BlockAddr)
-sem_Constant (CmpConst _cc) =
-    (sem_Constant_CmpConst (sem_ComplexConstant _cc))
-sem_Constant (ConstantExpr _expr) =
-    (sem_Constant_ConstantExpr (sem_ConstantExpr _expr))
-sem_Constant (GlobalValue _gv) =
-    (sem_Constant_GlobalValue (sem_GlobalValue _gv))
-sem_Constant (PoisonValue) =
-    (sem_Constant_PoisonValue)
-sem_Constant (SmpConst _sc) =
-    (sem_Constant_SmpConst (sem_SimpleConstant _sc))
 sem_Constant (UndefValue) =
     (sem_Constant_UndefValue)
+sem_Constant (PoisonValue) =
+    (sem_Constant_PoisonValue)
+sem_Constant (BlockAddr) =
+    (sem_Constant_BlockAddr)
+sem_Constant (SmpConst _sc) =
+    (sem_Constant_SmpConst (sem_SimpleConstant _sc))
+sem_Constant (CmpConst _cc) =
+    (sem_Constant_CmpConst (sem_ComplexConstant _cc))
+sem_Constant (GlobalValue _gv) =
+    (sem_Constant_GlobalValue (sem_GlobalValue _gv))
+sem_Constant (ConstantExpr _expr) =
+    (sem_Constant_ConstantExpr (sem_ConstantExpr _expr))
 -- semantic domain
 type T_Constant = ( Doc,Constant)
 data Inh_Constant = Inh_Constant {}
@@ -1373,76 +1373,19 @@ wrap_Constant :: T_Constant ->
 wrap_Constant sem (Inh_Constant) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_Constant _lhsOpp _lhsOself))
-sem_Constant_BlockAddr :: T_Constant
-sem_Constant_BlockAddr =
+sem_Constant_UndefValue :: T_Constant
+sem_Constant_UndefValue =
     (let _lhsOpp :: Doc
          _lhsOself :: Constant
          _lhsOpp =
-             ({-# LINE 248 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "blockaddr"
+             ({-# LINE 247 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "undef"
               {-# LINE 1384 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             BlockAddr
+             UndefValue
          _lhsOself =
              _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Constant_CmpConst :: T_ComplexConstant ->
-                         T_Constant
-sem_Constant_CmpConst cc_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Constant
-         _ccIpp :: Doc
-         _ccIself :: ComplexConstant
-         _lhsOpp =
-             ({-# LINE 251 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _ccIpp
-              {-# LINE 1401 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             CmpConst _ccIself
-         _lhsOself =
-             _self
-         ( _ccIpp,_ccIself) =
-             cc_
-     in  ( _lhsOpp,_lhsOself))
-sem_Constant_ConstantExpr :: T_ConstantExpr ->
-                             T_Constant
-sem_Constant_ConstantExpr expr_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Constant
-         _exprIpp :: Doc
-         _exprIself :: ConstantExpr
-         _lhsOpp =
-             ({-# LINE 252 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _exprIpp
-              {-# LINE 1420 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             ConstantExpr _exprIself
-         _lhsOself =
-             _self
-         ( _exprIpp,_exprIself) =
-             expr_
-     in  ( _lhsOpp,_lhsOself))
-sem_Constant_GlobalValue :: T_GlobalValue ->
-                            T_Constant
-sem_Constant_GlobalValue gv_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Constant
-         _gvIpp :: Doc
-         _gvIself :: GlobalValue
-         _lhsOpp =
-             ({-# LINE 253 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _gvIpp
-              {-# LINE 1439 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             GlobalValue _gvIself
-         _lhsOself =
-             _self
-         ( _gvIpp,_gvIself) =
-             gv_
      in  ( _lhsOpp,_lhsOself))
 sem_Constant_PoisonValue :: T_Constant
 sem_Constant_PoisonValue =
@@ -1451,10 +1394,24 @@ sem_Constant_PoisonValue =
          _lhsOpp =
              ({-# LINE 249 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "poison"
-              {-# LINE 1455 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1398 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              PoisonValue
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Constant_BlockAddr :: T_Constant
+sem_Constant_BlockAddr =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Constant
+         _lhsOpp =
+             ({-# LINE 248 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "blockaddr"
+              {-# LINE 1412 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             BlockAddr
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -1468,7 +1425,7 @@ sem_Constant_SmpConst sc_ =
          _lhsOpp =
              ({-# LINE 250 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _scIpp
-              {-# LINE 1472 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1429 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              SmpConst _scIself
@@ -1477,19 +1434,62 @@ sem_Constant_SmpConst sc_ =
          ( _scIpp,_scIself) =
              sc_
      in  ( _lhsOpp,_lhsOself))
-sem_Constant_UndefValue :: T_Constant
-sem_Constant_UndefValue =
+sem_Constant_CmpConst :: T_ComplexConstant ->
+                         T_Constant
+sem_Constant_CmpConst cc_ =
     (let _lhsOpp :: Doc
          _lhsOself :: Constant
+         _ccIpp :: Doc
+         _ccIself :: ComplexConstant
          _lhsOpp =
-             ({-# LINE 247 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "undef"
-              {-# LINE 1488 "src/Concurrent/Model/Visualizer.hs" #-}
+             ({-# LINE 251 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _ccIpp
+              {-# LINE 1448 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             UndefValue
+             CmpConst _ccIself
          _lhsOself =
              _self
+         ( _ccIpp,_ccIself) =
+             cc_
+     in  ( _lhsOpp,_lhsOself))
+sem_Constant_GlobalValue :: T_GlobalValue ->
+                            T_Constant
+sem_Constant_GlobalValue gv_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Constant
+         _gvIpp :: Doc
+         _gvIself :: GlobalValue
+         _lhsOpp =
+             ({-# LINE 253 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _gvIpp
+              {-# LINE 1467 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             GlobalValue _gvIself
+         _lhsOself =
+             _self
+         ( _gvIpp,_gvIself) =
+             gv_
+     in  ( _lhsOpp,_lhsOself))
+sem_Constant_ConstantExpr :: T_ConstantExpr ->
+                             T_Constant
+sem_Constant_ConstantExpr expr_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Constant
+         _exprIpp :: Doc
+         _exprIself :: ConstantExpr
+         _lhsOpp =
+             ({-# LINE 252 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _exprIpp
+              {-# LINE 1486 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             ConstantExpr _exprIself
+         _lhsOself =
+             _self
+         ( _exprIpp,_exprIself) =
+             expr_
      in  ( _lhsOpp,_lhsOself))
 -- ConstantDataSequential --------------------------------------
 -- cata
@@ -1754,10 +1754,10 @@ sem_ConstantExpr_UnaryConstantExpr name_ op_ val_ ty_ =
 -- cata
 sem_ConstantFP :: ConstantFP ->
                   T_ConstantFP
-sem_ConstantFP (ConstantFPDouble _dbv _ty) =
-    (sem_ConstantFP_ConstantFPDouble _dbv (sem_Type _ty))
 sem_ConstantFP (ConstantFPFloat _fpv _ty) =
     (sem_ConstantFP_ConstantFPFloat _fpv (sem_Type _ty))
+sem_ConstantFP (ConstantFPDouble _dbv _ty) =
+    (sem_ConstantFP_ConstantFPDouble _dbv (sem_Type _ty))
 -- semantic domain
 type T_ConstantFP = ( Doc,ConstantFP)
 data Inh_ConstantFP = Inh_ConstantFP {}
@@ -1768,26 +1768,6 @@ wrap_ConstantFP :: T_ConstantFP ->
 wrap_ConstantFP sem (Inh_ConstantFP) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_ConstantFP _lhsOpp _lhsOself))
-sem_ConstantFP_ConstantFPDouble :: Double ->
-                                   T_Type ->
-                                   T_ConstantFP
-sem_ConstantFP_ConstantFPDouble dbv_ ty_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: ConstantFP
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOpp =
-             ({-# LINE 269 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _tyIpp <+> double dbv_
-              {-# LINE 1783 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             ConstantFPDouble dbv_ _tyIself
-         _lhsOself =
-             _self
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOself))
 sem_ConstantFP_ConstantFPFloat :: Float ->
                                   T_Type ->
                                   T_ConstantFP
@@ -1799,10 +1779,30 @@ sem_ConstantFP_ConstantFPFloat fpv_ ty_ =
          _lhsOpp =
              ({-# LINE 268 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> float fpv_
-              {-# LINE 1803 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 1783 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantFPFloat fpv_ _tyIself
+         _lhsOself =
+             _self
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOself))
+sem_ConstantFP_ConstantFPDouble :: Double ->
+                                   T_Type ->
+                                   T_ConstantFP
+sem_ConstantFP_ConstantFPDouble dbv_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: ConstantFP
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 269 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _tyIpp <+> double dbv_
+              {-# LINE 1803 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             ConstantFPDouble dbv_ _tyIself
          _lhsOself =
              _self
          ( _tyIpp,_tyIself) =
@@ -1883,10 +1883,10 @@ sem_DataLayout_DataLayout s_ =
 -- cata
 sem_DefinitionTy :: DefinitionTy ->
                     T_DefinitionTy
-sem_DefinitionTy (ConstantD) =
-    (sem_DefinitionTy_ConstantD)
 sem_DefinitionTy (ThreadLocal) =
     (sem_DefinitionTy_ThreadLocal)
+sem_DefinitionTy (ConstantD) =
+    (sem_DefinitionTy_ConstantD)
 -- semantic domain
 type T_DefinitionTy = ( DefinitionTy)
 data Inh_DefinitionTy = Inh_DefinitionTy {}
@@ -1897,19 +1897,19 @@ wrap_DefinitionTy :: T_DefinitionTy ->
 wrap_DefinitionTy sem (Inh_DefinitionTy) =
     (let ( _lhsOself) = sem
      in  (Syn_DefinitionTy _lhsOself))
-sem_DefinitionTy_ConstantD :: T_DefinitionTy
-sem_DefinitionTy_ConstantD =
-    (let _lhsOself :: DefinitionTy
-         _self =
-             ConstantD
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
 sem_DefinitionTy_ThreadLocal :: T_DefinitionTy
 sem_DefinitionTy_ThreadLocal =
     (let _lhsOself :: DefinitionTy
          _self =
              ThreadLocal
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
+sem_DefinitionTy_ConstantD :: T_DefinitionTy
+sem_DefinitionTy_ConstantD =
+    (let _lhsOself :: DefinitionTy
+         _self =
+             ConstantD
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -1923,6 +1923,8 @@ sem_FunAttr (Alignstack _n) =
     (sem_FunAttr_Alignstack _n)
 sem_FunAttr (Alwaysinline) =
     (sem_FunAttr_Alwaysinline)
+sem_FunAttr (Nonlazybind) =
+    (sem_FunAttr_Nonlazybind)
 sem_FunAttr (Inlinehint) =
     (sem_FunAttr_Inlinehint)
 sem_FunAttr (Naked) =
@@ -1931,8 +1933,6 @@ sem_FunAttr (Noimplicitfloat) =
     (sem_FunAttr_Noimplicitfloat)
 sem_FunAttr (Noinline) =
     (sem_FunAttr_Noinline)
-sem_FunAttr (Nonlazybind) =
-    (sem_FunAttr_Nonlazybind)
 sem_FunAttr (Noredzone) =
     (sem_FunAttr_Noredzone)
 sem_FunAttr (Noreturn) =
@@ -1988,6 +1988,14 @@ sem_FunAttr_Alwaysinline =
          _lhsOself =
              _self
      in  ( _lhsOself))
+sem_FunAttr_Nonlazybind :: T_FunAttr
+sem_FunAttr_Nonlazybind =
+    (let _lhsOself :: FunAttr
+         _self =
+             Nonlazybind
+         _lhsOself =
+             _self
+     in  ( _lhsOself))
 sem_FunAttr_Inlinehint :: T_FunAttr
 sem_FunAttr_Inlinehint =
     (let _lhsOself :: FunAttr
@@ -2017,14 +2025,6 @@ sem_FunAttr_Noinline =
     (let _lhsOself :: FunAttr
          _self =
              Noinline
-         _lhsOself =
-             _self
-     in  ( _lhsOself))
-sem_FunAttr_Nonlazybind :: T_FunAttr
-sem_FunAttr_Nonlazybind =
-    (let _lhsOself :: FunAttr
-         _self =
-             Nonlazybind
          _lhsOself =
              _self
      in  ( _lhsOself))
@@ -2152,10 +2152,10 @@ sem_FuncAttrs_Nil =
 -- cata
 sem_Function :: Function ->
                 T_Function
-sem_Function (FunctionDecl _name _linkage _retty _isVar _params) =
-    (sem_Function_FunctionDecl (sem_Identifier _name) (sem_Linkage _linkage) (sem_Type _retty) _isVar (sem_Parameters _params))
 sem_Function (FunctionDef _name _linkage _retty _isVar _params _body) =
     (sem_Function_FunctionDef (sem_Identifier _name) (sem_Linkage _linkage) (sem_Type _retty) _isVar (sem_Parameters _params) (sem_BasicBlocks _body))
+sem_Function (FunctionDecl _name _linkage _retty _isVar _params) =
+    (sem_Function_FunctionDecl (sem_Identifier _name) (sem_Linkage _linkage) (sem_Type _retty) _isVar (sem_Parameters _params))
 -- semantic domain
 type T_Function = ILabel ->
                   ( ILabel,Doc,Doc,Function)
@@ -2167,55 +2167,6 @@ wrap_Function :: T_Function ->
 wrap_Function sem (Inh_Function _lhsIilabel) =
     (let ( _lhsOilabel,_lhsOpp,_lhsOppccfg,_lhsOself) = sem _lhsIilabel
      in  (Syn_Function _lhsOilabel _lhsOpp _lhsOppccfg _lhsOself))
-sem_Function_FunctionDecl :: T_Identifier ->
-                             T_Linkage ->
-                             T_Type ->
-                             Bool ->
-                             T_Parameters ->
-                             T_Function
-sem_Function_FunctionDecl name_ linkage_ retty_ isVar_ params_ =
-    (\ _lhsIilabel ->
-         (let _lhsOppccfg :: Doc
-              _lhsOpp :: Doc
-              _lhsOself :: Function
-              _lhsOilabel :: ILabel
-              _nameIpp :: Doc
-              _nameIppccfg :: Doc
-              _nameIself :: Identifier
-              _linkageIpp :: Doc
-              _linkageIself :: Linkage
-              _rettyIpp :: Doc
-              _rettyIself :: Type
-              _paramsIpp :: Doc
-              _paramsIself :: Parameters
-              _lhsOppccfg =
-                  ({-# LINE 46 "src/Concurrent/Model/Visualizer.ag" #-}
-                   P.empty
-                   {-# LINE 2195 "src/Concurrent/Model/Visualizer.hs" #-}
-                   )
-              _lhsOpp =
-                  ({-# LINE 66 "src/Language/LLVMIR/Printer/Module.ag" #-}
-                   text "declare" <+> _linkageIpp <+> _rettyIpp <+> _nameIpp <> parens _paramsIpp
-                   {-# LINE 2200 "src/Concurrent/Model/Visualizer.hs" #-}
-                   )
-              _self =
-                  FunctionDecl _nameIself _linkageIself _rettyIself isVar_ _paramsIself
-              _lhsOself =
-                  _self
-              _lhsOilabel =
-                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
-                   _lhsIilabel
-                   {-# LINE 2209 "src/Concurrent/Model/Visualizer.hs" #-}
-                   )
-              ( _nameIpp,_nameIppccfg,_nameIself) =
-                  name_
-              ( _linkageIpp,_linkageIself) =
-                  linkage_
-              ( _rettyIpp,_rettyIself) =
-                  retty_
-              ( _paramsIpp,_paramsIself) =
-                  params_
-          in  ( _lhsOilabel,_lhsOpp,_lhsOppccfg,_lhsOself)))
 sem_Function_FunctionDef :: T_Identifier ->
                             T_Linkage ->
                             T_Type ->
@@ -2225,9 +2176,9 @@ sem_Function_FunctionDef :: T_Identifier ->
                             T_Function
 sem_Function_FunctionDef name_ linkage_ retty_ isVar_ params_ body_ =
     (\ _lhsIilabel ->
-         (let _lhsOppccfg :: Doc
+         (let _lhsOpp :: Doc
+              _lhsOppccfg :: Doc
               _bodyOfname :: String
-              _lhsOpp :: Doc
               _bodyOilabel :: ILabel
               _ilabel :: ILabel
               _lhsOself :: Function
@@ -2245,40 +2196,40 @@ sem_Function_FunctionDef name_ linkage_ retty_ isVar_ params_ body_ =
               _bodyIpp :: Doc
               _bodyIppccfg :: Doc
               _bodyIself :: BasicBlocks
+              _lhsOpp =
+                  ({-# LINE 65 "src/Language/LLVMIR/Printer/Module.ag" #-}
+                   text "define"  <+> _linkageIpp <+> _rettyIpp <+> _nameIpp <> parens _paramsIpp <> char '{' <$> _bodyIpp <$> char '}'
+                   {-# LINE 2203 "src/Concurrent/Model/Visualizer.hs" #-}
+                   )
               _lhsOppccfg =
-                  ({-# LINE 48 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 48 "./src/Concurrent/Model/Visualizer.ag" #-}
                    text "subgraph cluster_" <> _nameIppccfg <+> text "{" </>
                    text "style=filled;" </>
                    text "color=lightblue;" </>
                    _bodyIppccfg </>
                    text "label = \"function" <+> _nameIppccfg <> text "\"; }"
-                   {-# LINE 2256 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2212 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _bodyOfname =
-                  ({-# LINE 54 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 54 "./src/Concurrent/Model/Visualizer.ag" #-}
                    case _nameIself of
                      Global x -> x
                      Local  y -> error "Visualizer: Function should always be a Global"
-                   {-# LINE 2263 "src/Concurrent/Model/Visualizer.hs" #-}
-                   )
-              _lhsOpp =
-                  ({-# LINE 65 "src/Language/LLVMIR/Printer/Module.ag" #-}
-                   text "define"  <+> _linkageIpp <+> _rettyIpp <+> _nameIpp <> parens _paramsIpp <> char '{' <$> _bodyIpp <$> char '}'
-                   {-# LINE 2268 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2219 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               (_bodyOilabel,_ilabel) =
-                  ({-# LINE 53 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 53 "./src/Concurrent/Model/Visualizer.ag" #-}
                    let __cont = _lhsIilabel in seq __cont ( case nextUnique __cont of { (__cont, ilabel) -> (__cont,ilabel)} )
-                   {-# LINE 2273 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2224 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _self =
                   FunctionDef _nameIself _linkageIself _rettyIself isVar_ _paramsIself _bodyIself
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _ilabel
-                   {-# LINE 2282 "src/Concurrent/Model/Visualizer.hs" #-}
+                   {-# LINE 2233 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               ( _nameIpp,_nameIppccfg,_nameIself) =
                   name_
@@ -2290,6 +2241,55 @@ sem_Function_FunctionDef name_ linkage_ retty_ isVar_ params_ body_ =
                   params_
               ( _bodyIilabel,_bodyIpp,_bodyIppccfg,_bodyIself) =
                   body_ _bodyOfname _bodyOilabel
+          in  ( _lhsOilabel,_lhsOpp,_lhsOppccfg,_lhsOself)))
+sem_Function_FunctionDecl :: T_Identifier ->
+                             T_Linkage ->
+                             T_Type ->
+                             Bool ->
+                             T_Parameters ->
+                             T_Function
+sem_Function_FunctionDecl name_ linkage_ retty_ isVar_ params_ =
+    (\ _lhsIilabel ->
+         (let _lhsOpp :: Doc
+              _lhsOppccfg :: Doc
+              _lhsOself :: Function
+              _lhsOilabel :: ILabel
+              _nameIpp :: Doc
+              _nameIppccfg :: Doc
+              _nameIself :: Identifier
+              _linkageIpp :: Doc
+              _linkageIself :: Linkage
+              _rettyIpp :: Doc
+              _rettyIself :: Type
+              _paramsIpp :: Doc
+              _paramsIself :: Parameters
+              _lhsOpp =
+                  ({-# LINE 66 "src/Language/LLVMIR/Printer/Module.ag" #-}
+                   text "declare" <+> _linkageIpp <+> _rettyIpp <+> _nameIpp <> parens _paramsIpp
+                   {-# LINE 2270 "src/Concurrent/Model/Visualizer.hs" #-}
+                   )
+              _lhsOppccfg =
+                  ({-# LINE 46 "./src/Concurrent/Model/Visualizer.ag" #-}
+                   P.empty
+                   {-# LINE 2275 "src/Concurrent/Model/Visualizer.hs" #-}
+                   )
+              _self =
+                  FunctionDecl _nameIself _linkageIself _rettyIself isVar_ _paramsIself
+              _lhsOself =
+                  _self
+              _lhsOilabel =
+                  ({-# LINE 29 "./src/Concurrent/Model/Visualizer.ag" #-}
+                   _lhsIilabel
+                   {-# LINE 2284 "src/Concurrent/Model/Visualizer.hs" #-}
+                   )
+              ( _nameIpp,_nameIppccfg,_nameIself) =
+                  name_
+              ( _linkageIpp,_linkageIself) =
+                  linkage_
+              ( _rettyIpp,_rettyIself) =
+                  retty_
+              ( _paramsIpp,_paramsIself) =
+                  params_
           in  ( _lhsOilabel,_lhsOpp,_lhsOppccfg,_lhsOself)))
 -- Functions ---------------------------------------------------
 -- cata
@@ -2314,8 +2314,8 @@ sem_Functions_Entry :: Identifier ->
                        T_Functions
 sem_Functions_Entry key_ val_ tl_ =
     (\ _lhsIilabel ->
-         (let _valOilabel :: ILabel
-              _lhsOpp :: Doc
+         (let _lhsOpp :: Doc
+              _valOilabel :: ILabel
               _lhsOself :: Functions
               _lhsOilabel :: ILabel
               _tlOilabel :: ILabel
@@ -2326,14 +2326,14 @@ sem_Functions_Entry key_ val_ tl_ =
               _tlIilabel :: ILabel
               _tlIpp :: Doc
               _tlIself :: Functions
-              _valOilabel =
-                  ({-# LINE 43 "src/Concurrent/Model/Visualizer.ag" #-}
-                   _lhsIilabel
-                   {-# LINE 2333 "src/Concurrent/Model/Visualizer.hs" #-}
-                   )
               _lhsOpp =
                   ({-# LINE 158 "src/Language/LLVMIR/Printer/Module.ag" #-}
                    _valIpp <$> _tlIpp
+                   {-# LINE 2333 "src/Concurrent/Model/Visualizer.hs" #-}
+                   )
+              _valOilabel =
+                  ({-# LINE 43 "./src/Concurrent/Model/Visualizer.ag" #-}
+                   _lhsIilabel
                    {-# LINE 2338 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _self =
@@ -2341,12 +2341,12 @@ sem_Functions_Entry key_ val_ tl_ =
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _tlIilabel
                    {-# LINE 2347 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
               _tlOilabel =
-                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _valIilabel
                    {-# LINE 2352 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -2371,7 +2371,7 @@ sem_Functions_Nil =
               _lhsOself =
                   _self
               _lhsOilabel =
-                  ({-# LINE 29 "src/Concurrent/Model/Visualizer.ag" #-}
+                  ({-# LINE 29 "./src/Concurrent/Model/Visualizer.ag" #-}
                    _lhsIilabel
                    {-# LINE 2377 "src/Concurrent/Model/Visualizer.hs" #-}
                    )
@@ -2654,18 +2654,18 @@ wrap_Identifier sem (Inh_Identifier) =
 sem_Identifier_Global :: T_Id ->
                          T_Identifier
 sem_Identifier_Global name_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Identifier
          _nameIself :: Id
-         _lhsOppccfg =
-             ({-# LINE 69 "src/Concurrent/Model/Visualizer.ag" #-}
-              text _nameIself
-              {-# LINE 2665 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 43 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '@' <> text _nameIself
+              {-# LINE 2665 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 69 "./src/Concurrent/Model/Visualizer.ag" #-}
+              text _nameIself
               {-# LINE 2670 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
@@ -2678,18 +2678,18 @@ sem_Identifier_Global name_ =
 sem_Identifier_Local :: T_Id ->
                         T_Identifier
 sem_Identifier_Local name_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Identifier
          _nameIself :: Id
-         _lhsOppccfg =
-             ({-# LINE 68 "src/Concurrent/Model/Visualizer.ag" #-}
-              text _nameIself
-              {-# LINE 2689 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 44 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '%' <> text _nameIself
+              {-# LINE 2689 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 68 "./src/Concurrent/Model/Visualizer.ag" #-}
+              text _nameIself
               {-# LINE 2694 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
@@ -2745,120 +2745,120 @@ sem_Identifiers_Nil =
 -- cata
 sem_Instruction :: Instruction ->
                    T_Instruction
-sem_Instruction (AShr _pc _id _ty _op1 _op2) =
-    (sem_Instruction_AShr (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (Add _pc _id _ty _op1 _op2) =
-    (sem_Instruction_Add (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (Alloca _pc _id _ty _align) =
-    (sem_Instruction_Alloca (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Align _align))
-sem_Instruction (And _pc _id _ty _op1 _op2) =
-    (sem_Instruction_And (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (AtomicRMW _pc _id _mptr _opval _op _ord) =
-    (sem_Instruction_AtomicRMW (sem_PC _pc) (sem_Identifier _id) (sem_Value _mptr) (sem_Value _opval) (sem_BinOp _op) (sem_AtomicOrdering _ord))
-sem_Instruction (BitCast _pc _id _v _ty) =
-    (sem_Instruction_BitCast (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (Ret _pc _r) =
+    (sem_Instruction_Ret (sem_PC _pc) (sem_RetInst _r))
 sem_Instruction (Br _pc _v _t _f) =
     (sem_Instruction_Br (sem_PC _pc) (sem_Value _v) (sem_Value _t) (sem_Value _f))
-sem_Instruction (Call _pc _mres _ty _callee _args) =
-    (sem_Instruction_Call (sem_PC _pc) (sem_Identifier _mres) (sem_Type _ty) (sem_Identifier _callee) (sem_Values _args))
-sem_Instruction (Cmpxchg _pc _id _mptr _cval _nval _ord) =
-    (sem_Instruction_Cmpxchg (sem_PC _pc) (sem_Identifier _id) (sem_Value _mptr) (sem_Value _cval) (sem_Value _nval) (sem_AtomicOrdering _ord))
-sem_Instruction (CreateThread _pc _args) =
-    (sem_Instruction_CreateThread (sem_PC _pc) (sem_Values _args))
-sem_Instruction (ExitThread _pc) =
-    (sem_Instruction_ExitThread (sem_PC _pc))
-sem_Instruction (ExtractValue _pc _id _aggr _idxs) =
-    (sem_Instruction_ExtractValue (sem_PC _pc) (sem_Identifier _id) (sem_Value _aggr) (sem_Ints _idxs))
+sem_Instruction (UBr _pc _d) =
+    (sem_Instruction_UBr (sem_PC _pc) (sem_Value _d))
+sem_Instruction (Switch _pc _ty _v _elems) =
+    (sem_Instruction_Switch (sem_PC _pc) (sem_Type _ty) (sem_Value _v) (sem_ValIdL _elems))
+sem_Instruction (Unreachable _pc) =
+    (sem_Instruction_Unreachable (sem_PC _pc))
+sem_Instruction (Add _pc _id _ty _op1 _op2) =
+    (sem_Instruction_Add (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
 sem_Instruction (FAdd _pc _id _ty _op1 _op2) =
     (sem_Instruction_FAdd (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (FCmp _pc _id _cond _ty _op1 _op2) =
-    (sem_Instruction_FCmp (sem_PC _pc) (sem_Identifier _id) (sem_RealPredicate _cond) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (FDiv _pc _id _ty _op1 _op2) =
-    (sem_Instruction_FDiv (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (FMul _pc _id _ty _op1 _op2) =
-    (sem_Instruction_FMul (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (FPExt _pc _id _v _ty) =
-    (sem_Instruction_FPExt (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
-sem_Instruction (FPToSI _pc _id _v _ty) =
-    (sem_Instruction_FPToSI (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
-sem_Instruction (FPToUI _pc _id _v _ty) =
-    (sem_Instruction_FPToUI (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
-sem_Instruction (FPTrunc _pc _id _v _ty) =
-    (sem_Instruction_FPTrunc (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
-sem_Instruction (FRem _pc _id _ty _op1 _op2) =
-    (sem_Instruction_FRem (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (Sub _pc _id _ty _op1 _op2) =
+    (sem_Instruction_Sub (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
 sem_Instruction (FSub _pc _id _ty _op1 _op2) =
     (sem_Instruction_FSub (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (GetElementPtr _pc _id _ty _struct _idxs) =
-    (sem_Instruction_GetElementPtr (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _struct) (sem_Values _idxs))
-sem_Instruction (ICmp _pc _id _cond _ty _op1 _op2) =
-    (sem_Instruction_ICmp (sem_PC _pc) (sem_Identifier _id) (sem_IntPredicate _cond) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (InsertValue _pc _id _aggr _ival _idxs) =
-    (sem_Instruction_InsertValue (sem_PC _pc) (sem_Identifier _id) (sem_Value _aggr) (sem_Value _ival) (sem_Ints _idxs))
-sem_Instruction (IntToPtr _pc _id _v _ty) =
-    (sem_Instruction_IntToPtr (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
-sem_Instruction (JoinThread _pc _id) =
-    (sem_Instruction_JoinThread (sem_PC _pc) (sem_Identifier _id))
-sem_Instruction (LShr _pc _id _ty _op1 _op2) =
-    (sem_Instruction_LShr (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (Load _pc _id _v _align) =
-    (sem_Instruction_Load (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Align _align))
 sem_Instruction (Mul _pc _id _ty _op1 _op2) =
     (sem_Instruction_Mul (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (FMul _pc _id _ty _op1 _op2) =
+    (sem_Instruction_FMul (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (UDiv _pc _id _ty _op1 _op2) =
+    (sem_Instruction_UDiv (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (SDiv _pc _id _ty _op1 _op2) =
+    (sem_Instruction_SDiv (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (FDiv _pc _id _ty _op1 _op2) =
+    (sem_Instruction_FDiv (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (URem _pc _id _ty _op1 _op2) =
+    (sem_Instruction_URem (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (SRem _pc _id _ty _op1 _op2) =
+    (sem_Instruction_SRem (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (FRem _pc _id _ty _op1 _op2) =
+    (sem_Instruction_FRem (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (Shl _pc _id _ty _op1 _op2) =
+    (sem_Instruction_Shl (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (LShr _pc _id _ty _op1 _op2) =
+    (sem_Instruction_LShr (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (AShr _pc _id _ty _op1 _op2) =
+    (sem_Instruction_AShr (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (And _pc _id _ty _op1 _op2) =
+    (sem_Instruction_And (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (Or _pc _id _ty _op1 _op2) =
+    (sem_Instruction_Or (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (Xor _pc _id _ty _op1 _op2) =
+    (sem_Instruction_Xor (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (Alloca _pc _id _ty _align) =
+    (sem_Instruction_Alloca (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Align _align))
+sem_Instruction (Store _pc _ty _v1 _v2 _align) =
+    (sem_Instruction_Store (sem_PC _pc) (sem_Type _ty) (sem_Value _v1) (sem_Value _v2) (sem_Align _align))
+sem_Instruction (Load _pc _id _v _align) =
+    (sem_Instruction_Load (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Align _align))
+sem_Instruction (GetElementPtr _pc _id _ty _struct _idxs) =
+    (sem_Instruction_GetElementPtr (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _struct) (sem_Values _idxs))
+sem_Instruction (Trunc _pc _id _v _ty) =
+    (sem_Instruction_Trunc (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (ZExt _pc _id _v _ty) =
+    (sem_Instruction_ZExt (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (SExt _pc _id _v _ty) =
+    (sem_Instruction_SExt (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (FPToUI _pc _id _v _ty) =
+    (sem_Instruction_FPToUI (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (FPToSI _pc _id _v _ty) =
+    (sem_Instruction_FPToSI (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (UIToFP _pc _id _v _ty) =
+    (sem_Instruction_UIToFP (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (SIToFP _pc _id _v _ty) =
+    (sem_Instruction_SIToFP (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (FPTrunc _pc _id _v _ty) =
+    (sem_Instruction_FPTrunc (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (FPExt _pc _id _v _ty) =
+    (sem_Instruction_FPExt (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (PtrToInt _pc _id _v _ty) =
+    (sem_Instruction_PtrToInt (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (IntToPtr _pc _id _v _ty) =
+    (sem_Instruction_IntToPtr (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (BitCast _pc _id _v _ty) =
+    (sem_Instruction_BitCast (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
+sem_Instruction (ICmp _pc _id _cond _ty _op1 _op2) =
+    (sem_Instruction_ICmp (sem_PC _pc) (sem_Identifier _id) (sem_IntPredicate _cond) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (FCmp _pc _id _cond _ty _op1 _op2) =
+    (sem_Instruction_FCmp (sem_PC _pc) (sem_Identifier _id) (sem_RealPredicate _cond) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
+sem_Instruction (PHI _pc _id _ty _vals) =
+    (sem_Instruction_PHI (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_PValues _vals))
+sem_Instruction (Call _pc _mres _ty _callee _args) =
+    (sem_Instruction_Call (sem_PC _pc) (sem_Identifier _mres) (sem_Type _ty) (sem_Identifier _callee) (sem_Values _args))
+sem_Instruction (Select _pc _id _cond _valt _valf) =
+    (sem_Instruction_Select (sem_PC _pc) (sem_Identifier _id) (sem_Value _cond) (sem_Value _valt) (sem_Value _valf))
+sem_Instruction (ExtractValue _pc _id _aggr _idxs) =
+    (sem_Instruction_ExtractValue (sem_PC _pc) (sem_Identifier _id) (sem_Value _aggr) (sem_Ints _idxs))
+sem_Instruction (InsertValue _pc _id _aggr _ival _idxs) =
+    (sem_Instruction_InsertValue (sem_PC _pc) (sem_Identifier _id) (sem_Value _aggr) (sem_Value _ival) (sem_Ints _idxs))
+sem_Instruction (Cmpxchg _pc _id _mptr _cval _nval _ord) =
+    (sem_Instruction_Cmpxchg (sem_PC _pc) (sem_Identifier _id) (sem_Value _mptr) (sem_Value _cval) (sem_Value _nval) (sem_AtomicOrdering _ord))
+sem_Instruction (AtomicRMW _pc _id _mptr _opval _op _ord) =
+    (sem_Instruction_AtomicRMW (sem_PC _pc) (sem_Identifier _id) (sem_Value _mptr) (sem_Value _opval) (sem_BinOp _op) (sem_AtomicOrdering _ord))
+sem_Instruction (CreateThread _pc _args) =
+    (sem_Instruction_CreateThread (sem_PC _pc) (sem_Values _args))
+sem_Instruction (JoinThread _pc _id) =
+    (sem_Instruction_JoinThread (sem_PC _pc) (sem_Identifier _id))
+sem_Instruction (ExitThread _pc) =
+    (sem_Instruction_ExitThread (sem_PC _pc))
 sem_Instruction (MutexInit _pc _rv _mutex) =
     (sem_Instruction_MutexInit (sem_PC _pc) (sem_Identifier _rv) (sem_Value _mutex))
 sem_Instruction (MutexLock _pc _rv _mutex) =
     (sem_Instruction_MutexLock (sem_PC _pc) (sem_Identifier _rv) (sem_Value _mutex))
 sem_Instruction (MutexUnlock _pc _rv _mutex) =
     (sem_Instruction_MutexUnlock (sem_PC _pc) (sem_Identifier _rv) (sem_Value _mutex))
-sem_Instruction (NotifyEvent _pc _event) =
-    (sem_Instruction_NotifyEvent (sem_PC _pc) _event)
-sem_Instruction (Or _pc _id _ty _op1 _op2) =
-    (sem_Instruction_Or (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (PHI _pc _id _ty _vals) =
-    (sem_Instruction_PHI (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_PValues _vals))
-sem_Instruction (PtrToInt _pc _id _v _ty) =
-    (sem_Instruction_PtrToInt (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
-sem_Instruction (Ret _pc _r) =
-    (sem_Instruction_Ret (sem_PC _pc) (sem_RetInst _r))
-sem_Instruction (SDiv _pc _id _ty _op1 _op2) =
-    (sem_Instruction_SDiv (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (SExt _pc _id _v _ty) =
-    (sem_Instruction_SExt (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
-sem_Instruction (SIToFP _pc _id _v _ty) =
-    (sem_Instruction_SIToFP (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
-sem_Instruction (SRem _pc _id _ty _op1 _op2) =
-    (sem_Instruction_SRem (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (Select _pc _id _cond _valt _valf) =
-    (sem_Instruction_Select (sem_PC _pc) (sem_Identifier _id) (sem_Value _cond) (sem_Value _valt) (sem_Value _valf))
-sem_Instruction (Shl _pc _id _ty _op1 _op2) =
-    (sem_Instruction_Shl (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (Store _pc _ty _v1 _v2 _align) =
-    (sem_Instruction_Store (sem_PC _pc) (sem_Type _ty) (sem_Value _v1) (sem_Value _v2) (sem_Align _align))
-sem_Instruction (Sub _pc _id _ty _op1 _op2) =
-    (sem_Instruction_Sub (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (Switch _pc _ty _v _elems) =
-    (sem_Instruction_Switch (sem_PC _pc) (sem_Type _ty) (sem_Value _v) (sem_ValIdL _elems))
-sem_Instruction (Trunc _pc _id _v _ty) =
-    (sem_Instruction_Trunc (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
-sem_Instruction (UBr _pc _d) =
-    (sem_Instruction_UBr (sem_PC _pc) (sem_Value _d))
-sem_Instruction (UDiv _pc _id _ty _op1 _op2) =
-    (sem_Instruction_UDiv (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (UIToFP _pc _id _v _ty) =
-    (sem_Instruction_UIToFP (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
-sem_Instruction (URem _pc _id _ty _op1 _op2) =
-    (sem_Instruction_URem (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (Unreachable _pc) =
-    (sem_Instruction_Unreachable (sem_PC _pc))
 sem_Instruction (WaitEvent _pc _event) =
     (sem_Instruction_WaitEvent (sem_PC _pc) _event)
+sem_Instruction (NotifyEvent _pc _event) =
+    (sem_Instruction_NotifyEvent (sem_PC _pc) _event)
 sem_Instruction (WaitTime _pc _time) =
     (sem_Instruction_WaitTime (sem_PC _pc) (sem_Value _time))
-sem_Instruction (Xor _pc _id _ty _op1 _op2) =
-    (sem_Instruction_Xor (sem_PC _pc) (sem_Identifier _id) (sem_Type _ty) (sem_Value _op1) (sem_Value _op2))
-sem_Instruction (ZExt _pc _id _v _ty) =
-    (sem_Instruction_ZExt (sem_PC _pc) (sem_Identifier _id) (sem_Value _v) (sem_Type _ty))
 -- semantic domain
 type T_Instruction = ( Doc,Doc,Instruction)
 data Inh_Instruction = Inh_Instruction {}
@@ -2869,15 +2869,194 @@ wrap_Instruction :: T_Instruction ->
 wrap_Instruction sem (Inh_Instruction) =
     (let ( _lhsOpp,_lhsOppccfg,_lhsOself) = sem
      in  (Syn_Instruction _lhsOpp _lhsOppccfg _lhsOself))
-sem_Instruction_AShr :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_AShr pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+sem_Instruction_Ret :: T_PC ->
+                       T_RetInst ->
+                       T_Instruction
+sem_Instruction_Ret pc_ r_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _rIpp :: Doc
+         _rIself :: RetInst
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 2886 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 81 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "ret" <+> _rIpp
+              {-# LINE 2891 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 2896 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Ret _pcIself _rIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _rIpp,_rIself) =
+             r_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Br :: T_PC ->
+                      T_Value ->
+                      T_Value ->
+                      T_Value ->
+                      T_Instruction
+sem_Instruction_Br pc_ v_ t_ f_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _vIpp :: Doc
+         _vIself :: Value
+         _tIpp :: Doc
+         _tIself :: Value
+         _fIpp :: Doc
+         _fIself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 2926 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 88 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "br" <+> _vIpp <> comma <+> _tIpp <> comma <+> _fIpp
+              {-# LINE 2931 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 2936 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Br _pcIself _vIself _tIself _fIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tIpp,_tIself) =
+             t_
+         ( _fIpp,_fIself) =
+             f_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_UBr :: T_PC ->
+                       T_Value ->
+                       T_Instruction
+sem_Instruction_UBr pc_ d_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _dIpp :: Doc
+         _dIself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 2964 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 87 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "br" <+> _dIpp
+              {-# LINE 2969 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 2974 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             UBr _pcIself _dIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _dIpp,_dIself) =
+             d_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Switch :: T_PC ->
+                          T_Type ->
+                          T_Value ->
+                          T_ValIdL ->
+                          T_Instruction
+sem_Instruction_Switch pc_ ty_ v_ elems_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _vIpp :: Doc
+         _vIself :: Value
+         _elemsIself :: ValIdL
+         _lhsOpp =
+             ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _tyIpp <$> _vIpp
+              {-# LINE 3003 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 32 "./src/Concurrent/Model/Visualizer.ag" #-}
+              P.empty
+              {-# LINE 3008 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Switch _pcIself _tyIself _vIself _elemsIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _vIpp,_vIself) =
+             v_
+         ( _elemsIself) =
+             elems_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Unreachable :: T_PC ->
+                               T_Instruction
+sem_Instruction_Unreachable pc_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3033 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 90 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "unreachable"
+              {-# LINE 3038 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3043 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Unreachable _pcIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Add :: T_PC ->
+                       T_Identifier ->
+                       T_Type ->
+                       T_Value ->
+                       T_Value ->
+                       T_Instruction
+sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIpp :: Doc
@@ -2889,20 +3068,720 @@ sem_Instruction_AShr pc_ id_ ty_ op1_ op2_ =
          _op1Iself :: Value
          _op2Ipp :: Doc
          _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 2896 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 2901 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3075 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 104 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "add"  _op1Ipp _op2Ipp
+              {-# LINE 3080 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3085 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Add _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_FAdd :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_FAdd pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3125 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 105 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "fadd" _op1Ipp _op2Ipp
+              {-# LINE 3130 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3135 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FAdd _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Sub :: T_PC ->
+                       T_Identifier ->
+                       T_Type ->
+                       T_Value ->
+                       T_Value ->
+                       T_Instruction
+sem_Instruction_Sub pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3175 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 106 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "sub"  _op1Ipp _op2Ipp
+              {-# LINE 3180 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3185 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Sub _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_FSub :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_FSub pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3225 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 107 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "fsub" _op1Ipp _op2Ipp
+              {-# LINE 3230 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3235 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FSub _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Mul :: T_PC ->
+                       T_Identifier ->
+                       T_Type ->
+                       T_Value ->
+                       T_Value ->
+                       T_Instruction
+sem_Instruction_Mul pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3275 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 108 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "mul"  _op1Ipp _op2Ipp
+              {-# LINE 3280 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3285 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Mul _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_FMul :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_FMul pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3325 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 109 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "fmul" _op1Ipp _op2Ipp
+              {-# LINE 3330 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3335 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FMul _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_UDiv :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_UDiv pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3375 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 110 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "udiv" _op1Ipp _op2Ipp
+              {-# LINE 3380 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3385 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             UDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_SDiv :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_SDiv pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3425 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 111 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "sdiv" _op1Ipp _op2Ipp
+              {-# LINE 3430 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3435 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             SDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_FDiv :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_FDiv pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3475 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 112 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "fdiv" _op1Ipp _op2Ipp
+              {-# LINE 3480 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3485 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_URem :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_URem pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3525 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 113 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "urem" _op1Ipp _op2Ipp
+              {-# LINE 3530 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3535 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             URem _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_SRem :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_SRem pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3575 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 114 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "srem" _op1Ipp _op2Ipp
+              {-# LINE 3580 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3585 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             SRem _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_FRem :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_FRem pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3625 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 115 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBinOp _tyIpp _idIpp "frem" _op1Ipp _op2Ipp
+              {-# LINE 3630 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3635 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FRem _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Shl :: T_PC ->
+                       T_Identifier ->
+                       T_Type ->
+                       T_Value ->
+                       T_Value ->
+                       T_Instruction
+sem_Instruction_Shl pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3675 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 116 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBitBinOp _tyIpp _idIpp "shl"  _op1Ipp _op2Ipp
+              {-# LINE 3680 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3685 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Shl _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_LShr :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_LShr pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3725 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 117 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBitBinOp _tyIpp _idIpp "lshr" _op1Ipp _op2Ipp
+              {-# LINE 3730 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3735 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             LShr _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_AShr :: T_PC ->
+                        T_Identifier ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_AShr pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3775 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 118 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pBitBinOp _tyIpp _idIpp "ashr" _op1Ipp _op2Ipp
-              {-# LINE 2906 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3780 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3785 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              AShr _pcIself _idIself _tyIself _op1Iself _op2Iself
@@ -2919,15 +3798,15 @@ sem_Instruction_AShr pc_ id_ ty_ op1_ op2_ =
          ( _op2Ipp,_op2Iself) =
              op2_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Add :: T_PC ->
+sem_Instruction_And :: T_PC ->
                        T_Identifier ->
                        T_Type ->
                        T_Value ->
                        T_Value ->
                        T_Instruction
-sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIpp :: Doc
@@ -2939,23 +3818,123 @@ sem_Instruction_Add pc_ id_ ty_ op1_ op2_ =
          _op1Iself :: Value
          _op2Ipp :: Doc
          _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 2946 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 2951 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3825 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
-             ({-# LINE 104 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "add"  _op1Ipp _op2Ipp
-              {-# LINE 2956 "src/Concurrent/Model/Visualizer.hs" #-}
+             ({-# LINE 119 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBitBinOp _tyIpp _idIpp "and"  _op1Ipp _op2Ipp
+              {-# LINE 3830 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3835 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             Add _pcIself _idIself _tyIself _op1Iself _op2Iself
+             And _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Or :: T_PC ->
+                      T_Identifier ->
+                      T_Type ->
+                      T_Value ->
+                      T_Value ->
+                      T_Instruction
+sem_Instruction_Or pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3875 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 120 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBitBinOp _tyIpp _idIpp "or"   _op1Ipp _op2Ipp
+              {-# LINE 3880 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3885 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Or _pcIself _idIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Xor :: T_PC ->
+                       T_Identifier ->
+                       T_Type ->
+                       T_Value ->
+                       T_Value ->
+                       T_Instruction
+sem_Instruction_Xor pc_ id_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 3925 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 121 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pBitBinOp _tyIpp _idIpp "xor"  _op1Ipp _op2Ipp
+              {-# LINE 3930 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3935 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Xor _pcIself _idIself _tyIself _op1Iself _op2Iself
          _lhsOself =
              _self
          ( _pcIself) =
@@ -2975,8 +3954,8 @@ sem_Instruction_Alloca :: T_PC ->
                           T_Align ->
                           T_Instruction
 sem_Instruction_Alloca pc_ id_ ty_ align_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIpp :: Doc
@@ -2986,20 +3965,20 @@ sem_Instruction_Alloca pc_ id_ ty_ align_ =
          _tyIself :: Type
          _alignIpp :: Doc
          _alignIself :: Align
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 2993 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 2998 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3972 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 82 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "alloca" <+> _tyIpp <> char ',' <+> _alignIpp
-              {-# LINE 3003 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 3977 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 3982 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Alloca _pcIself _idIself _tyIself _alignIself
@@ -3014,15 +3993,109 @@ sem_Instruction_Alloca pc_ id_ ty_ align_ =
          ( _alignIpp,_alignIself) =
              align_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_And :: T_PC ->
-                       T_Identifier ->
-                       T_Type ->
-                       T_Value ->
-                       T_Value ->
-                       T_Instruction
-sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+sem_Instruction_Store :: T_PC ->
+                         T_Type ->
+                         T_Value ->
+                         T_Value ->
+                         T_Align ->
+                         T_Instruction
+sem_Instruction_Store pc_ ty_ v1_ v2_ align_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _v1Ipp :: Doc
+         _v1Iself :: Value
+         _v2Ipp :: Doc
+         _v2Iself :: Value
+         _alignIpp :: Doc
+         _alignIself :: Align
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4019 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 84 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _tyIpp <+> text "store" <+> _v1Ipp <> char ',' <+> _v2Ipp <> char ',' <+> _alignIpp
+              {-# LINE 4024 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4029 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Store _pcIself _tyIself _v1Iself _v2Iself _alignIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _v1Ipp,_v1Iself) =
+             v1_
+         ( _v2Ipp,_v2Iself) =
+             v2_
+         ( _alignIpp,_alignIself) =
+             align_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Load :: T_PC ->
+                        T_Identifier ->
+                        T_Value ->
+                        T_Align ->
+                        T_Instruction
+sem_Instruction_Load pc_ id_ v_ align_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _alignIpp :: Doc
+         _alignIself :: Align
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4066 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 83 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _idIpp <+> char '=' <+> text "load"   <+> _vIpp  <> char ',' <+> _alignIpp
+              {-# LINE 4071 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4076 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Load _pcIself _idIself _vIself _alignIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _alignIpp,_alignIself) =
+             align_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_GetElementPtr :: T_PC ->
+                                 T_Identifier ->
+                                 T_Type ->
+                                 T_Value ->
+                                 T_Values ->
+                                 T_Instruction
+sem_Instruction_GetElementPtr pc_ id_ ty_ struct_ idxs_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIpp :: Doc
@@ -3030,27 +4103,27 @@ sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
          _idIself :: Identifier
          _tyIpp :: Doc
          _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3041 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
+         _structIpp :: Doc
+         _structIself :: Value
+         _idxsIpp :: Doc
+         _idxsIself :: Values
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3046 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4114 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
-             ({-# LINE 119 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBitBinOp _tyIpp _idIpp "and"  _op1Ipp _op2Ipp
-              {-# LINE 3051 "src/Concurrent/Model/Visualizer.hs" #-}
+             ({-# LINE 103 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _idIpp <+> char '=' <+> text "getelementptr" <+> _structIpp <> char ',' <+> _idxsIpp
+              {-# LINE 4119 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4124 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             And _pcIself _idIself _tyIself _op1Iself _op2Iself
+             GetElementPtr _pcIself _idIself _tyIself _structIself _idxsIself
          _lhsOself =
              _self
          ( _pcIself) =
@@ -3059,74 +4132,19 @@ sem_Instruction_And pc_ id_ ty_ op1_ op2_ =
              id_
          ( _tyIpp,_tyIself) =
              ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
+         ( _structIpp,_structIself) =
+             struct_
+         ( _idxsIpp,_idxsIself) =
+             idxs_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_AtomicRMW :: T_PC ->
-                             T_Identifier ->
-                             T_Value ->
-                             T_Value ->
-                             T_BinOp ->
-                             T_AtomicOrdering ->
-                             T_Instruction
-sem_Instruction_AtomicRMW pc_ id_ mptr_ opval_ op_ ord_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _mptrIpp :: Doc
-         _mptrIself :: Value
-         _opvalIpp :: Doc
-         _opvalIself :: Value
-         _opIpp :: Doc
-         _opIself :: BinOp
-         _ordIpp :: Doc
-         _ordIself :: AtomicOrdering
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3094 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3099 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 127 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _idIpp <+> char '=' <+> text "atomicrmw" <+> _mptrIpp <+> _opvalIpp <+> _ordIpp
-              {-# LINE 3104 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             AtomicRMW _pcIself _idIself _mptrIself _opvalIself _opIself _ordIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _mptrIpp,_mptrIself) =
-             mptr_
-         ( _opvalIpp,_opvalIself) =
-             opval_
-         ( _opIpp,_opIself) =
-             op_
-         ( _ordIpp,_ordIself) =
-             ord_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_BitCast :: T_PC ->
-                           T_Identifier ->
-                           T_Value ->
-                           T_Type ->
-                           T_Instruction
-sem_Instruction_BitCast pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+sem_Instruction_Trunc :: T_PC ->
+                         T_Identifier ->
+                         T_Value ->
+                         T_Type ->
+                         T_Instruction
+sem_Instruction_Trunc pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
          _idIpp :: Doc
@@ -3136,20 +4154,515 @@ sem_Instruction_BitCast pc_ id_ v_ ty_ =
          _vIself :: Value
          _tyIpp :: Doc
          _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3143 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3148 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4161 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 91 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "trunc"    _vIpp _tyIpp
+              {-# LINE 4166 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4171 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Trunc _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_ZExt :: T_PC ->
+                        T_Identifier ->
+                        T_Value ->
+                        T_Type ->
+                        T_Instruction
+sem_Instruction_ZExt pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4206 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 92 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "zext"     _vIpp _tyIpp
+              {-# LINE 4211 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4216 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             ZExt _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_SExt :: T_PC ->
+                        T_Identifier ->
+                        T_Value ->
+                        T_Type ->
+                        T_Instruction
+sem_Instruction_SExt pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4251 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 93 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "sext"     _vIpp _tyIpp
+              {-# LINE 4256 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4261 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             SExt _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_FPToUI :: T_PC ->
+                          T_Identifier ->
+                          T_Value ->
+                          T_Type ->
+                          T_Instruction
+sem_Instruction_FPToUI pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4296 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 94 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "fptoui"   _vIpp _tyIpp
+              {-# LINE 4301 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4306 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FPToUI _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_FPToSI :: T_PC ->
+                          T_Identifier ->
+                          T_Value ->
+                          T_Type ->
+                          T_Instruction
+sem_Instruction_FPToSI pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4341 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 95 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "fptosi"   _vIpp _tyIpp
+              {-# LINE 4346 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4351 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FPToSI _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_UIToFP :: T_PC ->
+                          T_Identifier ->
+                          T_Value ->
+                          T_Type ->
+                          T_Instruction
+sem_Instruction_UIToFP pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4386 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 96 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "uitofp"   _vIpp _tyIpp
+              {-# LINE 4391 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4396 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             UIToFP _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_SIToFP :: T_PC ->
+                          T_Identifier ->
+                          T_Value ->
+                          T_Type ->
+                          T_Instruction
+sem_Instruction_SIToFP pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4431 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 97 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "sitofp"   _vIpp _tyIpp
+              {-# LINE 4436 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4441 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             SIToFP _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_FPTrunc :: T_PC ->
+                           T_Identifier ->
+                           T_Value ->
+                           T_Type ->
+                           T_Instruction
+sem_Instruction_FPTrunc pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4476 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 98 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "fptrunc"  _vIpp _tyIpp
+              {-# LINE 4481 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4486 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FPTrunc _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_FPExt :: T_PC ->
+                         T_Identifier ->
+                         T_Value ->
+                         T_Type ->
+                         T_Instruction
+sem_Instruction_FPExt pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4521 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 99 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "fpext"    _vIpp _tyIpp
+              {-# LINE 4526 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4531 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FPExt _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_PtrToInt :: T_PC ->
+                            T_Identifier ->
+                            T_Value ->
+                            T_Type ->
+                            T_Instruction
+sem_Instruction_PtrToInt pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4566 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 100 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "ptrtoint" _vIpp _tyIpp
+              {-# LINE 4571 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4576 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             PtrToInt _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_IntToPtr :: T_PC ->
+                            T_Identifier ->
+                            T_Value ->
+                            T_Type ->
+                            T_Instruction
+sem_Instruction_IntToPtr pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4611 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 101 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              pConvOp _idIpp "inttoptr" _vIpp _tyIpp
+              {-# LINE 4616 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4621 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             IntToPtr _pcIself _idIself _vIself _tyIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _vIpp,_vIself) =
+             v_
+         ( _tyIpp,_tyIself) =
+             ty_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_BitCast :: T_PC ->
+                           T_Identifier ->
+                           T_Value ->
+                           T_Type ->
+                           T_Instruction
+sem_Instruction_BitCast pc_ id_ v_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _vIpp :: Doc
+         _vIself :: Value
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4656 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 102 "src/Language/LLVMIR/Printer/Module.ag" #-}
               pConvOp _idIpp "bitcast"  _vIpp _tyIpp
-              {-# LINE 3153 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4661 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4666 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              BitCast _pcIself _idIself _vIself _tyIself
@@ -3164,49 +4677,160 @@ sem_Instruction_BitCast pc_ id_ v_ ty_ =
          ( _tyIpp,_tyIself) =
              ty_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Br :: T_PC ->
-                      T_Value ->
-                      T_Value ->
-                      T_Value ->
-                      T_Instruction
-sem_Instruction_Br pc_ v_ t_ f_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+sem_Instruction_ICmp :: T_PC ->
+                        T_Identifier ->
+                        T_IntPredicate ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_ICmp pc_ id_ cond_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
-         _vIpp :: Doc
-         _vIself :: Value
-         _tIpp :: Doc
-         _tIself :: Value
-         _fIpp :: Doc
-         _fIself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3187 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _condIpp :: Doc
+         _condIself :: IntPredicate
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3192 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4707 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
-             ({-# LINE 88 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "br" <+> _vIpp <> comma <+> _tIpp <> comma <+> _fIpp
-              {-# LINE 3197 "src/Concurrent/Model/Visualizer.hs" #-}
+             ({-# LINE 85 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _idIpp <+> char '=' <+> text "icmp"   <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
+              {-# LINE 4712 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4717 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             Br _pcIself _vIself _tIself _fIself
+             ICmp _pcIself _idIself _condIself _tyIself _op1Iself _op2Iself
          _lhsOself =
              _self
          ( _pcIself) =
              pc_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tIpp,_tIself) =
-             t_
-         ( _fIpp,_fIself) =
-             f_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _condIpp,_condIself) =
+             cond_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_FCmp :: T_PC ->
+                        T_Identifier ->
+                        T_RealPredicate ->
+                        T_Type ->
+                        T_Value ->
+                        T_Value ->
+                        T_Instruction
+sem_Instruction_FCmp pc_ id_ cond_ ty_ op1_ op2_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _condIpp :: Doc
+         _condIself :: RealPredicate
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _op1Ipp :: Doc
+         _op1Iself :: Value
+         _op2Ipp :: Doc
+         _op2Iself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4762 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 86 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _idIpp <+> char '=' <+> text "icmp"   <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
+              {-# LINE 4767 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4772 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             FCmp _pcIself _idIself _condIself _tyIself _op1Iself _op2Iself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _condIpp,_condIself) =
+             cond_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _op1Ipp,_op1Iself) =
+             op1_
+         ( _op2Ipp,_op2Iself) =
+             op2_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_PHI :: T_PC ->
+                       T_Identifier ->
+                       T_Type ->
+                       T_PValues ->
+                       T_Instruction
+sem_Instruction_PHI pc_ id_ ty_ vals_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _valsIpp :: Doc
+         _valsIself :: PValues
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4811 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 122 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _idIpp <+> char '=' <+> text "phi" <+> _tyIpp <+> _valsIpp
+              {-# LINE 4816 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4821 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             PHI _pcIself _idIself _tyIself _valsIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _tyIpp,_tyIself) =
+             ty_
+         ( _valsIpp,_valsIself) =
+             vals_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
 sem_Instruction_Call :: T_PC ->
                         T_Identifier ->
@@ -3215,8 +4839,8 @@ sem_Instruction_Call :: T_PC ->
                         T_Values ->
                         T_Instruction
 sem_Instruction_Call pc_ mres_ ty_ callee_ args_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
          _mresIpp :: Doc
@@ -3229,20 +4853,20 @@ sem_Instruction_Call pc_ mres_ ty_ callee_ args_ =
          _calleeIself :: Identifier
          _argsIpp :: Doc
          _argsIself :: Values
-         _lhsOppccfg =
-             ({-# LINE 93 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself (text "call" <+> _calleeIppccfg)
-              {-# LINE 3236 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3241 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4860 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 89 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _mresIpp <+> char '=' <+> text "call" <+> _tyIpp <+> _calleeIpp <> char '(' <> _argsIpp <> char ')'
-              {-# LINE 3246 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 4865 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 93 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself (text "call" <+> _calleeIppccfg)
+              {-# LINE 4870 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Call _pcIself _mresIself _tyIself _calleeIself _argsIself
@@ -3258,6 +4882,151 @@ sem_Instruction_Call pc_ mres_ ty_ callee_ args_ =
              callee_
          ( _argsIpp,_argsIself) =
              args_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_Select :: T_PC ->
+                          T_Identifier ->
+                          T_Value ->
+                          T_Value ->
+                          T_Value ->
+                          T_Instruction
+sem_Instruction_Select pc_ id_ cond_ valt_ valf_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _condIpp :: Doc
+         _condIself :: Value
+         _valtIpp :: Doc
+         _valtIself :: Value
+         _valfIpp :: Doc
+         _valfIself :: Value
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4910 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 123 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _idIpp <+> char '=' <+> _condIpp <> char ',' <+> _valtIpp <> char ',' <+> _valfIpp
+              {-# LINE 4915 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4920 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Select _pcIself _idIself _condIself _valtIself _valfIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _condIpp,_condIself) =
+             cond_
+         ( _valtIpp,_valtIself) =
+             valt_
+         ( _valfIpp,_valfIself) =
+             valf_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_ExtractValue :: T_PC ->
+                                T_Identifier ->
+                                T_Value ->
+                                T_Ints ->
+                                T_Instruction
+sem_Instruction_ExtractValue pc_ id_ aggr_ idxs_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _aggrIpp :: Doc
+         _aggrIself :: Value
+         _idxsIpp :: Doc
+         _idxsIself :: Ints
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 4957 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 124 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _idIpp <+> char '=' <+> text "extractvalue" <+> _aggrIpp <> char ',' <+> _idxsIpp
+              {-# LINE 4962 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 4967 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             ExtractValue _pcIself _idIself _aggrIself _idxsIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _aggrIpp,_aggrIself) =
+             aggr_
+         ( _idxsIpp,_idxsIself) =
+             idxs_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_InsertValue :: T_PC ->
+                               T_Identifier ->
+                               T_Value ->
+                               T_Value ->
+                               T_Ints ->
+                               T_Instruction
+sem_Instruction_InsertValue pc_ id_ aggr_ ival_ idxs_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _aggrIpp :: Doc
+         _aggrIself :: Value
+         _ivalIpp :: Doc
+         _ivalIself :: Value
+         _idxsIpp :: Doc
+         _idxsIself :: Ints
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 5005 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 125 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _idIpp <+> char '=' <+> text "insertvalue" <+> _aggrIpp <> char ',' <+> _ivalIpp <> char ',' <+> _idxsIpp
+              {-# LINE 5010 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 32 "./src/Concurrent/Model/Visualizer.ag" #-}
+              _idIppccfg
+              {-# LINE 5015 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             InsertValue _pcIself _idIself _aggrIself _ivalIself _idxsIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _aggrIpp,_aggrIself) =
+             aggr_
+         ( _ivalIpp,_ivalIself) =
+             ival_
+         ( _idxsIpp,_idxsIself) =
+             idxs_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
 sem_Instruction_Cmpxchg :: T_PC ->
                            T_Identifier ->
@@ -3285,17 +5054,17 @@ sem_Instruction_Cmpxchg pc_ id_ mptr_ cval_ nval_ ord_ =
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3289 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5058 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 126 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _idIpp <+> char '=' <+> text "cmpxchg" <+> _mptrIpp <+> _cvalIpp <+> _nvalIpp <+> _ordIpp
-              {-# LINE 3294 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5063 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
-             ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 32 "./src/Concurrent/Model/Visualizer.ag" #-}
               _idIppccfg
-              {-# LINE 3299 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5068 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Cmpxchg _pcIself _idIself _mptrIself _cvalIself _nvalIself _ordIself
@@ -3314,30 +5083,85 @@ sem_Instruction_Cmpxchg pc_ id_ mptr_ cval_ nval_ ord_ =
          ( _ordIpp,_ordIself) =
              ord_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_AtomicRMW :: T_PC ->
+                             T_Identifier ->
+                             T_Value ->
+                             T_Value ->
+                             T_BinOp ->
+                             T_AtomicOrdering ->
+                             T_Instruction
+sem_Instruction_AtomicRMW pc_ id_ mptr_ opval_ op_ ord_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _idIpp :: Doc
+         _idIppccfg :: Doc
+         _idIself :: Identifier
+         _mptrIpp :: Doc
+         _mptrIself :: Value
+         _opvalIpp :: Doc
+         _opvalIself :: Value
+         _opIpp :: Doc
+         _opIself :: BinOp
+         _ordIpp :: Doc
+         _ordIself :: AtomicOrdering
+         _lhsOpp =
+             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 5113 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _pp =
+             ({-# LINE 127 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _idIpp <+> char '=' <+> text "atomicrmw" <+> _mptrIpp <+> _opvalIpp <+> _ordIpp
+              {-# LINE 5118 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 73 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself _pp
+              {-# LINE 5123 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             AtomicRMW _pcIself _idIself _mptrIself _opvalIself _opIself _ordIself
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+         ( _idIpp,_idIppccfg,_idIself) =
+             id_
+         ( _mptrIpp,_mptrIself) =
+             mptr_
+         ( _opvalIpp,_opvalIself) =
+             opval_
+         ( _opIpp,_opIself) =
+             op_
+         ( _ordIpp,_ordIself) =
+             ord_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
 sem_Instruction_CreateThread :: T_PC ->
                                 T_Values ->
                                 T_Instruction
 sem_Instruction_CreateThread pc_ args_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
          _argsIpp :: Doc
          _argsIself :: Values
-         _lhsOppccfg =
-             ({-# LINE 75 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself (text "create_thread")
-              {-# LINE 3331 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 3336 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5155 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 128 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "create_thread" <+> parens _argsIpp
-              {-# LINE 3341 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5160 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 75 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself (text "create_thread")
+              {-# LINE 5165 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              CreateThread _pcIself _argsIself
@@ -3348,677 +5172,10 @@ sem_Instruction_CreateThread pc_ args_ =
          ( _argsIpp,_argsIself) =
              args_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_ExitThread :: T_PC ->
+sem_Instruction_JoinThread :: T_PC ->
+                              T_Identifier ->
                               T_Instruction
-sem_Instruction_ExitThread pc_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _lhsOppccfg =
-             ({-# LINE 79 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself (text "exit_thread")
-              {-# LINE 3362 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3367 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 130 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "exit_thread"
-              {-# LINE 3372 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             ExitThread _pcIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_ExtractValue :: T_PC ->
-                                T_Identifier ->
-                                T_Value ->
-                                T_Ints ->
-                                T_Instruction
-sem_Instruction_ExtractValue pc_ id_ aggr_ idxs_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _aggrIpp :: Doc
-         _aggrIself :: Value
-         _idxsIpp :: Doc
-         _idxsIself :: Ints
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3401 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3406 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 124 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _idIpp <+> char '=' <+> text "extractvalue" <+> _aggrIpp <> char ',' <+> _idxsIpp
-              {-# LINE 3411 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             ExtractValue _pcIself _idIself _aggrIself _idxsIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _aggrIpp,_aggrIself) =
-             aggr_
-         ( _idxsIpp,_idxsIself) =
-             idxs_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_FAdd :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_FAdd pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3449 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3454 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 105 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "fadd" _op1Ipp _op2Ipp
-              {-# LINE 3459 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FAdd _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_FCmp :: T_PC ->
-                        T_Identifier ->
-                        T_RealPredicate ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_FCmp pc_ id_ cond_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _condIpp :: Doc
-         _condIself :: RealPredicate
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3502 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3507 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 86 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _idIpp <+> char '=' <+> text "icmp"   <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
-              {-# LINE 3512 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FCmp _pcIself _idIself _condIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _condIpp,_condIself) =
-             cond_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_FDiv :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_FDiv pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3554 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3559 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 112 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "fdiv" _op1Ipp _op2Ipp
-              {-# LINE 3564 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_FMul :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_FMul pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3604 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3609 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 109 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "fmul" _op1Ipp _op2Ipp
-              {-# LINE 3614 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FMul _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_FPExt :: T_PC ->
-                         T_Identifier ->
-                         T_Value ->
-                         T_Type ->
-                         T_Instruction
-sem_Instruction_FPExt pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3651 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3656 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 99 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "fpext"    _vIpp _tyIpp
-              {-# LINE 3661 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FPExt _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_FPToSI :: T_PC ->
-                          T_Identifier ->
-                          T_Value ->
-                          T_Type ->
-                          T_Instruction
-sem_Instruction_FPToSI pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3696 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3701 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 95 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "fptosi"   _vIpp _tyIpp
-              {-# LINE 3706 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FPToSI _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_FPToUI :: T_PC ->
-                          T_Identifier ->
-                          T_Value ->
-                          T_Type ->
-                          T_Instruction
-sem_Instruction_FPToUI pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3741 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3746 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 94 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "fptoui"   _vIpp _tyIpp
-              {-# LINE 3751 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FPToUI _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_FPTrunc :: T_PC ->
-                           T_Identifier ->
-                           T_Value ->
-                           T_Type ->
-                           T_Instruction
-sem_Instruction_FPTrunc pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3786 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3791 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 98 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "fptrunc"  _vIpp _tyIpp
-              {-# LINE 3796 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FPTrunc _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_FRem :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_FRem pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3834 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3839 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 115 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "frem" _op1Ipp _op2Ipp
-              {-# LINE 3844 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FRem _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_FSub :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_FSub pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3884 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3889 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 107 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "fsub" _op1Ipp _op2Ipp
-              {-# LINE 3894 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             FSub _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_GetElementPtr :: T_PC ->
-                                 T_Identifier ->
-                                 T_Type ->
-                                 T_Value ->
-                                 T_Values ->
-                                 T_Instruction
-sem_Instruction_GetElementPtr pc_ id_ ty_ struct_ idxs_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _structIpp :: Doc
-         _structIself :: Value
-         _idxsIpp :: Doc
-         _idxsIself :: Values
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3934 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3939 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 103 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _idIpp <+> char '=' <+> text "getelementptr" <+> _structIpp <> char ',' <+> _idxsIpp
-              {-# LINE 3944 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             GetElementPtr _pcIself _idIself _tyIself _structIself _idxsIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _structIpp,_structIself) =
-             struct_
-         ( _idxsIpp,_idxsIself) =
-             idxs_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_ICmp :: T_PC ->
-                        T_Identifier ->
-                        T_IntPredicate ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_ICmp pc_ id_ cond_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _condIpp :: Doc
-         _condIself :: IntPredicate
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 3987 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 3992 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 85 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _idIpp <+> char '=' <+> text "icmp"   <+> _condIpp <+> _op1Ipp <> char ',' <+> _op2Ipp
-              {-# LINE 3997 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             ICmp _pcIself _idIself _condIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _condIpp,_condIself) =
-             cond_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_InsertValue :: T_PC ->
-                               T_Identifier ->
-                               T_Value ->
-                               T_Value ->
-                               T_Ints ->
-                               T_Instruction
-sem_Instruction_InsertValue pc_ id_ aggr_ ival_ idxs_ =
+sem_Instruction_JoinThread pc_ id_ =
     (let _lhsOpp :: Doc
          _lhsOppccfg :: Doc
          _lhsOself :: Instruction
@@ -4026,112 +5183,20 @@ sem_Instruction_InsertValue pc_ id_ aggr_ ival_ idxs_ =
          _idIpp :: Doc
          _idIppccfg :: Doc
          _idIself :: Identifier
-         _aggrIpp :: Doc
-         _aggrIself :: Value
-         _ivalIpp :: Doc
-         _ivalIself :: Value
-         _idxsIpp :: Doc
-         _idxsIself :: Ints
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4039 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 125 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _idIpp <+> char '=' <+> text "insertvalue" <+> _aggrIpp <> char ',' <+> _ivalIpp <> char ',' <+> _idxsIpp
-              {-# LINE 4044 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOppccfg =
-             ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
-              _idIppccfg
-              {-# LINE 4049 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             InsertValue _pcIself _idIself _aggrIself _ivalIself _idxsIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _aggrIpp,_aggrIself) =
-             aggr_
-         ( _ivalIpp,_ivalIself) =
-             ival_
-         ( _idxsIpp,_idxsIself) =
-             idxs_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_IntToPtr :: T_PC ->
-                            T_Identifier ->
-                            T_Value ->
-                            T_Type ->
-                            T_Instruction
-sem_Instruction_IntToPtr pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4086 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4091 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 101 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "inttoptr" _vIpp _tyIpp
-              {-# LINE 4096 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             IntToPtr _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_JoinThread :: T_PC ->
-                              T_Identifier ->
-                              T_Instruction
-sem_Instruction_JoinThread pc_ id_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _lhsOppccfg =
-             ({-# LINE 77 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself (text "join_thread") <+> _idIppccfg
-              {-# LINE 4125 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4130 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5190 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 129 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "join_thread" <+> parens _idIpp
-              {-# LINE 4135 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5195 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 77 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself (text "join_thread") <+> _idIppccfg
+              {-# LINE 5200 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              JoinThread _pcIself _idIself
@@ -4142,158 +5207,42 @@ sem_Instruction_JoinThread pc_ id_ =
          ( _idIpp,_idIppccfg,_idIself) =
              id_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_LShr :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_LShr pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+sem_Instruction_ExitThread :: T_PC ->
+                              T_Instruction
+sem_Instruction_ExitThread pc_ =
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4169 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4174 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5221 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
-             ({-# LINE 117 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBitBinOp _tyIpp _idIpp "lshr" _op1Ipp _op2Ipp
-              {-# LINE 4179 "src/Concurrent/Model/Visualizer.hs" #-}
+             ({-# LINE 130 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "exit_thread"
+              {-# LINE 5226 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 79 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself (text "exit_thread")
+              {-# LINE 5231 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             LShr _pcIself _idIself _tyIself _op1Iself _op2Iself
+             ExitThread _pcIself
          _lhsOself =
              _self
          ( _pcIself) =
              pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Load :: T_PC ->
-                        T_Identifier ->
-                        T_Value ->
-                        T_Align ->
-                        T_Instruction
-sem_Instruction_Load pc_ id_ v_ align_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _alignIpp :: Doc
-         _alignIself :: Align
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4216 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4221 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 83 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _idIpp <+> char '=' <+> text "load"   <+> _vIpp  <> char ',' <+> _alignIpp
-              {-# LINE 4226 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Load _pcIself _idIself _vIself _alignIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _alignIpp,_alignIself) =
-             align_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Mul :: T_PC ->
-                       T_Identifier ->
-                       T_Type ->
-                       T_Value ->
-                       T_Value ->
-                       T_Instruction
-sem_Instruction_Mul pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4264 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4269 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 108 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "mul"  _op1Ipp _op2Ipp
-              {-# LINE 4274 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Mul _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
 sem_Instruction_MutexInit :: T_PC ->
                              T_Identifier ->
                              T_Value ->
                              T_Instruction
 sem_Instruction_MutexInit pc_ rv_ mutex_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
          _rvIpp :: Doc
@@ -4301,20 +5250,20 @@ sem_Instruction_MutexInit pc_ rv_ mutex_ =
          _rvIself :: Identifier
          _mutexIpp :: Doc
          _mutexIself :: Value
-         _lhsOppccfg =
-             ({-# LINE 81 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself (text "mutex_init")
-              {-# LINE 4308 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4313 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5257 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 131 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "mutex_init"    <+> _mutexIpp
-              {-# LINE 4318 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5262 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 81 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself (text "mutex_init")
+              {-# LINE 5267 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              MutexInit _pcIself _rvIself _mutexIself
@@ -4332,8 +5281,8 @@ sem_Instruction_MutexLock :: T_PC ->
                              T_Value ->
                              T_Instruction
 sem_Instruction_MutexLock pc_ rv_ mutex_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
          _rvIpp :: Doc
@@ -4341,20 +5290,20 @@ sem_Instruction_MutexLock pc_ rv_ mutex_ =
          _rvIself :: Identifier
          _mutexIpp :: Doc
          _mutexIself :: Value
-         _lhsOppccfg =
-             ({-# LINE 83 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself (text "mutex_lock")
-              {-# LINE 4348 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4353 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5297 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 132 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "mutex_lock"    <+> _mutexIpp
-              {-# LINE 4358 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5302 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 83 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself (text "mutex_lock")
+              {-# LINE 5307 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              MutexLock _pcIself _rvIself _mutexIself
@@ -4372,8 +5321,8 @@ sem_Instruction_MutexUnlock :: T_PC ->
                                T_Value ->
                                T_Instruction
 sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
+    (let _lhsOpp :: Doc
+         _lhsOppccfg :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
          _rvIpp :: Doc
@@ -4381,20 +5330,20 @@ sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
          _rvIself :: Identifier
          _mutexIpp :: Doc
          _mutexIself :: Value
-         _lhsOppccfg =
-             ({-# LINE 85 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself (text "mutex_unlock")
-              {-# LINE 4388 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 4393 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5337 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _pp =
              ({-# LINE 133 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "mutex_unlock"  <+> _mutexIpp
-              {-# LINE 4398 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5342 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 85 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself (text "mutex_unlock")
+              {-# LINE 5347 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              MutexUnlock _pcIself _rvIself _mutexIself
@@ -4407,890 +5356,6 @@ sem_Instruction_MutexUnlock pc_ rv_ mutex_ =
          ( _mutexIpp,_mutexIself) =
              mutex_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_NotifyEvent :: T_PC ->
-                               Int ->
-                               T_Instruction
-sem_Instruction_NotifyEvent pc_ event_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _lhsOppccfg =
-             ({-# LINE 91 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself (text "notify_event")
-              {-# LINE 4422 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 135 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "notify_event"  <+> int event_
-              {-# LINE 4427 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4432 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             NotifyEvent _pcIself event_
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Or :: T_PC ->
-                      T_Identifier ->
-                      T_Type ->
-                      T_Value ->
-                      T_Value ->
-                      T_Instruction
-sem_Instruction_Or pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4464 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4469 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 120 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBitBinOp _tyIpp _idIpp "or"   _op1Ipp _op2Ipp
-              {-# LINE 4474 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Or _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_PHI :: T_PC ->
-                       T_Identifier ->
-                       T_Type ->
-                       T_PValues ->
-                       T_Instruction
-sem_Instruction_PHI pc_ id_ ty_ vals_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _valsIpp :: Doc
-         _valsIself :: PValues
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4511 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4516 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 122 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _idIpp <+> char '=' <+> text "phi" <+> _tyIpp <+> _valsIpp
-              {-# LINE 4521 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             PHI _pcIself _idIself _tyIself _valsIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _valsIpp,_valsIself) =
-             vals_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_PtrToInt :: T_PC ->
-                            T_Identifier ->
-                            T_Value ->
-                            T_Type ->
-                            T_Instruction
-sem_Instruction_PtrToInt pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4556 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4561 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 100 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "ptrtoint" _vIpp _tyIpp
-              {-# LINE 4566 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             PtrToInt _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Ret :: T_PC ->
-                       T_RetInst ->
-                       T_Instruction
-sem_Instruction_Ret pc_ r_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _rIpp :: Doc
-         _rIself :: RetInst
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4594 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4599 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 81 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "ret" <+> _rIpp
-              {-# LINE 4604 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Ret _pcIself _rIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _rIpp,_rIself) =
-             r_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_SDiv :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_SDiv pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4638 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4643 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 111 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "sdiv" _op1Ipp _op2Ipp
-              {-# LINE 4648 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             SDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_SExt :: T_PC ->
-                        T_Identifier ->
-                        T_Value ->
-                        T_Type ->
-                        T_Instruction
-sem_Instruction_SExt pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4685 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4690 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 93 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "sext"     _vIpp _tyIpp
-              {-# LINE 4695 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             SExt _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_SIToFP :: T_PC ->
-                          T_Identifier ->
-                          T_Value ->
-                          T_Type ->
-                          T_Instruction
-sem_Instruction_SIToFP pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4730 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4735 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 97 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "sitofp"   _vIpp _tyIpp
-              {-# LINE 4740 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             SIToFP _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_SRem :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_SRem pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4778 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4783 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 114 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "srem" _op1Ipp _op2Ipp
-              {-# LINE 4788 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             SRem _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Select :: T_PC ->
-                          T_Identifier ->
-                          T_Value ->
-                          T_Value ->
-                          T_Value ->
-                          T_Instruction
-sem_Instruction_Select pc_ id_ cond_ valt_ valf_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _condIpp :: Doc
-         _condIself :: Value
-         _valtIpp :: Doc
-         _valtIself :: Value
-         _valfIpp :: Doc
-         _valfIself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4828 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4833 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 123 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _idIpp <+> char '=' <+> _condIpp <> char ',' <+> _valtIpp <> char ',' <+> _valfIpp
-              {-# LINE 4838 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Select _pcIself _idIself _condIself _valtIself _valfIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _condIpp,_condIself) =
-             cond_
-         ( _valtIpp,_valtIself) =
-             valt_
-         ( _valfIpp,_valfIself) =
-             valf_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Shl :: T_PC ->
-                       T_Identifier ->
-                       T_Type ->
-                       T_Value ->
-                       T_Value ->
-                       T_Instruction
-sem_Instruction_Shl pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4878 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4883 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 116 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBitBinOp _tyIpp _idIpp "shl"  _op1Ipp _op2Ipp
-              {-# LINE 4888 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Shl _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Store :: T_PC ->
-                         T_Type ->
-                         T_Value ->
-                         T_Value ->
-                         T_Align ->
-                         T_Instruction
-sem_Instruction_Store pc_ ty_ v1_ v2_ align_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _v1Ipp :: Doc
-         _v1Iself :: Value
-         _v2Ipp :: Doc
-         _v2Iself :: Value
-         _alignIpp :: Doc
-         _alignIself :: Align
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4927 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4932 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 84 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _tyIpp <+> text "store" <+> _v1Ipp <> char ',' <+> _v2Ipp <> char ',' <+> _alignIpp
-              {-# LINE 4937 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Store _pcIself _tyIself _v1Iself _v2Iself _alignIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _v1Ipp,_v1Iself) =
-             v1_
-         ( _v2Ipp,_v2Iself) =
-             v2_
-         ( _alignIpp,_alignIself) =
-             align_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Sub :: T_PC ->
-                       T_Identifier ->
-                       T_Type ->
-                       T_Value ->
-                       T_Value ->
-                       T_Instruction
-sem_Instruction_Sub pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 4977 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 4982 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 106 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "sub"  _op1Ipp _op2Ipp
-              {-# LINE 4987 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Sub _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Switch :: T_PC ->
-                          T_Type ->
-                          T_Value ->
-                          T_ValIdL ->
-                          T_Instruction
-sem_Instruction_Switch pc_ ty_ v_ elems_ =
-    (let _lhsOpp :: Doc
-         _lhsOppccfg :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _vIpp :: Doc
-         _vIself :: Value
-         _elemsIself :: ValIdL
-         _lhsOpp =
-             ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _tyIpp <$> _vIpp
-              {-# LINE 5022 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOppccfg =
-             ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
-              P.empty
-              {-# LINE 5027 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Switch _pcIself _tyIself _vIself _elemsIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _vIpp,_vIself) =
-             v_
-         ( _elemsIself) =
-             elems_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Trunc :: T_PC ->
-                         T_Identifier ->
-                         T_Value ->
-                         T_Type ->
-                         T_Instruction
-sem_Instruction_Trunc pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5062 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 5067 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 91 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "trunc"    _vIpp _tyIpp
-              {-# LINE 5072 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Trunc _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_UBr :: T_PC ->
-                       T_Value ->
-                       T_Instruction
-sem_Instruction_UBr pc_ d_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _dIpp :: Doc
-         _dIself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5100 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 5105 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 87 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "br" <+> _dIpp
-              {-# LINE 5110 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             UBr _pcIself _dIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _dIpp,_dIself) =
-             d_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_UDiv :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_UDiv pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5144 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 5149 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 110 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "udiv" _op1Ipp _op2Ipp
-              {-# LINE 5154 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             UDiv _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_UIToFP :: T_PC ->
-                          T_Identifier ->
-                          T_Value ->
-                          T_Type ->
-                          T_Instruction
-sem_Instruction_UIToFP pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5191 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 5196 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 96 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "uitofp"   _vIpp _tyIpp
-              {-# LINE 5201 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             UIToFP _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_URem :: T_PC ->
-                        T_Identifier ->
-                        T_Type ->
-                        T_Value ->
-                        T_Value ->
-                        T_Instruction
-sem_Instruction_URem pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5239 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 5244 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 113 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBinOp _tyIpp _idIpp "urem" _op1Ipp _op2Ipp
-              {-# LINE 5249 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             URem _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Unreachable :: T_PC ->
-                               T_Instruction
-sem_Instruction_Unreachable pc_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5276 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 5281 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 90 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "unreachable"
-              {-# LINE 5286 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Unreachable _pcIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
 sem_Instruction_WaitEvent :: T_PC ->
                              Int ->
                              T_Instruction
@@ -5299,23 +5364,53 @@ sem_Instruction_WaitEvent pc_ event_ =
          _lhsOpp :: Doc
          _lhsOself :: Instruction
          _pcIself :: PC
-         _lhsOppccfg =
-             ({-# LINE 87 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself (text "wait_event")
-              {-# LINE 5306 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _pp =
              ({-# LINE 134 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "wait_event"    <+> int event_
-              {-# LINE 5311 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5371 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 87 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself (text "wait_event")
+              {-# LINE 5376 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5316 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5381 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              WaitEvent _pcIself event_
+         _lhsOself =
+             _self
+         ( _pcIself) =
+             pc_
+     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
+sem_Instruction_NotifyEvent :: T_PC ->
+                               Int ->
+                               T_Instruction
+sem_Instruction_NotifyEvent pc_ event_ =
+    (let _lhsOppccfg :: Doc
+         _lhsOpp :: Doc
+         _lhsOself :: Instruction
+         _pcIself :: PC
+         _pp =
+             ({-# LINE 135 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "notify_event"  <+> int event_
+              {-# LINE 5401 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 91 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself (text "notify_event")
+              {-# LINE 5406 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOpp =
+             ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _pp
+              {-# LINE 5411 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             NotifyEvent _pcIself event_
          _lhsOself =
              _self
          ( _pcIself) =
@@ -5331,20 +5426,20 @@ sem_Instruction_WaitTime pc_ time_ =
          _pcIself :: PC
          _timeIpp :: Doc
          _timeIself :: Value
-         _lhsOppccfg =
-             ({-# LINE 89 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself (text "wait_time")
-              {-# LINE 5338 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _pp =
              ({-# LINE 136 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "wait_time"     <+> _timeIpp
-              {-# LINE 5343 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5433 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _lhsOppccfg =
+             ({-# LINE 89 "./src/Concurrent/Model/Visualizer.ag" #-}
+              int _pcIself <+> dotLabel _pcIself (text "wait_time")
+              {-# LINE 5438 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOpp =
              ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pp
-              {-# LINE 5348 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5443 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              WaitTime _pcIself _timeIself
@@ -5354,101 +5449,6 @@ sem_Instruction_WaitTime pc_ time_ =
              pc_
          ( _timeIpp,_timeIself) =
              time_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_Xor :: T_PC ->
-                       T_Identifier ->
-                       T_Type ->
-                       T_Value ->
-                       T_Value ->
-                       T_Instruction
-sem_Instruction_Xor pc_ id_ ty_ op1_ op2_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _op1Ipp :: Doc
-         _op1Iself :: Value
-         _op2Ipp :: Doc
-         _op2Iself :: Value
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5382 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 5387 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 121 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pBitBinOp _tyIpp _idIpp "xor"  _op1Ipp _op2Ipp
-              {-# LINE 5392 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Xor _pcIself _idIself _tyIself _op1Iself _op2Iself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _tyIpp,_tyIself) =
-             ty_
-         ( _op1Ipp,_op1Iself) =
-             op1_
-         ( _op2Ipp,_op2Iself) =
-             op2_
-     in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
-sem_Instruction_ZExt :: T_PC ->
-                        T_Identifier ->
-                        T_Value ->
-                        T_Type ->
-                        T_Instruction
-sem_Instruction_ZExt pc_ id_ v_ ty_ =
-    (let _lhsOppccfg :: Doc
-         _lhsOpp :: Doc
-         _lhsOself :: Instruction
-         _pcIself :: PC
-         _idIpp :: Doc
-         _idIppccfg :: Doc
-         _idIself :: Identifier
-         _vIpp :: Doc
-         _vIself :: Value
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOppccfg =
-             ({-# LINE 73 "src/Concurrent/Model/Visualizer.ag" #-}
-              int _pcIself <+> dotLabel _pcIself _pp
-              {-# LINE 5429 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _lhsOpp =
-             ({-# LINE 80 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _pp
-              {-# LINE 5434 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _pp =
-             ({-# LINE 92 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              pConvOp _idIpp "zext"     _vIpp _tyIpp
-              {-# LINE 5439 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             ZExt _pcIself _idIself _vIself _tyIself
-         _lhsOself =
-             _self
-         ( _pcIself) =
-             pc_
-         ( _idIpp,_idIppccfg,_idIself) =
-             id_
-         ( _vIpp,_vIself) =
-             v_
-         ( _tyIpp,_tyIself) =
-             ty_
      in  ( _lhsOpp,_lhsOppccfg,_lhsOself))
 -- Instructions ------------------------------------------------
 -- cata
@@ -5485,7 +5485,7 @@ sem_Instructions_Cons hd_ tl_ =
               {-# LINE 5486 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
-             ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 32 "./src/Concurrent/Model/Visualizer.ag" #-}
               _hdIppccfg <$> _tlIppccfg
               {-# LINE 5491 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5509,7 +5509,7 @@ sem_Instructions_Nil =
               {-# LINE 5510 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _lhsOppccfg =
-             ({-# LINE 32 "src/Concurrent/Model/Visualizer.ag" #-}
+             ({-# LINE 32 "./src/Concurrent/Model/Visualizer.ag" #-}
               P.empty
               {-# LINE 5515 "src/Concurrent/Model/Visualizer.hs" #-}
               )
@@ -5526,22 +5526,22 @@ sem_IntPredicate (IntEQ) =
     (sem_IntPredicate_IntEQ)
 sem_IntPredicate (IntNE) =
     (sem_IntPredicate_IntNE)
-sem_IntPredicate (IntSGE) =
-    (sem_IntPredicate_IntSGE)
-sem_IntPredicate (IntSGT) =
-    (sem_IntPredicate_IntSGT)
-sem_IntPredicate (IntSLE) =
-    (sem_IntPredicate_IntSLE)
-sem_IntPredicate (IntSLT) =
-    (sem_IntPredicate_IntSLT)
-sem_IntPredicate (IntUGE) =
-    (sem_IntPredicate_IntUGE)
 sem_IntPredicate (IntUGT) =
     (sem_IntPredicate_IntUGT)
-sem_IntPredicate (IntULE) =
-    (sem_IntPredicate_IntULE)
+sem_IntPredicate (IntUGE) =
+    (sem_IntPredicate_IntUGE)
 sem_IntPredicate (IntULT) =
     (sem_IntPredicate_IntULT)
+sem_IntPredicate (IntULE) =
+    (sem_IntPredicate_IntULE)
+sem_IntPredicate (IntSGT) =
+    (sem_IntPredicate_IntSGT)
+sem_IntPredicate (IntSGE) =
+    (sem_IntPredicate_IntSGE)
+sem_IntPredicate (IntSLT) =
+    (sem_IntPredicate_IntSLT)
+sem_IntPredicate (IntSLE) =
+    (sem_IntPredicate_IntSLE)
 -- semantic domain
 type T_IntPredicate = ( Doc,IntPredicate)
 data Inh_IntPredicate = Inh_IntPredicate {}
@@ -5580,59 +5580,17 @@ sem_IntPredicate_IntNE =
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_IntPredicate_IntSGE :: T_IntPredicate
-sem_IntPredicate_IntSGE =
+sem_IntPredicate_IntUGT :: T_IntPredicate
+sem_IntPredicate_IntUGT =
     (let _lhsOpp :: Doc
          _lhsOself :: IntPredicate
          _lhsOpp =
-             ({-# LINE 190 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "sge"
+             ({-# LINE 185 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "ugt"
               {-# LINE 5591 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             IntSGE
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_IntPredicate_IntSGT :: T_IntPredicate
-sem_IntPredicate_IntSGT =
-    (let _lhsOpp :: Doc
-         _lhsOself :: IntPredicate
-         _lhsOpp =
-             ({-# LINE 189 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "sgt"
-              {-# LINE 5605 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             IntSGT
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_IntPredicate_IntSLE :: T_IntPredicate
-sem_IntPredicate_IntSLE =
-    (let _lhsOpp :: Doc
-         _lhsOself :: IntPredicate
-         _lhsOpp =
-             ({-# LINE 192 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "sle"
-              {-# LINE 5619 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             IntSLE
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_IntPredicate_IntSLT :: T_IntPredicate
-sem_IntPredicate_IntSLT =
-    (let _lhsOpp :: Doc
-         _lhsOself :: IntPredicate
-         _lhsOpp =
-             ({-# LINE 191 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "slt"
-              {-# LINE 5633 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             IntSLT
+             IntUGT
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -5643,38 +5601,10 @@ sem_IntPredicate_IntUGE =
          _lhsOpp =
              ({-# LINE 186 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "uge"
-              {-# LINE 5647 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5605 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntUGE
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_IntPredicate_IntUGT :: T_IntPredicate
-sem_IntPredicate_IntUGT =
-    (let _lhsOpp :: Doc
-         _lhsOself :: IntPredicate
-         _lhsOpp =
-             ({-# LINE 185 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "ugt"
-              {-# LINE 5661 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             IntUGT
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_IntPredicate_IntULE :: T_IntPredicate
-sem_IntPredicate_IntULE =
-    (let _lhsOpp :: Doc
-         _lhsOself :: IntPredicate
-         _lhsOpp =
-             ({-# LINE 188 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "ule"
-              {-# LINE 5675 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             IntULE
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -5685,10 +5615,80 @@ sem_IntPredicate_IntULT =
          _lhsOpp =
              ({-# LINE 187 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ult"
-              {-# LINE 5689 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5619 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              IntULT
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_IntPredicate_IntULE :: T_IntPredicate
+sem_IntPredicate_IntULE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: IntPredicate
+         _lhsOpp =
+             ({-# LINE 188 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "ule"
+              {-# LINE 5633 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             IntULE
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_IntPredicate_IntSGT :: T_IntPredicate
+sem_IntPredicate_IntSGT =
+    (let _lhsOpp :: Doc
+         _lhsOself :: IntPredicate
+         _lhsOpp =
+             ({-# LINE 189 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "sgt"
+              {-# LINE 5647 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             IntSGT
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_IntPredicate_IntSGE :: T_IntPredicate
+sem_IntPredicate_IntSGE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: IntPredicate
+         _lhsOpp =
+             ({-# LINE 190 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "sge"
+              {-# LINE 5661 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             IntSGE
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_IntPredicate_IntSLT :: T_IntPredicate
+sem_IntPredicate_IntSLT =
+    (let _lhsOpp :: Doc
+         _lhsOself :: IntPredicate
+         _lhsOpp =
+             ({-# LINE 191 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "slt"
+              {-# LINE 5675 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             IntSLT
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_IntPredicate_IntSLE :: T_IntPredicate
+sem_IntPredicate_IntSLE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: IntPredicate
+         _lhsOpp =
+             ({-# LINE 192 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "sle"
+              {-# LINE 5689 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             IntSLE
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -5748,40 +5748,40 @@ sem_Ints_Nil =
 -- cata
 sem_Linkage :: Linkage ->
                T_Linkage
-sem_Linkage (AppendingLinkage) =
-    (sem_Linkage_AppendingLinkage)
-sem_Linkage (AvailableExternallyLinkage) =
-    (sem_Linkage_AvailableExternallyLinkage)
-sem_Linkage (CommonLinkage) =
-    (sem_Linkage_CommonLinkage)
-sem_Linkage (DLLExportLinkage) =
-    (sem_Linkage_DLLExportLinkage)
-sem_Linkage (DLLImportLinkage) =
-    (sem_Linkage_DLLImportLinkage)
 sem_Linkage (ExternalLinkage) =
     (sem_Linkage_ExternalLinkage)
-sem_Linkage (ExternalWeakLinkage) =
-    (sem_Linkage_ExternalWeakLinkage)
-sem_Linkage (GhostLinkage) =
-    (sem_Linkage_GhostLinkage)
-sem_Linkage (InternalLinkage) =
-    (sem_Linkage_InternalLinkage)
+sem_Linkage (AvailableExternallyLinkage) =
+    (sem_Linkage_AvailableExternallyLinkage)
 sem_Linkage (LinkOnceAnyLinkage) =
     (sem_Linkage_LinkOnceAnyLinkage)
 sem_Linkage (LinkOnceODRLinkage) =
     (sem_Linkage_LinkOnceODRLinkage)
-sem_Linkage (LinkerPrivateLinkage) =
-    (sem_Linkage_LinkerPrivateLinkage)
-sem_Linkage (LinkerPrivateWeakDefAutoLinkage) =
-    (sem_Linkage_LinkerPrivateWeakDefAutoLinkage)
-sem_Linkage (LinkerPrivateWeakLinkage) =
-    (sem_Linkage_LinkerPrivateWeakLinkage)
-sem_Linkage (PrivateLinkage) =
-    (sem_Linkage_PrivateLinkage)
 sem_Linkage (WeakAnyLinkage) =
     (sem_Linkage_WeakAnyLinkage)
 sem_Linkage (WeakODRLinkage) =
     (sem_Linkage_WeakODRLinkage)
+sem_Linkage (AppendingLinkage) =
+    (sem_Linkage_AppendingLinkage)
+sem_Linkage (InternalLinkage) =
+    (sem_Linkage_InternalLinkage)
+sem_Linkage (PrivateLinkage) =
+    (sem_Linkage_PrivateLinkage)
+sem_Linkage (DLLImportLinkage) =
+    (sem_Linkage_DLLImportLinkage)
+sem_Linkage (DLLExportLinkage) =
+    (sem_Linkage_DLLExportLinkage)
+sem_Linkage (ExternalWeakLinkage) =
+    (sem_Linkage_ExternalWeakLinkage)
+sem_Linkage (GhostLinkage) =
+    (sem_Linkage_GhostLinkage)
+sem_Linkage (CommonLinkage) =
+    (sem_Linkage_CommonLinkage)
+sem_Linkage (LinkerPrivateLinkage) =
+    (sem_Linkage_LinkerPrivateLinkage)
+sem_Linkage (LinkerPrivateWeakLinkage) =
+    (sem_Linkage_LinkerPrivateWeakLinkage)
+sem_Linkage (LinkerPrivateWeakDefAutoLinkage) =
+    (sem_Linkage_LinkerPrivateWeakDefAutoLinkage)
 -- semantic domain
 type T_Linkage = ( Doc,Linkage)
 data Inh_Linkage = Inh_Linkage {}
@@ -5792,17 +5792,17 @@ wrap_Linkage :: T_Linkage ->
 wrap_Linkage sem (Inh_Linkage) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_Linkage _lhsOpp _lhsOself))
-sem_Linkage_AppendingLinkage :: T_Linkage
-sem_Linkage_AppendingLinkage =
+sem_Linkage_ExternalLinkage :: T_Linkage
+sem_Linkage_ExternalLinkage =
     (let _lhsOpp :: Doc
          _lhsOself :: Linkage
          _lhsOpp =
-             ({-# LINE 219 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "appending"
+             ({-# LINE 213 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "external"
               {-# LINE 5803 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             AppendingLinkage
+             ExternalLinkage
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -5820,104 +5820,6 @@ sem_Linkage_AvailableExternallyLinkage =
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_Linkage_CommonLinkage :: T_Linkage
-sem_Linkage_CommonLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 226 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "common"
-              {-# LINE 5831 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             CommonLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Linkage_DLLExportLinkage :: T_Linkage
-sem_Linkage_DLLExportLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 223 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "dllexport"
-              {-# LINE 5845 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             DLLExportLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Linkage_DLLImportLinkage :: T_Linkage
-sem_Linkage_DLLImportLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 222 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "dllimport"
-              {-# LINE 5859 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             DLLImportLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Linkage_ExternalLinkage :: T_Linkage
-sem_Linkage_ExternalLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 213 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "external"
-              {-# LINE 5873 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             ExternalLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Linkage_ExternalWeakLinkage :: T_Linkage
-sem_Linkage_ExternalWeakLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 224 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "external"
-              {-# LINE 5887 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             ExternalWeakLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Linkage_GhostLinkage :: T_Linkage
-sem_Linkage_GhostLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 225 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "ghost"
-              {-# LINE 5901 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             GhostLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Linkage_InternalLinkage :: T_Linkage
-sem_Linkage_InternalLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 220 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "internal"
-              {-# LINE 5915 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             InternalLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
 sem_Linkage_LinkOnceAnyLinkage :: T_Linkage
 sem_Linkage_LinkOnceAnyLinkage =
     (let _lhsOpp :: Doc
@@ -5925,7 +5827,7 @@ sem_Linkage_LinkOnceAnyLinkage =
          _lhsOpp =
              ({-# LINE 215 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "linkonce"
-              {-# LINE 5929 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5831 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LinkOnceAnyLinkage
@@ -5939,66 +5841,10 @@ sem_Linkage_LinkOnceODRLinkage =
          _lhsOpp =
              ({-# LINE 216 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "linkonce_odr"
-              {-# LINE 5943 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5845 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LinkOnceODRLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Linkage_LinkerPrivateLinkage :: T_Linkage
-sem_Linkage_LinkerPrivateLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 227 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "linker_private"
-              {-# LINE 5957 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             LinkerPrivateLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Linkage_LinkerPrivateWeakDefAutoLinkage :: T_Linkage
-sem_Linkage_LinkerPrivateWeakDefAutoLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 229 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "linker_private_weak_def_auto"
-              {-# LINE 5971 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             LinkerPrivateWeakDefAutoLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Linkage_LinkerPrivateWeakLinkage :: T_Linkage
-sem_Linkage_LinkerPrivateWeakLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 228 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "linker_private_weak"
-              {-# LINE 5985 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             LinkerPrivateWeakLinkage
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Linkage_PrivateLinkage :: T_Linkage
-sem_Linkage_PrivateLinkage =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Linkage
-         _lhsOpp =
-             ({-# LINE 221 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "private"
-              {-# LINE 5999 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             PrivateLinkage
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -6009,7 +5855,7 @@ sem_Linkage_WeakAnyLinkage =
          _lhsOpp =
              ({-# LINE 217 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "weak"
-              {-# LINE 6013 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5859 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              WeakAnyLinkage
@@ -6023,10 +5869,164 @@ sem_Linkage_WeakODRLinkage =
          _lhsOpp =
              ({-# LINE 218 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "weak_odr"
-              {-# LINE 6027 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 5873 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              WeakODRLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_AppendingLinkage :: T_Linkage
+sem_Linkage_AppendingLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 219 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "appending"
+              {-# LINE 5887 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             AppendingLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_InternalLinkage :: T_Linkage
+sem_Linkage_InternalLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 220 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "internal"
+              {-# LINE 5901 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             InternalLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_PrivateLinkage :: T_Linkage
+sem_Linkage_PrivateLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 221 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "private"
+              {-# LINE 5915 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             PrivateLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_DLLImportLinkage :: T_Linkage
+sem_Linkage_DLLImportLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 222 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "dllimport"
+              {-# LINE 5929 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             DLLImportLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_DLLExportLinkage :: T_Linkage
+sem_Linkage_DLLExportLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 223 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "dllexport"
+              {-# LINE 5943 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             DLLExportLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_ExternalWeakLinkage :: T_Linkage
+sem_Linkage_ExternalWeakLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 224 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "external"
+              {-# LINE 5957 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             ExternalWeakLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_GhostLinkage :: T_Linkage
+sem_Linkage_GhostLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 225 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "ghost"
+              {-# LINE 5971 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             GhostLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_CommonLinkage :: T_Linkage
+sem_Linkage_CommonLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 226 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "common"
+              {-# LINE 5985 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             CommonLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_LinkerPrivateLinkage :: T_Linkage
+sem_Linkage_LinkerPrivateLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 227 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "linker_private"
+              {-# LINE 5999 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             LinkerPrivateLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_LinkerPrivateWeakLinkage :: T_Linkage
+sem_Linkage_LinkerPrivateWeakLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 228 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "linker_private_weak"
+              {-# LINE 6013 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             LinkerPrivateWeakLinkage
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Linkage_LinkerPrivateWeakDefAutoLinkage :: T_Linkage
+sem_Linkage_LinkerPrivateWeakDefAutoLinkage =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Linkage
+         _lhsOpp =
+             ({-# LINE 229 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "linker_private_weak_def_auto"
+              {-# LINE 6027 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             LinkerPrivateWeakDefAutoLinkage
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -6654,8 +6654,8 @@ sem_Module_Module :: String ->
                      T_NamedTypes ->
                      T_Module
 sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
-    (let _funsOilabel :: ILabel
-         _lhsOpp :: Doc
+    (let _lhsOpp :: Doc
+         _funsOilabel :: ILabel
          _lhsOself :: Module
          _layoutIpp :: Doc
          _layoutIself :: DataLayout
@@ -6668,14 +6668,14 @@ sem_Module_Module id_ layout_ target_ gvars_ funs_ nmdtys_ =
          _funsIself :: Functions
          _nmdtysIpp :: Doc
          _nmdtysIself :: NamedTypes
-         _funsOilabel =
-             ({-# LINE 39 "src/Concurrent/Model/Visualizer.ag" #-}
-              0
-              {-# LINE 6675 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
          _lhsOpp =
              ({-# LINE 59 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text ("; ModuleID ='" ++ id_ ++ "'") <$> _layoutIpp <$> _targetIpp <$> P.empty <$>  _nmdtysIpp <$> _gvarsIpp <$> _funsIpp
+              {-# LINE 6675 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _funsOilabel =
+             ({-# LINE 39 "./src/Concurrent/Model/Visualizer.ag" #-}
+              0
               {-# LINE 6680 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
@@ -7135,38 +7135,38 @@ sem_Parameters_Nil =
 -- cata
 sem_RealPredicate :: RealPredicate ->
                      T_RealPredicate
+sem_RealPredicate (LLVMRealPredicateFalse) =
+    (sem_RealPredicate_LLVMRealPredicateFalse)
 sem_RealPredicate (LLVMRealOEQ) =
     (sem_RealPredicate_LLVMRealOEQ)
-sem_RealPredicate (LLVMRealOGE) =
-    (sem_RealPredicate_LLVMRealOGE)
 sem_RealPredicate (LLVMRealOGT) =
     (sem_RealPredicate_LLVMRealOGT)
-sem_RealPredicate (LLVMRealOLE) =
-    (sem_RealPredicate_LLVMRealOLE)
+sem_RealPredicate (LLVMRealOGE) =
+    (sem_RealPredicate_LLVMRealOGE)
 sem_RealPredicate (LLVMRealOLT) =
     (sem_RealPredicate_LLVMRealOLT)
+sem_RealPredicate (LLVMRealOLE) =
+    (sem_RealPredicate_LLVMRealOLE)
 sem_RealPredicate (LLVMRealONE) =
     (sem_RealPredicate_LLVMRealONE)
 sem_RealPredicate (LLVMRealORD) =
     (sem_RealPredicate_LLVMRealORD)
-sem_RealPredicate (LLVMRealPredicateFalse) =
-    (sem_RealPredicate_LLVMRealPredicateFalse)
-sem_RealPredicate (LLVMRealPredicateTrue) =
-    (sem_RealPredicate_LLVMRealPredicateTrue)
-sem_RealPredicate (LLVMRealUEQ) =
-    (sem_RealPredicate_LLVMRealUEQ)
-sem_RealPredicate (LLVMRealUGE) =
-    (sem_RealPredicate_LLVMRealUGE)
-sem_RealPredicate (LLVMRealUGT) =
-    (sem_RealPredicate_LLVMRealUGT)
-sem_RealPredicate (LLVMRealULE) =
-    (sem_RealPredicate_LLVMRealULE)
-sem_RealPredicate (LLVMRealULT) =
-    (sem_RealPredicate_LLVMRealULT)
-sem_RealPredicate (LLVMRealUNE) =
-    (sem_RealPredicate_LLVMRealUNE)
 sem_RealPredicate (LLVMRealUNO) =
     (sem_RealPredicate_LLVMRealUNO)
+sem_RealPredicate (LLVMRealUEQ) =
+    (sem_RealPredicate_LLVMRealUEQ)
+sem_RealPredicate (LLVMRealUGT) =
+    (sem_RealPredicate_LLVMRealUGT)
+sem_RealPredicate (LLVMRealUGE) =
+    (sem_RealPredicate_LLVMRealUGE)
+sem_RealPredicate (LLVMRealULT) =
+    (sem_RealPredicate_LLVMRealULT)
+sem_RealPredicate (LLVMRealULE) =
+    (sem_RealPredicate_LLVMRealULE)
+sem_RealPredicate (LLVMRealUNE) =
+    (sem_RealPredicate_LLVMRealUNE)
+sem_RealPredicate (LLVMRealPredicateTrue) =
+    (sem_RealPredicate_LLVMRealPredicateTrue)
 -- semantic domain
 type T_RealPredicate = ( Doc,RealPredicate)
 data Inh_RealPredicate = Inh_RealPredicate {}
@@ -7177,6 +7177,20 @@ wrap_RealPredicate :: T_RealPredicate ->
 wrap_RealPredicate sem (Inh_RealPredicate) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_RealPredicate _lhsOpp _lhsOself))
+sem_RealPredicate_LLVMRealPredicateFalse :: T_RealPredicate
+sem_RealPredicate_LLVMRealPredicateFalse =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 195 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "false"
+              {-# LINE 7188 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             LLVMRealPredicateFalse
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
 sem_RealPredicate_LLVMRealOEQ :: T_RealPredicate
 sem_RealPredicate_LLVMRealOEQ =
     (let _lhsOpp :: Doc
@@ -7184,24 +7198,10 @@ sem_RealPredicate_LLVMRealOEQ =
          _lhsOpp =
              ({-# LINE 196 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "oeq"
-              {-# LINE 7188 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             LLVMRealOEQ
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_RealPredicate_LLVMRealOGE :: T_RealPredicate
-sem_RealPredicate_LLVMRealOGE =
-    (let _lhsOpp :: Doc
-         _lhsOself :: RealPredicate
-         _lhsOpp =
-             ({-# LINE 198 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "oge"
               {-# LINE 7202 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             LLVMRealOGE
+             LLVMRealOEQ
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -7219,17 +7219,17 @@ sem_RealPredicate_LLVMRealOGT =
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_RealPredicate_LLVMRealOLE :: T_RealPredicate
-sem_RealPredicate_LLVMRealOLE =
+sem_RealPredicate_LLVMRealOGE :: T_RealPredicate
+sem_RealPredicate_LLVMRealOGE =
     (let _lhsOpp :: Doc
          _lhsOself :: RealPredicate
          _lhsOpp =
-             ({-# LINE 200 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "ole"
+             ({-# LINE 198 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "oge"
               {-# LINE 7230 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             LLVMRealOLE
+             LLVMRealOGE
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -7247,6 +7247,20 @@ sem_RealPredicate_LLVMRealOLT =
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealOLE :: T_RealPredicate
+sem_RealPredicate_LLVMRealOLE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 200 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "ole"
+              {-# LINE 7258 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             LLVMRealOLE
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
 sem_RealPredicate_LLVMRealONE :: T_RealPredicate
 sem_RealPredicate_LLVMRealONE =
     (let _lhsOpp :: Doc
@@ -7254,7 +7268,7 @@ sem_RealPredicate_LLVMRealONE =
          _lhsOpp =
              ({-# LINE 201 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "one"
-              {-# LINE 7258 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7272 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealONE
@@ -7268,38 +7282,24 @@ sem_RealPredicate_LLVMRealORD =
          _lhsOpp =
              ({-# LINE 202 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ord"
-              {-# LINE 7272 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7286 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealORD
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_RealPredicate_LLVMRealPredicateFalse :: T_RealPredicate
-sem_RealPredicate_LLVMRealPredicateFalse =
+sem_RealPredicate_LLVMRealUNO :: T_RealPredicate
+sem_RealPredicate_LLVMRealUNO =
     (let _lhsOpp :: Doc
          _lhsOself :: RealPredicate
          _lhsOpp =
-             ({-# LINE 195 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "false"
-              {-# LINE 7286 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             LLVMRealPredicateFalse
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_RealPredicate_LLVMRealPredicateTrue :: T_RealPredicate
-sem_RealPredicate_LLVMRealPredicateTrue =
-    (let _lhsOpp :: Doc
-         _lhsOself :: RealPredicate
-         _lhsOpp =
-             ({-# LINE 210 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "true"
+             ({-# LINE 203 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "uno"
               {-# LINE 7300 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             LLVMRealPredicateTrue
+             LLVMRealUNO
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -7317,20 +7317,6 @@ sem_RealPredicate_LLVMRealUEQ =
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_RealPredicate_LLVMRealUGE :: T_RealPredicate
-sem_RealPredicate_LLVMRealUGE =
-    (let _lhsOpp :: Doc
-         _lhsOself :: RealPredicate
-         _lhsOpp =
-             ({-# LINE 206 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "uge"
-              {-# LINE 7328 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             LLVMRealUGE
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
 sem_RealPredicate_LLVMRealUGT :: T_RealPredicate
 sem_RealPredicate_LLVMRealUGT =
     (let _lhsOpp :: Doc
@@ -7338,24 +7324,24 @@ sem_RealPredicate_LLVMRealUGT =
          _lhsOpp =
              ({-# LINE 205 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ugt"
-              {-# LINE 7342 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7328 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealUGT
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_RealPredicate_LLVMRealULE :: T_RealPredicate
-sem_RealPredicate_LLVMRealULE =
+sem_RealPredicate_LLVMRealUGE :: T_RealPredicate
+sem_RealPredicate_LLVMRealUGE =
     (let _lhsOpp :: Doc
          _lhsOself :: RealPredicate
          _lhsOpp =
-             ({-# LINE 208 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "ule"
-              {-# LINE 7356 "src/Concurrent/Model/Visualizer.hs" #-}
+             ({-# LINE 206 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "uge"
+              {-# LINE 7342 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             LLVMRealULE
+             LLVMRealUGE
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -7366,10 +7352,24 @@ sem_RealPredicate_LLVMRealULT =
          _lhsOpp =
              ({-# LINE 207 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "ult"
-              {-# LINE 7370 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7356 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              LLVMRealULT
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_RealPredicate_LLVMRealULE :: T_RealPredicate
+sem_RealPredicate_LLVMRealULE =
+    (let _lhsOpp :: Doc
+         _lhsOself :: RealPredicate
+         _lhsOpp =
+             ({-# LINE 208 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "ule"
+              {-# LINE 7370 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             LLVMRealULE
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -7387,17 +7387,17 @@ sem_RealPredicate_LLVMRealUNE =
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_RealPredicate_LLVMRealUNO :: T_RealPredicate
-sem_RealPredicate_LLVMRealUNO =
+sem_RealPredicate_LLVMRealPredicateTrue :: T_RealPredicate
+sem_RealPredicate_LLVMRealPredicateTrue =
     (let _lhsOpp :: Doc
          _lhsOself :: RealPredicate
          _lhsOpp =
-             ({-# LINE 203 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "uno"
+             ({-# LINE 210 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "true"
               {-# LINE 7398 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             LLVMRealUNO
+             LLVMRealPredicateTrue
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -7481,10 +7481,10 @@ sem_Section_Section s_ =
 -- cata
 sem_SimpleConstant :: SimpleConstant ->
                       T_SimpleConstant
-sem_SimpleConstant (ConstantFP _fp) =
-    (sem_SimpleConstant_ConstantFP (sem_ConstantFP _fp))
 sem_SimpleConstant (ConstantInt _iv _ty) =
     (sem_SimpleConstant_ConstantInt _iv (sem_Type _ty))
+sem_SimpleConstant (ConstantFP _fp) =
+    (sem_SimpleConstant_ConstantFP (sem_ConstantFP _fp))
 sem_SimpleConstant (ConstantPointerNull _ty) =
     (sem_SimpleConstant_ConstantPointerNull (sem_Type _ty))
 -- semantic domain
@@ -7497,25 +7497,6 @@ wrap_SimpleConstant :: T_SimpleConstant ->
 wrap_SimpleConstant sem (Inh_SimpleConstant) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_SimpleConstant _lhsOpp _lhsOself))
-sem_SimpleConstant_ConstantFP :: T_ConstantFP ->
-                                 T_SimpleConstant
-sem_SimpleConstant_ConstantFP fp_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: SimpleConstant
-         _fpIpp :: Doc
-         _fpIself :: ConstantFP
-         _lhsOpp =
-             ({-# LINE 257 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _fpIpp
-              {-# LINE 7511 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             ConstantFP _fpIself
-         _lhsOself =
-             _self
-         ( _fpIpp,_fpIself) =
-             fp_
-     in  ( _lhsOpp,_lhsOself))
 sem_SimpleConstant_ConstantInt :: Int ->
                                   T_Type ->
                                   T_SimpleConstant
@@ -7527,7 +7508,7 @@ sem_SimpleConstant_ConstantInt iv_ ty_ =
          _lhsOpp =
              ({-# LINE 256 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> int   iv_
-              {-# LINE 7531 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7512 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              ConstantInt iv_ _tyIself
@@ -7535,6 +7516,25 @@ sem_SimpleConstant_ConstantInt iv_ ty_ =
              _self
          ( _tyIpp,_tyIself) =
              ty_
+     in  ( _lhsOpp,_lhsOself))
+sem_SimpleConstant_ConstantFP :: T_ConstantFP ->
+                                 T_SimpleConstant
+sem_SimpleConstant_ConstantFP fp_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: SimpleConstant
+         _fpIpp :: Doc
+         _fpIself :: ConstantFP
+         _lhsOpp =
+             ({-# LINE 257 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _fpIpp
+              {-# LINE 7531 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             ConstantFP _fpIself
+         _lhsOself =
+             _self
+         ( _fpIpp,_fpIself) =
+             fp_
      in  ( _lhsOpp,_lhsOself))
 sem_SimpleConstant_ConstantPointerNull :: T_Type ->
                                           T_SimpleConstant
@@ -7559,10 +7559,10 @@ sem_SimpleConstant_ConstantPointerNull ty_ =
 -- cata
 sem_Target :: Target ->
               T_Target
-sem_Target (Linux) =
-    (sem_Target_Linux)
 sem_Target (MacOs) =
     (sem_Target_MacOs)
+sem_Target (Linux) =
+    (sem_Target_Linux)
 -- semantic domain
 type T_Target = ( Doc,Target)
 data Inh_Target = Inh_Target {}
@@ -7573,20 +7573,6 @@ wrap_Target :: T_Target ->
 wrap_Target sem (Inh_Target) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_Target _lhsOpp _lhsOself))
-sem_Target_Linux :: T_Target
-sem_Target_Linux =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Target
-         _lhsOpp =
-             ({-# LINE 56 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "Linux"
-              {-# LINE 7584 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Linux
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
 sem_Target_MacOs :: T_Target
 sem_Target_MacOs =
     (let _lhsOpp :: Doc
@@ -7594,10 +7580,24 @@ sem_Target_MacOs =
          _lhsOpp =
              ({-# LINE 55 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "MacOs"
-              {-# LINE 7598 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7584 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              MacOs
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Target_Linux :: T_Target
+sem_Target_Linux =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Target
+         _lhsOpp =
+             ({-# LINE 56 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "Linux"
+              {-# LINE 7598 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Linux
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -7668,18 +7668,18 @@ sem_Triplet_Tuple x1_ x2_ x3_ =
 -- cata
 sem_TyFloatPoint :: TyFloatPoint ->
                     T_TyFloatPoint
+sem_TyFloatPoint (TyHalf) =
+    (sem_TyFloatPoint_TyHalf)
+sem_TyFloatPoint (TyFloat) =
+    (sem_TyFloatPoint_TyFloat)
 sem_TyFloatPoint (TyDouble) =
     (sem_TyFloatPoint_TyDouble)
 sem_TyFloatPoint (TyFP128) =
     (sem_TyFloatPoint_TyFP128)
-sem_TyFloatPoint (TyFloat) =
-    (sem_TyFloatPoint_TyFloat)
-sem_TyFloatPoint (TyHalf) =
-    (sem_TyFloatPoint_TyHalf)
-sem_TyFloatPoint (TyPPCFP128) =
-    (sem_TyFloatPoint_TyPPCFP128)
 sem_TyFloatPoint (Tyx86FP80) =
     (sem_TyFloatPoint_Tyx86FP80)
+sem_TyFloatPoint (TyPPCFP128) =
+    (sem_TyFloatPoint_TyPPCFP128)
 -- semantic domain
 type T_TyFloatPoint = ( Doc,TyFloatPoint)
 data Inh_TyFloatPoint = Inh_TyFloatPoint {}
@@ -7690,6 +7690,34 @@ wrap_TyFloatPoint :: T_TyFloatPoint ->
 wrap_TyFloatPoint sem (Inh_TyFloatPoint) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_TyFloatPoint _lhsOpp _lhsOself))
+sem_TyFloatPoint_TyHalf :: T_TyFloatPoint
+sem_TyFloatPoint_TyHalf =
+    (let _lhsOpp :: Doc
+         _lhsOself :: TyFloatPoint
+         _lhsOpp =
+             ({-# LINE 312 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "half"
+              {-# LINE 7701 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             TyHalf
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_TyFloatPoint_TyFloat :: T_TyFloatPoint
+sem_TyFloatPoint_TyFloat =
+    (let _lhsOpp :: Doc
+         _lhsOself :: TyFloatPoint
+         _lhsOpp =
+             ({-# LINE 313 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "float"
+              {-# LINE 7715 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             TyFloat
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
 sem_TyFloatPoint_TyDouble :: T_TyFloatPoint
 sem_TyFloatPoint_TyDouble =
     (let _lhsOpp :: Doc
@@ -7697,7 +7725,7 @@ sem_TyFloatPoint_TyDouble =
          _lhsOpp =
              ({-# LINE 314 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "double"
-              {-# LINE 7701 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7729 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyDouble
@@ -7711,52 +7739,10 @@ sem_TyFloatPoint_TyFP128 =
          _lhsOpp =
              ({-# LINE 315 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "fp128"
-              {-# LINE 7715 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             TyFP128
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_TyFloatPoint_TyFloat :: T_TyFloatPoint
-sem_TyFloatPoint_TyFloat =
-    (let _lhsOpp :: Doc
-         _lhsOself :: TyFloatPoint
-         _lhsOpp =
-             ({-# LINE 313 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "float"
-              {-# LINE 7729 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             TyFloat
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_TyFloatPoint_TyHalf :: T_TyFloatPoint
-sem_TyFloatPoint_TyHalf =
-    (let _lhsOpp :: Doc
-         _lhsOself :: TyFloatPoint
-         _lhsOpp =
-             ({-# LINE 312 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "half"
               {-# LINE 7743 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             TyHalf
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_TyFloatPoint_TyPPCFP128 :: T_TyFloatPoint
-sem_TyFloatPoint_TyPPCFP128 =
-    (let _lhsOpp :: Doc
-         _lhsOself :: TyFloatPoint
-         _lhsOpp =
-             ({-# LINE 317 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "ppc_fp128"
-              {-# LINE 7757 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             TyPPCFP128
+             TyFP128
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -7767,10 +7753,24 @@ sem_TyFloatPoint_Tyx86FP80 =
          _lhsOpp =
              ({-# LINE 316 "src/Language/LLVMIR/Printer/Module.ag" #-}
               text "x86_fp80"
-              {-# LINE 7771 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7757 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Tyx86FP80
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_TyFloatPoint_TyPPCFP128 :: T_TyFloatPoint
+sem_TyFloatPoint_TyPPCFP128 =
+    (let _lhsOpp :: Doc
+         _lhsOself :: TyFloatPoint
+         _lhsOpp =
+             ({-# LINE 317 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "ppc_fp128"
+              {-# LINE 7771 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             TyPPCFP128
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
@@ -7778,34 +7778,34 @@ sem_TyFloatPoint_Tyx86FP80 =
 -- cata
 sem_Type :: Type ->
             T_Type
-sem_Type (TyArray _numEl _ty) =
-    (sem_Type_TyArray _numEl (sem_Type _ty))
-sem_Type (TyFloatPoint _p) =
-    (sem_Type_TyFloatPoint (sem_TyFloatPoint _p))
-sem_Type (TyFunction _party _retty _isVar) =
-    (sem_Type_TyFunction (sem_Types _party) (sem_Type _retty) _isVar)
-sem_Type (TyInt _p) =
-    (sem_Type_TyInt _p)
-sem_Type (TyJumpTo _lb) =
-    (sem_Type_TyJumpTo (sem_Identifiers _lb))
+sem_Type (TyVoid) =
+    (sem_Type_TyVoid)
+sem_Type (Tyx86MMX) =
+    (sem_Type_Tyx86MMX)
 sem_Type (TyLabel) =
     (sem_Type_TyLabel)
 sem_Type (TyMetadata) =
     (sem_Type_TyMetadata)
 sem_Type (TyOpaque) =
     (sem_Type_TyOpaque)
-sem_Type (TyPointer _ty) =
-    (sem_Type_TyPointer (sem_Type _ty))
+sem_Type (TyInt _p) =
+    (sem_Type_TyInt _p)
+sem_Type (TyFloatPoint _p) =
+    (sem_Type_TyFloatPoint (sem_TyFloatPoint _p))
+sem_Type (TyArray _numEl _ty) =
+    (sem_Type_TyArray _numEl (sem_Type _ty))
+sem_Type (TyFunction _party _retty _isVar) =
+    (sem_Type_TyFunction (sem_Types _party) (sem_Type _retty) _isVar)
 sem_Type (TyStruct _name _numEl _tys) =
     (sem_Type_TyStruct _name _numEl (sem_Types _tys))
-sem_Type (TyUndefined) =
-    (sem_Type_TyUndefined)
+sem_Type (TyPointer _ty) =
+    (sem_Type_TyPointer (sem_Type _ty))
 sem_Type (TyVector _numEl _ty) =
     (sem_Type_TyVector _numEl (sem_Type _ty))
-sem_Type (TyVoid) =
-    (sem_Type_TyVoid)
-sem_Type (Tyx86MMX) =
-    (sem_Type_Tyx86MMX)
+sem_Type (TyUndefined) =
+    (sem_Type_TyUndefined)
+sem_Type (TyJumpTo _lb) =
+    (sem_Type_TyJumpTo (sem_Identifiers _lb))
 -- semantic domain
 type T_Type = ( Doc,Type)
 data Inh_Type = Inh_Type {}
@@ -7816,25 +7816,90 @@ wrap_Type :: T_Type ->
 wrap_Type sem (Inh_Type) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_Type _lhsOpp _lhsOself))
-sem_Type_TyArray :: Int ->
-                    T_Type ->
-                    T_Type
-sem_Type_TyArray numEl_ ty_ =
+sem_Type_TyVoid :: T_Type
+sem_Type_TyVoid =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
-         _tyIpp :: Doc
-         _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 304 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              brackets $ int numEl_ <+> char 'x' <+> _tyIpp
-              {-# LINE 7831 "src/Concurrent/Model/Visualizer.hs" #-}
+             ({-# LINE 297 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "void"
+              {-# LINE 7827 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             TyArray numEl_ _tyIself
+             TyVoid
          _lhsOself =
              _self
-         ( _tyIpp,_tyIself) =
-             ty_
+     in  ( _lhsOpp,_lhsOself))
+sem_Type_Tyx86MMX :: T_Type
+sem_Type_Tyx86MMX =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Type
+         _lhsOpp =
+             ({-# LINE 298 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "x86mmx"
+              {-# LINE 7841 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Tyx86MMX
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Type_TyLabel :: T_Type
+sem_Type_TyLabel =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Type
+         _lhsOpp =
+             ({-# LINE 299 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "label"
+              {-# LINE 7855 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             TyLabel
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Type_TyMetadata :: T_Type
+sem_Type_TyMetadata =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Type
+         _lhsOpp =
+             ({-# LINE 300 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "metadata"
+              {-# LINE 7869 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             TyMetadata
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Type_TyOpaque :: T_Type
+sem_Type_TyOpaque =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Type
+         _lhsOpp =
+             ({-# LINE 301 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "opaque"
+              {-# LINE 7883 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             TyOpaque
+         _lhsOself =
+             _self
+     in  ( _lhsOpp,_lhsOself))
+sem_Type_TyInt :: Int ->
+                  T_Type
+sem_Type_TyInt p_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Type
+         _lhsOpp =
+             ({-# LINE 302 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              char 'i' <> int p_
+              {-# LINE 7898 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             TyInt p_
+         _lhsOself =
+             _self
      in  ( _lhsOpp,_lhsOself))
 sem_Type_TyFloatPoint :: T_TyFloatPoint ->
                          T_Type
@@ -7846,7 +7911,7 @@ sem_Type_TyFloatPoint p_ =
          _lhsOpp =
              ({-# LINE 303 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _pIpp
-              {-# LINE 7850 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7915 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyFloatPoint _pIself
@@ -7854,6 +7919,26 @@ sem_Type_TyFloatPoint p_ =
              _self
          ( _pIpp,_pIself) =
              p_
+     in  ( _lhsOpp,_lhsOself))
+sem_Type_TyArray :: Int ->
+                    T_Type ->
+                    T_Type
+sem_Type_TyArray numEl_ ty_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Type
+         _tyIpp :: Doc
+         _tyIself :: Type
+         _lhsOpp =
+             ({-# LINE 304 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              brackets $ int numEl_ <+> char 'x' <+> _tyIpp
+              {-# LINE 7935 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             TyArray numEl_ _tyIself
+         _lhsOself =
+             _self
+         ( _tyIpp,_tyIself) =
+             ty_
      in  ( _lhsOpp,_lhsOself))
 sem_Type_TyFunction :: T_Types ->
                        T_Type ->
@@ -7869,7 +7954,7 @@ sem_Type_TyFunction party_ retty_ isVar_ =
          _lhsOpp =
              ({-# LINE 305 "src/Language/LLVMIR/Printer/Module.ag" #-}
               parens $ _partyIpp <+> text "->" <+> _rettyIpp
-              {-# LINE 7873 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7958 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyFunction _partyIself _rettyIself isVar_
@@ -7879,100 +7964,6 @@ sem_Type_TyFunction party_ retty_ isVar_ =
              party_
          ( _rettyIpp,_rettyIself) =
              retty_
-     in  ( _lhsOpp,_lhsOself))
-sem_Type_TyInt :: Int ->
-                  T_Type
-sem_Type_TyInt p_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Type
-         _lhsOpp =
-             ({-# LINE 302 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              char 'i' <> int p_
-              {-# LINE 7892 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             TyInt p_
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Type_TyJumpTo :: T_Identifiers ->
-                     T_Type
-sem_Type_TyJumpTo lb_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Type
-         _lbIself :: Identifiers
-         _lhsOpp =
-             ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              P.empty
-              {-# LINE 7908 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             TyJumpTo _lbIself
-         _lhsOself =
-             _self
-         ( _lbIself) =
-             lb_
-     in  ( _lhsOpp,_lhsOself))
-sem_Type_TyLabel :: T_Type
-sem_Type_TyLabel =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Type
-         _lhsOpp =
-             ({-# LINE 299 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "label"
-              {-# LINE 7924 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             TyLabel
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Type_TyMetadata :: T_Type
-sem_Type_TyMetadata =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Type
-         _lhsOpp =
-             ({-# LINE 300 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "metadata"
-              {-# LINE 7938 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             TyMetadata
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Type_TyOpaque :: T_Type
-sem_Type_TyOpaque =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Type
-         _lhsOpp =
-             ({-# LINE 301 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "opaque"
-              {-# LINE 7952 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             TyOpaque
-         _lhsOself =
-             _self
-     in  ( _lhsOpp,_lhsOself))
-sem_Type_TyPointer :: T_Type ->
-                      T_Type
-sem_Type_TyPointer ty_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Type
-         _tyIpp :: Doc
-         _tyIself :: Type
-         _lhsOpp =
-             ({-# LINE 307 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _tyIpp <> char '*'
-              {-# LINE 7969 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             TyPointer _tyIself
-         _lhsOself =
-             _self
-         ( _tyIpp,_tyIself) =
-             ty_
      in  ( _lhsOpp,_lhsOself))
 sem_Type_TyStruct :: String ->
                      Int ->
@@ -7986,7 +7977,7 @@ sem_Type_TyStruct name_ numEl_ tys_ =
          _lhsOpp =
              ({-# LINE 306 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '%' <> text name_ <+> int numEl_ <+> braces _tysIpp
-              {-# LINE 7990 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 7981 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyStruct name_ numEl_ _tysIself
@@ -7995,19 +7986,24 @@ sem_Type_TyStruct name_ numEl_ tys_ =
          ( _tysIpp,_tysIself) =
              tys_
      in  ( _lhsOpp,_lhsOself))
-sem_Type_TyUndefined :: T_Type
-sem_Type_TyUndefined =
+sem_Type_TyPointer :: T_Type ->
+                      T_Type
+sem_Type_TyPointer ty_ =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
+         _tyIpp :: Doc
+         _tyIself :: Type
          _lhsOpp =
-             ({-# LINE 309 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "TODO TYPE UNDEFINED"
-              {-# LINE 8006 "src/Concurrent/Model/Visualizer.hs" #-}
+             ({-# LINE 307 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _tyIpp <> char '*'
+              {-# LINE 8000 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             TyUndefined
+             TyPointer _tyIself
          _lhsOself =
              _self
+         ( _tyIpp,_tyIself) =
+             ty_
      in  ( _lhsOpp,_lhsOself))
 sem_Type_TyVector :: Int ->
                      T_Type ->
@@ -8020,7 +8016,7 @@ sem_Type_TyVector numEl_ ty_ =
          _lhsOpp =
              ({-# LINE 308 "src/Language/LLVMIR/Printer/Module.ag" #-}
               char '<' <> int numEl_ <+> char 'x' <+> _tyIpp <> char '>'
-              {-# LINE 8024 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8020 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              TyVector numEl_ _tyIself
@@ -8029,33 +8025,37 @@ sem_Type_TyVector numEl_ ty_ =
          ( _tyIpp,_tyIself) =
              ty_
      in  ( _lhsOpp,_lhsOself))
-sem_Type_TyVoid :: T_Type
-sem_Type_TyVoid =
+sem_Type_TyUndefined :: T_Type
+sem_Type_TyUndefined =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
          _lhsOpp =
-             ({-# LINE 297 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "void"
-              {-# LINE 8040 "src/Concurrent/Model/Visualizer.hs" #-}
+             ({-# LINE 309 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              text "TODO TYPE UNDEFINED"
+              {-# LINE 8036 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             TyVoid
+             TyUndefined
          _lhsOself =
              _self
      in  ( _lhsOpp,_lhsOself))
-sem_Type_Tyx86MMX :: T_Type
-sem_Type_Tyx86MMX =
+sem_Type_TyJumpTo :: T_Identifiers ->
+                     T_Type
+sem_Type_TyJumpTo lb_ =
     (let _lhsOpp :: Doc
          _lhsOself :: Type
+         _lbIself :: Identifiers
          _lhsOpp =
-             ({-# LINE 298 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              text "x86mmx"
-              {-# LINE 8054 "src/Concurrent/Model/Visualizer.hs" #-}
+             ({-# LINE 37 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              P.empty
+              {-# LINE 8052 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
-             Tyx86MMX
+             TyJumpTo _lbIself
          _lhsOself =
              _self
+         ( _lbIself) =
+             lb_
      in  ( _lhsOpp,_lhsOself))
 -- Types -------------------------------------------------------
 -- cata
@@ -8192,10 +8192,10 @@ sem_ValIdL_Nil =
 -- cata
 sem_Value :: Value ->
              T_Value
-sem_Value (Constant _c) =
-    (sem_Value_Constant (sem_Constant _c))
 sem_Value (Id _v _ty) =
     (sem_Value_Id (sem_Identifier _v) (sem_Type _ty))
+sem_Value (Constant _c) =
+    (sem_Value_Constant (sem_Constant _c))
 -- semantic domain
 type T_Value = ( Doc,Value)
 data Inh_Value = Inh_Value {}
@@ -8206,25 +8206,6 @@ wrap_Value :: T_Value ->
 wrap_Value sem (Inh_Value) =
     (let ( _lhsOpp,_lhsOself) = sem
      in  (Syn_Value _lhsOpp _lhsOself))
-sem_Value_Constant :: T_Constant ->
-                      T_Value
-sem_Value_Constant c_ =
-    (let _lhsOpp :: Doc
-         _lhsOself :: Value
-         _cIpp :: Doc
-         _cIself :: Constant
-         _lhsOpp =
-             ({-# LINE 244 "src/Language/LLVMIR/Printer/Module.ag" #-}
-              _cIpp
-              {-# LINE 8220 "src/Concurrent/Model/Visualizer.hs" #-}
-              )
-         _self =
-             Constant _cIself
-         _lhsOself =
-             _self
-         ( _cIpp,_cIself) =
-             c_
-     in  ( _lhsOpp,_lhsOself))
 sem_Value_Id :: T_Identifier ->
                 T_Type ->
                 T_Value
@@ -8239,7 +8220,7 @@ sem_Value_Id v_ ty_ =
          _lhsOpp =
              ({-# LINE 243 "src/Language/LLVMIR/Printer/Module.ag" #-}
               _tyIpp <+> _vIpp
-              {-# LINE 8243 "src/Concurrent/Model/Visualizer.hs" #-}
+              {-# LINE 8224 "src/Concurrent/Model/Visualizer.hs" #-}
               )
          _self =
              Id _vIself _tyIself
@@ -8249,6 +8230,25 @@ sem_Value_Id v_ ty_ =
              v_
          ( _tyIpp,_tyIself) =
              ty_
+     in  ( _lhsOpp,_lhsOself))
+sem_Value_Constant :: T_Constant ->
+                      T_Value
+sem_Value_Constant c_ =
+    (let _lhsOpp :: Doc
+         _lhsOself :: Value
+         _cIpp :: Doc
+         _cIself :: Constant
+         _lhsOpp =
+             ({-# LINE 244 "src/Language/LLVMIR/Printer/Module.ag" #-}
+              _cIpp
+              {-# LINE 8245 "src/Concurrent/Model/Visualizer.hs" #-}
+              )
+         _self =
+             Constant _cIself
+         _lhsOself =
+             _self
+         ( _cIpp,_cIself) =
+             c_
      in  ( _lhsOpp,_lhsOself))
 -- ValueIdxs ---------------------------------------------------
 -- cata

@@ -1,4 +1,4 @@
-{-#LANGUAGE RecordWildCards #-}
+{-#LANGUAGE RecordWildCards, DoAndIfThenElse #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Analysis.Module
 -- Copyright :  (c) 2013 Marcelo Sousa
