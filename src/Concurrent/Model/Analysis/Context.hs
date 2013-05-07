@@ -11,6 +11,8 @@ import Control.Monad.IO.Class
 import Control.Applicative
 import Control.Monad.State
 
+import qualified Data.Map as M
+
 import Language.LLVMIR
 import Concurrent.Model.Analysis.ControlFlow
 import Concurrent.Model.Analysis.DataFlow
@@ -22,13 +24,14 @@ data Core = Core
   }
 
 eCore :: Core
-eCore = undefined
+eCore = Core M.empty [] M.empty
 
 data Env = Env
   { corein  :: Core
   , coreout :: Core
   , ccfg    :: ControlFlow
   , df      :: DataFlow
+  , prevloc :: PC
   }
 
 newtype Context a = Context { unContext :: State Env a }

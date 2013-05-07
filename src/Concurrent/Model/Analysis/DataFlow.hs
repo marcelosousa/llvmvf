@@ -11,6 +11,12 @@ import qualified Data.Map    as M
 
 type TypeEnv   = M.Map Type () --(SSortExpr, SSort)
 
+{-
+data CS = ReadS
+        | WriteS
+        | Wait
+-}
+
 type DataFlow = M.Map String (M.Map Identifier Type)
 
 eDF :: DataFlow
