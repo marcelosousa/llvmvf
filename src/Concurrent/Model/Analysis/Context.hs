@@ -17,6 +17,12 @@ import Language.LLVMIR
 import Concurrent.Model.Analysis.ControlFlow
 import Concurrent.Model.Analysis.DataFlow
 
+data Location = Location 
+  { fn :: String
+  , bb :: Identifier
+  , pc :: PC
+  }
+
 data Core = Core
   { nmdtys :: NamedTypes
   , vars   :: Globals
@@ -31,7 +37,7 @@ data Env = Env
   , coreout :: Core
   , ccfg    :: ControlFlow
   , df      :: DataFlow
-  , prevloc :: PC
+  , loc     :: Location
   }
 
 newtype Context a = Context { unContext :: State Env a }
