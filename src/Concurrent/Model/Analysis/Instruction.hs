@@ -23,36 +23,38 @@ analyseInstr i = do
     -- Terminators
     Ret pc v -> do let l' = Location fn bb pc False
                        c  = flow pc ploc ccfg
-                       el = ExitLoc l' $ EndFn fn
-                       el' = el:eloc
-                       e' = e {ccfg = c, ploc = l', eloc = el'}
+                       el = ExitLoc l' EndFn
+                       el' = updateLocs l' el efloc
+                       e' = e {ccfg = c, ploc = l', efloc = el'}
                    putEnv e'
                    analyseRetValue v
     Unreachable pc -> let l' = Location fn bb pc False
                           c  = flow pc ploc ccfg
-                          el = ExitLoc l' $ EndFn fn
-                          el' = el:eloc
-                          e' = e {ccfg = c, ploc = l', eloc = el'}
+                          el = ExitLoc l' EndFn
+                          el' = updateLocs l' el efloc
+                          e' = e {ccfg = c, ploc = l', efloc = el'}
                       in putEnv e'
     Br  pc v t f -> do let ti = valueIdentifier' "" t
                            fi = valueIdentifier' "" f
                            l' = Location fn bb pc False
                            c  = flow pc ploc ccfg
-                           el = (ExitLoc l' $ BBLoc ti):(ExitLoc l' $ BBLoc fi):eloc
-                           e' = e {ccfg = c, ploc = l', eloc = el}
+                           elt = ExitLoc l' $ BBLoc ti
+                           elf = ExitLoc l' $ BBLoc fi
+                           el = updateLocs l' elt $ updateLocs l' elf efloc
+                           e' = e {ccfg = c, ploc = l', efloc = el}
                        putEnv e'
                        analyseValue v
     UBr pc d -> let di = valueIdentifier' "" d
                     l' = Location fn bb pc False
                     c  = flow pc ploc ccfg
-                    el = (ExitLoc l' $ BBLoc di):eloc
-                    e' = e {ccfg = c, ploc = l', eloc = el}
+                    el = updateLocs l' (ExitLoc l' $ BBLoc di) efloc
+                    e' = e {ccfg = c, ploc = l', efloc = el}
                 in putEnv e'
     -- Call Operation
     Call pc i ty callee vs -> do let l' = Location fn bb pc False
                                      c  = flow pc ploc ccfg
-                                     el = (ExitLoc l' $ FnLoc callee):eloc
-                                     e' = e {ccfg = c, ploc = l', eloc = el}
+                                     el = updateLocs l'  (ExitLoc l' $ FnLoc callee) efloc
+                                     e' = e {ccfg = c, ploc = l', efloc = el}
                                  putEnv e'
                                  mapM_ analyseValue vs
                                  analyseType ty
@@ -114,20 +116,20 @@ analyseInstr i = do
                                    l' = Location fn bb pc False
                                    c  = flow pc ploc ccfg
                                    el = ExitLoc l' $ EndTh fn
-                                   el' = el:eloc
-                                   e' = e {ccfg = c, ploc = l', eloc = el'}
+                                   el' = updateLocs l' el efloc
+                                   e' = e {ccfg = c, ploc = l', efloc = el'}
                                mapM_ analyseValue args  
     JoinThread   pc i -> do let l' = Location fn bb pc False
                                 c  = flow pc ploc ccfg
                                 el = SyncLoc l' i
-                                el' = el:eloc
-                                e' = e {ccfg = c, ploc = l', eloc = el'}
+                                el' = updateLocs l' el efloc
+                                e' = e {ccfg = c, ploc = l', efloc = el'}
                             putEnv e'
     ExitThread   pc -> do let l' = Location fn bb pc False
                               c  = flow pc ploc ccfg
                               el = ExitLoc l' $ EndTh fn
-                              el' = el:eloc
-                              e' = e {ccfg = c, ploc = l', eloc = el'}
+                              el' = updateLocs l' el efloc
+                              e' = e {ccfg = c, ploc = l', efloc = el'}
                           putEnv e'
     _ -> error $ "analyseInstr: " ++ show i ++ " not supported."    
 {-    MutexInit    pc :: PC rv :: Identifier mutex :: Value     

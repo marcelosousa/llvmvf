@@ -1,4 +1,4 @@
-{-#LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving #-}
+{-#LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving, RecordWildCards #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Analysis.Context
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -29,13 +29,25 @@ type Locations = [Location]
 data Where = BBLoc Identifier
            | FnLoc Identifier
            | ThLoc Identifier
-           | EndFn Identifier
+           | EndFn 
            | EndTh Identifier 
 
 data Loc = ExitLoc Location Where
          | SyncLoc Location Identifier
              
-type Locs = [Loc]
+isLocEndTh :: Loc -> Bool
+isLocEndTh (ExitLoc l w) = isWhEndTh w
+isLocEndTh (SyncLoc l i) = False
+
+isWhEndTh :: Where -> Bool
+isWhEndTh (EndTh _) = True
+isWhEndTh _         = False
+
+pcLoc :: Loc -> PC
+pcLoc (ExitLoc l@Location{..} _) = lpc
+pcLoc (SyncLoc l@Location{..} _) = lpc
+                             
+type LocList = [Loc]
 
 data Core = Core
   { nmdtys :: NamedTypes
@@ -46,17 +58,35 @@ data Core = Core
 eCore :: Core
 eCore = Core M.empty [] M.empty
 
+type Locs = M.Map Identifier (M.Map Identifier LocList)
+
+type Seen = M.Map Identifier [Identifier]
+
 data Env = Env
   { corein  :: Core
   , coreout :: Core
   , ccfg    :: ControlFlow
   , df      :: DataFlow
   , ploc    :: Location
-  , pfloc   :: Locations
-  , eloc    :: Locs
-  , efloc   :: M.Map Identifier Locs
+  , efloc   :: Locs
+  , seen    :: Seen
   }
 
+updateLocs :: Location -> Loc -> Locs -> Locs
+updateLocs l@Location{..} loc locs = 
+    M.alter f fn locs where
+        f Nothing = Just $ M.singleton bb [loc]
+        f (Just m) = Just $ M.alter g bb m
+        g Nothing = Just [loc]
+        g (Just l) = Just $ loc:l
+        
+getThreadExits :: Identifier -> Locs -> [PC]
+getThreadExits i m = case M.lookup i m of
+    Nothing -> error "getThreadExits:" -- ++ show i ++ " " ++ show m
+    Just bb -> let bbi = concat $ M.elems bb
+                   bbi' = filter isLocEndTh bbi
+               in map pcLoc bbi'
+               
 newtype Context a = Context { unContext :: State Env a }
     deriving (Monad, Functor, Applicative)
 
