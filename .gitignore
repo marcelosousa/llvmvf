@@ -9,9 +9,10 @@ src/Concurrent/Model/Encoder/Model.hs
 src/Concurrent/Model/PThread.hs
 src/Concurrent/Model/Analysis/Util.hs
 src/Concurrent/Model/Domain/PThread.hs
-src/ConCurrent/Model/Visualizer.hs
+src/Concurrent/Model/Visualizer.hs
 src/Concurrent/Model/SystemC.hs
 src/Concurrent/Model/Analysis/SystemC.hs
+src/Concurrent/Model/Encoder/Threads.hs
 
 # LLVM Byte-code 
 *.bc

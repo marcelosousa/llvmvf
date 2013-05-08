@@ -141,11 +141,12 @@ analyseInstr i = do
                               el' = updateLocs l' el efloc
                               e' = e {ccfg = c, ploc = l', efloc = el'}
                           putEnv e'
+    -- Mutexes
+    MutexInit    pc i mutex -> analyseNInstr pc [] [mutex]    
+    MutexLock    pc i mutex -> analyseNInstr pc [] [mutex]
+    MutexUnlock  pc i mutex -> analyseNInstr pc [] [mutex]
     _ -> error $ "analyseInstr: " ++ show i ++ " not supported."    
-{-    MutexInit    pc :: PC rv :: Identifier mutex :: Value     
-    MutexLock    pc :: PC rv :: Identifier mutex :: Value
-    MutexUnlock  pc :: PC rv :: Identifier mutex :: Value
-    WaitEvent    pc :: PC event :: Int
+{-    WaitEvent    pc :: PC event :: Int
     NotifyEvent  pc :: PC event :: Int
     WaitTime     pc :: PC time :: Value    
 -}

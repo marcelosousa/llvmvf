@@ -80,11 +80,14 @@ sem Instruction
   | ExitThread
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "exit_thread")
   | MutexInit 
-      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_init")
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_init" <+> 
+                                                       text (identifierValue @mutex.self))
   | MutexLock 
-      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_lock")
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_lock" <+> 
+                                                       text (identifierValue @mutex.self))
   | MutexUnlock 
-      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_unlock")
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_unlock" <+>
+                                                       text (identifierValue @mutex.self))
   | WaitEvent
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "wait_event")
   | WaitTime
