@@ -18,6 +18,7 @@ emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid False []
 valueIdentifier :: Value -> Maybe Identifier
 valueIdentifier (Id i _) = Just i
 valueIdentifier (Constant (GlobalValue (GlobalVariable i _))) = Just i
+valueIdentifier (Constant (GlobalValue (FunctionValue i _))) = Just i
 valueIdentifier _ = Nothing
 
 valueIdentifier' :: String -> Value -> Identifier
@@ -29,6 +30,9 @@ valueIdentifier' e v =
 identifierName :: Identifier -> String
 identifierName (Global n) = n
 identifierName (Local  n) = n
+
+identifierValue :: Value -> String
+identifierValue v = identifierName $ valueIdentifier' "" v
 
 findBasicBlock :: Identifier -> Function -> BasicBlock
 findBasicBlock i (FunctionDecl _ _ _ _ _) = error $ "findBasicBlock: " ++ show i ++ " not found."

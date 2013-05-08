@@ -126,6 +126,7 @@ analyseInstr i = do
                                    el' = updateLocs l' el efloc
                                    ths = updateThreads fn (ti,t) threads
                                    e' = e {ccfg = c, ploc = l', efloc = el', threads = ths}
+                               putEnv e'
                                mapM_ analyseValue args  
     JoinThread   pc i -> do let l' = Location fn bb pc False
                                 c  = flow pc ploc ccfg

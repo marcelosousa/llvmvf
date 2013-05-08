@@ -26,21 +26,28 @@ data Location = Location
   , lpc :: PC
   , ise :: Bool
   }
-  deriving Show
+  deriving (Show, Eq)
 
 type Locations = [Location]
 
-data Where = BBLoc Identifier
-           | FnLoc Identifier
-           | ThLoc Identifier
-           | EndFn 
-           | EndTh Identifier 
-  deriving Show
+data Where = BBLoc Identifier -- Jump to Basic Block
+           | FnLoc Identifier -- Call Function
+           | ThLoc Identifier -- Create Thread
+           | EndFn            -- End of Function
+           | EndTh Identifier -- End of Thread
+  deriving (Show, Eq)
+
+--instance Ord Where where
+--  BBLoc < _ 
 
 data Loc = ExitLoc Location Where
          | SyncLoc Location Identifier
-  deriving Show
-             
+  deriving (Show, Eq)
+
+instance Ord Loc where
+  (ExitLoc _ _) > _ = True
+  _ > _ = False
+              
 isLocEndTh :: Loc -> Bool
 isLocEndTh (ExitLoc l w) = isWhEndTh w
 isLocEndTh (SyncLoc l i) = False

@@ -72,9 +72,11 @@ sem Instruction
   | Ret Alloca Load Store ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
   | CreateThread
-      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "create_thread")
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "create_thread" <+> 
+                                                       text (identifierValue $ @args.self !! 0) <+> 
+                                                       text (identifierValue $ @args.self !! 2))
   | JoinThread
-      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "join_thread") <+> @id.ppccfg
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "join_thread" <+> @id.ppccfg)
   | ExitThread
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "exit_thread")
   | MutexInit 
@@ -102,7 +104,7 @@ dumpccfg (Model mdl) ccfg =
     text "digraph structs {" </>
     text "bgcolor=transparent;" </>
     text "node [shape=Mrecord];" </>
-    text "-1 [label=\"||\", shape=Mdiamond];" </>
+    --text "-1 [label=\"||\", shape=Mdiamond];" </>
     vsep (Prelude.map dotFunction $ M.elems $ getModFns mdl) </>
     vsep (Prelude.map pretty ccfg) </>
     text "}"
