@@ -120,7 +120,7 @@ sem Instruction
   | Or   loc.pp = pBitBinOp @ty.pp @id.pp "or"   @op1.pp @op2.pp
   | Xor  loc.pp = pBitBinOp @ty.pp @id.pp "xor"  @op1.pp @op2.pp
   | PHI  loc.pp = @id.pp <+> char '=' <+> text "phi" <+> @ty.pp <+> @vals.pp
-  | Select loc.pp = @id.pp <+> char '=' <+> @cond.pp <> char ',' <+> @valt.pp <> char ',' <+> @valf.pp
+  | Select loc.pp = @id.pp <+> char '=' <+> text "select" <+> @cond.pp <> char ',' <+> @valt.pp <> char ',' <+> @valf.pp
   | ExtractValue loc.pp = @id.pp <+> char '=' <+> text "extractvalue" <+> @aggr.pp <> char ',' <+> @idxs.pp
   | InsertValue loc.pp = @id.pp <+> char '=' <+> text "insertvalue" <+> @aggr.pp <> char ',' <+> @ival.pp <> char ',' <+> @idxs.pp
   | Cmpxchg loc.pp = @id.pp <+> char '=' <+> text "cmpxchg" <+> @mptr.pp <+> @cval.pp <+> @nval.pp <+> @ord.pp
