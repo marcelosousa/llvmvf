@@ -1,4 +1,4 @@
-{-#LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving, RecordWildCards #-}
+{-#LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving, RecordWildCards, FlexibleInstances #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Analysis.Context
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -19,6 +19,8 @@ import Language.LLVMIR
 import Language.LLVMIR.Util
 import Concurrent.Model.Analysis.ControlFlow
 import Concurrent.Model.Analysis.DataFlow
+
+import UU.PPrint hiding ((<$>)) 
 
 data Location = Location 
   { fn  :: Identifier
@@ -79,10 +81,27 @@ data Core = Core
 eCore :: Core
 eCore = Core M.empty [] M.empty
 
+data ThreadId = ThreadId Identifier
+              | ThreadGEP Identifier [Int]
+  deriving (Show, Eq, Ord)
+
+instance Pretty ThreadId where
+  pretty (ThreadId i) = pretty i
+  pretty (ThreadGEP i l) = pretty i <+> hsep (map pretty l)
+
+instance Pretty (Either Identifier (Identifier, [Int])) where
+  pretty (Left i) = pretty i
+  pretty (Right (i,l)) = pretty i <+> hsep (map pretty l)
+
+threadId :: Value -> ThreadId
+threadId v = case infoValue v of
+  Left reg -> ThreadId reg
+  Right (var, idxs) -> ThreadGEP var idxs
+
 type Locs = M.Map Identifier (M.Map Identifier LocList)
 
 type Seen = M.Map Identifier [Identifier]
-type Threads = M.Map Identifier [(Identifier,Identifier)]
+type Threads = M.Map Identifier [(ThreadId,Identifier)]
 
 data Env = Env
   { corein  :: Core
@@ -111,8 +130,8 @@ findThread fn reg df@DataFlow{..} threads =
             Nothing -> error $ "findThread failed"
             Just t -> t
 
-findInThreads :: Identifier -> [(Identifier, Identifier)] -> Maybe Identifier
-findInThreads i l = snd <$> find (\x -> fst x == i) l
+findInThreads :: Identifier -> [(ThreadId, Identifier)] -> Maybe Identifier
+findInThreads i l = snd <$> find (\x -> fst x == ThreadId i) l
 
 getLocs :: Location -> Locs -> LocList
 getLocs l@Location{..} m =
@@ -153,7 +172,7 @@ updateLocs l@Location{..} loc locs =
         g Nothing = Just [loc]
         g (Just l) = Just $ loc:l
 
-updateThreads :: Identifier -> (Identifier, Identifier) -> Threads -> Threads
+updateThreads :: Identifier -> (ThreadId, Identifier) -> Threads -> Threads
 updateThreads fn ti t = 
     M.alter f fn t where
         f Nothing = Just [ti]

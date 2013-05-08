@@ -6,8 +6,10 @@
 module Language.LLVMIR.Util where
 
 import Language.LLVMIR
+
 import Data.Maybe
 import Data.List
+import UU.PPrint
 
 nextUnique :: Int -> (Int, Int)
 nextUnique u = (u+1, u)
@@ -52,3 +54,20 @@ getBBId (BasicBlock i _) = i
 
 getModFns :: Module -> Functions
 getModFns (Module id layout target gvars funs nmdtys) = funs
+
+infoValue :: Value -> Either Identifier (Identifier, [Int])
+infoValue v = case v of
+  Constant (ConstantExpr (GetElementPtrConstantExpr i idxs)) ->
+    let vi = valueIdentifier' "infovalue gep" i
+        is = map intConstantValue idxs
+    in Right $ (vi,is) 
+  _ -> Left $ valueIdentifier' "infovalue" v
+
+intConstantValue :: Value -> Int
+intConstantValue (Constant (SmpConst (ConstantInt v _))) = v
+intConstantValue sc = error $ "intConstantValue: " ++ show sc
+
+instance Pretty Identifier where
+  pretty (Local i) = text i
+  pretty (Global i) = text i
+

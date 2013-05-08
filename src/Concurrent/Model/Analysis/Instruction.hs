@@ -118,7 +118,7 @@ analyseInstr i = do
     Cmpxchg   pc i mptr cval nval ord -> analyseNInstr pc [] [mptr,cval,nval]
     AtomicRMW pc i mptr val op ord -> analyseNInstr pc [] [mptr,val]
     -- Concurrent Operations Added
-    CreateThread pc args -> do let ti = valueIdentifier' "" $ args !! 0 
+    CreateThread pc args -> do let ti = threadId $ args !! 0 
                                    t = valueIdentifier' "" $ args !! 2 
                                    l' = Location fn bb pc False
                                    c  = flow pc ploc ccfg

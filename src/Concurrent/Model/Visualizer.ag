@@ -28,7 +28,7 @@ import Language.LLVMIR.Util
 attr Functions Function BasicBlocks BasicBlock
   chn ilabel :: {ILabel}
 
-attr Function BasicBlocks BasicBlock Instructions Instruction Identifier
+attr Function BasicBlocks BasicBlock Instructions Instruction Identifier Value
   syn ppccfg use {<$>} {P.empty} :: {Doc}
 
 sem BasicBlocks BasicBlock
@@ -69,11 +69,14 @@ sem Identifier
   | Global lhs.ppccfg = text @name.self
 
 sem Instruction
-  | Ret Alloca Load Store ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW 
+  | Ret Alloca Load Store ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
+  | GetElementPtr 
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> text "gep" <+>
+                                                       @struct.ppccfg <> char ',' <+> @idxs.pp)
   | CreateThread
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "create_thread" <+> 
-                                                       text (identifierValue $ @args.self !! 0) <+> 
+                                                       parens (pretty (infoValue $ @args.self !! 0)) <+> 
                                                        text (identifierValue $ @args.self !! 2))
   | JoinThread
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "join_thread" <+> @id.ppccfg)
@@ -99,6 +102,11 @@ sem Instruction
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "notify_event")
   | Call
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "call" <+> @callee.ppccfg)
+
+sem Value
+  | Id       lhs.ppccfg = @v.pp
+  | Constant lhs.ppccfg = @c.pp
+
 {
 type ILabel = Int
 
