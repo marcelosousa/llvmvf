@@ -45,12 +45,11 @@ analyseFunction fn = case fn of
   FunctionDecl name _ rty iv pms -> return ()
   FunctionDef  name _ rty iv pms body -> trace ("Analyzing Function " ++ show name) $ do
       e@Env{..} <- getEnv
+      let coreo = addFnToCore fn coreout
       if fnWasAnalyzed name corein seen
       then return ()
-      else do analyseBB $ head body
-              o@Env{..} <- getEnv
-              let locs = getLocs ploc efloc
-              trace ("AnalyzeFunction: " ++ show locs) $ mapM_ analyseLoc locs
+      else do putEnv $ e {coreout = coreo}
+              analyseBB $ head body
 
 -- Analyse a special location
 -- VIF
@@ -120,5 +119,6 @@ analyseBB (BasicBlock i instrs) = do
     else do mapM_ analyseInstr instrs
             o@Env{..} <- getEnv
             let seen' = addToSeen fni i seen
-            putEnv $ o {seen = seen'}
-         
+                locs = getLocs ploc efloc
+            putEnv $ o {seen = seen'} 
+            trace ("LOCS : " ++ show locs) $ mapM_ analyseLoc locs

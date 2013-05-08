@@ -150,9 +150,9 @@ runCCFG bc SystemC = error "llvmvf for SystemC is currently not available."
 runCCFG bc PThread = do mdl <- extract bc
                         let bf = dropExtension bc
                             mod = (M.model mdl) :: M.Model PThread
-                            (_,ccfg,_) = M.analyse "main" mod
+                            (m,ccfg,_) = M.analyse "main" mod
                             outfile = addExtension bf "dot"
-                        writeFile outfile (show $ dumpccfg mod ccfg)
+                        writeFile outfile (show $ dumpccfg m ccfg)
 
 -- | 'runBMC' - main bmc function
 runBMC :: FilePath -> Domain -> M.Bound -> IO ()

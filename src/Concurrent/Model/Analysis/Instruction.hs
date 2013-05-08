@@ -108,7 +108,7 @@ analyseInstr i = do
     Store  pc   ty v1 v2 align   -> analyseNInstr pc [ty] [v1,v2]
     Load   pc i    v     align   -> do analyseNInstr pc []   [v]
                                        o@Env{..} <- getEnv
-                                       let iv = valueIdentifier' "" v
+                                       let iv = infoValue v
                                            d@DataFlow{..} = df
                                            d' = d { loadMap = updateLoadMap fn (i,iv) loadMap }
                                            o' = o { df = d' }
@@ -118,7 +118,7 @@ analyseInstr i = do
     Cmpxchg   pc i mptr cval nval ord -> analyseNInstr pc [] [mptr,cval,nval]
     AtomicRMW pc i mptr val op ord -> analyseNInstr pc [] [mptr,val]
     -- Concurrent Operations Added
-    CreateThread pc args -> do let ti = threadId $ args !! 0 
+    CreateThread pc args -> do let ti = infoValue $ args !! 0 
                                    t = valueIdentifier' "" $ args !! 2 
                                    l' = Location fn bb pc False
                                    c  = flow pc ploc ccfg

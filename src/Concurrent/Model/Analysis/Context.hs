@@ -81,22 +81,11 @@ data Core = Core
 eCore :: Core
 eCore = Core M.empty [] M.empty
 
-data ThreadId = ThreadId Identifier
-              | ThreadGEP Identifier [Int]
-  deriving (Show, Eq, Ord)
-
-instance Pretty ThreadId where
-  pretty (ThreadId i) = pretty i
-  pretty (ThreadGEP i l) = pretty i <+> hsep (map pretty l)
+type ThreadId = Either Identifier (Identifier, [Int])
 
 instance Pretty (Either Identifier (Identifier, [Int])) where
   pretty (Left i) = pretty i
   pretty (Right (i,l)) = pretty i <+> hsep (map pretty l)
-
-threadId :: Value -> ThreadId
-threadId v = case infoValue v of
-  Left reg -> ThreadId reg
-  Right (var, idxs) -> ThreadGEP var idxs
 
 type Locs = M.Map Identifier (M.Map Identifier LocList)
 
@@ -120,18 +109,18 @@ findThread fn reg df@DataFlow{..} threads =
   let fnLoadMap = MB.fromMaybe (error "fnLoadMap in findThread") $ M.lookup fn loadMap
       fnThreads = MB.fromMaybe (error $ "fnThreads in findThread " ++ show fn ++ " " ++ show threads) $ M.lookup fn threads
   -- It can be that reg is the actual identifier
-  in case findInThreads reg fnThreads of
+  in case findInThreads (Left reg) fnThreads of
       Just t -> t
       Nothing -> 
         -- Check if it was the register that reg loaded from
         case M.lookup reg fnLoadMap of
           Nothing -> error $ "findThread failed " ++ show fn ++ " " ++ show reg
           Just reg' -> case findInThreads reg' fnThreads of
-            Nothing -> error $ "findThread failed"
+            Nothing -> error $ "findThread failed(2): " ++ show reg'
             Just t -> t
 
-findInThreads :: Identifier -> [(ThreadId, Identifier)] -> Maybe Identifier
-findInThreads i l = snd <$> find (\x -> fst x == ThreadId i) l
+findInThreads :: ThreadId -> [(ThreadId, Identifier)] -> Maybe Identifier
+findInThreads i l = snd <$> find (\x -> fst x ==  i) l
 
 getLocs :: Location -> Locs -> LocList
 getLocs l@Location{..} m =
@@ -140,6 +129,10 @@ getLocs l@Location{..} m =
         Just fnt -> case M.lookup bb fnt of
             Nothing -> error "getLocs: BB"
             Just bbt -> bbt
+
+addFnToCore :: Function -> Core -> Core
+addFnToCore fn@(FunctionDef n _ _ _ _ _) (Core nmd vars fns) = 
+  Core nmd vars $ M.insert n fn fns 
 
 fnWasAnalyzed :: Identifier -> Core -> Seen -> Bool
 fnWasAnalyzed i c@Core{..} seen =

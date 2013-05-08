@@ -17,7 +17,9 @@ data CS = ReadS
         | Wait
 -}
 
-type LoadMap = M.Map Identifier (M.Map Identifier Identifier)
+type IdOrGep = Either Identifier (Identifier,[Int])
+
+type LoadMap = M.Map Identifier (M.Map Identifier IdOrGep)
 data DataFlow = 
   DataFlow { loadMap :: LoadMap 
            }
@@ -26,7 +28,7 @@ eDF :: DataFlow
 eDF = DataFlow M.empty
 
 
-updateLoadMap :: Identifier -> (Identifier, Identifier) -> LoadMap -> LoadMap
+updateLoadMap :: Identifier -> (Identifier, IdOrGep) -> LoadMap -> LoadMap
 updateLoadMap i (a,b) lm = M.alter f i lm where
     f Nothing = Just $ M.singleton a b
     f (Just ln) = Just $ M.insert a b ln
