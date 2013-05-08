@@ -49,7 +49,8 @@ analyseFunction fn = case fn of
       then return ()
       else do analyseBB $ head body
               o@Env{..} <- getEnv
-              mapM_ analyseLoc $ getLocs ploc efloc
+              let locs = getLocs ploc efloc
+              trace ("AnalyzeFunction: " ++ show locs) $ mapM_ analyseLoc locs
 
 -- Analyse a special location
 -- VIF
@@ -108,10 +109,6 @@ analyseLoc loc = do
                                     e' = e {ccfg = c, ploc = iLoc}
                                 putEnv e'
                                 analyseFunction th
-                               -- o@Env{..} <- getEnv -- Retrieve the new env
-                               -- let p = getThreadExits tni efloc
-                               --     c' = foldr (\l1 r -> (Switch l1 lpc):r) ccfg p 
-                               -- putEnv $ o {ccfg = c'}
                           
 -- Add to seen
 analyseBB :: BasicBlock -> Context ()

@@ -25,10 +25,22 @@ import Language.LLVMIR
 import Language.LLVMIR.Util
 }
 
+attr PValues PValue 
+  syn ppccfg :: {Doc}
+
+sem PValues
+  | Nil  lhs.ppccfg = P.empty
+  | Cons lhs.ppccfg = if (length @tl.self == 0)
+                      then @hd.ppccfg
+                      else @hd.ppccfg <> char ',' <+> @tl.ppccfg
+
+sem PValue
+  | Tuple lhs.ppccfg = char '(' <+> @x1.ppccfg <> char ',' <+> @x2.ppccfg <+> char ')'
+
 attr Functions Function BasicBlocks BasicBlock
   chn ilabel :: {ILabel}
 
-attr Function BasicBlocks BasicBlock Instructions Instruction Identifier Value
+attr Function BasicBlocks BasicBlock Instructions Instruction Identifier Value Constant GlobalValue
   syn ppccfg use {<$>} {P.empty} :: {Doc}
 
 sem BasicBlocks BasicBlock
@@ -69,8 +81,9 @@ sem Identifier
   | Global lhs.ppccfg = text @name.self
 
 sem Instruction
-  | Ret Alloca Load Store ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue AtomicRMW 
+  | Ret Alloca Load Store ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue AtomicRMW 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
+  | PHI  loc.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> text "phi" <+> @vals.ppccfg)
   | GetElementPtr 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> text "gep" <+>
                                                        @struct.ppccfg <> char ',' <+> @idxs.pp)
@@ -105,7 +118,22 @@ sem Instruction
 
 sem Value
   | Id       lhs.ppccfg = @v.pp
-  | Constant lhs.ppccfg = @c.pp
+  | Constant lhs.ppccfg = @c.ppccfg
+
+sem Constant
+  | UndefValue   lhs.ppccfg = text "undef"
+  | BlockAddr    lhs.ppccfg = text "blockaddr"
+  | PoisonValue  lhs.ppccfg = text "poison"
+  | SmpConst     lhs.ppccfg = @sc.pp
+  | CmpConst     lhs.ppccfg = @cc.pp
+  | ConstantExpr lhs.ppccfg = @expr.pp
+  | GlobalValue  lhs.ppccfg = @gv.ppccfg
+
+sem GlobalValue
+  | FunctionValue  lhs.ppccfg = @n.pp
+  | GlobalAlias    lhs.ppccfg = @n.pp
+  | GlobalVariable lhs.ppccfg = @n.pp
+
 
 {
 type ILabel = Int
