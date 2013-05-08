@@ -76,7 +76,7 @@ sem RetInst
   | VoidRet  lhs.pp = text "void"
 
 sem Instruction
-  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue InsertValue AtomicRMW Cmpxchg CreateThread JoinThread ExitThread MutexInit MutexLock MutexUnlock
+  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue InsertValue AtomicRMW Cmpxchg CreateThread JoinThread ExitThread MutexInit MutexLock MutexUnlock MutexDestroy
            lhs.pp = @pp
   | Ret    loc.pp = text "ret" <+> @r.pp 
   | Alloca loc.pp = @id.pp <+> char '=' <+> text "alloca" <+> @ty.pp <> char ',' <+> @align.pp
@@ -131,6 +131,7 @@ sem Instruction
   | MutexInit    loc.pp = text "mutex_init"    <+> @mutex.pp 
   | MutexLock    loc.pp = text "mutex_lock"    <+> @mutex.pp
   | MutexUnlock  loc.pp = text "mutex_unlock"  <+> @mutex.pp
+  | MutexDestroy loc.pp = text "mutex_destroy" <+> @mutex.pp
   | WaitEvent    loc.pp = text "wait_event"    <+> int @event
   | NotifyEvent  loc.pp = text "notify_event"  <+> int @event
   | WaitTime     loc.pp = text "wait_time"     <+> @time.pp

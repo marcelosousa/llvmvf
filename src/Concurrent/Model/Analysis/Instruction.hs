@@ -145,6 +145,7 @@ analyseInstr i = do
     MutexInit    pc i mutex -> analyseNInstr pc [] [mutex]    
     MutexLock    pc i mutex -> analyseNInstr pc [] [mutex]
     MutexUnlock  pc i mutex -> analyseNInstr pc [] [mutex]
+    MutexDestroy pc i mutex -> analyseNInstr pc [] [mutex]
     _ -> error $ "analyseInstr: " ++ show i ++ " not supported."    
 {-    WaitEvent    pc :: PC event :: Int
     NotifyEvent  pc :: PC event :: Int

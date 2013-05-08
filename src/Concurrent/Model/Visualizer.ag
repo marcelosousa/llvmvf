@@ -88,6 +88,9 @@ sem Instruction
   | MutexUnlock 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_unlock" <+>
                                                        text (identifierValue @mutex.self))
+  | MutexDestroy
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_destroy" <+>
+                                                       text (identifierValue @mutex.self))
   | WaitEvent
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "wait_event")
   | WaitTime
