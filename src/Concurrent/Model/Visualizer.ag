@@ -81,7 +81,7 @@ sem Identifier
   | Global lhs.ppccfg = text @name.self
 
 sem Instruction
-  | Ret Alloca ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue AtomicRMW CondInit CondWait CondSignal 
+  | Ret Alloca ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue AtomicRMW 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
   | Load 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> 
@@ -115,6 +115,18 @@ sem Instruction
   | MutexDestroy
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "mutex_destroy" <+>
                                                        text (identifierValue @mutex.self))
+  | CondInit     
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@rv.pp <+> char '=' <+>
+                                                       text "cond_init" <+> @cond.ppccfg)
+  | CondWait  
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@rv.pp <+> char '=' <+>
+                                                       text "cond_wait" <+> 
+                                                       @cond.ppccfg <+> @mutex.ppccfg)
+  | CondSignal 
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@rv.pp <+> char '=' <+>
+                                                       text "cond_signal" <+> 
+                                                       @cond.ppccfg)
+
   | WaitEvent
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "wait_event")
   | WaitTime
