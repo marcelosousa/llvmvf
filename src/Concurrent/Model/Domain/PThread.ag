@@ -39,7 +39,10 @@ sem Instruction
                          "pthread_mutex_init"   -> MutexInit    @pc.self @mres.self (@args.self !! 0)
                          "pthread_mutex_lock"   -> MutexLock    @pc.self @mres.self (@args.self !! 0)
                          "pthread_mutex_unlock" -> MutexUnlock  @pc.self @mres.self (@args.self !! 0)
-                         "pthread_join"         -> JoinThread   @pc.self $ valueIdentifier' "PThread.ag Instruction:" $ @args.self !! 0 
+                         "pthread_join"         -> JoinThread   @pc.self $ valueIdentifier' "PThread.ag Instruction:" $ @args.self !! 0
+                         "pthread_cond_init"    -> CondInit     @pc.self @mres.self (@args.self !! 0)
+			 "pthread_cond_wait"    -> CondWait     @pc.self @mres.self (@args.self !! 0) (@args.self !! 1)
+                         "pthread_cond_signal"  -> CondSignal   @pc.self @mres.self (@args.self !! 0)
                          x                      -> Call         @pc.self @mres.self @ty.self @callee.self @args.self   
     loc.calleename = identifierName @callee.self
 

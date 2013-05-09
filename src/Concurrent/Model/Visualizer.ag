@@ -81,7 +81,7 @@ sem Identifier
   | Global lhs.ppccfg = text @name.self
 
 sem Instruction
-  | Ret Alloca ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue AtomicRMW 
+  | Ret Alloca ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue AtomicRMW CondInit CondWait CondSignal 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
   | Load 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> 

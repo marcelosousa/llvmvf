@@ -132,6 +132,9 @@ sem Instruction
   | MutexLock    loc.pp = text "mutex_lock"    <+> @mutex.pp
   | MutexUnlock  loc.pp = text "mutex_unlock"  <+> @mutex.pp
   | MutexDestroy loc.pp = text "mutex_destroy" <+> @mutex.pp
+  | CondInit     loc.pp = text "cond_init"     <+> @cond.pp 
+  | CondWait     loc.pp = text "cond_wait"     <+> @cond.pp <+> @mutex.pp 
+  | CondSignal   loc.pp = text "cond_signal"   <+> @cond.pp 
   | WaitEvent    loc.pp = text "wait_event"    <+> int @event
   | NotifyEvent  loc.pp = text "notify_event"  <+> int @event
   | WaitTime     loc.pp = text "wait_time"     <+> @time.pp

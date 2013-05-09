@@ -127,6 +127,9 @@ data Instruction
   | MutexLock    pc :: PC rv :: Identifier mutex :: Value
   | MutexUnlock  pc :: PC rv :: Identifier mutex :: Value
   | MutexDestroy pc :: PC rv :: Identifier mutex :: Value
+  | CondInit     pc :: PC rv :: Identifier cond :: Value
+  | CondWait     pc :: PC rv :: Identifier cond :: Value mutex :: Value
+  | CondSignal   pc :: PC rv :: Identifier cond :: Value
   | WaitEvent    pc :: PC event :: Int
   | NotifyEvent  pc :: PC event :: Int
   | WaitTime     pc :: PC time :: Value
