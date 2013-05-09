@@ -25,10 +25,10 @@ import Language.LLVMIR
 import Language.LLVMIR.Util
 }
 
-attr PValues PValue 
+attr PValues PValue Types
   syn ppccfg :: {Doc}
 
-sem PValues
+sem PValues Types
   | Nil  lhs.ppccfg = P.empty
   | Cons lhs.ppccfg = if (length @tl.self == 0)
                       then @hd.ppccfg
@@ -40,7 +40,7 @@ sem PValue
 attr Functions Function BasicBlocks BasicBlock
   chn ilabel :: {ILabel}
 
-attr Function BasicBlocks BasicBlock Instructions Instruction Identifier Value Constant ConstantExpr GlobalValue
+attr Function BasicBlocks BasicBlock Instructions Instruction Identifier Value Constant ConstantExpr GlobalValue Type
   syn ppccfg use {<$>} {P.empty} :: {Doc}
 
 sem BasicBlocks BasicBlock
@@ -81,7 +81,7 @@ sem Identifier
   | Global lhs.ppccfg = text @name.self
 
 sem Instruction
-  | Ret Alloca ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue AtomicRMW 
+  | Ret ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue AtomicRMW 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
   | Load 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> 
@@ -89,6 +89,8 @@ sem Instruction
   | Store  
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (text "store" <+> @v1.ppccfg <> 
                                                        char ',' <+> @v2.ppccfg)
+  | Alloca 
+      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> text "alloca" <+> @ty.ppccfg)
   | PHI  
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> 
                                                        text "phi" <+> @vals.ppccfg)
@@ -165,6 +167,22 @@ sem ConstantExpr
   | SelectConstantExpr         lhs.ppccfg = text "SelectConstantExpr"
   | ShuffleVectorConstantExpr  lhs.ppccfg = text "ShuffleVectorConstantExpr"
   | UnaryConstantExpr          lhs.ppccfg = @ty.pp <+> text @name <+> @val.pp
+
+
+sem Type
+  | TyVoid       lhs.ppccfg = text "void"
+  | Tyx86MMX     lhs.ppccfg = text "x86mmx" 
+  | TyLabel      lhs.ppccfg = text "label"
+  | TyMetadata   lhs.ppccfg = text "metadata" 
+  | TyOpaque     lhs.ppccfg = text "opaque"
+  | TyInt        lhs.ppccfg = char 'i' <> int @p 
+  | TyFloatPoint lhs.ppccfg = @p.pp
+  | TyArray      lhs.ppccfg = text "Arr" <+> parens (int @numEl <+> char 'x' <+> @ty.ppccfg)
+  | TyFunction   lhs.ppccfg = parens $ @party.pp <+> text "->" <+> @retty.pp 
+  | TyStruct     lhs.ppccfg = char '%' <> text @name <+> int @numEl <+> text "Str" <+> parens @tys.ppccfg
+  | TyPointer    lhs.ppccfg = @ty.ppccfg <> char '*'
+  | TyVector     lhs.ppccfg = char '<' <> int @numEl <+> char 'x' <+> @ty.ppccfg <> char '>'
+  | TyUndefined  lhs.ppccfg = text "TODO TYPE UNDEFINED"
 
 {
 type ILabel = Int

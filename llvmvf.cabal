@@ -13,7 +13,7 @@ Executable llvmvf
                     , containers    >= 0.2
                     , filepath
                     , uu-parsinglib >= 2.7.1
-                    , mtl           
+                    , mtl           == 2.0.1.0 
                     , fgl           
                     , uulib         >= 0.9.14
                     , cmdargs
