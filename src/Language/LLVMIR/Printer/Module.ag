@@ -76,7 +76,7 @@ sem RetInst
   | VoidRet  lhs.pp = text "void"
 
 sem Instruction
-  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue InsertValue AtomicRMW Cmpxchg CreateThread MutexInit MutexLock MutexUnlock
+  | Ret Alloca Load Store ICmp FCmp UBr Br Call Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor PHI Select ExtractValue InsertValue AtomicRMW Cmpxchg CreateThread JoinThread ExitThread MutexInit MutexLock MutexUnlock MutexDestroy
            lhs.pp = @pp
   | Ret    loc.pp = text "ret" <+> @r.pp 
   | Alloca loc.pp = @id.pp <+> char '=' <+> text "alloca" <+> @ty.pp <> char ',' <+> @align.pp
@@ -120,15 +120,21 @@ sem Instruction
   | Or   loc.pp = pBitBinOp @ty.pp @id.pp "or"   @op1.pp @op2.pp
   | Xor  loc.pp = pBitBinOp @ty.pp @id.pp "xor"  @op1.pp @op2.pp
   | PHI  loc.pp = @id.pp <+> char '=' <+> text "phi" <+> @ty.pp <+> @vals.pp
-  | Select loc.pp = @id.pp <+> char '=' <+> @cond.pp <> char ',' <+> @valt.pp <> char ',' <+> @valf.pp
+  | Select loc.pp = @id.pp <+> char '=' <+> text "select" <+> @cond.pp <> char ',' <+> @valt.pp <> char ',' <+> @valf.pp
   | ExtractValue loc.pp = @id.pp <+> char '=' <+> text "extractvalue" <+> @aggr.pp <> char ',' <+> @idxs.pp
   | InsertValue loc.pp = @id.pp <+> char '=' <+> text "insertvalue" <+> @aggr.pp <> char ',' <+> @ival.pp <> char ',' <+> @idxs.pp
   | Cmpxchg loc.pp = @id.pp <+> char '=' <+> text "cmpxchg" <+> @mptr.pp <+> @cval.pp <+> @nval.pp <+> @ord.pp
   | AtomicRMW loc.pp = @id.pp <+> char '=' <+> text "atomicrmw" <+> @mptr.pp <+> @opval.pp <+> @ord.pp
   | CreateThread loc.pp = text "create_thread" <+> parens @args.pp
+  | JoinThread   loc.pp = text "join_thread" <+> parens @id.pp
+  | ExitThread   loc.pp = text "exit_thread" 
   | MutexInit    loc.pp = text "mutex_init"    <+> @mutex.pp 
   | MutexLock    loc.pp = text "mutex_lock"    <+> @mutex.pp
   | MutexUnlock  loc.pp = text "mutex_unlock"  <+> @mutex.pp
+  | MutexDestroy loc.pp = text "mutex_destroy" <+> @mutex.pp
+  | CondInit     loc.pp = text "cond_init"     <+> @cond.pp 
+  | CondWait     loc.pp = text "cond_wait"     <+> @cond.pp <+> @mutex.pp 
+  | CondSignal   loc.pp = text "cond_signal"   <+> @cond.pp 
   | WaitEvent    loc.pp = text "wait_event"    <+> int @event
   | NotifyEvent  loc.pp = text "notify_event"  <+> int @event
   | WaitTime     loc.pp = text "wait_time"     <+> @time.pp

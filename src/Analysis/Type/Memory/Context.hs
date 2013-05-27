@@ -20,7 +20,7 @@ type Constrs  = S.Set (Identifier, Identifier)
 type TyAnnEnv = M.Map Identifier TyAnn
 type Context  = (Constrs, TyAnnEnv)
 
-data RTyRes = RTyRes Name Context (M.Map Name Context)
+data RTyRes = RTyRes Name Context (M.Map Identifier Context)
 
 filterIContext :: Context -> Identifier -> Context
 filterIContext (cnstrs, tyen) i = let c = S.toList cnstrs
@@ -52,8 +52,8 @@ instance Show RTyRes where
 del :: String 
 del = "========================\n"
 
-prettyFn :: (String, Context) -> String -> String
-prettyFn (n,ty) r = "Function " ++ n ++ "\n"
+prettyFn :: (Identifier, Context) -> String -> String
+prettyFn (n,ty) r = "Function " ++ show n ++ "\n"
 	  		   ++ prettyContext ty
 	  		   ++ r 
 

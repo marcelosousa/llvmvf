@@ -1,0 +1,46 @@
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Analysis.Util
+-- Copyright :  (c) 2013 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Analysis.Util}{}{}
+
+include "Base.ag"
+
+imports{
+import qualified Data.Map as Map
+import qualified Data.IntMap as IM
+import Data.Maybe 
+
+import Language.LLVMIR
+}
+
+attr Instruction
+  syn instrpc :: {PC}
+
+sem Instruction
+  | * lhs.instrpc = @pc.self
+
+{
+instrpc :: Instruction -> PC
+instrpc i = instrpc_Syn_Instruction $ wrap_Instruction (sem_Instruction i) $ Inh_Instruction { }
+
+entryPCFunction :: Function -> Maybe PC
+entryPCFunction fn = case fn of
+  FunctionDecl name _ rty iv pms -> Nothing
+  FunctionDef  name _ rty iv pms bbs -> 
+    Just $ entryPCBB $ head bbs
+
+entryBBFunction :: Function -> Maybe Identifier
+entryBBFunction fn = case fn of
+  FunctionDecl name _ rty iv pms -> Nothing
+  FunctionDef  name _ rty iv pms bbs -> 
+    case bbs of
+	   [] -> Nothing
+	   ((BasicBlock i _):_) -> Just i
+
+entryPCBB :: BasicBlock -> PC
+entryPCBB (BasicBlock _ instrs) = instrpc $ head instrs
+}

@@ -32,7 +32,7 @@ type Id = (String)
 type MId = maybe Id
 type MIdentifier = maybe Identifier
 
-type Functions = map {String} Function
+type Functions = map {Identifier} Function
 type Globals = [Global]
 type Identifiers = [Identifier]
 type Arguments = [Argument]
@@ -150,11 +150,6 @@ data Function
 --          optAlign   :: MAlign          
 --          gcName     :: MGCName
 
-{
-emptyFunction :: Function
-emptyFunction = FunctionDef (Global "undefined") ExternalLinkage TyVoid False [] []
-}
-          
 data BasicBlock
   | BasicBlock 
       label  :: Identifier

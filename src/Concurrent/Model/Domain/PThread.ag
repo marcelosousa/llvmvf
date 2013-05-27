@@ -1,0 +1,61 @@
+optpragmas {
+{-#LANGUAGE EmptyDataDecls, RecordWildCards #-}
+}
+
+{
+-------------------------------------------------------------------------------
+-- Module    :  Concurrent.Model.Domain.PThread
+-- Copyright :  (c) 2012-2013 Marcelo Sousa
+-------------------------------------------------------------------------------
+}
+
+module {Concurrent.Model.Domain.PThread}{}{}
+
+include "Base.ag"
+include "Type.ag"
+
+imports 
+{
+import qualified Data.Map as M
+import qualified Data.IntMap as IM
+import Data.Maybe 
+
+import Concurrent.Model
+import Language.LLVMIR
+import Language.LLVMIR.Util
+import UU.PPrint
+
+import Debug.Trace (trace)
+}
+ 
+attr Module Functions Function BasicBlocks BasicBlock Instructions Instruction Value Identifier Constant ConstantFP Linkage CConv Visibility DefinitionTy Argument Align GCName FunAttr Attribute Section TargetData Target Parameter IntPredicate RealPredicate GlobalValue ConstantDataSequential ConstantExpr SimpleConstant ComplexConstant RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering Type Types Parameters TyFloatPoint Arguments Values Id ValIdL ValId PValues MIdentifier PValue Ints PC Identifiers DataLayout Globals DLayout Global MConstant
+  syn annotated :: self 
+
+sem Instruction
+  | Call 
+    lhs.annotated = case @loc.calleename of
+                         "pthread_create"       -> CreateThread @pc.self @args.self
+                         "pthread_exit"         -> ExitThread   @pc.self
+                         "pthread_mutex_init"   -> MutexInit    @pc.self @mres.self (@args.self !! 0)
+                         "pthread_mutex_lock"   -> MutexLock    @pc.self @mres.self (@args.self !! 0)
+                         "pthread_mutex_unlock" -> MutexUnlock  @pc.self @mres.self (@args.self !! 0)
+                         "pthread_join"         -> JoinThread   @pc.self $ valueIdentifier' "PThread.ag Instruction:" $ @args.self !! 0
+                         "pthread_cond_init"    -> CondInit     @pc.self @mres.self (@args.self !! 0)
+                         "pthread_cond_wait"    -> CondWait     @pc.self @mres.self (@args.self !! 0) (@args.self !! 1)
+                         "pthread_cond_signal"  -> CondSignal   @pc.self @mres.self (@args.self !! 0)
+                         x                      -> Call         @pc.self @mres.self @ty.self @callee.self @args.self   
+    loc.calleename = identifierName @callee.self
+
+{ 
+-- PThread
+data PThread
+
+instance Pretty PThread
+
+-- Synchronous (Interleaved) Concurrent Models
+-- At one given time, there only one atomic instruction
+-- being executed. Scheduler specification is required.
+instance SCModel PThread where
+  -- model :: String -> Module -> Model PThread
+  model mdl = Model $ annotated_Syn_Module $ wrap_Module (sem_Module mdl) $ Inh_Module {}
+}

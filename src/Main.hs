@@ -24,8 +24,8 @@ import qualified Language.LTL.Base as LTL
 import UU.PPrint 
 import Language.SMTLib2.Printer    (prettyprint)
 
-import Concurrent.Model
-import Concurrent.Model.PThread
+import qualified Concurrent.Model as M
+import Concurrent.Model.Domain.PThread
 -- import Concurrent.Model.SystemC
 import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
@@ -49,7 +49,7 @@ _helpType = unlines ["llvmvf type uses a refined type system for separation of r
 
 data Option = Extract   {input :: FilePath}
             | CCFG      {input :: FilePath, domain :: Domain}
-            | Arch      {input :: FilePath, domain :: Domain}
+            | Model     {input :: FilePath, domain :: Domain}
             | BMC       {input :: FilePath, domain :: Domain, bound :: Int}
             | Convert   {input :: FilePath}
             | Type      {input :: FilePath}
@@ -71,10 +71,10 @@ ccfgMode = CCFG  { input = def &= args
                  , domain = def &= help "domain of verification: PThread | SystemC (Super Beta)" 
                  } &= help _helpCCFG
 
-archMode :: Option
-archMode = Arch { input = def &= args
-                , domain = def &= help "domain of verification: PThread | SystemC (Super Beta)" 
-                } &= help _helpArch
+modelMode :: Option
+modelMode = Model { input = def &= args
+                  , domain = def &= help "domain of verification: PThread | SystemC (Super Beta)" 
+                  } &= help _helpArch
 
 bmcMode :: Option
 bmcMode = BMC { input = def &= args
@@ -89,7 +89,7 @@ typeCheckMode :: Option
 typeCheckMode = TypeCheck { input = def &= args } &= help _helpTypeCheck
 
 progModes :: Mode (CmdArgs Option)
-progModes = cmdArgsMode $ modes [extractMode, archMode, bmcMode, typeCheckMode, typeMode, ccfgMode]
+progModes = cmdArgsMode $ modes [extractMode, modelMode, ccfgMode, bmcMode, typeCheckMode, typeMode]
          &= help _help
          &= program _program
          &= summary _summary
@@ -103,18 +103,17 @@ runOption :: Option -> IO ()
 runOption (Extract bc) = do mdl <- extract bc
                             let bf = dropExtension bc
                             writeFile (addExtension bf "llvf") (show $ pretty mdl)
-runOption (Arch bc d) = runArch bc d                           
+runOption (Model bc d) = extractModel bc d                           
+runOption (CCFG bc d)  = runCCFG bc d
 runOption (BMC bc d k) = runBMC bc d k
 runOption (TypeCheck bc) = do mdl <- extract bc
                              -- print mdl
                               print $ typeCheck mdl
 runOption (Type bc) = do mdl <- extract bc
                          print $ typeAnalysis mdl
-runOption (CCFG bc d) = runCCFG bc d
-{-runOption bc Htm     = do mdl <- extract bc
-                          let bf = dropExtension bc
-                          writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)
--}
+--runOption bc Htm     = do mdl <- extract bc
+--                          let bf = dropExtension bc
+--                          writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)
 --runOption bc Parse k = do mdl <- extract bc
 --                          let bf  = dropExtension bc
 --                              mod = (model mdl) :: Model PThread
@@ -136,29 +135,32 @@ runOption (CCFG bc d) = runCCFG bc d
 --                              writeFile (addExtension bf "rawm")  (show $ mdl)
 --                              writeFile (addExtension bf "smt2")  (show $ prettyprint $ encodeSysC mod k)
 
--- | 'runModel' - extract the model
-runArch :: FilePath -> Domain -> IO ()
-runArch bc SystemC = error "llvmvf for SystemC is currently not available."
-runArch bc PThread = do mdl <- extract bc
-                        let bf  = dropExtension bc
-                            mod = (model mdl) :: Model PThread
-                            outfile = addExtension bf "model"
-                        writeFile outfile (show mod)
-
--- | 'runBMC' - main bmc function
-runBMC :: FilePath -> Domain -> Bound -> IO ()
-runBMC bc SystemC _ = error "llvmvf for SystemC is currently not available."
-runBMC bc PThread k = do mdl <- extract bc
-                         let bf  = dropExtension bc
-                             mod = (model mdl) :: Model PThread
-                             outfile = addExtension bf "smt2"
-                         putStrLn $ "Generating " ++ outfile ++ "..."  
-                         --writeFile outfile (show $ prettyprint $ encode mod k)
+-- | 'extractModel' - extract the model
+extractModel :: FilePath -> Domain -> IO ()
+extractModel bc SystemC = error "llvmvf for SystemC is currently not available."
+extractModel bc PThread = do mdl <- extract bc
+                             let bf  = dropExtension bc
+                                 mod = (M.model mdl) :: M.Model PThread
+                                 outfile = addExtension bf "model"
+                             writeFile outfile (show mod)
 
 -- | 'runCCFG' - extract the concurrent control flow graph
 runCCFG :: FilePath -> Domain -> IO ()
 runCCFG bc SystemC = error "llvmvf for SystemC is currently not available."
 runCCFG bc PThread = do mdl <- extract bc
                         let bf = dropExtension bc
-                            mod = (model mdl) :: Model PThread
-                        writeFile (addExtension bf "dot") (show $ pretty mod)
+                            mod = (M.model mdl) :: M.Model PThread
+                            (m,ccfg,_) = M.analyse "main" mod
+                            outfile = addExtension bf "dot"
+                        writeFile outfile (show $ dumpccfg m ccfg)
+
+-- | 'runBMC' - main bmc function
+runBMC :: FilePath -> Domain -> M.Bound -> IO ()
+runBMC bc SystemC _ = error "llvmvf for SystemC is currently not available."
+runBMC bc PThread k = do mdl <- extract bc
+                         let bf  = dropExtension bc
+                             mod = (M.model mdl) :: M.Model PThread
+                             outfile = addExtension bf "smt2"
+                         putStrLn $ "Generating " ++ outfile ++ "..."  
+                         --writeFile outfile (show $ prettyprint $ encode mod k)
+
