@@ -45,7 +45,9 @@ sem Identifier
 
 sem DataLayout
   | DataLayout
-     lhs.pp = text "target datalayout =" <+> dquotes (Prelude.foldr1 (\x y -> x <> char '-' <> y) (Prelude.map text @s.self))
+     lhs.pp = if (@s.self == []) 
+              then text "target datalayout =" 
+              else text "target datalayout =" <+> dquotes (Prelude.foldr1 (\x y -> x <> char '-' <> y) (Prelude.map text @s.self))
 
 sem TargetData
   | TargetData
@@ -124,7 +126,7 @@ sem Instruction
   | ExtractValue loc.pp = @id.pp <+> char '=' <+> text "extractvalue" <+> @aggr.pp <> char ',' <+> @idxs.pp
   | InsertValue loc.pp = @id.pp <+> char '=' <+> text "insertvalue" <+> @aggr.pp <> char ',' <+> @ival.pp <> char ',' <+> @idxs.pp
   | Cmpxchg loc.pp = @id.pp <+> char '=' <+> text "cmpxchg" <+> @mptr.pp <+> @cval.pp <+> @nval.pp <+> @ord.pp
-  | AtomicRMW loc.pp = @id.pp <+> char '=' <+> text "atomicrmw" <+> @mptr.pp <+> @opval.pp <+> @ord.pp
+  | AtomicRMW loc.pp = text "atomicrmw" -- @id.pp <+> char '=' <+> text "atomicrmw" <+> @mptr.pp <+> @opval.pp <+> @ord.pp
   | CreateThread loc.pp = text "create_thread" <+> parens @args.pp
   | JoinThread   loc.pp = text "join_thread" <+> parens @id.pp
   | ExitThread   loc.pp = text "exit_thread" 

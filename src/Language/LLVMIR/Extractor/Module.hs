@@ -79,20 +79,26 @@ pTarget :: Parser LL.Target
 pTarget =  const LL.MacOs <$> pSomewhere "apple"
        <|> const LL.Linux <$> pSomewhere "linux"  
           
+runParser' :: a -> Parser a -> String -> a
+runParser' d p s = 
+  case execParser p s of
+    (a,[]) -> a
+    (a,xs) -> d
+
 getTargetData :: Context IO LL.TargetData
 getTargetData = do e@Env{..} <- getEnv
                    liftIO $ withModule mdl $ \mdlPtr -> do 
                      cs <- FFI.getTarget mdlPtr
-                     s <- peekCString cs                            
-                     return $ LL.TargetData s $ runParser "parsing target" pTarget s
+                     s <- peekCString cs                   
+                     return $ LL.TargetData s $ runParser' LL.Linux pTarget s -- runParser "parsing target" pTarget s
  
 -- Data Layout    
 getDataLayout :: Context IO LL.DataLayout
 getDataLayout = do e@Env{..} <- getEnv
                    liftIO $ withModule mdl $ \mdlPtr -> do 
                      cs <- FFI.getDataLayout mdlPtr
-                     s <- peekCString cs                            
-                     return $ LL.DataLayout $ runParser "error" pDataLayout s
+                     s <- peekCString cs                         
+                     return $ LL.DataLayout $ runParser' [] pDataLayout s -- runParser "parsing data layout" pDataLayout s
 
 pChar :: Parser Char
 pChar = pLetter <|> pDigit <|> pSym ':'
