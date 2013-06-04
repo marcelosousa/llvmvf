@@ -11,13 +11,22 @@ data RetInst
   | ValueRet v :: Value
   | VoidRet 
 
-data Instruction
-  -- Terminators
+-- Terminators
+data Terminator
   | Ret         pc :: PC r :: RetInst
   | Br          pc :: PC v :: Value t :: Value f :: Value
   | UBr         pc :: PC d :: Value 
   | Switch      pc :: PC ty :: Type v :: Value elems :: ValIdL -- TODO
   | Unreachable pc :: PC
+
+data PHI
+  | PHI
+      pc :: PC
+      id :: Identifier
+      ty :: Type
+      vals :: PValues
+      
+data Instruction
   -- Standard Binary Operations
   | Add  pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
   | FAdd pc :: PC id :: Identifier ty :: Type op1 :: Value op2 :: Value
@@ -77,11 +86,6 @@ data Instruction
   -- Other Operations
   | ICmp pc :: PC id :: Identifier cond :: IntPredicate ty :: Type op1 :: Value op2 :: Value 
   | FCmp pc :: PC id :: Identifier cond :: RealPredicate ty :: Type op1 :: Value op2 :: Value 
-  | PHI
-      pc :: PC
-      id :: Identifier
-      ty :: Type
-      vals :: PValues
   | Call
       pc     :: PC
       mres   :: Identifier

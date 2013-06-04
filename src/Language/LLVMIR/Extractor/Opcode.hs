@@ -50,9 +50,9 @@ data Opcode =
   | PtrToInt
   | IntToPtr
   | BitCast
+  | PHI    
   | ICmp   
   | FCmp   
-  | PHI    
   | Call   
   | Select 
   | UserOp1
@@ -75,6 +75,7 @@ data InstClass = Terminator
                | Memory
                | Cast
                | Other
+               | PHI
    deriving (Show, Eq, Ord, Enum, Read)
 
 (<>) :: (Ord a) => a -> (a,a) -> Bool
@@ -86,5 +87,6 @@ opcodeClass x | x <> (1,7)   = Terminator
               | x <> (20,25) = Logical
               | x <> (26,32) = Memory
               | x <> (33,44) = Cast
-              | x <> (45,58) = Other
+              | x == 45      = PHI
+              | x <> (46,58) = Other
               | otherwise    = error "'opcodeClass': No class for opcode" 

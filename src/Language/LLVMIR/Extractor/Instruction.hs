@@ -76,9 +76,10 @@ getPC = do e@Env{..} <- getEnv
            putEnv $ e {pc = opc + 1}
            return opc
 
+
 -- | Get Instruction from a LLVM Value
 getInstruction :: Context IO LL.Instruction
-getInstruction = do v <- getInstructionValue 
+getInstruction = do v <- getInstructionValue
                     opcode <- liftIO $ FFI.instGetOpcode v
                    -- oname <- liftIO $ (FFI.instGetOpcodeName v) >>= peekCString
                     let op = toOpcode opcode
@@ -90,9 +91,10 @@ getInstruction = do v <- getInstructionValue
                          Memory     -> getMemoryOp     op
                          Cast       -> getCastOp       op
                          Other      -> getOtherOp      op
+                         PHI        -> error "getInstruction: received a PHI instruction"
 
 -- | Get Terminator Instruction
-getTerminatorOp :: Opcode -> Context IO LL.Instruction
+getTerminatorOp :: Opcode -> Context IO LL.Terminator
 getTerminatorOp Ret          = do ival <- getInstructionValue
                                   pc   <- getPC
                                   n    <- liftIO $ FFI.returnInstGetNumSuccessors ival
@@ -197,6 +199,15 @@ getCastOp PtrToInt = convOps LL.PtrToInt
 getCastOp IntToPtr = convOps LL.IntToPtr
 getCastOp BitCast  = convOps LL.BitCast
 
+-- | Get PHI Instruction
+getPHIOp :: Context IO LL.PHI
+getPHIOp = do ival  <- getInstructionValue
+              pc    <- getPC
+              ident <- getIdent ival
+              ty    <- typeOf ival 
+              args  <- getPHIArgs ival
+              return $ LL.PHI pc (LL.Local ident) ty args
+
 -- | Get Other Instruction
 getOtherOp   :: Opcode -> Context IO LL.Instruction
 getOtherOp ICmp = do ival  <- getInstructionValue
@@ -213,12 +224,6 @@ getOtherOp FCmp = do ival  <- getInstructionValue
                      ty    <- typeOf ival 
                      (op1,op2) <- getICmpOps ival 
                      return $ LL.FCmp pc (LL.Local ident) (toRealPredicate cond) ty op1 op2
-getOtherOp PHI  = do ival  <- getInstructionValue
-                     pc    <- getPC
-                     ident <- getIdent ival
-                     ty    <- typeOf ival 
-                     args  <- getPHIArgs ival
-                     return $ LL.PHI pc (LL.Local ident) ty args
 getOtherOp Call = do ival  <- getInstructionValue
                      pc    <- getPC
                      ident <- getIdent ival

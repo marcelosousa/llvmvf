@@ -74,6 +74,8 @@ type DLayout = [String]
 type ValId = (Value, Identifier)
 type ValIdL = [ValId]
 
+type PHIs = [PHI]
+
 data Module
   | Module
     id     :: String
@@ -153,9 +155,9 @@ data Function
 data BasicBlock
   | BasicBlock 
       label  :: Identifier
- --     phis   :: Instructions
+      phis   :: PHIs
       instrs :: Instructions
- --     tmn    :: Instruction
+      tmn    :: Terminator
  
 data Identifier 
   | Global name :: Id -- (functions, global variables) begin with the '@'
@@ -325,7 +327,7 @@ data Alias
 --          aliaseeTy  :: Type
 --          aliasee    :: Id
 
-set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue SimpleConstant ComplexConstant  ConstantDataSequential ConstantExpr ConstantFP RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering
+set Every = Module Global Function Linkage CConv Visibility DefinitionTy LocalVar Argument Align GCName FunAttr BasicBlock Instruction DataLayout Alias Attribute Section Value Identifier TargetData Target Parameter IntPredicate RealPredicate Constant GlobalValue SimpleConstant ComplexConstant  ConstantDataSequential ConstantExpr ConstantFP RetInst NamedTypes CompareConstantExpr BinOp AtomicOrdering Terminator PHI
 
 deriving Every: Show
 deriving Every: Eq

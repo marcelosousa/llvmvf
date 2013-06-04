@@ -170,11 +170,51 @@ getParam (pname, pval) = do ty <- typeOf pval
 -- Basic Blocks                                 
 getBasicBlock :: (String, Value) -> Context IO LL.BasicBlock
 getBasicBlock (bbname, bbvalue) = do instr  <- liftIO $ getInstructions bbvalue
-                                     instrs <- forM instr getInst
-                                     return $ LL.BasicBlock (LL.Local bbname) instrs
-                   
-getInst :: (String, Value) -> Context IO LL.Instruction
-getInst (_,instrv) = do e@Env{..} <- getEnv
-                        putEnv $ e {instr = Just instrv}
-                        getInstruction
+                                     (phis, ri)     <- getPHIS instr
+                                     (instrs, tmni) <- getInsts ri
+                                     tmn <- getTerminator tmni
+                                     return $ LL.BasicBlock (LL.Local bbname) phis instrs tmn
+
+type Instrs = [(String,Value)]
+
+is :: InstClass -> Value -> Context IO Bool
+is i v = do opcode <- liftIO $ FFI.instGetOpcode v
+            let op = toOpcode opcode
+            case opcodeClass opcode of
+                 PHI        -> return $ i == PHI
+                 Terminator -> return $ i == Terminator   
+                 _   -> return $ i /= PHI && i /= Terminator
+                        
+
+getPHIS :: Instrs -> Context IO (LL.PHIs, Instrs)
+getPHIS [] = error "getPHIS: empty list"
+getPHIS l@((_,x):xs) = do b <- is PHI x
+                          if b 
+                          then do e@Env{..} <- getEnv
+                                  putEnv $ e {instr = Just x}
+                                  phi <- getPHIOp
+                                  (phis,rl) <- getPHIS xs
+                                  return (phi:phis,rl)
+                          else return ([],l)
+
+getInsts :: Instrs -> Context IO (LL.Instructions, Instrs)
+getInsts [] = error "getInsts: empty list"
+getInsts l@((_,x):xs) = do b <- is Other x
+                           if b 
+                           then do e@Env{..} <- getEnv
+                                   putEnv $ e {instr = Just x}
+                                   oi <- getInstruction
+                                   (ois,rl) <- getInsts xs
+                                   return (oi:ois,rl)
+                           else return ([],l)
+
+getTerminator :: Instrs -> Context IO LL.Terminator
+getTerminator [] = error "getTerminator: empty list"
+getTerminator [(_,x)] = do b <- is Terminator x 
+                           if b 
+                           then do e@Env{..} <- getEnv
+                                   putEnv $ e {instr = Just x}
+                                   getTerminator
+                           else error "getTerminator: element is not a terminaor"
+getTerminator l = error "getTerminator: length list > 1"                        
 
