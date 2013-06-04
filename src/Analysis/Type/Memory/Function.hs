@@ -63,12 +63,12 @@ tyanFunction nmdtye (c,tye) (FunctionDef  n l rty iv pms bbs) =
 tyanFunction nmdtye c (FunctionDecl n l rty iv pms) = c
 
 tyanCheckBasicBlock :: NamedTyEnv -> Context -> BasicBlocks -> BasicBlock -> Context
-tyanCheckBasicBlock nmdtye (c,tye) bbs (BasicBlock l instr) = -- trace ("typeCheckBasicBlock " ++ show l) $
+tyanCheckBasicBlock nmdtye (c,tye) bbs (BasicBlock l instr) = trace ("typeCheckBasicBlock " ++ show l) $
   let ((c', tye'),rty) = tyanCheckInstructions nmdtye (c,tye) instr 
   in case M.lookup l tye of
     Nothing -> case rty of
         T.TyJumpTo ids -> let bbsj = map (fromMaybe (error "typeCheckBasicBlock: cant find basic block") . findBasicBlock bbs) ids 
-                          in tyanCheckBasicBlocks nmdtye (c',(insert l rty tye')) bbs bbsj  
+                          in trace ("TyJumpTo : " ++ show ids) $ tyanCheckBasicBlocks nmdtye (c',(insert l rty tye')) bbs bbsj  
         ty -> (c',tye')
     Just ty -> (c,tye) 
 

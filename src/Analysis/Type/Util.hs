@@ -77,7 +77,7 @@ insert k@(Local i) v m = case M.lookup k m of
 
 typeValueGen :: (Ord k, Show k, Show a) => M.Map k a -> k -> a -> (a -> a -> Bool) -> String -> a
 typeValueGen tye v ty op s = case M.lookup v tye of
-                              Nothing -> error $ "Type error: " ++ show v ++ " is not in the environment!" 
+                              Nothing -> error $ "Type error: " ++ show v ++ " is not in the environment: " ++ show tye 
                               Just t  -> if t `op` ty
                                          then t -- trace ("typeValueGen: " ++ show v ++ ":" ++ show t) $ t
                                          else error $ s ++ ": Given " ++ show ty ++ ". Expected " ++ show t ++ " in " ++ show v

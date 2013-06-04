@@ -37,7 +37,7 @@ import Debug.Trace
 import Analysis.Type
 
 _program, _summary :: String
-_summary = unlines ["LLVM Verification Framework - v0.2","llvmvf supports verification of pthread code at the LLVM IR level.","Copyright 2012-2013 @ Marcelo Sousa"]
+_summary = unlines ["LLVM Verification Framework - v0.2 (type beta)","llvmvf supports verification of pthread code at the LLVM IR level.","Copyright 2012-2013 @ Marcelo Sousa"]
 _program = "llvmvf"
 _help    = "The input files of llvmvf are byte code files generated from a LLVM front-end (eg. clang)"
 _helpBMC = "Example: llvmvf bmc -d=pthread -b=10 x.bc"

@@ -167,6 +167,7 @@ tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
   				if ty == tycval && tycval == tynval
   				then ((nc, insert i ty tye), ty)
   				else error $ "Cmpxchg: Types are not equal " ++ show [ty,tycval,tynval]
+ 			T.TyDer (T.TyPtr ty T.TyIOAddr) -> error $ "Cmpxchg: Pointer to IOAddr: " ++ show tymptr  	
   			x -> error $ "Cmpxchg: Type of first element is not pointer: " ++ show x
   	AtomicRMW pc i mptr val op ord -> 
   		let (tymptr,cmptr) = rtyanValue nmdtye tye i mptr
@@ -177,6 +178,7 @@ tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
   			    if ty == tyval
   			    then ((nc, insert i ty tye), ty)
   			    else error $ "AtomicRMW: Types are not equal " ++ show [ty,tyval]
+ 			T.TyDer (T.TyPtr ty T.TyIOAddr) -> error $ "AtomicRMW: Pointer to IOAddr: " ++ show tymptr  			    
   			x -> error $ "AtomicRMW: Type of first element is not pointer: " ++ show x
 
 tyanCheckCall :: NamedTyEnv -> Context -> Identifier -> Type -> Identifier -> Values -> (Context, TyAnn)
