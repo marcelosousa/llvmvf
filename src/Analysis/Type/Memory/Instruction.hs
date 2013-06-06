@@ -28,18 +28,21 @@ rtyanValue :: NamedTyEnv -> TyAnnEnv -> Identifier -> Value -> (TyAnn, Constrs)
 rtyanValue nmdtye tye i v = let (ty, lid) = tyanValue nmdtye tye v
                             in (ty, S.fromList $ map (\j -> (i,j)) lid) 
 
-tyanCheckInstruction :: NamedTyEnv -> Context -> Instruction -> (Context, TyAnn)
-tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
-  -- Terminators
+-- Terminators
+tyanCheckTerminator :: NamedTyEnv -> Context -> Terminator -> (Context, TyAnn)
+tyanCheckTerminator nmdtye c@(ctrs,tye) i = case i of
 	Ret pc VoidRet      -> (c, T.TyPri $ T.TyVoid)
 	Ret pc (ValueRet v) -> (c, fst $ tyanValue nmdtye tye v) 
 	Unreachable pc      -> (c, T.TyUndef) -- Unreachable has no defined semantics 
 	Br  pc v t f        -> if (fst $ tyanValue nmdtye tye v) == (T.TyPri $ T.TyInt 1)
 		                   then (c, liftTy $ typeCheckBranchs [t,f])
-		                   else error "typeCheckInstruction.Br: Condition type is not i1"
+		                   else error "tyanCheckTerminator.Br: Condition type is not i1"
 	UBr pc d            -> (c, liftTy $ typeCheckBranchs [d])
-	Switch pc ty v elems -> error "tyanCheckInstruction: Switch instruction not supported."	
-  -- Phi Instructions
+	Switch pc ty v elems -> error "tyanCheckTerminator: Switch instruction not supported."	
+
+-- Phi Instructions
+tyanCheckPHI :: NamedTyEnv -> Context -> PHI -> (Context, TyAnn)
+tyanCheckPHI nmdtye c@(ctrs,tye) i = case i of
  	PHI pc i ty vals -> let (vs,ls) = unzip vals
  	                        (tyvs, sctrs) = unzip $ map (rtyanValue nmdtye tye i) vs
  	                        tyls = map typeCheckBranch ls
@@ -48,7 +51,10 @@ tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
  	                        nctrs = foldr S.union ctrs sctrs
  	                    in if seq tyls p1
  	                       then ((nctrs, insert i tyl tye), tyl)
- 	                       else error $ "typeCheckInstruction.PHI: " ++ show ty ++ " " ++ show tyvs
+ 	                       else error $ "tyanCheckPHI.PHI: " ++ show ty ++ " " ++ show tyvs
+
+tyanCheckInstruction :: NamedTyEnv -> Context -> Instruction -> (Context, TyAnn)
+tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
   -- Standard Binary Operations
   -- Integer Operations
  	Add  pc i ty op1 op2 -> tyanCheckBinInstr TyClassInt nmdtye c i ty op1 op2 

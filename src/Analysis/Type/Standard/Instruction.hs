@@ -26,25 +26,31 @@ typeCheckBranch :: Value -> Identifier
 typeCheckBranch (Id i ty) = i -- TODO need to check if ty is a TyLabel or *(TyInt 8)
 typeCheckBranch v = error $ "typeCheckBranchs: Expected identifier and given " ++ show v
 
-typeCheckInstruction :: NamedTyEnv -> TyEnv -> Instruction -> (TyEnv, Type)
-typeCheckInstruction nmdtye tye i = case i of
-  -- Terminators
+-- Terminators
+typeCheckTerminator :: NamedTyEnv -> TyEnv -> Terminator -> (TyEnv, Type)
+typeCheckTerminator nmdtye tye i = case i of
 	Ret pc VoidRet      -> (tye, TyVoid)
 	Ret pc (ValueRet v) -> (tye, typeValue nmdtye tye v) 
 	Unreachable pc      -> (tye, TyUndefined) -- Unreachable has no defined semantics 
 	Br  pc v t f        -> if typeValue nmdtye tye v == TyInt 1
 		                   then (tye, typeCheckBranchs [t,f])
-		                   else error "typeCheckInstruction.Br: Condition type is not i1"
+		                   else error "typeCheckTerminator.Br: Condition type is not i1"
 	UBr pc d            -> (tye, typeCheckBranchs [d])
-	Switch pc ty v elems -> error "typeCheckInstruction: Switch instruction not supported."
-  -- Phi Instructions
+	Switch pc ty v elems -> error "typeCheckTerminator: Switch instruction not supported."
+
+-- Phi Instructions
+typeCheckPHI :: NamedTyEnv -> TyEnv -> PHI -> (TyEnv, Type)
+typeCheckPHI nmdtye tye i = case i of
  	PHI pc i ty vals -> let (vs,ls) = unzip vals
  	                        tyvs = map (typeValue nmdtye tye) vs
  	                        tyls = map typeCheckBranch ls
  	                        p1 = all (==ty) tyvs
  	                    in if seq tyls p1
  	                       then (insert i ty tye, ty)
- 	                       else error $ "typeCheckInstruction.PHI: " ++ show ty ++ " " ++ show tyvs
+ 	                       else error $ "typeCheckPHI.PHI: " ++ show ty ++ " " ++ show tyvs
+
+typeCheckInstruction :: NamedTyEnv -> TyEnv -> Instruction -> (TyEnv, Type)
+typeCheckInstruction nmdtye tye i = case i of
   -- Standard Binary Operations
   -- Integer Operations
  	Add  pc i ty op1 op2 -> typeCheckBinInstr TyClassInt tye i ty (typeValue nmdtye tye op1) (typeValue nmdtye tye op2) 

@@ -54,7 +54,6 @@ tyanCheckParameter :: TyAnnEnv -> Parameter -> (TyAnn, TyAnnEnv)
 tyanCheckParameter tye (Parameter i ty) = let tya = liftTy ty
                                           in (tya, insert i tya tye)
 
-
 -- Analyse a function
 tyanFunction :: NamedTyEnv -> Context -> Function -> Context
 tyanFunction nmdtye (c,tye) (FunctionDef  n l rty iv pms bbs) = 
@@ -63,7 +62,7 @@ tyanFunction nmdtye (c,tye) (FunctionDef  n l rty iv pms bbs) =
 tyanFunction nmdtye c (FunctionDecl n l rty iv pms) = c
 
 tyanCheckBasicBlock :: NamedTyEnv -> Context -> BasicBlocks -> BasicBlock -> Context
-tyanCheckBasicBlock nmdtye (c,tye) bbs (BasicBlock l instr) = trace ("typeCheckBasicBlock " ++ show l) $
+tyanCheckBasicBlock nmdtye (c,tye) bbs (BasicBlock l phis instr tmn) = trace ("typeCheckBasicBlock " ++ show l) $
   let ((c', tye'),rty) = tyanCheckInstructions nmdtye (c,tye) instr 
   in case M.lookup l tye of
     Nothing -> case rty of

@@ -16,6 +16,7 @@ import Language.LLVMIR.Extractor   (extract)
 import Language.LLVMIR.Printer
 import Language.HTm.Base
 import Language.LLVMIR.Converter (llvmir2Htm)
+import Language.FeatherIR
 
 import Text.Blaze.Html.Renderer.String as P
 import Language.LLVMIR.Printer.NamedTypes 
@@ -24,10 +25,10 @@ import qualified Language.LTL.Base as LTL
 import UU.PPrint 
 import Language.SMTLib2.Printer    (prettyprint)
 
-import qualified Concurrent.Model as M
-import Concurrent.Model.Domain.PThread
+--import qualified Concurrent.Model as M
+--import Concurrent.Model.Domain.PThread
 -- import Concurrent.Model.SystemC
-import Concurrent.Model.Visualizer
+--import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
 --import Concurrent.Model.Encoder    (encode)
 import Test.Example
@@ -103,9 +104,9 @@ runOption :: Option -> IO ()
 runOption (Extract bc) = do mdl <- extract bc
                             let bf = dropExtension bc
                             writeFile (addExtension bf "llvf") (show $ pretty mdl)
-runOption (Model bc d) = extractModel bc d                           
-runOption (CCFG bc d)  = runCCFG bc d
-runOption (BMC bc d k) = runBMC bc d k
+runOption (Model bc d) = undefined -- extractModel bc d                           
+runOption (CCFG bc d)  = undefined -- runCCFG bc d
+runOption (BMC bc d k) = undefined -- runBMC bc d k
 runOption (TypeCheck bc) = do mdl <- extract bc
                              -- print mdl
                               print $ typeCheck mdl
@@ -136,6 +137,7 @@ runOption (Type bc) = do mdl <- extract bc
 --                              writeFile (addExtension bf "smt2")  (show $ prettyprint $ encodeSysC mod k)
 
 -- | 'extractModel' - extract the model
+{-
 extractModel :: FilePath -> Domain -> IO ()
 extractModel bc SystemC = error "llvmvf for SystemC is currently not available."
 extractModel bc PThread = do mdl <- extract bc
@@ -163,4 +165,4 @@ runBMC bc PThread k = do mdl <- extract bc
                              outfile = addExtension bf "smt2"
                          putStrLn $ "Generating " ++ outfile ++ "..."  
                          --writeFile outfile (show $ prettyprint $ encode mod k)
-
+-}

@@ -42,5 +42,5 @@ entryBBFunction fn = case fn of
 	   ((BasicBlock i _):_) -> Just i
 
 entryPCBB :: BasicBlock -> PC
-entryPCBB (BasicBlock _ instrs) = instrpc $ head instrs
+entryPCBB (BasicBlock _ _ instrs _) = instrpc $ head instrs
 }

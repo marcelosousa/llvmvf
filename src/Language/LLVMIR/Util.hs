@@ -43,14 +43,14 @@ findBasicBlock i (FunctionDef  _ _ _ _ _ body) =
     find (isBasicBlock i) body
 
 isBasicBlock :: Identifier -> BasicBlock -> Bool
-isBasicBlock i (BasicBlock j _) = i==j
+isBasicBlock i (BasicBlock j _ _ _) = i==j
 
 fnBasicBlockIds :: Function -> [Identifier]
 fnBasicBlockIds (FunctionDecl _ _ _ _ _) = []
 fnBasicBlockIds (FunctionDef  _ _ _ _ _ body) = map getBBId body
 
 getBBId :: BasicBlock -> Identifier
-getBBId (BasicBlock i _) = i
+getBBId (BasicBlock i _ _ _) = i
 
 getModFns :: Module -> Functions
 getModFns (Module id layout target gvars funs nmdtys) = funs

@@ -31,6 +31,67 @@ import Control.Monad.IO.Class (liftIO)
 
 import Util.Demangler
 
+type Instrs = [(String,Value)]
+
+is :: InstClass -> Value -> Context IO Bool
+is i v = do opcode <- liftIO $ FFI.instGetOpcode v
+            let op = toOpcode opcode
+            case opcodeClass opcode of
+                 PHI        -> return $ i == PHI
+                 Terminator -> return $ i == Terminator   
+                 _   -> return $ i /= PHI && i /= Terminator
+                        
+
+getPHIS :: Instrs -> Context IO (LL.PHIs, Instrs)
+getPHIS [] = error "getPHIS: empty list"
+getPHIS l@((_,x):xs) = do b <- is PHI x
+                          if b 
+                          then do e@Env{..} <- getEnv
+                                  putEnv $ e {instr = Just x}
+                                  phi <- getPHIOp
+                                  (phis,rl) <- getPHIS xs
+                                  return (phi:phis,rl)
+                          else return ([],l)
+
+getInsts :: Instrs -> Context IO (LL.Instructions, Instrs)
+getInsts [] = error "getInsts: empty list"
+getInsts l@((_,x):xs) = do b <- is Other x
+                           if b 
+                           then do e@Env{..} <- getEnv
+                                   putEnv $ e {instr = Just x}
+                                   oi <- getInstruction
+                                   (ois,rl) <- getInsts xs
+                                   return (oi:ois,rl)
+                           else return ([],l)
+
+-- | Get Instruction from a LLVM Value
+getInstruction :: Context IO LL.Instruction
+getInstruction = do v <- getInstructionValue
+                    opcode <- liftIO $ FFI.instGetOpcode v
+                   -- oname <- liftIO $ (FFI.instGetOpcodeName v) >>= peekCString
+                    let op = toOpcode opcode
+                   -- liftIO $ print (oname, opcode, op, opcodeClass opcode)
+                    case opcodeClass opcode of
+                         Binary     -> getBinaryOp     op
+                         Logical    -> getLogicalOp    op
+                         Memory     -> getMemoryOp     op
+                         Cast       -> getCastOp       op
+                         Other      -> getOtherOp      op
+                         Terminator -> error "getInstruction: received a terminator"
+                         PHI        -> error "getInstruction: received a PHI instruction"
+
+getTerminator :: Instrs -> Context IO LL.Terminator
+getTerminator [] = error "getTerminator: empty list"
+getTerminator [(_,x)] = do b <- is Terminator x 
+                           if b 
+                           then do e@Env{..} <- getEnv
+                                   putEnv $ e {instr = Just x}
+                                   opcode <- liftIO $ FFI.instGetOpcode x
+                                   let op = toOpcode opcode
+                                   getTerminatorOp op
+                           else error "getTerminator: element is not a terminaor"
+getTerminator l = error "getTerminator: length list > 1"       
+
 getPHIArgs :: Value -> Context IO [(LL.Value, LL.Value)]
 getPHIArgs ii = do num <- liftIO $ FFI.countIncoming ii
                    oloop ii 0 num
@@ -77,21 +138,7 @@ getPC = do e@Env{..} <- getEnv
            return opc
 
 
--- | Get Instruction from a LLVM Value
-getInstruction :: Context IO LL.Instruction
-getInstruction = do v <- getInstructionValue
-                    opcode <- liftIO $ FFI.instGetOpcode v
-                   -- oname <- liftIO $ (FFI.instGetOpcodeName v) >>= peekCString
-                    let op = toOpcode opcode
-                   -- liftIO $ print (oname, opcode, op, opcodeClass opcode)
-                    case opcodeClass opcode of
-                         Terminator -> getTerminatorOp op 
-                         Binary     -> getBinaryOp     op
-                         Logical    -> getLogicalOp    op
-                         Memory     -> getMemoryOp     op
-                         Cast       -> getCastOp       op
-                         Other      -> getOtherOp      op
-                         PHI        -> error "getInstruction: received a PHI instruction"
+
 
 -- | Get Terminator Instruction
 getTerminatorOp :: Opcode -> Context IO LL.Terminator

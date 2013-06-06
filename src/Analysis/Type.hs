@@ -1,3 +1,4 @@
+ {-# LANGUAGE UnicodeSyntax #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Type
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -17,9 +18,14 @@ import Analysis.Type.Util (TyEnv)
 import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
 import Analysis.Type.Memory.Context (RTyRes)
 import Analysis.Type.Memory.Module (tyanModule)
+import Analysis.Type.Inference.Module (typeAnnInference)
 
 typeCheck :: Module -> STyRes 
 typeCheck = typeCheckModule
 -- 
 typeAnalysis :: Module -> RTyRes
 typeAnalysis = tyanModule
+
+-- Type Annotated Inference
+typeInference ∷ Module → α
+typeInference = typeAnnInference

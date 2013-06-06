@@ -40,7 +40,7 @@ sem PValue
 attr Functions Function BasicBlocks BasicBlock
   chn ilabel :: {ILabel}
 
-attr Function BasicBlocks BasicBlock Instructions Instruction Identifier Value Constant ConstantExpr GlobalValue Type
+attr Function BasicBlocks BasicBlock Instructions Instruction PHIs PHI Terminator Identifier Value Constant ConstantExpr GlobalValue Type
   syn ppccfg use {<$>} {P.empty} :: {Doc}
 
 sem BasicBlocks BasicBlock
@@ -72,7 +72,9 @@ sem BasicBlock
       lhs.ppccfg = text "subgraph cluster_" <> text @lhs.fname <> int @ilabel <+> text "{" </>
                    text "style=filled;" </>
                    text "color=gray;" </>
+                   @phis.ppccfg </>
                    @instrs.ppccfg </>
+                   @tmn.ppccfg </>
                    text "label = \"basic block" <+> @label.pp <> text "\"; }"
       loc.ilabel :: uniqueref ilabel
 
@@ -80,8 +82,17 @@ sem Identifier
   | Local  lhs.ppccfg = text @name.self
   | Global lhs.ppccfg = text @name.self
 
+sem PHI
+  | PHI  
+    lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> 
+                                                     text "phi" <+> @vals.ppccfg)
+
+sem Terminator
+  | Ret UBr Br Unreachable
+    lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
+
 sem Instruction
-  | Ret ICmp FCmp UBr Br Unreachable Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue AtomicRMW 
+  | ICmp FCmp Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue AtomicRMW 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self @pp
   | Load 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> 
@@ -91,9 +102,7 @@ sem Instruction
                                                        char ',' <+> @v2.ppccfg)
   | Alloca 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> text "alloca" <+> @ty.ppccfg)
-  | PHI  
-      lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> 
-                                                       text "phi" <+> @vals.ppccfg)
+
   | GetElementPtr 
       lhs.ppccfg = int @pc.self <+> dotLabel @pc.self (@id.pp <+> char '=' <+> text "gep" <+>
                                                        @struct.ppccfg <> char ',' <+> @idxs.pp)

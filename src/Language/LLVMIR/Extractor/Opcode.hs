@@ -50,9 +50,9 @@ data Opcode =
   | PtrToInt
   | IntToPtr
   | BitCast
-  | PHI    
   | ICmp   
-  | FCmp   
+  | FCmp 
+  | Phi      
   | Call   
   | Select 
   | UserOp1
@@ -87,6 +87,6 @@ opcodeClass x | x <> (1,7)   = Terminator
               | x <> (20,25) = Logical
               | x <> (26,32) = Memory
               | x <> (33,44) = Cast
-              | x == 45      = PHI
-              | x <> (46,58) = Other
+              | x == 47      = PHI
+              | x <> (45, 46) || x <> (48, 58) = Other
               | otherwise    = error "'opcodeClass': No class for opcode" 

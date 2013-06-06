@@ -15,7 +15,8 @@ type TyEnv = M.Map Identifier Type
 type NamedTyEnv = M.Map Id Type
 
 data TyClass = TyClassInt | TyClassFloat
-
+  deriving (Show, Eq, Ord)
+  
 isSmpTy :: Type -> Bool
 isSmpTy (TyInt x)  = let n = div x 8
                      in n == 1 || n == 2 || n == 4 || n == 8
@@ -89,8 +90,8 @@ typeGlobalValue tye f op (GlobalVariable n ty) = typeValueGen tye n (f ty) op "t
                              
 findBasicBlock :: BasicBlocks -> Identifier -> Maybe BasicBlock
 findBasicBlock [] l = Nothing
-findBasicBlock (bb@(BasicBlock l _):bbs) i | i == l = Just bb
-                                           | otherwise = findBasicBlock bbs i
+findBasicBlock (bb@(BasicBlock l _ _ _):bbs) i | i == l = Just bb
+                                               | otherwise = findBasicBlock bbs i
                                                                                
 sizeof :: Type -> Int
 sizeof (TyInt        p         ) = p  

@@ -42,7 +42,7 @@ data TyAnnot = TyIOAddr
   deriving (Eq, Ord)
 
 instance Show TyAnn where
-  show TyBot = "_|_"
+  show TyBot = "⊥"
   show TyUndef = "undef"
   show (TyPri t) = show t
   show (TyDer t) = show t
