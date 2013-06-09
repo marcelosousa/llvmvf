@@ -18,7 +18,7 @@ instance TyConstr Function where
 	-- τℂ ∷ → Function → State Γ (S.Set Τℂ)
 	τℂ (FunctionDef  n _ τ _ ς bbs) = do
 		let τα = (↑)τ
-		    nℂ = (ℂπ n) :⊑: (ℂτ τα) ∘ ε
+		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε
 		ςℂs ← τList nℂ ς
 		νfn n
 		τList ςℂs bbs
@@ -27,7 +27,7 @@ instance TyConstr Function where
 instance TyConstr Parameter where
 	τℂ (Parameter n τ) = do
 		let τα = (↑)τ
-		    nℂ = (ℂπ n) :⊑: (ℂτ τα) ∘ ε
+		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε
 		(↣) nℂ 
 
 instance TyConstr BasicBlock where

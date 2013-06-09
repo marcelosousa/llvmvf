@@ -49,15 +49,29 @@ type Τ = Type
 type Τα = TyAnn
 type Id = Identifier
 
+data ΤClass = 
+  ΤInt | ΤFlt | ΤPtr | Τ1NA
+
+  deriving (Eq, Ord,Show)
+
 -- Constraint Element
 data ℂ = ℂτ Τα -- Type α
        | ℂπ Id -- Type of Id
-       | ℂc TyClass -- Class of  
+       | ℂc ΤClass -- Class of  
   deriving (Eq, Ord,Show)
 
 -- Type Constraint
-data Τℂ = ℂ :⊑: ℂ
+data Τℂ = ℂ :=: ℂ -- same type
+        | ℂ :<: ℂ -- subtyping i1 :<: i2
+        | ℂ :≤: ℂ -- less than 
+        | ℂ :≌: ℂ -- bit size equality
   deriving (Eq, Ord,Show)
+
+(>:) ∷ ℂ → ℂ → Τℂ
+c1 >: c2 = c2 :<: c1
+
+(≥:) ∷ ℂ → ℂ → Τℂ
+c1 ≥: c2 = c2 :≤: c1
 
 -- Environment
 data Γ = Γ 
@@ -88,7 +102,7 @@ data Γ = Γ
 
 -- Type Constraint Class
 class TyConstr a where
-  τℂ ∷ a → State Γ (S.Set Τℂ)
+    τℂ ∷ a → State Γ (S.Set Τℂ)
 
 -- Type Inference Class
 class Constr a where

@@ -23,10 +23,10 @@ instance TyConstr PHI where
 	-- τℂ ∷ → PHI → State Γ (S.Set Τℂ)
 	τℂ (PHI _ n τ v) = do
 		let τα = (↑)τ                     -- lift type
-		    nℂ = (ℂπ n) :⊑: (ℂτ τα) ∘ ε   -- constraint the id to type τα
+		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε   -- constraint the id to type τα
 		    vi  = fst $ unzip v           -- get values
 		    viℂ = S.fromList $ map π vi   -- compute elementary constraints
-		    aℂs = S.map ((ℂπ n) :⊑:) viℂ  -- constraint the current name to viℂ
+		    aℂs = S.map ((ℂπ n) :=:) viℂ  -- constraint the current name to viℂ
 		τList (nℂ ∪ aℂs) vi
 
 instance TyConstr Terminator where
@@ -37,33 +37,33 @@ instance TyConstr Terminator where
 		case tmn of
 			Ret _ VoidRet → do
 				let τα = T.TyPri T.TyVoid
-				    fnℂ = (ℂπ fn) :⊑: (ℂτ τα)
-				    bbℂ = (ℂπ bb) :⊑: (ℂτ τα)
+				    fnℂ = (ℂπ fn) :=: (ℂτ τα)
+				    bbℂ = (ℂπ bb) :=: (ℂτ τα)
 				(↣) $ fnℂ ∘ (bbℂ ∘ ε)
 			Ret _ (ValueRet v) → do
 				τℂv ← τℂ v
 				let πv = π v
-				    fnℂ = (ℂπ fn) :⊑: πv
-				    bbℂ = (ℂπ bb) :⊑: πv
+				    fnℂ = (ℂπ fn) :=: πv
+				    bbℂ = (ℂπ bb) :=: πv
 				(↣) $ fnℂ ∘ (bbℂ ∘ τℂv)
 			Unreachable _ → do
 				let τα = T.TyUndef 
-				    fnℂ = (ℂπ fn) :⊑: (ℂτ τα)
-				    bbℂ = (ℂπ bb) :⊑: (ℂτ τα)
+				    fnℂ = (ℂπ fn) :=: (ℂτ τα)
+				    bbℂ = (ℂπ bb) :=: (ℂτ τα)
 				(↣) $ fnℂ ∘ (bbℂ ∘ ε)
 			Br _ c t f → do
 				τℂv ← τList ε [c,t,f]
 				let (πc,πt,πf) = (π c,π t,π f)
-				    cℂ = πc :⊑: (ℂτ $ T.TyPri $ T.TyInt 1)
-				    tfℂ = πt :⊑: πf
-				    fnℂ = (ℂπ fn) :⊑: πt
-				    bbℂ = (ℂπ bb) :⊑: πt
+				    cℂ = πc :=: (ℂτ $ T.TyPri $ T.TyInt 1)
+				    tfℂ = πt :=: πf
+				    fnℂ = (ℂπ fn) :=: πt
+				    bbℂ = (ℂπ bb) :=: πt
 				(↣) $ cℂ ∘ (tfℂ ∘ (fnℂ ∘ (bbℂ ∘ τℂv)))
 			UBr _ d → do
 				τℂd ← τℂ d
 				let πd = π d
-				    fnℂ = (ℂπ fn) :⊑: πd
-				    bbℂ = (ℂπ bb) :⊑: πd
+				    fnℂ = (ℂπ fn) :=: πd
+				    bbℂ = (ℂπ bb) :=: πd
 				(↣) $ fnℂ ∘ (bbℂ ∘ τℂd)
 			_ → error $ show tmn ⧺ " not supported"
 
@@ -71,45 +71,71 @@ instance TyConstr Instruction where
 	τℂ i = case i of
 	-- Standard Binary Operations
 	-- Integer Operations
- 		Add  _ n τ α β → τℂbin TyClassInt n τ α β 
- 		Sub  _ n τ α β → τℂbin TyClassInt n τ α β  
- 		Mul  _ n τ α β → τℂbin TyClassInt n τ α β  
- 		UDiv _ n τ α β → τℂbin TyClassInt n τ α β  
- 		SDiv _ n τ α β → τℂbin TyClassInt n τ α β  
- 		URem _ n τ α β → τℂbin TyClassInt n τ α β  
- 		SRem _ n τ α β → τℂbin TyClassInt n τ α β
+ 		Add  _ n τ α β → τℂbin ΤInt n τ α β 
+ 		Sub  _ n τ α β → τℂbin ΤInt n τ α β  
+ 		Mul  _ n τ α β → τℂbin ΤInt n τ α β  
+ 		UDiv _ n τ α β → τℂbin ΤInt n τ α β  
+ 		SDiv _ n τ α β → τℂbin ΤInt n τ α β  
+ 		URem _ n τ α β → τℂbin ΤInt n τ α β  
+ 		SRem _ n τ α β → τℂbin ΤInt n τ α β
  	-- Bitwise Binary Operations
-		Shl  _ n τ α β → τℂbin TyClassInt n τ α β 
-		LShr _ n τ α β → τℂbin TyClassInt n τ α β 
-		AShr _ n τ α β → τℂbin TyClassInt n τ α β 
-		And  _ n τ α β → τℂbin TyClassInt n τ α β 
-		Or   _ n τ α β → τℂbin TyClassInt n τ α β 
-		Xor  _ n τ α β → τℂbin TyClassInt n τ α β 
+		Shl  _ n τ α β → τℂbin ΤInt n τ α β 
+		LShr _ n τ α β → τℂbin ΤInt n τ α β 
+		AShr _ n τ α β → τℂbin ΤInt n τ α β 
+		And  _ n τ α β → τℂbin ΤInt n τ α β 
+		Or   _ n τ α β → τℂbin ΤInt n τ α β 
+		Xor  _ n τ α β → τℂbin ΤInt n τ α β 
     -- Float Operations
- 		FAdd _ n τ α β → τℂbin TyClassFloat n τ α β
- 		FSub _ n τ α β → τℂbin TyClassFloat n τ α β
- 		FMul _ n τ α β → τℂbin TyClassFloat n τ α β
- 		FDiv _ n τ α β → τℂbin TyClassFloat n τ α β
- 		FRem _ n τ α β → τℂbin TyClassFloat n τ α β
+ 		FAdd _ n τ α β → τℂbin ΤFlt n τ α β
+ 		FSub _ n τ α β → τℂbin ΤFlt n τ α β
+ 		FMul _ n τ α β → τℂbin ΤFlt n τ α β
+ 		FDiv _ n τ α β → τℂbin ΤFlt n τ α β
+ 		FRem _ n τ α β → τℂbin ΤFlt n τ α β
+    -- Cast Operations
+		Trunc    _ n α τ → τℂcast n (α,ΤInt) (τ,ΤInt) (>:)  -- Truncate integers
+		ZExt     _ n α τ → τℂcast n (α,ΤInt) (τ,ΤInt) (:<:) -- Zero extend integers
+		SExt     _ n α τ → τℂcast n (α,ΤInt) (τ,ΤInt) (:<:) -- Sign extend integers
+		FPTrunc  _ n α τ → τℂcast n (α,ΤFlt) (τ,ΤFlt) (>:)  -- Truncate floating point
+		FPExt    _ n α τ → τℂcast n (α,ΤFlt) (τ,ΤFlt) (:≤:) -- Extend floating point
+		FPToUI   _ n α τ → τℂcast n (α,ΤFlt) (τ,ΤInt) (:=:) -- floating point → UInt
+		FPToSI   _ n α τ → τℂcast n (α,ΤFlt) (τ,ΤInt) (:=:) -- floating point → SInt
+		UIToFP   _ n α τ → τℂcast n (α,ΤInt) (τ,ΤFlt) (:=:) -- UInt → floating point
+		SIToFP   _ n α τ → τℂcast n (α,ΤInt) (τ,ΤFlt) (:=:) -- SInt → floating point
+		PtrToInt _ n α τ → τℂcast n (α,ΤPtr) (τ,ΤInt) (:=:) -- Pointer → integer 
+		IntToPtr _ n α τ → τℂcast n (α,ΤInt) (τ,ΤPtr) (:=:) -- integer → Pointer
+		BitCast  _ n α τ → τℂcast n (α,Τ1NA) (τ,Τ1NA) (:≌:) -- 1stclass non agg → 1stclass non agg
 
-
-τℂbin ∷ TyClass → Identifier → Τ → Value → Value → State Γ (S.Set Τℂ)
+-- Type Constraints for Binary Operations
+τℂbin ∷ ΤClass → Identifier → Τ → Value → Value → State Γ (S.Set Τℂ)
 τℂbin τc n τ α β = do
 	τℂα ← τℂ α
 	τℂβ ← τℂ β
 	let cτρ = ℂτ $ (↑)τ
 	    (πα,πβ) = (π α,π β)
-	    αℂ = cτρ :⊑: πα
-	    βℂ = cτρ :⊑: πβ
-	    αβℂ = πα :⊑: πβ
-	    cℂ = cτρ :⊑: (ℂc τc) 
-	(↣) $ αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ))))
+	    αℂ = cτρ :=: πα
+	    βℂ = cτρ :=: πβ
+	    αβℂ = πα :=: πβ
+	    cℂ = cτρ :=: (ℂc τc)
+	    nℂ = (ℂπ n) :=: cτρ
+	(↣) $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
+
+-- Type Constraints for Cast Operations
+τℂcast ∷ Identifier → (Value, ΤClass) → (Τ, ΤClass) → (ℂ → ℂ → Τℂ) → State Γ (S.Set Τℂ)
+τℂcast n (α,τcα) (τ,τcτ) (?:) = do
+	τℂα ← τℂ α
+	let cτρ = ℂτ $ (↑)τ
+	    πα = π α
+	    cℂα = πα :=: (ℂc τcα)
+	    cℂτ = cτρ :=: (ℂc τcτ)
+	    αℂ = πα ?: cτρ
+	    nℂ = (ℂπ n) :=: cτρ
+	(↣) $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
 
 -- Type Constraints for values
 instance TyConstr Value where
 	τℂ (Id n τ) = do
 		let τα = (↑)τ
-		    nℂ = (ℂπ n) :⊑: (ℂτ τα) ∘ ε
+		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε
 		(↣) nℂ
 	τℂ c = (↣) ε
 
