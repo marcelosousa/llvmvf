@@ -104,7 +104,11 @@ instance TyConstr Instruction where
 		PtrToInt _ n α τ → τℂcast n (α,ΤPtr) (τ,ΤInt) (:=:) -- Pointer → integer 
 		IntToPtr _ n α τ → τℂcast n (α,ΤInt) (τ,ΤPtr) (:=:) -- integer → Pointer
 		BitCast  _ n α τ → τℂcast n (α,Τ1NA) (τ,Τ1NA) (:≌:) -- 1stclass non agg → 1stclass non agg
-
+    -- Comparison Operations
+		ICmp _ n _ τ α β → τℂcmp ΤInt n τ α β
+		FCmp _ n _ τ α β → τℂcmp ΤFlt n τ α β 
+    -- Memory Operations
+    
 -- Type Constraints for Binary Operations
 τℂbin ∷ ΤClass → Identifier → Τ → Value → Value → State Γ (S.Set Τℂ)
 τℂbin τc n τ α β = do
@@ -130,6 +134,21 @@ instance TyConstr Instruction where
 	    αℂ = πα ?: cτρ
 	    nℂ = (ℂπ n) :=: cτρ
 	(↣) $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
+
+-- Type Constraints for comparison operations
+τℂcmp ∷ ΤClass → Identifier → Τ → Value → Value → State Γ (S.Set Τℂ)
+τℂcmp τc n τ α β = do
+	τℂα ← τℂ α
+	τℂβ ← τℂ β
+	let cτρ = ℂτ $ (↑)τ
+	    (πα,πβ) = (π α,π β)
+	    αℂ = cτρ :=: πα
+	    βℂ = cτρ :=: πβ
+	    αβℂ = πα :=: πβ
+	    cℂ = cτρ :=: (ℂc τc)
+	    cτn = ℂτ $ T.TyPri $ T.TyInt 1 
+	    nℂ = (ℂπ n) :=: cτn
+	(↣) $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
 
 -- Type Constraints for values
 instance TyConstr Value where
