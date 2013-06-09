@@ -39,33 +39,33 @@ instance TyConstr Terminator where
 		case tmn of
 			Ret _ VoidRet → do
 				let τα = T.TyPri T.TyVoid
-				    fnℂ = (ℂπ fn) :=: (ℂτ τα)
-				    bbℂ = (ℂπ bb) :=: (ℂτ τα)
+				    fnℂ = ℂπ fn :=: ℂτ τα
+				    bbℂ = ℂπ bb :=: ℂτ τα
 				(↣) $ fnℂ ∘ (bbℂ ∘ ε)
 			Ret _ (ValueRet v) → do
 				τℂv ← τℂ v
 				let πv = π v
-				    fnℂ = (ℂπ fn) :=: πv
-				    bbℂ = (ℂπ bb) :=: πv
+				    fnℂ = ℂπ fn :=: πv
+				    bbℂ = ℂπ bb :=: πv
 				(↣) $ fnℂ ∘ (bbℂ ∘ τℂv)
 			Unreachable _ → do
 				let τα = T.TyUndef 
-				    fnℂ = (ℂπ fn) :=: (ℂτ τα)
-				    bbℂ = (ℂπ bb) :=: (ℂτ τα)
+				    fnℂ = ℂπ fn :=: ℂτ τα
+				    bbℂ = ℂπ bb :=: ℂτ τα
 				(↣) $ fnℂ ∘ (bbℂ ∘ ε)
 			Br _ c t f → do
 				τℂv ← τList ε [c,t,f]
 				let (πc,πt,πf) = (π c,π t,π f)
 				    cℂ = πc :=: (ℂτ $ T.TyPri $ T.TyInt 1)
 				    tfℂ = πt :=: πf
-				    fnℂ = (ℂπ fn) :=: πt
-				    bbℂ = (ℂπ bb) :=: πt
+				    fnℂ = ℂπ fn :=: πt
+				    bbℂ = ℂπ bb :=: πt
 				(↣) $ cℂ ∘ (tfℂ ∘ (fnℂ ∘ (bbℂ ∘ τℂv)))
 			UBr _ d → do
 				τℂd ← τℂ d
 				let πd = π d
-				    fnℂ = (ℂπ fn) :=: πd
-				    bbℂ = (ℂπ bb) :=: πd
+				    fnℂ = ℂπ fn :=: πd
+				    bbℂ = ℂπ bb :=: πd
 				(↣) $ fnℂ ∘ (bbℂ ∘ τℂd)
 			_ → error $ show tmn ⧺ " not supported"
 
@@ -134,8 +134,8 @@ instance TyConstr Instruction where
 	    αℂ = cτρ :=: πα
 	    βℂ = cτρ :=: πβ
 	    αβℂ = πα :=: πβ
-	    cℂ = cτρ :=: (ℂc τc)
-	    nℂ = (ℂπ n) :=: cτρ
+	    cℂ = cτρ :=: ℂc τc
+	    nℂ = ℂπ n :=: cτρ
 	(↣) $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
 
 -- Type Constraints for Cast Operations
@@ -144,10 +144,10 @@ instance TyConstr Instruction where
 	τℂα ← τℂ α
 	let cτρ = ℂτ $ (↑)τ
 	    πα = π α
-	    cℂα = πα :=: (ℂc τcα)
-	    cℂτ = cτρ :=: (ℂc τcτ)
+	    cℂα = πα :=: ℂc τcα
+	    cℂτ = cτρ :=: ℂc τcτ
 	    αℂ = πα ?: cτρ
-	    nℂ = (ℂπ n) :=: cτρ
+	    nℂ = ℂπ n :=: cτρ
 	(↣) $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
 
 -- Type Constraints for comparison operations
@@ -160,9 +160,9 @@ instance TyConstr Instruction where
 	    αℂ = cτρ :=: πα
 	    βℂ = cτρ :=: πβ
 	    αβℂ = πα :=: πβ
-	    cℂ = cτρ :=: (ℂc τc)
+	    cℂ = cτρ :=: ℂc τc
 	    cτn = ℂτ $ T.TyPri $ T.TyInt 1 
-	    nℂ = (ℂπ n) :=: cτn
+	    nℂ = ℂπ n :=: cτn
 	(↣) $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
 
 τℂcall ∷ Id → Τ → Id → Values → State Γ (S.Set Τℂ)
@@ -171,7 +171,7 @@ instance TyConstr Instruction where
 	let (πn,πc) = (ℂπ n,ℂπ c)
 	    cτρ = ℂτ $ (↑)τ       -- OK
 	    πχ = map π χ
-	    nℂ = (ℂπ n) :=: cτρ   -- OK
+	    nℂ = ℂπ n :=: cτρ   -- OK
 	    ς  = ℂp (ℂλ πχ cτρ) T.TyRegAddr
 	    cℂ = πc :=: ς
 	(↣) $ nℂ ∘ (cℂ ∘ τℂχ)

@@ -22,7 +22,7 @@ import qualified Data.Set as S
 τℂalloca ∷ Id → Τ → State Γ (S.Set Τℂ)
 τℂalloca n τ = do
 	let cτρ = ℂτ $ T.TyDer $ T.TyPtr (τ ↑^ T.TyRegAddr) T.TyRegAddr
-	    nℂ = (ℂπ n) :=: cτρ
+	    nℂ = ℂπ n :=: cτρ
 	(↣) $ nℂ ∘ ε
 
 -- Type Constraints for Store
@@ -34,7 +34,7 @@ import qualified Data.Set as S
 	    (πα,πβ) = (π α,π β)  -- 
 	    αℂ = πα :=: cτρ
 	    βℂ = πβ :=: (πα ⤜ T.TyRegAddr)
-	    cℂ = πα :=: (ℂc Τ1)
+	    cℂ = πα :=: ℂc Τ1
 	(↣) $ αℂ ∘ (βℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))
 
 -- Type Constraints for Load
@@ -44,7 +44,7 @@ import qualified Data.Set as S
 	let πα = π α
 	    πn = ℂπ n
 	    αℂ = πα :=: (πn ⤜ T.TyRegAddr)
-	    nℂ = πn :=: (ℂc Τ1)
+	    nℂ = πn :=: ℂc Τ1
 	(↣) $ αℂ ∘ (nℂ ∘ τℂα)
 
 -- Type Constraints for GEP
@@ -59,10 +59,7 @@ import qualified Data.Set as S
 	    δsℂ = S.fromList $ map ((ℂc ΤInt) :=:) πδs
 	    α1ℂ = πα :=: cτρ
 	    α2ℂ = πα :=: cℂ
-	    πn  = ℂπ n
-	    (δi:δr) = map getIntValue δs
-	    πδi = ℂι πα δi
-	    nℂ  = πn :=: foldr (\δ πδ → ℂι πδ δ) πδi δr
+	    nℂ  = ℂπ n :=: πgep α δs
 	(↣) $ nℂ ∘ (α1ℂ ∘ (α2ℂ ∘ (δsℂ ∪ τℂs)))
 
 -- Type contraints for atomic instructions

@@ -2238,10 +2238,11 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7969;"	v
 νbb	./Analysis/Type/Inference/Base.hs	105;"	v
 νfn	./Analysis/Type/Inference/Base.hs	99;"	v
 π	./Analysis/Type/Inference/Base.hs	122;"	v
+πgep	./Analysis/Type/Inference/Value.hs	88;"	v
 τList	./Analysis/Type/Inference/Base.hs	45;"	v
 τℂ	./Analysis/Type/Inference/Base.hs	118;"	v
 τℂalloca	./Analysis/Type/Inference/Instruction/Memory.hs	23;"	v
-τℂaop	./Analysis/Type/Inference/Instruction/Memory.hs	70;"	v
+τℂaop	./Analysis/Type/Inference/Instruction/Memory.hs	67;"	v
 τℂbin	./Analysis/Type/Inference/Instruction.hs	129;"	v
 τℂcall	./Analysis/Type/Inference/Instruction.hs	169;"	v
 τℂcast	./Analysis/Type/Inference/Instruction.hs	143;"	v
