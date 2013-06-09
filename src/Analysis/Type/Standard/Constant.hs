@@ -103,9 +103,6 @@ typeGetElementPtrConstantExpr nmdtye tye v idxs = --trace ("gep: " ++ show v ++ 
                       else error $ "typeGetElementPtrConstantExpr: not all indices are integers" 
       ty -> error $ "typeGetElementPtrConstantExpr: " ++ show ty 
 
-getIntValue :: Value -> Int
-getIntValue (Constant (SmpConst (ConstantInt i _))) = i
-getIntValue _ = -1
 
 getTypeAgg :: NamedTyEnv -> Type -> [Int] -> Type
 getTypeAgg nmdtye ty [] = TyPointer ty

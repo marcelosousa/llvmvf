@@ -10,7 +10,7 @@ module Analysis.Type.Inference.Global where
 import Language.LLVMIR
 
 import Analysis.Type.Inference.Base
-import Analysis.Type.Inference.Constant
+import Analysis.Type.Inference.Value
 
 import Analysis.Type.Memory.Util
 

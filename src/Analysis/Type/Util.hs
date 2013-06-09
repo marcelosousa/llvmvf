@@ -45,6 +45,10 @@ isAgg (TyArray _ _) = True
 isAgg (TyStruct _ _ _) = True
 isAgg _ = False
 
+getIntValue :: Value -> Int
+getIntValue (Constant (SmpConst (ConstantInt i _))) = i
+getIntValue _ = -1
+
 isTyOrVecOfTy :: TyClass -> Type -> Bool
 isTyOrVecOfTy TyClassInt (TyInt _) = True
 isTyOrVecOfTy TyClassInt (TyVector _ (TyInt _)) = True

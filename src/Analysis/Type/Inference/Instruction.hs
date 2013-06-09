@@ -7,15 +7,17 @@
 
 module Analysis.Type.Inference.Instruction where
 
-import Language.LLVMIR 
+import Language.LLVMIR hiding (Id)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.TyAnn as T
+import Analysis.Type.Util
 
-import Analysis.Type.Inference.Constant
+import Analysis.Type.Inference.Value
+import Analysis.Type.Inference.Instruction.Memory
+
 import Prelude.Unicode ((⧺))
 import Control.Monad.State
-import Analysis.Type.Util
 
 import qualified Data.Set as S
 
@@ -108,9 +110,22 @@ instance TyConstr Instruction where
 		ICmp _ n _ τ α β → τℂcmp ΤInt n τ α β
 		FCmp _ n _ τ α β → τℂcmp ΤFlt n τ α β 
     -- Memory Operations
-    
+		Alloca _ n τ   _ → τℂalloca n τ
+		Store  _ τ α β _ → τℂstore τ α β
+		Load   _ n α   _ → τℂload n α
+		GetElementPtr _ n τ α δs → τℂgep n τ α δs
+    -- Atomic Operations
+  		Cmpxchg   _ n α β η _ → τℂaop n α [β,η]
+		AtomicRMW _ n α β _ _ → τℂaop n α [β]
+    -- Call
+		Call _ n τ c χ → τℂcall n τ c χ
+    -- Vector Operations
+		Select       _ n α β η  → error "vector operations not supported" 
+		ExtractValue _ n α δs   → error "vector operations not supported"
+		InsertValue  _ n α β δs → error "vector operations not supported"
+
 -- Type Constraints for Binary Operations
-τℂbin ∷ ΤClass → Identifier → Τ → Value → Value → State Γ (S.Set Τℂ)
+τℂbin ∷ ΤClass → Id → Τ → Value → Value → State Γ (S.Set Τℂ)
 τℂbin τc n τ α β = do
 	τℂα ← τℂ α
 	τℂβ ← τℂ β
@@ -124,7 +139,7 @@ instance TyConstr Instruction where
 	(↣) $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
 
 -- Type Constraints for Cast Operations
-τℂcast ∷ Identifier → (Value, ΤClass) → (Τ, ΤClass) → (ℂ → ℂ → Τℂ) → State Γ (S.Set Τℂ)
+τℂcast ∷ Id → (Value, ΤClass) → (Τ, ΤClass) → (ℂ → ℂ → Τℂ) → State Γ (S.Set Τℂ)
 τℂcast n (α,τcα) (τ,τcτ) (?:) = do
 	τℂα ← τℂ α
 	let cτρ = ℂτ $ (↑)τ
@@ -136,7 +151,7 @@ instance TyConstr Instruction where
 	(↣) $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
 
 -- Type Constraints for comparison operations
-τℂcmp ∷ ΤClass → Identifier → Τ → Value → Value → State Γ (S.Set Τℂ)
+τℂcmp ∷ ΤClass → Id → Τ → Value → Value → State Γ (S.Set Τℂ)
 τℂcmp τc n τ α β = do
 	τℂα ← τℂ α
 	τℂβ ← τℂ β
@@ -150,14 +165,13 @@ instance TyConstr Instruction where
 	    nℂ = (ℂπ n) :=: cτn
 	(↣) $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
 
--- Type Constraints for values
-instance TyConstr Value where
-	τℂ (Id n τ) = do
-		let τα = (↑)τ
-		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε
-		(↣) nℂ
-	τℂ c = (↣) ε
-
-instance Constr Value where
-	π (Id n τ) = ℂπ n
-	π (Constant c) = π c
+τℂcall ∷ Id → Τ → Id → Values → State Γ (S.Set Τℂ)
+τℂcall n τ c χ = do
+	τℂχ ← τList ε χ
+	let (πn,πc) = (ℂπ n,ℂπ c)
+	    cτρ = ℂτ $ (↑)τ       -- OK
+	    πχ = map π χ
+	    nℂ = (ℂπ n) :=: cτρ   -- OK
+	    ς  = ℂp (ℂλ πχ cτρ) T.TyRegAddr
+	    cℂ = πc :=: ς
+	(↣) $ nℂ ∘ (cℂ ∘ τℂχ)

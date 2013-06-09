@@ -34,6 +34,9 @@ import Control.Monad.State
 (↑) ∷ Τ → Τα
 (↑) = liftTy
 
+(↑^) ∷ Τ → Ταρ → Τα
+(↑^) = liftTyGen
+
 (↣) ∷ (Monad m) ⇒ a → m a
 (↣) = return
 
@@ -47,18 +50,28 @@ import Control.Monad.State
 
 type Τ = Type
 type Τα = TyAnn
+type Ταρ = TyAnnot
 type Id = Identifier
 
 data ΤClass = 
-  ΤInt | ΤFlt | ΤPtr | Τ1NA
+  ΤInt | ΤFlt | ΤPtr | Τ1NA | Τ1 | ΤAgg
 
   deriving (Eq, Ord,Show)
 
 -- Constraint Element
 data ℂ = ℂτ Τα -- Type α
        | ℂπ Id -- Type of Id
-       | ℂc ΤClass -- Class of  
+       | ℂι ℂ Int  -- for GEP instruction
+       | ℂc ΤClass -- Class of
+       | ℂp ℂ Ταρ  -- Pointer to ℂ Τα
+       | ℂλ [ℂ] ℂ  -- Function
   deriving (Eq, Ord,Show)
+
+-- Normalize the constraint
+(⤜) ∷ ℂ → Ταρ → ℂ
+(ℂc _) ⤜ ταρ = error "⤜: can't life class constraint"
+(ℂτ τ) ⤜ ταρ = ℂτ $ TyDer $ TyPtr τ ταρ
+c      ⤜ ταρ = ℂp c ταρ
 
 -- Type Constraint
 data Τℂ = ℂ :=: ℂ -- same type
