@@ -32,10 +32,10 @@ import qualified Data.Set as S
 	τℂβ ← τℂ β               -- τℂ of pointer
 	let cτρ = ℂτ $ (↑)τ      -- ref τ of value
 	    (πα,πβ) = (π α,π β)  -- 
-	    αℂ = πα :=: cτρ
+	    τℂ = ℂτ (T.TyPri T.TyVoid) :=: cτρ
 	    βℂ = πβ :=: (πα ⤜ T.TyRegAddr)
-	    cℂ = πα :=: ℂc Τ1
-	(↣) $ αℂ ∘ (βℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))
+	    αℂ = πα :=: ℂc Τ1
+	(↣) $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ)))
 
 -- Type Constraints for Load
 τℂload ∷ Id → Value → State Γ (S.Set Τℂ)

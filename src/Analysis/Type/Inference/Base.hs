@@ -13,6 +13,8 @@ import Language.LLVMIR (Identifier(..), Identifiers, Type)
 import Analysis.Type.Memory.TyAnn
 import Analysis.Type.Memory.Util
 import Analysis.Type.Util
+import Prelude.Unicode ((⧺))
+import UU.PPrint 
 
 import Control.Monad
 import Control.Applicative
@@ -65,7 +67,15 @@ data ℂ = ℂτ Τα -- Type α
        | ℂc ΤClass -- Class of
        | ℂp ℂ Ταρ  -- Pointer to ℂ Τα
        | ℂλ [ℂ] ℂ  -- Function
-  deriving (Eq, Ord,Show)
+  deriving (Eq, Ord)
+
+instance Show ℂ where
+  show (ℂτ τα)    = "ℂτ(" ⧺ show τα ⧺ ")"
+  show (ℂπ α)     = "ℂπ(" ⧺ (show $ pretty α) ⧺ ")"
+  show (ℂι c i)   = "ℂι(" ⧺ show c ⧺ "," ⧺ show i ⧺ ")"
+  show (ℂc τc)    = "ℂc(" ⧺ show τc ⧺ ")"
+  show (ℂp c ταρ) = "ℂp(" ⧺ show c ⧺ "," ⧺ show ταρ ⧺ ")"
+  show (ℂλ cl c)  = "ℂλ(" ⧺ show cl ⧺ "→" ⧺ show c ⧺ ")"
 
 -- Normalize the constraint
 (⤜) ∷ ℂ → Ταρ → ℂ

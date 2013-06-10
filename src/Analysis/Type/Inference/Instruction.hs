@@ -26,10 +26,10 @@ instance TyConstr PHI where
 	τℂ (PHI _ n τ v) = do
 		let τα = (↑)τ                     -- lift type
 		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε   -- constraint the id to type τα
-		    vi  = fst $ unzip v           -- get values
+		    (vi,vl) = unzip v             -- get values
 		    viℂ = S.fromList $ map π vi   -- compute elementary constraints
 		    aℂs = S.map ((ℂπ n) :=:) viℂ  -- constraint the current name to viℂ
-		τList (nℂ ∪ aℂs) vi
+		τList (nℂ ∪ aℂs) (vi⧺vl)
 
 instance TyConstr Terminator where
 	-- τℂ ∷ → Terminator → State Γ (S.Set Τℂ)
@@ -59,13 +59,13 @@ instance TyConstr Terminator where
 				let (πc,πt,πf) = (π c,π t,π f)
 				    cℂ = πc :=: (ℂτ $ T.TyPri $ T.TyInt 1)
 				    tfℂ = πt :=: πf
-				    fnℂ = ℂπ fn :=: πt
+				    fnℂ = ℂπ fn :=: cλ πt
 				    bbℂ = ℂπ bb :=: πt
 				(↣) $ cℂ ∘ (tfℂ ∘ (fnℂ ∘ (bbℂ ∘ τℂv)))
 			UBr _ d → do
 				τℂd ← τℂ d
 				let πd = π d
-				    fnℂ = ℂπ fn :=: πd
+				    fnℂ = ℂπ fn :=: cλ πd
 				    bbℂ = ℂπ bb :=: πd
 				(↣) $ fnℂ ∘ (bbℂ ∘ τℂd)
 			_ → error $ show tmn ⧺ " not supported"
@@ -132,8 +132,8 @@ instance TyConstr Instruction where
 	τℂβ ← τℂ β
 	let cτρ = ℂτ $ (↑)τ
 	    (πα,πβ) = (π α,π β)
-	    αℂ = cτρ :=: πα
-	    βℂ = cτρ :=: πβ
+	    αℂ = πα :=: cτρ  
+	    βℂ = πβ :=: cτρ  
 	    αβℂ = πα :=: πβ
 	    cℂ = cτρ :=: ℂc τc
 	    nℂ = ℂπ n :=: cτρ
@@ -158,13 +158,12 @@ instance TyConstr Instruction where
 	τℂβ ← τℂ β
 	let cτρ = ℂτ $ (↑)τ
 	    (πα,πβ) = (π α,π β)
-	    αℂ = cτρ :=: πα
-	    βℂ = cτρ :=: πβ
 	    αβℂ = πα :=: πβ
-	    cℂ = cτρ :=: ℂc τc
-	    cτn = ℂτ $ T.TyPri $ T.TyInt 1 
+	    cℂ  = πα :=: ℂc τc
+	    cτn = ℂτ $ T.TyPri $ T.TyInt 1
 	    nℂ = ℂπ n :=: cτn
-	(↣) $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
+	    τℂ = cτρ :=: cτn
+	(↣) $ nℂ ∘ (τℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ))))
 
 τℂcall ∷ Id → Τ → Id → Values → State Γ (S.Set Τℂ)
 τℂcall n τ c χ = do
