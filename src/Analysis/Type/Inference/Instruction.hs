@@ -34,23 +34,24 @@ instance TyConstr PHI where
 instance TyConstr Terminator where
 	-- τℂ ∷ → Terminator → State Γ (S.Set Τℂ)
 	τℂ tmn = do
-		fn ← δfn
+		(fn,πς) ← δfn
 		bb ← δbb
+		let cλ = ℂλ πς
 		case tmn of
 			Ret _ VoidRet → do
 				let τα = T.TyPri T.TyVoid
-				    fnℂ = ℂπ fn :=: ℂτ τα
+				    fnℂ = ℂπ fn :=: cλ (ℂτ τα)
 				    bbℂ = ℂπ bb :=: ℂτ τα
 				(↣) $ fnℂ ∘ (bbℂ ∘ ε)
 			Ret _ (ValueRet v) → do
 				τℂv ← τℂ v
 				let πv = π v
-				    fnℂ = ℂπ fn :=: πv
+				    fnℂ = ℂπ fn :=: cλ πv
 				    bbℂ = ℂπ bb :=: πv
 				(↣) $ fnℂ ∘ (bbℂ ∘ τℂv)
 			Unreachable _ → do
 				let τα = T.TyUndef 
-				    fnℂ = ℂπ fn :=: ℂτ τα
+				    fnℂ = ℂπ fn :=: cλ (ℂτ τα)
 				    bbℂ = ℂπ bb :=: ℂτ τα
 				(↣) $ fnℂ ∘ (bbℂ ∘ ε)
 			Br _ c t f → do

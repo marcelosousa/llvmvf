@@ -17,10 +17,12 @@ import Analysis.Type.Memory.Util
 instance TyConstr Function where
 	-- τℂ ∷ → Function → State Γ (S.Set Τℂ)
 	τℂ (FunctionDef  n _ τ _ ς bbs) = do
-		let τα = (↑)τ
-		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε
+		let πτ = ℂτ $ (↑)τ
+		    πς = map π ς
+		    πn = ℂλ πς πτ
+		    nℂ = (ℂπ n) :=: πn ∘ ε
 		ςℂs ← τList nℂ ς
-		νfn n
+		νfn (n,πς)
 		τList ςℂs bbs
 	τℂ (FunctionDecl _ _ _ _ _) = (↣) ε
 

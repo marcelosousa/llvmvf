@@ -89,16 +89,15 @@ c1 ≥: c2 = c2 :≤: c1
 -- Environment
 data Γ = Γ 
 	{ 
-	  fn ∷ Id -- Current Function
-  , ps ∷ [ℂ] -- Current Function Arg Constraints
+	  fn ∷ (Id,[ℂ]) -- Current Function
 	, bb ∷ Id -- Current Basic Block
   	}
 
-εΓ = Γ (Global "") [] (Global "")
+εΓ = Γ ((Global ""),[]) (Global "")
 
 -- update the function in the
 -- environment
-νfn ∷ Id → State Γ ()
+νfn ∷ (Id,[ℂ]) → State Γ ()
 νfn n = do γ@Γ{..} ← get
            put γ{fn = n}
 
@@ -108,7 +107,7 @@ data Γ = Γ
 νbb n = do γ@Γ{..} ← get
            put γ{bb = n}
 
-δfn ∷ State Γ Id
+δfn ∷ State Γ (Id,[ℂ])
 δfn = do γ@Γ{..} ← get
          (↣) fn
 
