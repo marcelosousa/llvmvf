@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable, UnicodeSyntax #-}
 
 -------------------------------------------------------------------------------
 -- Module    :  Main
@@ -24,6 +24,7 @@ import Language.LLVMIR.Printer.NamedTypes
 import qualified Language.LTL.Base as LTL
 import UU.PPrint 
 import Language.SMTLib2.Printer    (prettyprint)
+import qualified Data.Set as S
 
 --import qualified Concurrent.Model as M
 --import Concurrent.Model.Domain.PThread
@@ -48,7 +49,7 @@ _helpArch = unlines ["llvmvf arch outputs the concurrent architecture representa
 _helpTypeCheck = unlines ["llvmvf typecheck checks if the LLVM IR types are consistent with the typing rules defined in the Language Reference."]
 _helpType = unlines ["llvmvf type uses a refined type system for separation of regular (user/kernel) and I/O memory"]
 
-data Option = Extract   {input :: FilePath}
+data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
             | CCFG      {input :: FilePath, domain :: Domain}
             | Model     {input :: FilePath, domain :: Domain}
             | BMC       {input :: FilePath, domain :: Domain, bound :: Int}
@@ -57,14 +58,21 @@ data Option = Extract   {input :: FilePath}
             | TypeCheck {input :: FilePath}
   deriving (Show, Data, Typeable, Eq)
 
+data ExtractMode = Raw | Pretty 
+  deriving (Show, Data, Typeable, Eq)
+
 data Domain = PThread | SystemC
   deriving (Show, Data, Typeable, Eq)
+
+instance Default ExtractMode where
+  def = Pretty
 
 instance Default Domain where
   def = PThread
 
 extractMode :: Option
 extractMode = Extract  { input = def &= args
+                       , emode = def &= help "mode of extraction: Raw | Pretty (default)" 
                        } &= help _helpExtract
 
 ccfgMode :: Option
@@ -101,9 +109,12 @@ main = do options <- cmdArgsRun progModes
           runOption options
           
 runOption :: Option -> IO ()
-runOption (Extract bc) = do mdl <- extract bc
-                            let bf = dropExtension bc
-                            writeFile (addExtension bf "llvf") (show $ pretty mdl)
+runOption (Extract bc m) = do mdl <- extract bc
+                              let bf = dropExtension bc
+                                  p = case m of
+                                    Raw → show mdl
+                                    Pretty → show $ pretty mdl
+                              writeFile (addExtension bf "llvf") p
 runOption (Model bc d) = undefined -- extractModel bc d                           
 runOption (CCFG bc d)  = undefined -- runCCFG bc d
 runOption (BMC bc d k) = undefined -- runBMC bc d k
@@ -111,7 +122,7 @@ runOption (TypeCheck bc) = do mdl <- extract bc
                              -- print mdl
                               print $ typeCheck mdl
 runOption (Type bc) = do mdl <- extract bc
-                         print $ typeInference mdl --typeAnalysis mdl
+                         forM_ (S.toList $ typeInference mdl) print  --typeAnalysis mdl
 --runOption bc Htm     = do mdl <- extract bc
 --                          let bf = dropExtension bc
 --                          writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)

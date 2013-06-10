@@ -90,10 +90,11 @@ c1 ≥: c2 = c2 :≤: c1
 data Γ = Γ 
 	{ 
 	  fn ∷ Id -- Current Function
+  , ps ∷ [ℂ] -- Current Function Arg Constraints
 	, bb ∷ Id -- Current Basic Block
   	}
 
-εΓ = Γ (Global "") (Global "")
+εΓ = Γ (Global "") [] (Global "")
 
 -- update the function in the
 -- environment

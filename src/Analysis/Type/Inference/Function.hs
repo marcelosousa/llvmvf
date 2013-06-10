@@ -30,6 +30,9 @@ instance TyConstr Parameter where
 		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε
 		(↣) nℂ 
 
+instance Constr Parameter where
+	π (Parameter n τ) = ℂπ n
+
 instance TyConstr BasicBlock where
 	τℂ (BasicBlock n φs is tmn) = do
 		νbb n 
