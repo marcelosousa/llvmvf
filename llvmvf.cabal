@@ -13,17 +13,18 @@ Executable llvmvf
                     , containers    >= 0.2
                     , filepath
                     , uu-parsinglib >= 2.7.1
-                    , mtl           == 2.0.1.0 
+                    , mtl           == 2.1.1 
                     , fgl           
                     , uulib         >= 0.9.14
                     , cmdargs
                     , transformers 
                     , llvm-base
-                    , llvm
+                    , llvm          == 3.0.1.0
                     , smtlib        == 1.0
                     , demangler     == 1.0
                     , blaze-html
                     , text
+                    , base-unicode-symbols
     Hs-Source-Dirs:   src/
     include-dirs: include
     C-Sources:        cbits/demangler.cpp

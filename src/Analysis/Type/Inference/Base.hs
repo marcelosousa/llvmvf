@@ -9,7 +9,7 @@ module Analysis.Type.Inference.Base where
 
 import qualified Data.Set as S
 
-import Language.LLVMIR (Identifier, Identifiers, Type)
+import Language.LLVMIR (Identifier(..), Identifiers, Type)
 import Analysis.Type.Memory.TyAnn
 import Analysis.Type.Memory.Util
 import Analysis.Type.Util
@@ -92,6 +92,8 @@ data Γ = Γ
 	  fn ∷ Id -- Current Function
 	, bb ∷ Id -- Current Basic Block
   	}
+
+εΓ = Γ (Global "") (Global "")
 
 -- update the function in the
 -- environment

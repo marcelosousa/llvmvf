@@ -111,7 +111,7 @@ runOption (TypeCheck bc) = do mdl <- extract bc
                              -- print mdl
                               print $ typeCheck mdl
 runOption (Type bc) = do mdl <- extract bc
-                         print $ typeAnalysis mdl
+                         print $ typeInference mdl --typeAnalysis mdl
 --runOption bc Htm     = do mdl <- extract bc
 --                          let bf = dropExtension bc
 --                          writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)

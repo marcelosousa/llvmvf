@@ -18,7 +18,8 @@ import Analysis.Type.Inference.Function
 import Control.Monad
 import Control.Monad.State
 
-typeAnnInference = undefined
+typeAnnInference ∷ Module → S.Set Τℂ
+typeAnnInference mdl = evalState (τℂs mdl) εΓ
 
 -- | Compute type constraints
 τℂs ∷ Module → State Γ (S.Set Τℂ)

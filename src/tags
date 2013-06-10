@@ -114,7 +114,7 @@ ConstantStruct	./Language/LLVMIR/Extractor/ConstantClass.hs	19;"	d
 ConstantStruct	src/Language/LLVMIR.hs	157;"	d
 ConstantVector	./Language/LLVMIR/Extractor/ConstantClass.hs	20;"	d
 ConstantVector	src/Language/LLVMIR.hs	158;"	d
-Constr	./Analysis/Type/Inference/Base.hs	121;"	t
+Constr	./Analysis/Type/Inference/Base.hs	123;"	t
 Constrs	./Analysis/Type/Memory/Context.hs	19;"	t
 Context	./Analysis/Type/Memory/Context.hs	21;"	t
 Context	./Language/LLVMIR/Extractor/Context.hs	28;"	d
@@ -883,7 +883,7 @@ TyBot	./Analysis/Type/Memory/TyAnn.hs	13;"	d
 TyClass	./Analysis/Type/Util.hs	17;"	t
 TyClassFloat	./Analysis/Type/Util.hs	17;"	d
 TyClassInt	./Analysis/Type/Util.hs	17;"	d
-TyConstr	./Analysis/Type/Inference/Base.hs	117;"	t
+TyConstr	./Analysis/Type/Inference/Base.hs	119;"	t
 TyDer	./Analysis/Type/Memory/TyAnn.hs	16;"	d
 TyDer	./Analysis/Type/Memory/TyAnn.hs	27;"	t
 TyDouble	src/Language/LLVMIR.hs	447;"	d
@@ -2044,10 +2044,10 @@ tyanModule	./Analysis/Type/Memory/Module.hs	25;"	v
 tyanSignature	./Analysis/Type/Memory/Function.hs	33;"	v	file:
 tyanUnaryExpression	./Analysis/Type/Memory/Constant.hs	134;"	v
 tyanValue	./Analysis/Type/Memory/Constant.hs	24;"	v
-typeAnalysis	./Analysis/Type.hs	27;"	v
-typeAnnInference	./Analysis/Type/Inference/Module.hs	21;"	v
+typeAnalysis	./Analysis/Type.hs	29;"	v
+typeAnnInference	./Analysis/Type/Inference/Module.hs	22;"	v
 typeCastOp	./Analysis/Type/Standard/Instruction.hs	153;"	v
-typeCheck	./Analysis/Type.hs	24;"	v
+typeCheck	./Analysis/Type.hs	26;"	v
 typeCheckBasicBlock	./Analysis/Type/Standard/Function.hs	46;"	v	file:
 typeCheckBasicBlocks	./Analysis/Type/Standard/Function.hs	56;"	v	file:
 typeCheckBinInstr	./Analysis/Type/Standard/Instruction.hs	216;"	v
@@ -2076,7 +2076,7 @@ typeExpression	./Analysis/Type/Standard/Constant.hs	91;"	v
 typeFunction	./Analysis/Type/Standard/Function.hs	17;"	v
 typeGetElementPtrConstantExpr	./Analysis/Type/Standard/Constant.hs	97;"	v
 typeGlobalValue	./Analysis/Type/Util.hs	91;"	v
-typeInference	./Analysis/Type.hs	31;"	v
+typeInference	./Analysis/Type.hs	33;"	v
 typeMode	Main.hs	87;"	v
 typeOf	./Language/LLVMIR/Extractor/Type.hs	35;"	v
 typeSignature	./Analysis/Type/Standard/Function.hs	32;"	v	file:
@@ -2232,15 +2232,16 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7969;"	v
 Τℂ	./Analysis/Type/Inference/Base.hs	77;"	t
 Φ	./Language/FeatherIR/Base/Syntax.hs	28;"	d
 Φ	./Language/FeatherIR/Base/Syntax.hs	28;"	t
-δbb	./Analysis/Type/Inference/Base.hs	113;"	v
-δfn	./Analysis/Type/Inference/Base.hs	109;"	v
+δbb	./Analysis/Type/Inference/Base.hs	115;"	v
+δfn	./Analysis/Type/Inference/Base.hs	111;"	v
 ε	./Analysis/Type/Inference/Base.hs	26;"	v
-νbb	./Analysis/Type/Inference/Base.hs	105;"	v
-νfn	./Analysis/Type/Inference/Base.hs	99;"	v
-π	./Analysis/Type/Inference/Base.hs	122;"	v
+εΓ	./Analysis/Type/Inference/Base.hs	96;"	v
+νbb	./Analysis/Type/Inference/Base.hs	107;"	v
+νfn	./Analysis/Type/Inference/Base.hs	101;"	v
+π	./Analysis/Type/Inference/Base.hs	124;"	v
 πgep	./Analysis/Type/Inference/Value.hs	88;"	v
 τList	./Analysis/Type/Inference/Base.hs	45;"	v
-τℂ	./Analysis/Type/Inference/Base.hs	118;"	v
+τℂ	./Analysis/Type/Inference/Base.hs	120;"	v
 τℂalloca	./Analysis/Type/Inference/Instruction/Memory.hs	23;"	v
 τℂaop	./Analysis/Type/Inference/Instruction/Memory.hs	67;"	v
 τℂbin	./Analysis/Type/Inference/Instruction.hs	129;"	v
@@ -2249,7 +2250,7 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7969;"	v
 τℂcmp	./Analysis/Type/Inference/Instruction.hs	155;"	v
 τℂgep	./Analysis/Type/Inference/Instruction/Memory.hs	52;"	v
 τℂload	./Analysis/Type/Inference/Instruction/Memory.hs	42;"	v
-τℂs	./Analysis/Type/Inference/Module.hs	25;"	v	file:
+τℂs	./Analysis/Type/Inference/Module.hs	26;"	v	file:
 τℂstore	./Analysis/Type/Inference/Instruction/Memory.hs	30;"	v
 τℂu	./Analysis/Type/Inference/Base.hs	48;"	v
 ℂ	./Analysis/Type/Inference/Base.hs	62;"	t

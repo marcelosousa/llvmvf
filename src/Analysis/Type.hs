@@ -19,6 +19,8 @@ import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
 import Analysis.Type.Memory.Context (RTyRes)
 import Analysis.Type.Memory.Module (tyanModule)
 import Analysis.Type.Inference.Module (typeAnnInference)
+import Analysis.Type.Inference.Base
+import Data.Set
 
 typeCheck :: Module -> STyRes 
 typeCheck = typeCheckModule
@@ -27,5 +29,5 @@ typeAnalysis :: Module -> RTyRes
 typeAnalysis = tyanModule
 
 -- Type Annotated Inference
-typeInference ∷ Module → α
+typeInference ∷ Module → Set Τℂ
 typeInference = typeAnnInference
