@@ -14,6 +14,7 @@ import Language.LLVMIR
 import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Global
 import Analysis.Type.Inference.Function
+import Analysis.Type.Inference.Worklist
 
 import Control.Monad
 import Control.Monad.State
