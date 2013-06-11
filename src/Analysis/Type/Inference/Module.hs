@@ -19,8 +19,8 @@ import Analysis.Type.Inference.Worklist
 import Control.Monad
 import Control.Monad.State
 
-typeAnnInference ∷ Module → S.Set Τℂ
-typeAnnInference mdl = evalState (τℂs mdl) εΕ
+typeAnnInference ∷ Module → Γ --S.Set Τℂ
+typeAnnInference mdl = (⊨) $ evalState (τℂs mdl) εΕ
 
 -- | Compute type constraints
 τℂs ∷ Module → ℂState

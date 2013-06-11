@@ -19,6 +19,7 @@ import Control.Monad.State
 import Analysis.Type.Util
 
 import Prelude.Unicode ((⧺))
+import Data.List.Unicode ((∈))
 
 import qualified Data.Set as S
 import qualified Data.Map as M
@@ -28,8 +29,8 @@ type Ω = M.Map Id ℂ
 
 εΩ = M.empty
 
-optT ∷ S.Set Τℂ → Ω
-optT = S.fold rewrite εΩ
+collapse ∷ S.Set Τℂ → Ω
+collapse = S.fold rewrite εΩ
 
 rewrite ∷ Τℂ → Ω → Ω
 rewrite τℂ γ = case τℂ of
@@ -117,74 +118,40 @@ rewriteEq γ (ℂp c1 τα1) (ℂp c2 τα2)
 rewriteEq γ (ℂp c1 τα1) (ℂc c)
 rewriteEq γ (ℂp c1 τα1) (ℂλ ca cr) = error "rewriteEq: cant constraint pointer with function"
 rewriteEq γ (ℂp c1 τα1) c = rewriteEq γ c (ℂp c1 τα1)
-
 -}
 
 ------------------------------------------
 
-
-
-
-type Γ = M.Map Id TyAnn
-
-εΓ = M.empty
+type Γ = M.Map Id Τα
 
 (⊨) ∷ S.Set Τℂ → Γ
-(⊨) τℂ = solve εΓ τℂ
---(⊨) τℂ = S.fold (\τc γ → solve γ τℂ τc) εΓ τℂ
+(⊨) τℂ = let γ = collapse τℂ 
+         in M.mapWithKey (\n c → solve γ [n] c) γ
 
 -- Solve 
 -- Input : Env, Constraints left
-solve ∷ Γ → S.Set Τℂ → Γ
-solve γ τℂ = 
-  if S.null τℂ
-  then γ
-  else let (c,τℂ') = extract τℂ
-       in case c of
-      	c1 :=: c2 → solveEq γ τℂ' c1 c2 
-      	c1 :<: c2 → undefined
-      	c1 :≤: c2 → undefined
-      	c1 :≌: c2 → undefined
+solve ∷ Ω → [Id] → ℂ → Τα
+solve γ n τℂ = case τℂ of
+  ℂτ τ → τ
+  ℂπ m → look γ n m
+  ℂc cl → error "solve does not expect a class"
+  ℂι c i → undefined
+  ℂp c a → let cτ = solve γ n c 
+           in TyDer $ TyPtr cτ a  
+  ℂλ ca cr → let caτ = map (solve γ n) ca
+                 crτ = solve γ n cr
+             in TyDer $ TyFun caτ crτ False
 
--- Solving :=:
-solveEq ∷ Γ → S.Set Τℂ → ℂ → ℂ → Γ
-solveEq = undefined
+look ∷ Ω → [Id] → Id → Τα 
+look γ l m | m ∈ l = error "look: same identifiers"
+           | otherwise = case M.lookup m γ of
+                Nothing → error "look: not in map" 
+                Just c  → solve γ (m:l) c
 {-
--- τ :=: τ
-solveEq γ τℂ (ℂτ τ1) (ℂτ τ2) =
-	if τ1 == τ2
-	then solve γ τℂ
-	else error $ "τ error: solveEq (1)"
--- τ :=: c
-solveEq γ τℂ (ℂτ τ1) (ℂc c) = 
-  if classOf τ1 == c
-  then solve γ τℂ
-  else error $ "τ error: solveEq (2)"
--- n :=: τ  
-solveEq γ τℂ (ℂπ n) (ℂτ τ1) = 
-  let γ' = case M.lookup n γ of
-    Nothing → let γ' = M.insert n τ1 γ
-              in solve γ' τℂ
-    Just τ2 → let τ = τ1 `unify` τ2
-                  M.update (const $ Just τ) γ
-  in solve γ' τℂ
-solveEq γ τℂ (ℂπ n) (ℂπ x) = undefined
+data ℂ = ℂτ Τα -- Type α
+       | ℂπ Id -- Type of Id
+       | ℂc ΤClass -- Class of
+       | ℂι ℂ Int  -- for GEP instruction
+       | ℂp ℂ Ταρ  -- Pointer to ℂ Τα
+       | ℂλ [ℂ] ℂ  -- Function
 -}
-
-unify ∷ Τ → Τ → Τ
-unify = undefined
- 
-extract ∷ S.Set Τℂ → (Τℂ, S.Set Τℂ)
-extract τℂ = case S.minView τℂ of
-	Nothing → error "extract"
-	Just v  → v
-
-look ∷ S.Set Τℂ → Id → S.Set Τℂ
-τℂ `look` n = S.filter (lhsτℂ n) τℂ
-
-lhsτℂ ∷ Id → Τℂ → Bool
-lhsτℂ n (ℂπ m :=: _) = n == m
-lhsτℂ n (ℂπ m :<: _) = n == m
-lhsτℂ n (ℂπ m :≤: _) = n == m
-lhsτℂ n (ℂπ m :≌: _) = n == m
-lhsτℂ n _            = False
