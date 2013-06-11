@@ -20,10 +20,10 @@ import Control.Monad
 import Control.Monad.State
 
 typeAnnInference ∷ Module → S.Set Τℂ
-typeAnnInference mdl = evalState (τℂs mdl) εΓ
+typeAnnInference mdl = evalState (τℂs mdl) εΕ
 
 -- | Compute type constraints
-τℂs ∷ Module → State Γ (S.Set Τℂ)
+τℂs ∷ Module → ℂState
 τℂs (Module i l t gvs fns nmdtys) = do
     gvsℂs ← τList ε gvs
     τList gvsℂs $ M.elems fns

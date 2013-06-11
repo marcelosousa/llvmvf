@@ -43,10 +43,10 @@ import Control.Monad.State
 (↣) = return
 
 -- | Auxiliar Function
-τList ∷ (TyConstr a) ⇒ S.Set Τℂ → [a] → State Γ (S.Set Τℂ)
+τList ∷ (TyConstr a) ⇒ S.Set Τℂ → [a] → ℂState
 τList = foldM τℂu
 
-τℂu ∷ (TyConstr α) ⇒ S.Set Τℂ → α → State Γ (S.Set Τℂ)
+τℂu ∷ (TyConstr α) ⇒ S.Set Τℂ → α → ℂState
 τℂu τℂs α = do ατℂ ← τℂ α
                (↣) $ τℂs ∪ ατℂ
 
@@ -97,37 +97,40 @@ c1 >: c2 = c2 :<: c1
 c1 ≥: c2 = c2 :≤: c1
 
 -- Environment
-data Γ = Γ 
+data Ε = Ε 
 	{ 
 	  fn ∷ (Id,[ℂ]) -- Current Function
 	, bb ∷ Id -- Current Basic Block
   	}
 
-εΓ = Γ ((Global ""),[]) (Global "")
+εΕ = Ε ((Global ""),[]) (Global "")
+
+type ΕState α = State Ε α
+type ℂState = ΕState (S.Set Τℂ)
 
 -- update the function in the
 -- environment
-νfn ∷ (Id,[ℂ]) → State Γ ()
-νfn n = do γ@Γ{..} ← get
+νfn ∷ (Id,[ℂ]) → ΕState ()
+νfn n = do γ@Ε{..} ← get
            put γ{fn = n}
 
 -- update the bb in the
 -- environment
-νbb ∷ Id → State Γ ()
-νbb n = do γ@Γ{..} ← get
+νbb ∷ Id → ΕState ()
+νbb n = do γ@Ε{..} ← get
            put γ{bb = n}
 
-δfn ∷ State Γ (Id,[ℂ])
-δfn = do γ@Γ{..} ← get
+δfn ∷ ΕState (Id,[ℂ])
+δfn = do γ@Ε{..} ← get
          (↣) fn
 
-δbb ∷ State Γ Id
-δbb = do γ@Γ{..} ← get
+δbb ∷ ΕState Id
+δbb = do γ@Ε{..} ← get
          (↣) bb
 
 -- Type Constraint Class
 class TyConstr a where
-    τℂ ∷ a → State Γ (S.Set Τℂ)
+    τℂ ∷ a → ℂState
 
 -- Type Inference Class
 class Constr a where

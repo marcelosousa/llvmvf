@@ -22,7 +22,7 @@ import Control.Monad.State
 import qualified Data.Set as S
 
 instance TyConstr PHI where
-	-- τℂ ∷ → PHI → State Γ (S.Set Τℂ)
+	-- τℂ ∷ → PHI → ℂState
 	τℂ (PHI _ n τ v) = do
 		let τα = (↑)τ                     -- lift type
 		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε   -- constraint the id to type τα
@@ -32,7 +32,7 @@ instance TyConstr PHI where
 		τList (nℂ ∪ aℂs) (vi⧺vl)
 
 instance TyConstr Terminator where
-	-- τℂ ∷ → Terminator → State Γ (S.Set Τℂ)
+	-- τℂ ∷ → Terminator → ℂState
 	τℂ tmn = do
 		(fn,πς) ← δfn
 		bb ← δbb
@@ -126,7 +126,7 @@ instance TyConstr Instruction where
 		InsertValue  _ n α β δs → error "vector operations not supported"
 
 -- Type Constraints for Binary Operations
-τℂbin ∷ ΤClass → Id → Τ → Value → Value → State Γ (S.Set Τℂ)
+τℂbin ∷ ΤClass → Id → Τ → Value → Value → ℂState
 τℂbin τc n τ α β = do
 	τℂα ← τℂ α
 	τℂβ ← τℂ β
@@ -140,7 +140,7 @@ instance TyConstr Instruction where
 	(↣) $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
 
 -- Type Constraints for Cast Operations
-τℂcast ∷ Id → (Value, ΤClass) → (Τ, ΤClass) → (ℂ → ℂ → Τℂ) → State Γ (S.Set Τℂ)
+τℂcast ∷ Id → (Value, ΤClass) → (Τ, ΤClass) → (ℂ → ℂ → Τℂ) → ℂState
 τℂcast n (α,τcα) (τ,τcτ) (?:) = do
 	τℂα ← τℂ α
 	let cτρ = ℂτ $ (↑)τ
@@ -152,7 +152,7 @@ instance TyConstr Instruction where
 	(↣) $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
 
 -- Type Constraints for comparison operations
-τℂcmp ∷ ΤClass → Id → Τ → Value → Value → State Γ (S.Set Τℂ)
+τℂcmp ∷ ΤClass → Id → Τ → Value → Value → ℂState
 τℂcmp τc n τ α β = do
 	τℂα ← τℂ α
 	τℂβ ← τℂ β
@@ -165,7 +165,7 @@ instance TyConstr Instruction where
 	    τℂ = cτρ :=: cτn
 	(↣) $ nℂ ∘ (τℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ))))
 
-τℂcall ∷ Id → Τ → Id → Values → State Γ (S.Set Τℂ)
+τℂcall ∷ Id → Τ → Id → Values → ℂState
 τℂcall n τ c χ = do
 	τℂχ ← τList ε χ
 	let (πn,πc) = (ℂπ n,ℂπ c)

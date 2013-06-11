@@ -19,14 +19,14 @@ import Analysis.Type.Util
 import qualified Data.Set as S
 
 -- Type Constraints for Alloca
-τℂalloca ∷ Id → Τ → State Γ (S.Set Τℂ)
+τℂalloca ∷ Id → Τ → ℂState
 τℂalloca n τ = do
 	let cτρ = ℂτ $ T.TyDer $ T.TyPtr (τ ↑^ T.TyRegAddr) T.TyRegAddr
 	    nℂ = ℂπ n :=: cτρ
 	(↣) $ nℂ ∘ ε
 
 -- Type Constraints for Store
-τℂstore ∷ Τ → Value → Value → State Γ (S.Set Τℂ)
+τℂstore ∷ Τ → Value → Value → ℂState
 τℂstore τ α β = do
 	τℂα ← τℂ α               -- τℂ of value
 	τℂβ ← τℂ β               -- τℂ of pointer
@@ -38,7 +38,7 @@ import qualified Data.Set as S
 	(↣) $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ)))
 
 -- Type Constraints for Load
-τℂload ∷ Id → Value → State Γ (S.Set Τℂ)
+τℂload ∷ Id → Value → ℂState
 τℂload n α = do
 	τℂα ← τℂ α               -- τℂ of value
 	let πα = π α
@@ -48,7 +48,7 @@ import qualified Data.Set as S
 	(↣) $ αℂ ∘ (nℂ ∘ τℂα)
 
 -- Type Constraints for GEP
-τℂgep ∷ Id → Τ → Value → Values → State Γ (S.Set Τℂ)
+τℂgep ∷ Id → Τ → Value → Values → ℂState
 τℂgep n τ α δs = do
 	τℂα ← τℂ α
 	τℂs ← τList τℂα δs
@@ -63,7 +63,7 @@ import qualified Data.Set as S
 	(↣) $ nℂ ∘ (α1ℂ ∘ (α2ℂ ∘ (δsℂ ∪ τℂs)))
 
 -- Type contraints for atomic instructions
-τℂaop ∷ Id → Value → Values → State Γ (S.Set Τℂ)
+τℂaop ∷ Id → Value → Values → ℂState
 τℂaop n α βs = do
 	τℂα ← τℂ α
 	τv ← τList τℂα βs
