@@ -5,7 +5,7 @@
 -- Type Inference
 -------------------------------------------------------------------------------
 
-module Analysis.Type.Inference.Module (typeAnnInference) where
+module Analysis.Type.Inference.Module (typeAnnInference,typeConstraints) where
 
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -14,15 +14,19 @@ import Language.LLVMIR
 import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Global
 import Analysis.Type.Inference.Function
-import Analysis.Type.Inference.Worklist
+import Analysis.Type.Inference.Solver
 
 import Control.Monad
 import Control.Monad.State
 
-typeAnnInference ∷ Module → Γ --S.Set Τℂ
-typeAnnInference mdl = (⊨) $ evalState (τℂs mdl) εΕ
+typeAnnInference ∷ Module → Γ 
+typeAnnInference = (⊨) . typeConstraints
+
+typeConstraints ∷ Module → S.Set Τℂ
+typeConstraints mdl = evalState (τℂs mdl) εΕ
 
 -- | Compute type constraints
+-- Compute individually for functions
 τℂs ∷ Module → ℂState
 τℂs (Module i l t gvs fns nmdtys) = do
     gvsℂs ← τList ε gvs

@@ -1,13 +1,13 @@
 {-# LANGUAGE UnicodeSyntax, FlexibleInstances #-}
 -------------------------------------------------------------------------------
--- Module    :  Analysis.Type.Inference.Worklist
+-- Module    :  Analysis.Type.Inference.Solver
 -- Copyright :  (c) 2013 Marcelo Sousa
 -- Worklist algorithm
 -- Type equality must consider recursive types
 -- That is going to complicate a bit more.
 -------------------------------------------------------------------------------
 
-module Analysis.Type.Inference.Worklist where
+module Analysis.Type.Inference.Solver where
 
 import Language.LLVMIR hiding (Id)
 import Analysis.Type.Inference.Base
