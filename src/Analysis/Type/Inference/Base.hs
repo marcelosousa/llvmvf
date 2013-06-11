@@ -57,14 +57,17 @@ type Id = Identifier
 
 data ΤClass = 
   ΤInt | ΤFlt | ΤPtr | Τ1NA | Τ1 | ΤAgg
-
   deriving (Eq, Ord,Show)
+
+classOf ∷ Τα → ΤClass
+classOf (TyPri (TyInt _)) = ΤInt
+classOf _ = undefined
 
 -- Constraint Element
 data ℂ = ℂτ Τα -- Type α
        | ℂπ Id -- Type of Id
-       | ℂι ℂ Int  -- for GEP instruction
        | ℂc ΤClass -- Class of
+       | ℂι ℂ Int  -- for GEP instruction
        | ℂp ℂ Ταρ  -- Pointer to ℂ Τα
        | ℂλ [ℂ] ℂ  -- Function
   deriving (Eq, Ord)
@@ -79,7 +82,7 @@ instance Show ℂ where
 
 -- Normalize the constraint
 (⤜) ∷ ℂ → Ταρ → ℂ
-(ℂc _) ⤜ ταρ = error "⤜: can't life class constraint"
+(ℂc _) ⤜ ταρ = error "⤜: can't lift class constraint"
 (ℂτ τ) ⤜ ταρ = ℂτ $ TyDer $ TyPtr τ ταρ
 c      ⤜ ταρ = ℂp c ταρ
 

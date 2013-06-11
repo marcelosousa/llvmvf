@@ -29,7 +29,7 @@ instance TyConstr PHI where
 		    (vi,vl) = unzip v             -- get values
 		    viℂ = S.fromList $ map π vi   -- compute elementary constraints
 		    aℂs = S.map ((ℂπ n) :=:) viℂ  -- constraint the current name to viℂ
-		τList (nℂ ∪ aℂs) (vi⧺vl)
+		τList (nℂ ∪ aℂs) vi -- ⧺vl)
 
 instance TyConstr Terminator where
 	-- τℂ ∷ → Terminator → ℂState
@@ -55,7 +55,7 @@ instance TyConstr Terminator where
 				    bbℂ = ℂπ bb :=: ℂτ τα
 				(↣) $ fnℂ ∘ (bbℂ ∘ ε)
 			Br _ c t f → do
-				τℂv ← τList ε [c,t,f]
+				τℂv ← τList ε [c]--,t,f]
 				let (πc,πt,πf) = (π c,π t,π f)
 				    cℂ = πc :=: (ℂτ $ T.TyPri $ T.TyInt 1)
 				    tfℂ = πt :=: πf
@@ -63,11 +63,11 @@ instance TyConstr Terminator where
 				    bbℂ = ℂπ bb :=: πt
 				(↣) $ cℂ ∘ (tfℂ ∘ (fnℂ ∘ (bbℂ ∘ τℂv)))
 			UBr _ d → do
-				τℂd ← τℂ d
+				--τℂd ← τℂ d
 				let πd = π d
 				    fnℂ = ℂπ fn :=: cλ πd
 				    bbℂ = ℂπ bb :=: πd
-				(↣) $ fnℂ ∘ (bbℂ ∘ τℂd)
+				(↣) $ fnℂ ∘ (bbℂ ∘ ε) -- τℂd)
 			_ → error $ show tmn ⧺ " not supported"
 
 instance TyConstr Instruction where
