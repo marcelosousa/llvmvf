@@ -28,14 +28,14 @@ import qualified Data.Set as S
 -- Type Constraints for Store
 τℂstore ∷ Τ → Value → Value → ℂState
 τℂstore τ α β = do
-	τℂα ← τℂ α               -- τℂ of value
-	τℂβ ← τℂ β               -- τℂ of pointer
+--	τℂα ← τℂ α               -- τℂ of value
+--	τℂβ ← τℂ β               -- τℂ of pointer
 	let cτρ = ℂτ $ (↑)τ      -- ref τ of value
 	    (πα,πβ) = (π α,π β)  -- 
 	    τℂ = ℂτ (T.TyPri T.TyVoid) :=: cτρ
 	    βℂ = πβ :=: (πα ⤜ T.TyRegAddr)
 	    αℂ = πα :=: ℂc Τ1
-	(↣) $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ)))
+	(↣) $ τℂ ∘ (αℂ ∘ (βℂ ∘ ε)) -- (τℂα ∪ τℂβ)))
 
 -- Type Constraints for Load
 τℂload ∷ Id → Value → ℂState
@@ -65,10 +65,10 @@ import qualified Data.Set as S
 -- Type contraints for atomic instructions
 τℂaop ∷ Id → Value → Values → ℂState
 τℂaop n α βs = do
-	τℂα ← τℂ α
-	τv ← τList τℂα βs
+--	τℂα ← τℂ α
+--	τv ← τList τℂα βs
 	let πn = ℂπ n
 	    πα = π α
 	    nℂ = S.fromList $ map ((πn :=:) . π) βs
 	    αℂ = πα :=: (πn ⤜ T.TyRegAddr)
-	(↣) $ αℂ ∘ (nℂ ∪ τv)
+	(↣) $ αℂ ∘ ε --(nℂ ∪ τv)

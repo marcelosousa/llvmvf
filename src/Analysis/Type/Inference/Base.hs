@@ -43,7 +43,7 @@ import Control.Monad.State
 (↣) = return
 
 -- | Auxiliar Function
-τList ∷ (TyConstr a) ⇒ S.Set Τℂ → [a] → ℂState
+τList ∷ (TyConstr α) ⇒ S.Set Τℂ → [α] → ℂState
 τList = foldM τℂu
 
 τℂu ∷ (TyConstr α) ⇒ S.Set Τℂ → α → ℂState
@@ -59,9 +59,10 @@ data ΤClass =
   ΤInt | ΤFlt | ΤPtr | Τ1NA | Τ1 | ΤAgg
   deriving (Eq, Ord,Show)
 
-classOf ∷ Τα → ΤClass
-classOf (TyPri (TyInt _)) = ΤInt
-classOf _ = undefined
+classOf ∷ Τα → ΤClass → Bool
+(TyPri (TyInt _)) `classOf` ΤInt = True
+(TyPri _)         `classOf` Τ1 = True
+_ `classOf` _ = undefined
 
 -- Constraint Element
 data ℂ = ℂτ Τα -- Type α

@@ -44,7 +44,7 @@ rewriteEq ∷ Ω → ℂ → ℂ → (ℂ,Ω)
 rewriteEq γ α@(ℂτ τ)     β = rwEqτ γ α β -- type
 rewriteEq γ α@(ℂc cl)    β = rwEqc γ α β -- class
 rewriteEq γ α@(ℂι c i)   β = undefined --rwEqι γ α β -- gep
-rewriteEq γ α@(ℂp c τα)  β = undefined --rwEqp γ α β -- pointer
+rewriteEq γ α@(ℂp c τα)  β = rwEqp γ α β -- pointer
 rewriteEq γ α@(ℂλ ca cr) β = rwEqλ γ α β -- function
 rewriteEq γ α@(ℂπ n)     β = rwEqπ γ α β -- var
 
@@ -55,7 +55,7 @@ rwEqτ γ α@(ℂτ τ1) β =
     ℂτ τ2 → if τ1 == τ2 
             then (α,γ)
             else error $ "rwEqτ (1)"
-    ℂc cl → if classOf τ1 == cl 
+    ℂc cl → if τ1 `classOf` cl 
             then (α,γ)
             else error $ "rwEqτ (2)"
     _ → rewriteEq γ β α                       
@@ -112,13 +112,28 @@ rwEqι γ (ℂι c1 i1) (ℂc c)
 rwEqι γ (ℂι c1 i1) (ℂλ ca cr) = error "rewriteEq: cant constraint gep with function"
 rwEqι γ (ℂι c1 i1) (ℂp c ταρ) = error "rewriteEq: cant constraint gep with pointer"
 rwEqι γ (ℂι c1 i1) c = rewriteEq γ c (ℂι c1 i1) 
+-}
 
 -- Type pointer
-rewriteEq γ (ℂp c1 τα1) (ℂp c2 τα2)
-rewriteEq γ (ℂp c1 τα1) (ℂc c)
-rewriteEq γ (ℂp c1 τα1) (ℂλ ca cr) = error "rewriteEq: cant constraint pointer with function"
-rewriteEq γ (ℂp c1 τα1) c = rewriteEq γ c (ℂp c1 τα1)
--}
+-- Missing ℂc
+rwEqp ∷ Ω → ℂ → ℂ → (ℂ,Ω)
+rwEqp γ α@(ℂp c1 τα1) β = 
+  case β of
+    ℂτ τ → case τ of
+      TyDer (TyPtr τ1 τα2) → 
+        let (c,γ') = rewriteEq γ c1 (ℂτ τ1)
+        in if τα1 == τα2
+         then (α,γ')
+         else error "rwEqp: annotations dont match" 
+      _ → error "rwEqp: types dont match"
+    ℂp c2 τα2 → 
+      let (c,γ') = rewriteEq γ α β
+      in if τα1 == τα2
+         then (α,γ')
+         else error "rwEqp: annotations dont match"
+    ℂλ ca cr → error "rewriteEq: cant constraint pointer with function" 
+    _ → rewriteEq γ β α
+rwEqp γ _ _ = error $ "rwEqp: FATAL"
 
 ------------------------------------------
 

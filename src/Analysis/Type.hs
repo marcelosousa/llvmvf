@@ -34,5 +34,7 @@ typeAnalysis = tyanModule
 
 -- Type Annotated Inference
 typeInference ∷ Module → IO () -- Γ -- Set Τℂ
-typeInference mdl = forM_ (S.toList $ typeConstraints mdl) print
---typeInference mdl = forM_ (M.assocs $ typeAnnInference mdl) (\(a,b) -> print (show $ pretty a,b)) 
+typeInference mdl = forM_ (concatMap M.assocs $ typeAnnInference mdl) (\(a,b) -> print (show $ pretty a,b)) 
+
+typeConstraint ∷ Module → IO ()
+typeConstraint mdl = forM_ (concatMap S.toList $ typeConstraints mdl) print

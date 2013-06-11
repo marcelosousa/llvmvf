@@ -19,15 +19,16 @@ import Analysis.Type.Inference.Solver
 import Control.Monad
 import Control.Monad.State
 
-typeAnnInference ∷ Module → Γ 
-typeAnnInference = (⊨) . typeConstraints
+typeAnnInference ∷ Module → [Γ] 
+typeAnnInference = map (⊨) . typeConstraints
 
-typeConstraints ∷ Module → S.Set Τℂ
+typeConstraints ∷ Module → [S.Set Τℂ]
 typeConstraints mdl = evalState (τℂs mdl) εΕ
 
 -- | Compute type constraints
 -- Compute individually for functions
-τℂs ∷ Module → ℂState
+τℂs ∷ Module → State Ε [S.Set Τℂ]
 τℂs (Module i l t gvs fns nmdtys) = do
     gvsℂs ← τList ε gvs
-    τList gvsℂs $ M.elems fns
+    mapM (τℂu gvsℂs) $ M.elems fns
+    --τList gvsℂs $ M.elems fns
