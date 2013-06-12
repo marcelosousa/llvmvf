@@ -1,3 +1,4 @@
+{-# LANGUAGE UnicodeSyntax #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Type.Memory.TyAnn
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -7,6 +8,9 @@
 module Analysis.Type.Memory.TyAnn where
 
 import Language.LLVMIR (Identifier, Identifiers)
+
+import Control.Applicative
+import Prelude.Unicode ((≡))
 
 type TysAnn = [TyAnn]
 
@@ -41,6 +45,9 @@ data TyAnnot = TyIOAddr
              | TyAny
   deriving (Eq, Ord)
 
+i ∷ Int → TyAnn
+i n = TyPri $ TyInt n
+
 instance Show TyAnn where
   show TyBot = "⊥"
   show TyUndef = "undef"
@@ -72,3 +79,47 @@ instance Show TyAnnot where
   show TyIOAddr = "IOAddr"
   show TyRegAddr = "RegAddr"
   show TyAny = "AnyAddr"
+
+class AEq α where
+  (≅) ∷ α → α → Maybe α
+
+instance AEq TyAnn where
+  (TyDer τ1) ≅ (TyDer τ2) = TyDer <$> τ1 ≅ τ2
+  τ1 ≅ τ2 = if τ1 ≡ τ2
+            then Just τ1
+            else Nothing
+
+instance AEq TyDer where
+  (TyAgg τ1) ≅ (TyAgg τ2) = TyAgg <$> τ1 ≅ τ2
+  (TyVec n τ1) ≅ (TyVec m τ2) =
+    if n ≡ m
+    then TyVec n <$> τ1 ≅ τ2
+    else Nothing
+  (TyFun a1 r1 b1) ≅ (TyFun a2 r2 b2) =
+    if b1 ≡ b2
+    then (\a r → TyFun a r b1) <$> cmpList a1 a2 <*> r1 ≅ r2
+    else Nothing  
+  (TyPtr τ1 a1) ≅ (TyPtr τ2 a2) = TyPtr <$> τ1 ≅ τ2 <*> a1 ≅ a2
+  τ1 ≅ τ2 = Nothing
+
+instance AEq TyAgg where
+  (TyArr n τ1) ≅ (TyArr m τ2) = 
+    if n ≡ m
+    then TyArr n <$> τ1 ≅ τ2
+    else Nothing
+  (TyStr n i τ1) ≅ (TyStr m j τ2) =
+    if n ≡ m && i ≡ j
+    then TyStr n i <$> cmpList τ1 τ2
+    else Nothing
+  τ1 ≅ τ2 = Nothing
+
+instance AEq TyAnnot where
+  TyIOAddr ≅ TyRegAddr = Nothing
+  TyIOAddr ≅ _         = Just TyIOAddr
+  TyRegAddr ≅ TyIOAddr = Nothing
+  TyRegAddr ≅ _        = Just TyRegAddr
+  TyAny ≅ TyAny = Just TyAny
+  TyAny ≅ α     = Just α
+
+cmpList ∷ TysAnn → TysAnn → Maybe TysAnn
+cmpList a1 a2 = sequence $ map (uncurry (≅)) $ zip a1 a2

@@ -18,7 +18,7 @@ import Analysis.Type.Inference.Value
 import Control.Monad.State
 import Analysis.Type.Util
 
-import Prelude.Unicode ((⧺))
+import Prelude.Unicode ((⧺),(≡))
 import Data.List.Unicode ((∈))
 
 import qualified Data.Set as S
@@ -52,9 +52,9 @@ rewriteEq γ α@(ℂπ n)     β = rwEqπ γ α β -- var
 rwEqτ ∷ Ω → ℂ → ℂ → (ℂ,Ω)
 rwEqτ γ α@(ℂτ τ1) β =
   case β of
-    ℂτ τ2 → if τ1 == τ2 
-            then (α,γ)
-            else error $ "rwEqτ (1)"
+    ℂτ τ2 → case τ1 ≅ τ2 of
+              Nothing → error $ "rwEqτ (1)"
+              Just c  → (ℂτ c,γ)
     ℂc cl → if τ1 `classOf` cl 
             then (α,γ)
             else error $ "rwEqτ (2)"
@@ -65,7 +65,7 @@ rwEqτ γ _ _ = error $ "rwEqτ: FATAL"
 rwEqc ∷ Ω → ℂ → ℂ → (ℂ,Ω)
 rwEqc γ α@(ℂc cl1) β = 
   case β of 
-    ℂc cl2 → if cl1 == cl2
+    ℂc cl2 → if cl1 ≡ cl2
              then (α,γ)
              else error $ "rwEqc (1)"
     _ → rewriteEq γ β α
@@ -77,10 +77,10 @@ rwEqπ γ α@(ℂπ n) β =
   case M.lookup n γ of
     Nothing → (β, M.insert n β γ)
     Just ζ  → case ζ of
-      ℂπ m → if n == m
+      ℂπ m → if n ≡ m
              then (β, M.insert n β γ)
              else case β of
-                ℂπ o → if n == o || o == m
+                ℂπ o → if n ≡ o || o ≡ m
                        then (β, γ)
                        else (β, M.insert m β γ)
                 _ → (β,M.insert n β γ)
@@ -122,15 +122,15 @@ rwEqp γ α@(ℂp c1 τα1) β =
     ℂτ τ → case τ of
       TyDer (TyPtr τ1 τα2) → 
         let (c,γ') = rewriteEq γ c1 (ℂτ τ1)
-        in if τα1 == τα2
-         then (α,γ')
-         else error "rwEqp: annotations dont match" 
+        in case τα1 ≅ τα2 of
+         Just τα → (α,γ')
+         Nothing → error $ "rwEqp error: " ⧺ show α ⧺ " " ⧺ show β
       _ → error "rwEqp: types dont match"
     ℂp c2 τα2 → 
       let (c,γ') = rewriteEq γ α β
-      in if τα1 == τα2
-         then (α,γ')
-         else error "rwEqp: annotations dont match"
+      in case τα1 ≅ τα2 of
+         Just τα → (α,γ')
+         Nothing → error $ "rwEqp error: " ⧺ show α ⧺ " " ⧺ show β
     ℂλ ca cr → error "rewriteEq: cant constraint pointer with function" 
     _ → rewriteEq γ β α
 rwEqp γ _ _ = error $ "rwEqp: FATAL"

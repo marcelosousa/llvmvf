@@ -169,9 +169,13 @@ instance TyConstr Instruction where
 τℂcall n τ c χ = do
 	τℂχ ← τList ε χ
 	let (πn,πc) = (ℂπ n,ℂπ c)
-	    cτρ = ℂτ $ (↑)τ       -- OK
+	    cτρ = ℂτ $ τncall c τ       -- OK
 	    πχ = map π χ
 	    nℂ = ℂπ n :=: cτρ   -- OK
-	    ς  = ℂp (ℂλ πχ cτρ) T.TyRegAddr
+	    ς  = ℂλ πχ cτρ --ℂp (ℂλ πχ cτρ) T.TyRegAddr
 	    cℂ = πc :=: ς
 	(↣) $ nℂ ∘ (cℂ ∘ τℂχ)
+
+τncall ∷ Id → Τ → Τα
+τncall (Global "ioremap") τ = τ ↑^ T.TyIOAddr
+τncall n τ = (↑)τ
