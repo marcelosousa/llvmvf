@@ -274,11 +274,22 @@ getOtherOp FCmp = do ival  <- getInstructionValue
 getOtherOp Call = do ival  <- getInstructionValue
                      pc    <- getPC
                      ident <- getIdent ival
-                     ty    <- typeOf ival 
-                     (callee, args) <- getOperands ival >>= getCallArgs
-                     --liftIO $ print callee
-                     callee' <- liftIO $ demangler callee
-                     return $ LL.Call pc (LL.Local ident) ty (LL.Global callee') args
+                     ty    <- typeOf ival
+                     isIAsm <- liftIO $ FFI.isCallInlineAsm ival
+                     if cInt2Bool isIAsm
+                     then do iasmVal <- liftIO $ FFI.getCalledValue ival 
+                             iasmStr <- liftIO $ FFI.inlineAsmString iasmVal >>= peekCString
+                             iasmCtr <- liftIO $ FFI.inlineAsmConstrString iasmVal >>= peekCString
+                             iasmhsd <- liftIO $ FFI.inlineAsmHasSideEffects iasmVal
+                             iasmisa <- liftIO $ FFI.inlineAsmIsAlignStack iasmVal
+                             iasmdlct <- liftIO $ FFI.inlineAsmGetDialect iasmVal >>= (return . fromEnum)
+                             args <- getOperands ival >>= (\l -> mapM getValue (init l))
+                             let (hsd,isa) = (cInt2Bool iasmhsd, cInt2Bool iasmhsd)
+                             return $ LL.InlineAsm pc (LL.Local ident) ty hsd isa iasmdlct iasmStr iasmCtr args
+                     else do (callee, args) <- getOperands ival >>= getCallArgs
+                             --liftIO $ print callee
+                             callee' <- liftIO $ demangler callee
+                             return $ LL.Call pc (LL.Local ident) ty (LL.Global callee') args
 getOtherOp Select         = do ival <- getInstructionValue
                                pc   <- getPC
                                ident <- getIdent ival

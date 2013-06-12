@@ -92,6 +92,16 @@ data Instruction
       ty     :: Type
       callee :: Identifier
       args   :: Values 
+  | InlineAsm
+      pc     :: PC
+      mres   :: Identifier
+      ty     :: Type
+      hasSE  :: Bool
+      isSA   :: Bool
+      dlct   :: Int
+      asm    :: String
+      constr :: String
+      args   :: Values
   | Select
       pc :: PC
       id :: Identifier

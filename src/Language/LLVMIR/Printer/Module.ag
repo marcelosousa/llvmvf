@@ -101,6 +101,7 @@ sem Instruction
   | ICmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
   | FCmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
   | Call   loc.pp = @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
+  | InlineAsm loc.pp = @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> text "asm" <+> bool @hasSE <+> bool @isSA <+> int @dlct <+> dquotes (text @asm) <+> dquotes (text @constr) <> char '(' <> @args.pp <> char ')'
   | Trunc    loc.pp = pConvOp @id.pp "trunc"    @v.pp @ty.pp
   | ZExt     loc.pp = pConvOp @id.pp "zext"     @v.pp @ty.pp
   | SExt     loc.pp = pConvOp @id.pp "sext"     @v.pp @ty.pp
