@@ -25,7 +25,7 @@ import qualified Language.LTL.Base as LTL
 import UU.PPrint 
 import Language.SMTLib2.Printer    (prettyprint)
 import qualified Data.Map as M
-
+import Language.Asm
 --import qualified Concurrent.Model as M
 --import Concurrent.Model.Domain.PThread
 -- import Concurrent.Model.SystemC
