@@ -15,7 +15,9 @@ import Text.ParserCombinators.UU.Demo.Examples hiding (Parser)
 import Prelude.Unicode ((⧺),(≡))
 import Data.Char 
 
-import Language.LLVMIR hiding (Instruction(..))
+data TyGas = I Int
+           | Fp Int
+   deriving (Eq,Ord,Show)
 
 infixl 5 **>
 
@@ -28,22 +30,22 @@ type Asm = ([Directive],[(Maybe String, [GAS])])
 
 -- GAS instructions generally have the form mnemonic source, destination. 
 data GAS = Nop
-         | Add Type Operand Operand
-         | Mov Type Operand Operand
-         | Cmpxchg Type Operand Operand
+         | Add TyGas Operand Operand
+         | Mov TyGas Operand Operand
+         | Cmpxchg TyGas Operand Operand
          | Lock
-  deriving Show
+  deriving (Eq,Ord,Show)
 
 data Directive = Pushsection String String
 			   | Balign Int
 			   | Long String 
 			   | Popsection
-  deriving Show
+  deriving (Eq,Ord,Show)
 
 data Operand = Lit Int 
              | Reg String
              | CReg String
-  deriving Show
+  deriving (Eq,Ord,Show)
 
 -- |'Char' ~=> @[a-zA-Z0-9%$]@
 pChar :: Parser Char
@@ -55,16 +57,16 @@ pAChar = pLower <|> pUpper <|> pDigit <|> pAnySym "._\"-"
 pString ∷ Parser String
 pString = pList1 pAChar
 
-pType' ∷ Parser Type
-pType' =  const (TyInt 8)  <$> pSym 'b'
-      <|> const (TyInt 16) <$> pSym 's'
-      <|> const (TyInt 16) <$> pSym 'w'
-      <|> const (TyInt 32) <$> pSym 'l'
-      <|> const (TyInt 64) <$> pSym 'q'
-      <|> const (TyFloatPoint Tyx86FP80) <$> pSym 't'
+pType' ∷ Parser TyGas
+pType' =  const (I 8)  <$> pSym 'b'
+      <|> const (I 16) <$> pSym 's'
+      <|> const (I 16) <$> pSym 'w'
+      <|> const (I 32) <$> pSym 'l'
+      <|> const (I 64) <$> pSym 'q'
+      <|> const (Fp 80) <$> pSym 't'
 
-pType ∷ Parser Type
-pType = pType' `opt` (TyInt 32)
+pType ∷ Parser TyGas
+pType = pType' `opt` (I 32)
 
 -- digit2Num converts a char to a num.
 digit2Num :: Num a => Char -> a
@@ -114,5 +116,5 @@ parseAsm ∷ String → Asm
 parseAsm s | last s ≡ ';' = runParser "Error Asm" pAsm s
            | otherwise    = runParser "Error Asm" pAsm (s ⧺ ";")
 
-transform ∷ Asm → Function
-transform = undefined
+--transform ∷ Asm → Function
+--transform = undefined

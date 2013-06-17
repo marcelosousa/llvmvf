@@ -99,7 +99,7 @@ data Instruction
       hasSE  :: Bool
       isSA   :: Bool
       dlct   :: Int
-      asm    :: String
+      asm    :: {Asm}
       constr :: String
       args   :: Values
   | Select
