@@ -586,6 +586,7 @@ SIToFP	./Language/LLVMIR/Extractor/Opcode.hs	47;"	d
 SIToFP	src/Language/LLVMIR.hs	276;"	d
 SRem	./Language/LLVMIR/Extractor/Opcode.hs	26;"	d
 SRem	src/Language/LLVMIR.hs	258;"	d
+STyRes	./Analysis/Type/Standard/Module.hs	18;"	d	file:
 STyRes	./Analysis/Type/Standard/Module.hs	18;"	t
 Section	src/Language/LLVMIR.hs	424;"	d
 Section	src/Language/LLVMIR.hs	424;"	t
@@ -1053,6 +1054,7 @@ extract	./Language/LLVMIR/Extractor/Module.hs	53;"	v
 extractMode	Main.hs	74;"	v
 extractModule	./Language/LLVMIR/Extractor/Module.hs	58;"	v	file:
 f	./Analysis/Type/Standard/Instruction.hs	219;"	v
+f	./Language/Asm.hs	19;"	v
 f_Terminator_Br	src/Language/LLVMIR.hs	440;"	v
 filterIContext	./Analysis/Type/Memory/Context.hs	26;"	v
 findBasicBlock	./Analysis/Type/Util.hs	96;"	v
@@ -1321,11 +1323,13 @@ pDataLayout	./Language/LLVMIR/Extractor/Module.hs	110;"	v	file:
 pElem	./Language/LLVMIR/Extractor/Module.hs	107;"	v	file:
 pEx	./Language/LTL/Base.hs	85;"	v
 pSomewhere	./Language/LLVMIR/Extractor/Module.hs	75;"	v	file:
+pString	./Language/Asm.hs	16;"	v
 pTarget	./Language/LLVMIR/Extractor/Module.hs	79;"	v	file:
 p_Type_TyFloatPoint	src/Language/LLVMIR.hs	462;"	v
 p_Type_TyInt	src/Language/LLVMIR.hs	461;"	v
 params_Function_FunctionDecl	src/Language/LLVMIR.hs	222;"	v
 params_Function_FunctionDef	src/Language/LLVMIR.hs	221;"	v
+parseAsm	./Language/Asm.hs	21;"	v
 party_Type_TyFunction	src/Language/LLVMIR.hs	464;"	v
 pc	./Language/LLVMIR/Extractor/Context.hs	25;"	v
 pc_Instruction_AShr	src/Language/LLVMIR.hs	262;"	v
