@@ -116,7 +116,6 @@ sizeof (TyMetadata             ) = error "sizeof"
 sizeof (TyOpaque               ) = error "sizeof"
 sizeof (TyUndefined            ) = error "sizeof"
 sizeof (TyFunction pty rty iv  ) = error "sizeof"
-sizeof (TyJumpTo lb            ) = error "sizeof"
 
 (<=>) :: NamedTyEnv -> Type -> Type -> Bool
 (<=>) nmdtye TyVoid      TyVoid      = True

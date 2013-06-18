@@ -20,7 +20,7 @@ import Debug.Trace (trace)
 -- Need to pattern match on the value here.
 typeCheckBranchs :: Values -> Type
 typeCheckBranchs [] = error "typeCheckBranchs: Empty value list"
-typeCheckBranchs l  = TyJumpTo $ map typeCheckBranch l
+--typeCheckBranchs l  = TyJumpTo $ map typeCheckBranch l
 
 typeCheckBranch :: Value -> Identifier
 typeCheckBranch (Id i ty) = i -- TODO need to check if ty is a TyLabel or *(TyInt 8)

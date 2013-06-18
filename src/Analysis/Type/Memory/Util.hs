@@ -36,7 +36,7 @@ liftTyGen (TyStruct n s ty)   a = T.TyDer $ T.TyAgg $ T.TyStr n s $ map (flip li
 liftTyGen (TyFunction as r iv) a = T.TyDer $ T.TyFun (map (flip liftTyGen a) as) (liftTyGen r a) iv
 liftTyGen (TyPointer ty)      a = T.TyDer $ T.TyPtr (liftTyGen ty a) a
 liftTyGen (TyVector s ty)     a = T.TyDer $ T.TyVec s $ liftTyGen ty a
-liftTyGen (TyJumpTo i)        a = T.TyJumpTo i
+--liftTyGen (TyJumpTo i)        a = T.TyJumpTo i
 
 
 erase :: TyAnn -> Type
@@ -51,7 +51,7 @@ erase (T.TyDer (T.TyAgg (T.TyStr n s tys))) = TyStruct n s $ map erase tys
 erase (T.TyDer (T.TyFun tys ty v))          = TyFunction (map erase tys) (erase ty) v
 erase (T.TyDer (T.TyPtr ty _))              = TyPointer $ erase ty
 erase (T.TyDer (T.TyVec s ty))              = TyVector s $ erase ty
-erase (T.TyJumpTo i)                        = TyJumpTo i
+--erase (T.TyJumpTo i)                        = TyJumpTo i
 erase x = error $ "erase " ++ show x 
 
 eraseEnv :: TyAnnEnv -> TyEnv

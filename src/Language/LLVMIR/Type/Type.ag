@@ -35,7 +35,6 @@ data Type
       numEl :: Int
       ty    :: Type
   | TyUndefined
-  | TyJumpTo lb :: Identifiers
 
 data TyFloatPoint
   | TyHalf -- ^ Compatible with i386?

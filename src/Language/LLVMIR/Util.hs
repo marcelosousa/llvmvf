@@ -1,3 +1,4 @@
+{-# LANGUAGE UnicodeSyntax #-}
 -------------------------------------------------------------------------------
 -- Module    :  Language.LLVMIR.Util
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -9,6 +10,7 @@ import Language.LLVMIR
 
 import Data.Maybe
 import Data.List
+import qualified Data.Set as S
 import UU.PPrint
 
 nextUnique :: Int -> (Int, Int)
@@ -66,6 +68,10 @@ infoValue v = case v of
 intConstantValue :: Value -> Int
 intConstantValue (Constant (SmpConst (ConstantInt v _))) = v
 intConstantValue sc = error $ "intConstantValue: " ++ show sc
+
+getNames ∷ Module → S.Set Identifier
+getNames = undefined
+
 
 instance Pretty Identifier where
   pretty (Local i) = text i

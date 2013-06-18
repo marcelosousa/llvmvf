@@ -115,6 +115,3 @@ pAsm = (,) <$> pList pDirective <*> pList pSection
 parseAsm ∷ String → Asm
 parseAsm s | last s ≡ ';' = runParser "Error Asm" pAsm s
            | otherwise    = runParser "Error Asm" pAsm (s ⧺ ";")
-
---transform ∷ Asm → Function
---transform = undefined

@@ -25,7 +25,8 @@ import qualified Language.LTL.Base as LTL
 import UU.PPrint 
 import Language.SMTLib2.Printer    (prettyprint)
 import qualified Data.Map as M
-import Language.Asm
+--import Language.Asm
+import Analysis.Asm.Lift
 --import qualified Concurrent.Model as M
 --import Concurrent.Model.Domain.PThread
 -- import Concurrent.Model.SystemC
@@ -48,6 +49,7 @@ _helpCCFG = unlines ["llvmvf ccfg output a .dot file with the concurrent control
 _helpArch = unlines ["llvmvf arch outputs the concurrent architecture representation of the model into the .model file.","Example: llvmvf arch -d=pthread x.bc"]
 _helpTypeCheck = unlines ["llvmvf typecheck checks if the LLVM IR types are consistent with the typing rules defined in the Language Reference."]
 _helpType = unlines ["llvmvf type uses a refined type system for separation of regular (user/kernel) and I/O memory"]
+--_helpLiftAsm = unlines ["llvmvf liftasm lifts inline assembly code to LLVM IR functions"]
 
 data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
             | CCFG      {input :: FilePath, domain :: Domain}
@@ -58,7 +60,7 @@ data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
             | TypeCheck {input :: FilePath}
   deriving (Show, Data, Typeable, Eq)
 
-data ExtractMode = Raw | Pretty 
+data ExtractMode = Raw | Pretty | LiftAsm
   deriving (Show, Data, Typeable, Eq)
 
 data Domain = PThread | SystemC
@@ -72,7 +74,7 @@ instance Default Domain where
 
 extractMode :: Option
 extractMode = Extract  { input = def &= args
-                       , emode = def &= help "mode of extraction: Raw | Pretty (default)" 
+                       , emode = def &= help "mode of extraction: LiftAsm | Raw | Pretty (default)" 
                        } &= help _helpExtract
 
 ccfgMode :: Option
@@ -114,6 +116,7 @@ runOption (Extract bc m) = do mdl <- extract bc
                                   p = case m of
                                     Raw → show mdl
                                     Pretty → show $ pretty mdl
+                                    LiftAsm → show $ liftAsm mdl
                               writeFile (addExtension bf "llvf") p
 runOption (Model bc d) = undefined -- extractModel bc d                           
 runOption (CCFG bc d)  = undefined -- runCCFG bc d

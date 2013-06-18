@@ -47,8 +47,8 @@ typeCheckBasicBlock nmdtye tye bbs (BasicBlock l phis instr tmn) = -- trace ("ty
   let (tye', rty) = typeCheckInstructions nmdtye tye instr 
   in case M.lookup l tye of
     Nothing -> case rty of
-        TyJumpTo ids -> let bbsj = map (fromMaybe (error "typeCheckBasicBlock: cant find basic block") . findBasicBlock bbs) ids 
-                        in typeCheckBasicBlocks nmdtye (insert l rty tye') bbs bbsj  
+--        TyJumpTo ids -> let bbsj = map (fromMaybe (error "typeCheckBasicBlock: cant find basic block") . findBasicBlock bbs) ids 
+--                        in typeCheckBasicBlocks nmdtye (insert l rty tye') bbs bbsj  
         ty -> tye'
     Just ty -> tye 
 
