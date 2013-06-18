@@ -1,4 +1,4 @@
-{-# LANGUAGE UnicodeSyntax #-}
+{-# LANGUAGE UnicodeSyntax, RecordWildCards, FlexibleInstances #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Asm.Lift
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -7,7 +7,7 @@
 
 module Analysis.Asm.Lift(liftAsm) where
 
-import Language.LLVMIR
+import Language.LLVMIR hiding (Id)
 import Language.LLVMIR.Util
 import Language.Asm
 
@@ -17,10 +17,17 @@ import Prelude.Unicode ((⧺),(≡))
 
 import Control.Monad
 import Control.Applicative
-import Control.Monad.State
+import Control.Monad.State hiding (lift)
 
 (↣) ∷ (Monad m) ⇒ a → m a
 (↣) = return
+
+-- A bit of unicode non-sense
+(∪) ∷ Ord κ ⇒ M.Map κ α → M.Map κ α → M.Map κ α
+(∪) = M.union
+
+ε ∷ Ord κ ⇒ M.Map κ α
+ε = M.empty
 
 type Id = Identifier
 
@@ -46,37 +53,39 @@ data Ε = Ε
 
 δnames ∷ ΕState (S.Set Id)
 δnames = do γ@Ε{..} ← get
-         (↣) names
+            (↣) names
 
 freshName ∷ ΕState Id
 freshName = undefined
 
 εΕ ∷ Module → Ε
-εΕ m = E (Global "",0) (getNames m) M.empty
+εΕ m = Ε (Global "",0) (getNames m) ε
 
 -------------------------------------------------------------------------------
 liftAsm ∷ Module → Module
-liftAsm mod@(Module id layout target gvs fns nmdtys) = 
-	let fns' = M.fromList $ evalState (lift $ M.toList) (εΕ m)
+liftAsm m@(Module id layout target gvs fns nmdtys) = 
+	let (f,α@Ε{..}) = runState (lift $ M.toList fns) $ εΕ m
+	    fns' = asmfn ∪ M.fromList f
 	in Module id layout target gvs fns' nmdtys
 
 class Assembly α where
-	lift ∷ α → ΛState
+	lift ∷ α → ΕState α
 
-liftList ∷ (Assembly α) ⇒ [(Identifier,Function)] → [α] → ΛState
+liftList ∷ [(Identifier,Function)] → [(Identifier,Function)] → ΕState [(Identifier,Function)]
 liftList = foldM liftElem
 
-liftElem ∷ (Assembly α) ⇒ [(Identifier,Function)] → α → ΛState
+liftElem ∷ [(Identifier,Function)] → (Identifier,Function) → ΕState [(Identifier,Function)]
 liftElem β α = do α' ← lift α
-                  (↣) $ α' ⧺ β
+                  (↣) $ α':β
 
 instance Assembly [(Identifier,Function)] where
 	lift = liftList []
 
 instance Assembly (Identifier,Function) where
 	lift (i,fn) = case fn of
-		FunctionDecl name linkage retty isVar params     → (↣) [(i,fn)]
-		FunctionDef  name linkage retty isVar params bbs → do
+		FunctionDecl name linkage retty isVar params     → (↣) (i,fn)
+		FunctionDef  name linkage retty isVar params bbs → undefined
+{-		
 
 			let asmbbs = map (liftAsmBB name) bbs
 		    	(bbs',asmfns) = unzip asmbbs
@@ -100,3 +109,4 @@ liftAsmInstr name i = case i of
 		in (fncall,[(fname,fn)])
 	_ → (i,[])
 
+-}
