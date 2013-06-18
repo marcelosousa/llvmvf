@@ -35,8 +35,7 @@ type ΕState α = State Ε α
 
 -- Environment
 data Ε = Ε 
-	{ 
-	  fn ∷ (Id, Int)   -- Current Function
+	{ fn ∷ (Id, Int)   -- Current Function
 	, names ∷ S.Set Id -- Names
 	, asmfn ∷ Functions -- Created Functions
   	}
@@ -46,6 +45,11 @@ data Ε = Ε
 νfn ∷ (Id,Int) → ΕState ()
 νfn n = do γ@Ε{..} ← get
            put γ{fn = n}
+
+νasmfn ∷ (Id,Function) → ΕState ()
+νasmfn (i,f) = do γ@Ε{..} ← get
+                  let fns = M.insert i f asmfn
+                  put γ{asmfn = fns}
 
 δfn ∷ ΕState (Id,Int)
 δfn = do γ@Ε{..} ← get
@@ -64,49 +68,43 @@ freshName = undefined
 -------------------------------------------------------------------------------
 liftAsm ∷ Module → Module
 liftAsm m@(Module id layout target gvs fns nmdtys) = 
-	let (f,α@Ε{..}) = runState (lift $ M.toList fns) $ εΕ m
+	let (f,α@Ε{..}) = runState (liftList [] $ M.toList fns) $ εΕ m
 	    fns' = asmfn ∪ M.fromList f
 	in Module id layout target gvs fns' nmdtys
 
 class Assembly α where
 	lift ∷ α → ΕState α
 
-liftList ∷ [(Identifier,Function)] → [(Identifier,Function)] → ΕState [(Identifier,Function)]
+liftList ∷ Assembly α ⇒ [α] → [α] → ΕState [α]
 liftList = foldM liftElem
 
-liftElem ∷ [(Identifier,Function)] → (Identifier,Function) → ΕState [(Identifier,Function)]
+liftElem ∷ Assembly α ⇒ [α] → α → ΕState [α]
 liftElem β α = do α' ← lift α
                   (↣) $ α':β
-
-instance Assembly [(Identifier,Function)] where
-	lift = liftList []
 
 instance Assembly (Identifier,Function) where
 	lift (i,fn) = case fn of
 		FunctionDecl name linkage retty isVar params     → (↣) (i,fn)
-		FunctionDef  name linkage retty isVar params bbs → undefined
-{-		
+		FunctionDef  name linkage retty isVar params bbs → do
+			νfn (i,0)
+			bbs' ← mapM lift bbs
+			let fn' = FunctionDef name linkage retty isVar params bbs'
+			(↣) (i,fn')
 
-			let asmbbs = map (liftAsmBB name) bbs
-		    	(bbs',asmfns) = unzip asmbbs
-		    	fn' = FunctionDef  name linkage retty isVar params bbs'
-			in [(i,fn')] ⧺ concat asmfns
+instance Assembly BasicBlock where
+	lift bb = case bb of
+		BasicBlock label phis instrs tmn → do
+			instrs' ← mapM lift instrs
+			(↣) $ BasicBlock label phis instrs' tmn
 
-liftAsmBB ∷ Identifier → BasicBlock → (BasicBlock,[(Identifier,Function)])
-liftAsmBB name bb = case bb of
-	BasicBlock label phis instrs tmn → 
-		let asminstr = map (liftAsmInstr name) instrs
-		    (instrs',asmis) = unzip asminstr
-		    bb' = BasicBlock label phis instrs' tmn
-		in (bb',concat asmis)
+instance Assembly Instruction where
+	lift i = case i of
+		InlineAsm pc α τ _ _ _ asm constr args → do
+			fname ← freshName		    
+			let fn = buildFn fname τ asm args
+			νasmfn (fname,fn)
+			(↣) $ Call pc α τ fname args
+		_ → (↣) i
 
-liftAsmInstr ∷ Identifier → Instruction → (Instruction,[(Identifier,Function)])
-liftAsmInstr name i = case i of
-	InlineAsm pc α τ _ _ _ asm constr args → 
-		let fname = freshName undefined
-		    fncall = Call pc α τ fname args
-		    fn = function fname τ asm args
-		in (fncall,[(fname,fn)])
-	_ → (i,[])
-
--}
+buildFn ∷ Id → Type → Asm → Values → Function
+buildFn = undefined
