@@ -147,6 +147,7 @@ data Instruction
   | WaitEvent    pc :: PC event :: Int
   | NotifyEvent  pc :: PC event :: Int
   | WaitTime     pc :: PC time :: Value
+  -- | Lock         pc :: PC
 
 data BinOp
   | OpXchg

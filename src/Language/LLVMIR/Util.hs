@@ -11,6 +11,7 @@ import Language.LLVMIR
 import Data.Maybe
 import Data.List
 import qualified Data.Set as S
+import qualified Data.Map as M
 import UU.PPrint
 
 nextUnique :: Int -> (Int, Int)
@@ -65,13 +66,38 @@ infoValue v = case v of
     in Right $ (vi,is) 
   _ -> Left $ valueIdentifier' "infovalue" v
 
+
 intConstantValue :: Value -> Int
 intConstantValue (Constant (SmpConst (ConstantInt v _))) = v
 intConstantValue sc = error $ "intConstantValue: " ++ show sc
 
 getNames ∷ Module → S.Set Identifier
-getNames = undefined
+getNames (Module id layout target gvars funs nmdtys) = 
+    let gvarsid = S.fromList $ map getNameGlobal gvars 
+        funsid  = S.fromList $ M.keys funs
+    in gvarsid `S.union` funsid
 
+getNameGlobal ∷ Global → Identifier
+getNameGlobal (GlobalVar name _ _ _ _ _ _) = name
+
+class Typing α where
+  typeOf ∷ α → Type 
+
+instance Typing Value where
+  typeOf (Id _ τ) = τ
+  typeOf (Constant c) = typeOf c
+
+instance Typing Constant where
+  typeOf (SmpConst sc) = typeOf sc
+
+instance Typing SimpleConstant where
+   typeOf (ConstantInt _ τ) = τ
+   typeOf (ConstantFP  fp)  = typeOf fp
+   typeOf (ConstantPointerNull τ) = τ
+
+instance Typing ConstantFP where
+   typeOf (ConstantFPFloat  _ τ) = τ
+   typeOf (ConstantFPDouble _ τ) = τ
 
 instance Pretty Identifier where
   pretty (Local i) = text i
