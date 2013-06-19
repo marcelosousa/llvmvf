@@ -608,7 +608,6 @@ SIToFP	./Language/LLVMIR/Extractor/Opcode.hs	47;"	d
 SIToFP	src/Language/LLVMIR.hs	295;"	d
 SRem	./Language/LLVMIR/Extractor/Opcode.hs	26;"	d
 SRem	src/Language/LLVMIR.hs	296;"	d
-STyRes	./Analysis/Type/Standard/Module.hs	18;"	d	file:
 STyRes	./Analysis/Type/Standard/Module.hs	18;"	t
 Section	src/Language/LLVMIR.hs	429;"	d
 Section	src/Language/LLVMIR.hs	429;"	t
@@ -2334,10 +2333,8 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 |~	./Language/LTL/Base.hs	262;"	v
 |~|	./Language/LTL/Base.hs	317;"	v
 ~>	./Language/LTL/Base.hs	74;"	v
-Γ	./Analysis/Asm/Lift.hs	134;"	d	file:
 Γ	./Analysis/Asm/Lift.hs	134;"	t	file:
 Γ	./Analysis/Type/Inference/Solver.hs	140;"	t
-Ε	./Analysis/Asm/Lift.hs	45;"	d	file:
 Ε	./Analysis/Asm/Lift.hs	45;"	t	file:
 Ε	./Analysis/Type/Inference/Base.hs	104;"	d
 Ε	./Analysis/Type/Inference/Base.hs	104;"	t

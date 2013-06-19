@@ -1,4 +1,4 @@
-{-# LANGUAGE UnicodeSyntax, RecordWildCards, FlexibleInstances #-}
+{-# LANGUAGE UnicodeSyntax, RecordWildCards, FlexibleInstances, DoAndIfThenElse #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Asm.Lift
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -263,9 +263,10 @@ __raw_cmpxchg((ptr), (old), (new), (size), LOCK_PREFIX)
 -}
 buildValue ∷ Type → AS.Operand → State Γ Value
 buildValue τ (AS.Lit n) = (↣) $ Constant $ SmpConst $ ConstantInt n τ
+buildValue τ (AS.Reg "0") = (↣) $ IR.Id (Local "0") τ
 buildValue τ (AS.Reg s) = do γ@Γ{..} ← get
                              let ns = read s ∷ Int
-                                 Parameter i t = params !! ns
+                                 Parameter i t = params !! (ns - 1)
                              case M.lookup i vars of
                              	Nothing → (↣) $ IR.Id i τ
                              	Just v  → (↣) v

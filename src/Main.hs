@@ -116,7 +116,7 @@ runOption (Extract bc m) = do mdl <- extract bc
                                   p = case m of
                                     Raw → show mdl
                                     Pretty → show $ pretty mdl
-                                    LiftAsm → show $ liftAsm mdl
+                                    LiftAsm → show $ pretty $ liftAsm mdl
                               writeFile (addExtension bf "llvf") p
 runOption (Model bc d) = undefined -- extractModel bc d                           
 runOption (CCFG bc d)  = undefined -- runCCFG bc d
