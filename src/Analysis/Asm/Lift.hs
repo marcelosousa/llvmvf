@@ -14,6 +14,7 @@ import qualified Language.Asm as AS
 
 import qualified Data.Map as M
 import qualified Data.Set as S
+import Data.List
 import Prelude.Unicode ((⧺),(≡))
 
 
@@ -143,7 +144,8 @@ analyzeC r (AS.FC _)    = r
 analyzeGasC ∷ AS.GasC → (M.Map String Int, [Int], Int) → (M.Map String Int, [Int], Int)
 analyzeGasC gasc (mri,lpos,n) = case gasc of
 	AS.PosC p  → if p `elem` lpos
-		         then (mri,lpos,n)
+		         then let lpos' = delete p lpos
+		              in (mri,lpos'⧺[p],n)
 		         else (mri,lpos⧺[p],n)
 	AS.CRegC s → (M.insert s n mri,lpos,n+1)
 	c       → (mri,(lpos⧺[n]),n+1)
@@ -181,6 +183,7 @@ buildParam ∷ (Value,Int) → Parameter
 buildParam (v,i) = Parameter (Local $ show i) $ typeOf v
 
 buildBody ∷ AS.Asm → State Γ BasicBlocks
+buildBody (_,[]) = (↣) $ [BasicBlock (Local "bb") [] [] (Ret 0 VoidRet)]
 buildBody (_,sections) = mapM (buildBB . snd) sections
 
 buildBB ∷ [AS.GAS] → State Γ BasicBlock
@@ -193,7 +196,9 @@ buildBB instr = do
 buildBBName ∷ State Γ Id
 buildBBName = do 
     γ@Γ{..} ← get
-    let name = Local $ "bb" ⧺ show counter
+    let name = if counter ≡ 0
+    	       then Local "bb"
+    	       else Local $ "bb" ⧺ show counter
         c = counter + 1
     put γ{counter=c}
     (↣) name
@@ -256,84 +261,42 @@ buildInstruction is i = case i of
 	_ → (↣) is
 
 
-pos ∷ String → Parameters → Parameter
-pos s p = let ps = length p
-              si = read s ∷ Int
-          in case si of
-          	0 → p !! (ps - 1)
-          	n → p !! (n - 1)
-
 buildXchg ∷ Type → AS.Operand → AS.Operand → State Γ Instruction
-buildXchg τ (AS.Reg α) (AS.Reg β) = do
+buildXchg τ α@(AS.Reg _) ρ@(AS.Reg _) = do
 	γ@Γ{..} ← get
 	let τptr = TyPointer τ
-	    Parameter αi ατ = pos α params
-	    Parameter βi βτ = pos β params
-	    ptrv = case M.lookup αi vars of
-	    	Nothing → IR.Id αi ατ
-	    	Just v → v
-	    vv = case M.lookup βi vars of
-	    	Nothing → IR.Id βi βτ
-	    	Just vb → vb
-	if τptr /= ατ
-	then error "buildXchg: pointer location failed"
-	else do j ← freshLocal
-	        let βj = IR.Id j βτ
-	        put γ{lastVar = Just βj}
-	        (↣) $ AtomicRMW 0 j ptrv vv OpXchg Monotonic
+	αv ← buildValue τ α
+	ρv ← buildValue τptr ρ
+	j ← freshLocal
+	let βj = IR.Id j τ
+	γ@Γ{..} ← get
+	put γ{lastVar = Just βj}
+	(↣) $ AtomicRMW 0 j ρv αv OpXchg Monotonic
 buildXchg τ _ _ = error "buildXchg"
 	    
 
 buildCmpxchg ∷ Type → AS.Operand → AS.Operand → State Γ Instruction
-buildCmpxchg τ n (AS.Reg ptr) = do
+buildCmpxchg τ n ρ@(AS.Reg ptr) = do
 	γ@Γ{..} ← get
-	let ptrpos = read ptr ∷ Int
-	    τptr = TyPointer τ
-	    Parameter i t = params !! (ptrpos - 1)
-	    ptrv = case M.lookup i vars of
-        	Nothing → IR.Id i τ
-        	Just v  → v
-	if τptr /= t
-	then error "buildCmpxchg: pointer location failed"
-	else case n of
-		AS.Lit nval → do
-			let nv = Constant $ SmpConst $ ConstantInt nval τ
-			    Parameter oi ot = params !! ptrpos
-			    ov = case M.lookup oi vars of
-			    	Nothing → IR.Id oi ot
-			    	Just v'  → v'
-			j ← freshLocal
-			let βj = IR.Id j τ
-			γ@Γ{..} ← get
-			put γ{lastVar = Just βj}
-			(↣) $ Cmpxchg 0 j ptrv nv ov Monotonic
-		AS.Reg nreg → do
-			let Parameter ni nt = params !! ptrpos
-			    nv = case M.lookup ni vars of
-			    	Nothing → IR.Id ni nt
-			    	Just nv' → nv'
-			    Parameter oi ot = params !! (ptrpos + 1)
-			    ov = case M.lookup oi vars of
-			    	Nothing → IR.Id oi ot
-			    	Just ov' → ov'
-			j ← freshLocal
-			let βj = IR.Id j τ
-			γ@Γ{..} ← get
-			put γ{lastVar = Just βj}
-			(↣) $ Cmpxchg 0 j ptrv nv ov Monotonic
+	let τptr = TyPointer τ
+	    α = case M.lookup "eax" mri of
+	    		Nothing → error "buildCmpxchg: no eax"
+	    		Just αi → AS.Reg $ show αi 
+	nv ← buildValue τ n
+	ρv ← buildValue τptr ρ
+	αv ← buildValue τ α
+	j ← freshLocal
+	let βj = IR.Id j τ
+	γ@Γ{..} ← get
+	put γ{lastVar = Just βj}
+	(↣) $ Cmpxchg 0 j ρv αv nv Monotonic
 buildCmpxchg τ n _ = error "buildCmpxchg"
-  
+
 
 buildValue ∷ Type → AS.Operand → State Γ Value
 buildValue τ (AS.Lit n) = (↣) $ Constant $ SmpConst $ ConstantInt n τ
-buildValue τ (AS.Reg "0") = do γ@Γ{..} ← get
-                               let v = IR.Id (Local "0") τ
-                               case M.lookup (Local "0") vars of
-                               	Nothing → (↣) v
-                               	Just v' → (↣) v'
 buildValue τ (AS.Reg s) = do γ@Γ{..} ← get
-                             let ns = read s ∷ Int
-                                 Parameter i t = params !! (ns - 1)
+                             let i = Local s
                              case M.lookup i vars of
                              	Nothing → (↣) $ IR.Id i τ
                              	Just v  → (↣) v
