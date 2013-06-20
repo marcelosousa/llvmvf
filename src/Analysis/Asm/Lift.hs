@@ -200,6 +200,15 @@ buildInstruction is i = case i of
 		put γ{lastVar = Just βi}
 		let ι = Add 0 (valueIdentifier' "" βi) τ αv βv
 		(↣) $ ι:is
+	AS.Sub τ' α β → do
+		let τ = τGas2τ τ'
+		αv ← buildValue τ α
+		βv ← buildValue τ β
+		βi ← ssaValue βv
+		γ@Γ{..} ← get
+		put γ{lastVar = Just βi}
+		let ι = Sub 0 (valueIdentifier' "" βi) τ αv βv
+		(↣) $ ι:is
 	AS.Mov τ' α β → do
 		let τ = τGas2τ τ'
 		αv ← buildValue τ α
@@ -212,7 +221,52 @@ buildInstruction is i = case i of
 	AS.Cmpxchg τ α β → do
 		ι ← buildCmpxchg (τGas2τ τ) α β 
 		(↣) $ ι:is
+	AS.Xchg τ' α β → do
+		ι ← buildXchg (τGas2τ τ') α β
+		(↣) $ ι:is
+	AS.Sete α → (↣) is
+	AS.Bswap τ' α → do
+		let τ = τGas2τ τ'
+		    fn = case τ of
+		    	TyInt 16 → Global "llvm.bswap.i16"
+		    	TyInt 32 → Global "llvm.bswap.i32"
+		    	TyInt 64 → Global "llvm.bswap.i64"
+		αv ← buildValue τ α
+		αi ← ssaValue αv
+		γ@Γ{..} ← get
+		let αι = valueIdentifier' "" αi
+		    ι = Call 0 αι τ fn [αv]
+		(↣) $ ι:is
 	_ → (↣) is
+
+
+pos ∷ String → Parameters → Parameter
+pos s p = let ps = length p
+              si = read s ∷ Int
+          in case si of
+          	0 → p !! (ps - 1)
+          	n → p !! (n - 1)
+
+buildXchg ∷ Type → AS.Operand → AS.Operand → State Γ Instruction
+buildXchg τ (AS.Reg α) (AS.Reg β) = do
+	γ@Γ{..} ← get
+	let τptr = TyPointer τ
+	    Parameter αi ατ = pos α params
+	    Parameter βi βτ = pos β params
+	    ptrv = case M.lookup αi vars of
+	    	Nothing → IR.Id αi ατ
+	    	Just v → v
+	    vv = case M.lookup βi vars of
+	    	Nothing → IR.Id βi βτ
+	    	Just vb → vb
+	if τptr /= ατ
+	then error "buildXchg: pointer location failed"
+	else do j ← freshLocal
+	        let βj = IR.Id j βτ
+	        put γ{lastVar = Just βj}
+	        (↣) $ AtomicRMW 0 j ptrv vv OpXchg Monotonic
+buildXchg τ _ _ = error "buildXchg"
+	    
 
 buildCmpxchg ∷ Type → AS.Operand → AS.Operand → State Γ Instruction
 buildCmpxchg τ n (AS.Reg ptr) = do
@@ -253,17 +307,14 @@ buildCmpxchg τ n (AS.Reg ptr) = do
 			(↣) $ Cmpxchg 0 j ptrv nv ov Monotonic
 buildCmpxchg τ n _ = error "buildCmpxchg"
   
-{-
-cmpxchg(ptr,old,new) 
-__cmpxchg(ptr,old,new,sizeof(*(ptr)))
-__raw_cmpxchg((ptr), (old), (new), (size), LOCK_PREFIX)
 
-%293 = call i32 asm sideeffect "lock; cmpxchgl $2,$1", "={ax},=*m,r,0,*m,~{memory},~{dirflag},~{fpsr},~{flags}"
-(i32* %287, i32 %292, i32 %c.0.i.i.i, i32* %287) #4, !dbg !11571, !srcloc !11573
--}
 buildValue ∷ Type → AS.Operand → State Γ Value
 buildValue τ (AS.Lit n) = (↣) $ Constant $ SmpConst $ ConstantInt n τ
-buildValue τ (AS.Reg "0") = (↣) $ IR.Id (Local "0") τ
+buildValue τ (AS.Reg "0") = do γ@Γ{..} ← get
+                               let v = IR.Id (Local "0") τ
+                               case M.lookup (Local "0") vars of
+                               	Nothing → (↣) v
+                               	Just v' → (↣) v'
 buildValue τ (AS.Reg s) = do γ@Γ{..} ← get
                              let ns = read s ∷ Int
                                  Parameter i t = params !! (ns - 1)

@@ -27,7 +27,7 @@ import Language.LLVMIR.Extractor.Type
 import Language.LLVMIR.Extractor.Context
 import Language.LLVMIR.Extractor.Atomic
 
-import Language.Asm (parseAsm)
+import Language.Asm (parseAsm, parseAsmC)
 
 import Control.Monad.IO.Class (liftIO)
 
@@ -287,7 +287,7 @@ getOtherOp Call = do ival  <- getInstructionValue
                              iasmdlct <- liftIO $ FFI.inlineAsmGetDialect iasmVal >>= (return . fromEnum)
                              args <- getOperands ival >>= (\l -> mapM getValue (init l))
                              let (hsd,isa) = (cInt2Bool iasmhsd, cInt2Bool iasmhsd)
-                             return $ LL.InlineAsm pc (LL.Local ident) ty hsd isa iasmdlct (parseAsm iasmStr) iasmCtr args
+                             return $ LL.InlineAsm pc (LL.Local ident) ty hsd isa iasmdlct (parseAsm iasmStr) (parseAsmC iasmCtr) args
                      else do (callee, args) <- getOperands ival >>= getCallArgs
                              --liftIO $ print callee
                              callee' <- liftIO $ demangler callee

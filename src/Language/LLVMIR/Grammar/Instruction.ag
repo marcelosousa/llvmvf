@@ -100,7 +100,7 @@ data Instruction
       isSA   :: Bool
       dlct   :: Int
       asm    :: {Asm}
-      constr :: String
+      constr :: {[AsmC]}
       args   :: Values
   | Select
       pc :: PC

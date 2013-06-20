@@ -15,6 +15,8 @@ import Text.ParserCombinators.UU.Demo.Examples hiding (Parser)
 import Prelude.Unicode ((⧺),(≡))
 import Data.Char 
 
+--import Debug.Trace
+
 data TyGas = I Int
            | Fp Int
    deriving (Eq,Ord,Show)
@@ -31,8 +33,12 @@ type Asm = ([Directive],[(Maybe String, [GAS])])
 -- GAS instructions generally have the form mnemonic source, destination. 
 data GAS = Nop
          | Add TyGas Operand Operand
+         | Sub TyGas Operand Operand
          | Mov TyGas Operand Operand
          | Cmpxchg TyGas Operand Operand
+         | Xchg TyGas Operand Operand
+         | Sete Operand
+         | Bswap TyGas Operand
          | Lock
   deriving (Eq,Ord,Show)
 
@@ -76,11 +82,16 @@ digit2Num a = fromInteger $ toInteger $ ord a - ord '0'
 pSNumeral :: Num a => Parser a
 pSNumeral = foldl (\a b -> a * 10 + (digit2Num b)) 0 <$> pList1 pDigit <?> "<numeral>"
 
+pUnOp ∷ Parser (Operand → GAS)
+pUnOp =   const Sete <$> pToken "sete"
+      <|> Bswap <$> pToken "bswap" **> pType
+
 pBinOp ∷ Parser (Operand → Operand → GAS)
 pBinOp =  Add <$> pToken "add" **> pType
       <|> Mov <$> pToken "mov" **> pType
+      <|> Sub <$> pToken "sub" **> pType
       <|> Cmpxchg <$> pToken "cmpxchg" **> pType
-
+      <|> Xchg <$> pToken "xchg" **> pType
 
 pOperand ∷ Parser Operand
 pOperand =  Lit <$> pSym '$' **> pSym '$' **> pSNumeral
@@ -89,6 +100,9 @@ pOperand =  Lit <$> pSym '$' **> pSym '$' **> pSNumeral
 
 pCmd ∷ Parser GAS
 pCmd =  (\op b c → op b c) <$> pBinOp <*> pSpaces **> pOperand <*> pSym ',' **> pSpaces **> pOperand
+	<|> (\op a → op a)     <$> pUnOp <*> pSpaces **> pOperand
+	<|> (\τ α → Add τ (Lit (-1)) α) <$> pToken "dec" **> pType <*> pSpaces **> pOperand
+	<|> (\τ α → Add τ (Lit 1) α)    <$> pToken "inc" **> pType <*> pSpaces **> pOperand
     <|> const Lock <$> pToken "lock"
 
 pGAS ∷ Parser GAS
@@ -113,5 +127,29 @@ pAsm ∷ Parser Asm
 pAsm = (,) <$> pList pDirective <*> pList pSection
 
 parseAsm ∷ String → Asm
-parseAsm s | last s ≡ ';' = runParser "Error Asm" pAsm s
+parseAsm "" = ([],[])
+parseAsm s | last s ≡ ';' = runParser "Error Asm2" pAsm s
            | otherwise    = runParser "Error Asm" pAsm (s ⧺ ";")
+
+data AsmC = IC GasC | OC GasC
+  deriving (Eq,Ord,Show)
+
+data GasC = PosC Int
+          | MemC
+          | RegC
+          | CRegC String
+  deriving (Eq,Ord,Show)
+  
+parseAsmC ∷ String → [AsmC]
+parseAsmC = runParser "Error Asmℂ" (pComma `pListSep` pAsmC) 
+
+pAsmC ∷ Parser AsmC
+pAsmC =  OC <$> pSym '=' **> pGasC
+     <|> IC <$> pGasC
+
+pGasC ∷ Parser GasC
+pGasC =  const (CRegC "eax") <$> pToken "{ax}"
+     <|> const MemC <$> pToken "*m"
+     <|> const RegC <$> pToken "r"
+     <|> (PosC . digit2Num)  <$> pDigit
+
