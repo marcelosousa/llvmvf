@@ -125,41 +125,57 @@ instance Assembly Instruction where
 	lift i = case i of
 		InlineAsm pc α τ _ _ _ asm constr args → do
 			fname ← freshName		    
-			let fn = buildFn fname τ asm args
+			let fn = buildFn fname τ asm constr args
 			νasmfn (fname,fn)
 			(↣) $ Call pc α τ fname args
 		_ → (↣) i
 
 -------------------------------------------------------------------------------
+analyzeConstr ∷ AS.AsmCs → (M.Map String Int, [Int])
+analyzeConstr s = let (m,l,_) = foldl analyzeC (M.empty,[],0) s
+                  in (m,l)
+
+analyzeC ∷ (M.Map String Int, [Int],Int) → AS.AsmC → (M.Map String Int, [Int],Int)
+analyzeC r (AS.IC gasC) = analyzeGasC gasC r 
+analyzeC r (AS.OC gasC) = analyzeGasC gasC r
+analyzeC r (AS.FC _)    = r
+
+analyzeGasC ∷ AS.GasC → (M.Map String Int, [Int], Int) → (M.Map String Int, [Int], Int)
+analyzeGasC gasc (mri,lpos,n) = case gasc of
+	AS.PosC p  → if p `elem` lpos
+		         then (mri,lpos,n)
+		         else (mri,lpos⧺[p],n)
+	AS.CRegC s → (M.insert s n mri,lpos,n+1)
+	c       → (mri,(lpos⧺[n]),n+1)
+
 data Γ = Γ {
 	  vars    ∷ M.Map Id Value
 	, lastVar ∷ Maybe Value
 	, counter ∷ Int -- Num of bbs
 	, locals  ∷ S.Set Id
-	, params  ∷ Parameters
-	, args    ∷ Values
+	, mri     ∷ M.Map String Int
 }
 
-εΓ ∷ Parameters → Values → Γ
-εΓ p v = let ip = S.fromList $ map (\(Parameter i _ ) → i) p
-         in Γ ε Nothing 0 ip p v
+εΓ ∷ Parameters → M.Map String Int → Γ
+εΓ p mri = let ip = S.fromList $ map (\(Parameter i _ ) → i) p
+           in Γ ε Nothing 0 ip mri
 
 freshLocal ∷ State Γ Id
-freshLocal = do 
+freshLocal = do
 	γ@Γ{..} ← get
 	let tmp = Local $ "tmp" ⧺ (show $ S.size locals)
 	    locals' = tmp ∘ locals
 	put γ{locals = locals'}
 	(↣) tmp
 
-buildFn ∷ Id → Type → AS.Asm → Values → Function
-buildFn n τ asm vals = 
-	let params = buildParams vals
-	    bbs = evalState (buildBody asm) $ εΓ params vals
+buildFn ∷ Id → Type → AS.Asm → AS.AsmCs → Values → Function
+buildFn n τ asm constr vals = 
+	let (mri,lpos) = analyzeConstr constr
+	    params = if length lpos ≡ length vals
+	    	     then map buildParam $ zip vals lpos
+	    	     else error $ "buildFn: length of lists is different " ⧺ show lpos ⧺ show vals
+	    bbs = evalState (buildBody asm) $ εΓ params mri
 	in FunctionDef n PrivateLinkage τ False params bbs
-
-buildParams ∷ Values → Parameters
-buildParams v = map buildParam $ zip v [0..]
 
 buildParam ∷ (Value,Int) → Parameter
 buildParam (v,i) = Parameter (Local $ show i) $ typeOf v

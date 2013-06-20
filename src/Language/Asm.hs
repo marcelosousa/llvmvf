@@ -131,25 +131,34 @@ parseAsm "" = ([],[])
 parseAsm s | last s ≡ ';' = runParser "Error Asm2" pAsm s
            | otherwise    = runParser "Error Asm" pAsm (s ⧺ ";")
 
-data AsmC = IC GasC | OC GasC
+type AsmCs = [AsmC]
+
+data AsmC = IC GasC | OC GasC | FC String
   deriving (Eq,Ord,Show)
 
 data GasC = PosC Int
           | MemC
           | RegC
+          | IRegC
           | CRegC String
   deriving (Eq,Ord,Show)
-  
+
 parseAsmC ∷ String → [AsmC]
-parseAsmC = runParser "Error Asmℂ" (pComma `pListSep` pAsmC) 
+parseAsmC = runParser "Error AsmC" (pComma `pListSep` pAsmC) 
 
 pAsmC ∷ Parser AsmC
 pAsmC =  OC <$> pSym '=' **> pGasC
      <|> IC <$> pGasC
+     <|> FC <$> pToken "~{memory}"
+     <|> FC <$> pToken "~{dirflag}"
+     <|> FC <$> pToken "~{fpsr}"
+     <|> FC <$> pToken "~{flags}"
+     <|> FC <$> pToken "~{cc}"
 
 pGasC ∷ Parser GasC
 pGasC =  const (CRegC "eax") <$> pToken "{ax}"
-     <|> const MemC <$> pToken "*m"
+     <|> const MemC <$> (pToken "*m" <|> pToken "*qm")
      <|> const RegC <$> pToken "r"
+     <|> const IRegC <$> pToken "ir"
      <|> (PosC . digit2Num)  <$> pDigit
 
