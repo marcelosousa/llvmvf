@@ -13,7 +13,7 @@ module Analysis.Type where
 import qualified Data.Map as M
 import qualified Data.Set as S
 
-import Language.LLVMIR
+import Language.LLVMIR hiding (Id)
 
 import Analysis.Type.Util (TyEnv)
 import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
@@ -34,7 +34,25 @@ typeAnalysis = tyanModule
 
 -- Type Annotated Inference
 typeInference ∷ Module → IO () -- Γ -- Set Τℂ
-typeInference mdl = forM_ (concatMap M.assocs $ typeAnnInference mdl) (\(a,b) -> print (show $ pretty a,b)) 
+typeInference mdl = do 
+	let γ = M.assocs $ typeAnnInference mdl 
+	forM_ γ (uncurry printTyInfFn)
+
+printTyInfFn ∷ Id → Γ → IO ()
+printTyInfFn fn γ = do
+	putStrLn "----------------------"
+	print $ pretty fn
+	putStrLn "----------------------"
+	forM_ (M.assocs γ) (\(a,b) → print (pretty a,b))
 
 typeConstraint ∷ Module → IO ()
-typeConstraint mdl = forM_ (concatMap S.toList $ typeConstraints mdl) print
+typeConstraint mdl = do
+	let cs = M.assocs $ typeConstraints mdl
+	forM_ cs (uncurry printTyℂFn)
+
+printTyℂFn ∷ Id → S.Set Τℂ → IO ()
+printTyℂFn fn c = do
+	putStrLn "----------------------"
+	print $ pretty fn
+	putStrLn "----------------------"
+	forM_ (S.toList c) print
