@@ -1549,7 +1549,7 @@ prettyFn	./Analysis/Type/Standard/Module.hs	56;"	v	file:
 prettyTy	./Analysis/Type/Standard/Module.hs	61;"	v	file:
 prettyTyAnnEnv	./Analysis/Type/Memory/Context.hs	72;"	v
 printTyInfFn	./Analysis/Type.hs	42;"	v
-printTyℂFn	./Analysis/Type.hs	53;"	v
+printTyℂFn	./Analysis/Type.hs	54;"	v
 progModes	Main.hs	107;"	v
 ptrtoMem	./Analysis/Type/Memory/Instruction.hs	222;"	v
 putEnv	./Language/LLVMIR/Extractor/Context.hs	41;"	v
@@ -2215,7 +2215,7 @@ typeComplexConstant	./Analysis/Type/Standard/Constant.hs	52;"	v
 typeConstant	./Analysis/Type/Standard/Constant.hs	23;"	v
 typeConstantDataSequential	./Analysis/Type/Standard/Constant.hs	78;"	v
 typeConstantFP	./Analysis/Type/Standard/Constant.hs	46;"	v
-typeConstraint	./Analysis/Type.hs	48;"	v
+typeConstraint	./Analysis/Type.hs	49;"	v
 typeConstraints	./Analysis/Type/Inference/Module.hs	27;"	v
 typeExpression	./Analysis/Type/Standard/Constant.hs	91;"	v
 typeFunction	./Analysis/Type/Standard/Function.hs	17;"	v
@@ -2409,6 +2409,7 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 τGas2τ	./Analysis/Asm/Lift.hs	342;"	v	file:
 τList	./Analysis/Type/Inference/Base.hs	47;"	v
 τncall	./Analysis/Type/Inference/Instruction.hs	180;"	v
+τselect	./Analysis/Type/Inference/Instruction.hs	184;"	v
 τℂ	./Analysis/Type/Inference/Base.hs	137;"	v
 τℂalloca	./Analysis/Type/Inference/Instruction/Memory.hs	23;"	v
 τℂaop	./Analysis/Type/Inference/Instruction/Memory.hs	67;"	v

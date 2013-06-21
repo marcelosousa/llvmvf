@@ -121,7 +121,7 @@ instance TyConstr Instruction where
     -- Call
 		Call _ n τ c χ → τℂcall n τ c χ
     -- Vector Operations
-		Select       _ n α β η  → error "select vector operations not supported" 
+		Select       _ n α β η  → τselect n α β η
 		ExtractValue _ n α δs   → error "extract vector operations not supported"
 		InsertValue  _ n α β δs → error "insert vector operations not supported"
 
@@ -179,3 +179,13 @@ instance TyConstr Instruction where
 τncall ∷ Id → Τ → Τα
 τncall (Global "ioremap") τ = τ ↑^ T.TyIOAddr
 τncall n τ = (↑)τ
+
+τselect ∷ Id → Value → Value → Value → ℂState
+τselect n α β η = do
+	let (πα,πβ,πη) = (π α,π β,π η)
+	    αcτ = ℂτ $ T.TyPri $ T.TyInt 1
+	    αℂ = πα :=: αcτ
+	    nℂ = ℂπ n :=: πβ
+	    βηℂ = πβ :=: πη
+	    βℂ = πβ :=: ℂc Τ1
+	(↣) $ αℂ ∘ (nℂ ∘ (βηℂ ∘ (βℂ ∘ ε))) 
