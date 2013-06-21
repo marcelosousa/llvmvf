@@ -23,7 +23,9 @@ import Data.List.Unicode ((∈))
 
 import qualified Data.Set as S
 import qualified Data.Map as M
-import Debug.Trace
+import qualified Debug.Trace as Trace
+
+trace s f = f
 
 type Ω = M.Map Id ℂ
 
@@ -41,16 +43,18 @@ rewrite τℂ γ = case τℂ of
 
 -- rewriteEq
 rewriteEq ∷ Ω → ℂ → ℂ → (ℂ,Ω)
-rewriteEq γ α@(ℂτ τ)     β = rwEqτ γ α β -- type
-rewriteEq γ α@(ℂc cl)    β = rwEqc γ α β -- class
-rewriteEq γ α@(ℂι c i)   β = undefined --rwEqι γ α β -- gep
-rewriteEq γ α@(ℂp c τα)  β = rwEqp γ α β -- pointer
-rewriteEq γ α@(ℂλ ca cr) β = rwEqλ γ α β -- function
-rewriteEq γ α@(ℂπ n)     β = rwEqπ γ α β -- var
+rewriteEq γ α β = trace "rewriteEq " $ 
+  case α of
+    ℂτ τ     → rwEqτ γ α β -- type
+    ℂc cl    → rwEqc γ α β -- class
+    ℂι c i   → undefined --rwEqι γ α β -- gep
+    ℂp c τα  → rwEqp γ α β -- pointer
+    ℂλ ca cr → rwEqλ γ α β -- function
+    ℂπ n     → rwEqπ γ α β -- var
 
 -- Type
 rwEqτ ∷ Ω → ℂ → ℂ → (ℂ,Ω)
-rwEqτ γ α@(ℂτ τ1) β =
+rwEqτ γ α@(ℂτ τ1) β = trace "rwEqτ" $ 
   case β of
     ℂτ τ2 → case τ1 ≅ τ2 of
               Nothing → error $ "rwEqτ (1)"
@@ -63,7 +67,7 @@ rwEqτ γ _ _ = error $ "rwEqτ: FATAL"
 
 -- Type Class
 rwEqc ∷ Ω → ℂ → ℂ → (ℂ,Ω)
-rwEqc γ α@(ℂc cl1) β = 
+rwEqc γ α@(ℂc cl1) β = trace "rwEqc" $ 
   case β of 
     ℂc cl2 → if cl1 ≡ cl2
              then (α,γ)
@@ -73,7 +77,7 @@ rwEqc γ _ _ = error $ "rwEqc: FATAL"
 
 -- Type Var
 rwEqπ ∷ Ω → ℂ → ℂ → (ℂ,Ω)
-rwEqπ γ α@(ℂπ n) β =  
+rwEqπ γ α@(ℂπ n) β = trace "rwEqπ" $ 
   case M.lookup n γ of
     Nothing → (β, M.insert n β γ)
     Just ζ  → case ζ of
@@ -91,7 +95,7 @@ rwEqπ γ _ _ = error $ "rwEqπ: FATAL"
 
 -- Type Function
 rwEqλ ∷ Ω → ℂ → ℂ → (ℂ,Ω)
-rwEqλ γ α@(ℂλ ca1 cr1) β =
+rwEqλ γ α@(ℂλ ca1 cr1) β = trace "rwEqλ" $ 
   case β of 
     ℂλ ca2 cr2 → 
       let (ca,γ') = foldr fλ ([],γ) $ zip ca1 ca2
@@ -117,7 +121,7 @@ rwEqι γ (ℂι c1 i1) c = rewriteEq γ c (ℂι c1 i1)
 -- Type pointer
 -- Missing ℂc
 rwEqp ∷ Ω → ℂ → ℂ → (ℂ,Ω)
-rwEqp γ α@(ℂp c1 τα1) β = 
+rwEqp γ α@(ℂp c1 τα1) β = trace "rwEqp" $ 
   case β of
     ℂτ τ → case τ of
       TyDer (TyPtr τ1 τα2) → 
@@ -127,7 +131,7 @@ rwEqp γ α@(ℂp c1 τα1) β =
          Nothing → error $ "rwEqp error: " ⧺ show α ⧺ " " ⧺ show β
       _ → error "rwEqp: types dont match"
     ℂp c2 τα2 → 
-      let (c,γ') = rewriteEq γ α β
+      let (c,γ') = rewriteEq γ c1 c2
       in case τα1 ≅ τα2 of
          Just τα → (α,γ')
          Nothing → error $ "rwEqp error: " ⧺ show α ⧺ " " ⧺ show β
@@ -140,8 +144,8 @@ rwEqp γ _ _ = error $ "rwEqp: FATAL"
 type Γ = M.Map Id Τα
 
 (⊨) ∷ S.Set Τℂ → Γ
-(⊨) τℂ = let γ = collapse τℂ 
-         in M.mapWithKey (\n c → solve γ [n] c) γ
+(⊨) τℂ = let γ = trace "collapse" $ collapse τℂ 
+         in trace "solve" $ M.mapWithKey (\n c → solve γ [n] c) γ
 
 -- Solve 
 -- Input : Env, Constraints left

@@ -121,9 +121,9 @@ instance TyConstr Instruction where
     -- Call
 		Call _ n τ c χ → τℂcall n τ c χ
     -- Vector Operations
-		Select       _ n α β η  → error "vector operations not supported" 
-		ExtractValue _ n α δs   → error "vector operations not supported"
-		InsertValue  _ n α β δs → error "vector operations not supported"
+		Select       _ n α β η  → error "select vector operations not supported" 
+		ExtractValue _ n α δs   → error "extract vector operations not supported"
+		InsertValue  _ n α β δs → error "insert vector operations not supported"
 
 -- Type Constraints for Binary Operations
 τℂbin ∷ ΤClass → Id → Τ → Value → Value → ℂState

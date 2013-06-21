@@ -58,6 +58,7 @@ data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
             | Convert   {input :: FilePath}
             | Type      {input :: FilePath}
             | TypeCheck {input :: FilePath}
+            | TypeConstrs {input ∷ FilePath}
   deriving (Show, Data, Typeable, Eq)
 
 data ExtractMode = Raw | Pretty | LiftAsm
@@ -96,11 +97,14 @@ bmcMode = BMC { input = def &= args
 typeMode :: Option
 typeMode = Type { input = def &= args } &= help _helpType
 
+typeCMode :: Option
+typeCMode = TypeConstrs { input = def &= args } &= help _helpType
+
 typeCheckMode :: Option
 typeCheckMode = TypeCheck { input = def &= args } &= help _helpTypeCheck
 
 progModes :: Mode (CmdArgs Option)
-progModes = cmdArgsMode $ modes [extractMode, modelMode, ccfgMode, bmcMode, typeCheckMode, typeMode]
+progModes = cmdArgsMode $ modes [extractMode, modelMode, ccfgMode, bmcMode, typeCheckMode, typeMode,typeCMode]
          &= help _help
          &= program _program
          &= summary _summary
@@ -126,6 +130,8 @@ runOption (TypeCheck bc) = do mdl <- extract bc
                               print $ typeCheck mdl
 runOption (Type bc) = do mdl <- extract bc
                          typeInference $ liftAsm mdl  --typeAnalysis mdl
+runOption (TypeConstrs bc) = do mdl <- extract bc
+                                typeConstraint $ liftAsm mdl  --typeAnalysis mdl
 --runOption bc Htm     = do mdl <- extract bc
 --                          let bf = dropExtension bc
 --                          writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)
