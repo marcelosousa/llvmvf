@@ -138,8 +138,18 @@ analyzeConstr s = let (m,l,_) = foldl analyzeC (M.empty,[],0) s
 
 analyzeC ∷ (M.Map String Int, [Int],Int) → AS.AsmC → (M.Map String Int, [Int],Int)
 analyzeC r (AS.IC gasC) = analyzeGasC gasC r 
-analyzeC r (AS.OC gasC) = analyzeGasC gasC r
+analyzeC r (AS.OC gasC) = analyzeOutC gasC r
 analyzeC r (AS.FC _)    = r
+
+analyzeOutC ∷ AS.GasC → (M.Map String Int, [Int], Int) → (M.Map String Int, [Int], Int)
+analyzeOutC gasc (mri,lpos,n) = case gasc of
+	AS.MemC → (mri,(lpos⧺[n]),n+1)
+	AS.PosC p  → if p `elem` lpos
+		         then let lpos' = delete p lpos
+		              in (mri,lpos'⧺[p],n)
+		         else (mri,lpos⧺[p],n)
+	AS.CRegC s → (M.insert s n mri,lpos,n+1)
+	_ → (mri,lpos,n+1)
 
 analyzeGasC ∷ AS.GasC → (M.Map String Int, [Int], Int) → (M.Map String Int, [Int], Int)
 analyzeGasC gasc (mri,lpos,n) = case gasc of
@@ -263,6 +273,10 @@ buildAdd τ α β@(AS.Reg _) = do
 	case typeOf βv of
 		TyInt n → do
 			βi ← freshLocal
+			γ@Γ{..} ← get
+			let βvi = valueIdentifier' "" βv
+			    vars' = M.insert βvi (IR.Id βi τ) vars
+			put γ{vars = vars'}
 			(↣) $ [Add 0 βi τ αv βv]
 		TyPointer τ' → do
 			βii ← freshLocal
@@ -310,7 +324,7 @@ buildValue τ (AS.Lit n) = (↣) $ Constant $ SmpConst $ ConstantInt n τ
 buildValue τ (AS.Reg s) = do γ@Γ{..} ← get
                              let i = Local s
                              case M.lookup i vars of
-                             	Nothing → error $ "buildValue " ⧺ show s -- (↣) $ IR.Id i τ
+                             	Nothing → (↣) $ IR.Id i τ
                              	Just v  → (↣) v
 buildValue τ (AS.CReg s) = error "buildValue: does not support clobber registers"
 
