@@ -19,6 +19,7 @@ import Analysis.Type.Memory.TyAnn
 
 import Control.Monad
 import Control.Monad.State
+import Prelude.Unicode ((⧺))
 
 typeAnnInference ∷ Module → M.Map Id Γ 
 typeAnnInference = M.map (⊨) . typeConstraints
@@ -40,6 +41,7 @@ iτℂ = ioremap ∘ ε
 τℂs ∷ Module → State Ε (M.Map Id (S.Set Τℂ))
 τℂs (Module i l t gvs fns nmdtys) = do
     gvsℂs ← τList iτℂ gvs
-    lℂs ← mapM (τℂu gvsℂs) $ M.elems fns
-    (↣) $ M.fromList $ zip (M.keys fns) lℂs
+    --lℂs ← mapM (τℂu gvsℂs) $ M.elems fns
+    lℂs ← mapM τℂ $ M.elems fns
+    (↣) $ M.fromList $ (zip (M.keys fns) lℂs) ⧺ [(Global "globals",gvsℂs)]
     --τList gvsℂs $ M.elems fns

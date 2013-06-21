@@ -53,6 +53,6 @@ typeConstraint mdl = do
 printTyℂFn ∷ Id → S.Set Τℂ → IO ()
 printTyℂFn fn c = do
 	putStrLn "----------------------"
-	print $ pretty fn
+	putStrLn $ show $ pretty fn
 	putStrLn "----------------------"
 	forM_ (S.toList c) print

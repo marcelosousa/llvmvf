@@ -25,8 +25,8 @@ import qualified Language.LTL.Base as LTL
 import UU.PPrint 
 import Language.SMTLib2.Printer    (prettyprint)
 import qualified Data.Map as M
---import Language.Asm
 import Analysis.Asm.Lift
+import Analysis.Simplify.Intrinsics
 --import qualified Concurrent.Model as M
 --import Concurrent.Model.Domain.PThread
 -- import Concurrent.Model.SystemC
@@ -120,7 +120,7 @@ runOption (Extract bc m) = do mdl <- extract bc
                                   p = case m of
                                     Raw → show mdl
                                     Pretty → show $ pretty mdl
-                                    LiftAsm → show $ pretty $ liftAsm mdl
+                                    LiftAsm → show $ pretty $ liftAsm $ liftDebug mdl
                               writeFile (addExtension bf "llvf") p
 runOption (Model bc d) = undefined -- extractModel bc d                           
 runOption (CCFG bc d)  = undefined -- runCCFG bc d
@@ -131,7 +131,7 @@ runOption (TypeCheck bc) = do mdl <- extract bc
 runOption (Type bc) = do mdl <- extract bc
                          typeInference $ liftAsm mdl  --typeAnalysis mdl
 runOption (TypeConstrs bc) = do mdl <- extract bc
-                                typeConstraint $ liftAsm mdl  --typeAnalysis mdl
+                                typeConstraint $ liftAsm $ liftDebug mdl  --typeAnalysis mdl
 --runOption bc Htm     = do mdl <- extract bc
 --                          let bf = dropExtension bc
 --                          writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)
