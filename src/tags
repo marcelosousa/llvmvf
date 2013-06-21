@@ -1048,17 +1048,18 @@ bitbinOps	./Language/LLVMIR/Extractor/Instruction.hs	354;"	v
 bmcMode	Main.hs	91;"	v
 body_Function_FunctionDef	src/Language/LLVMIR.hs	226;"	v
 bound	Main.hs	57;"	v
-buildBB	./Analysis/Asm/Lift.hs	190;"	v	file:
-buildBBName	./Analysis/Asm/Lift.hs	197;"	v	file:
-buildBody	./Analysis/Asm/Lift.hs	186;"	v	file:
-buildCmpxchg	./Analysis/Asm/Lift.hs	279;"	v	file:
-buildFn	./Analysis/Asm/Lift.hs	174;"	v	file:
-buildInstruction	./Analysis/Asm/Lift.hs	214;"	v	file:
+buildAdd	./Analysis/Asm/Lift.hs	260;"	v	file:
+buildBB	./Analysis/Asm/Lift.hs	191;"	v	file:
+buildBBName	./Analysis/Asm/Lift.hs	198;"	v	file:
+buildBody	./Analysis/Asm/Lift.hs	187;"	v	file:
+buildCmpxchg	./Analysis/Asm/Lift.hs	291;"	v	file:
+buildFn	./Analysis/Asm/Lift.hs	175;"	v	file:
+buildInstruction	./Analysis/Asm/Lift.hs	215;"	v	file:
 buildName	./Analysis/Asm/Lift.hs	77;"	v	file:
-buildParam	./Analysis/Asm/Lift.hs	183;"	v	file:
-buildTerminator	./Analysis/Asm/Lift.hs	207;"	v	file:
-buildValue	./Analysis/Asm/Lift.hs	297;"	v	file:
-buildXchg	./Analysis/Asm/Lift.hs	265;"	v	file:
+buildParam	./Analysis/Asm/Lift.hs	184;"	v	file:
+buildTerminator	./Analysis/Asm/Lift.hs	208;"	v	file:
+buildValue	./Analysis/Asm/Lift.hs	309;"	v	file:
+buildXchg	./Analysis/Asm/Lift.hs	277;"	v	file:
 cInt2Bool	./Language/LLVMIR/Extractor/Util.hs	20;"	v
 cUInt2Bool	./Language/LLVMIR/Extractor/Util.hs	16;"	v
 c_Value_Constant	src/Language/LLVMIR.hs	483;"	v
@@ -1119,8 +1120,8 @@ fnBasicBlockIds	./Language/LLVMIR/Util.hs	52;"	v
 fp_SimpleConstant_ConstantFP	src/Language/LLVMIR.hs	433;"	v
 fptoint	./Analysis/Type/Standard/Instruction.hs	162;"	v
 fpv_ConstantFP_ConstantFPFloat	src/Language/LLVMIR.hs	191;"	v
-fpτGas2τ	./Analysis/Asm/Lift.hs	320;"	v	file:
-freshLocal	./Analysis/Asm/Lift.hs	166;"	v	file:
+fpτGas2τ	./Analysis/Asm/Lift.hs	332;"	v	file:
+freshLocal	./Analysis/Asm/Lift.hs	167;"	v	file:
 freshName	./Analysis/Asm/Lift.hs	81;"	v	file:
 funs_Module_Module	src/Language/LLVMIR.hs	376;"	v
 getBBId	./Language/LLVMIR/Util.hs	56;"	v
@@ -2075,7 +2076,7 @@ size	./Language/LTL/Base.hs	213;"	v
 sizeof	./Analysis/Type/Util.hs	101;"	v
 solve	./Analysis/Type/Inference/Solver.hs	149;"	v
 splitConstrs	./Analysis/Type/Memory/Context.hs	33;"	v
-ssaValue	./Analysis/Asm/Lift.hs	306;"	v	file:
+ssaValue	./Analysis/Asm/Lift.hs	318;"	v	file:
 states	./Language/LTL/Base.hs	159;"	v
 struct_ConstantExpr_GetElementPtrConstantExpr	src/Language/LLVMIR.hs	183;"	v
 struct_Instruction_GetElementPtr	src/Language/LLVMIR.hs	274;"	v
@@ -2398,7 +2399,7 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 νname	./Analysis/Asm/Lift.hs	64;"	v	file:
 π	./Analysis/Type/Inference/Base.hs	141;"	v
 πgep	./Analysis/Type/Inference/Value.hs	88;"	v
-τGas2τ	./Analysis/Asm/Lift.hs	316;"	v	file:
+τGas2τ	./Analysis/Asm/Lift.hs	328;"	v	file:
 τList	./Analysis/Type/Inference/Base.hs	47;"	v
 τncall	./Analysis/Type/Inference/Instruction.hs	180;"	v
 τℂ	./Analysis/Type/Inference/Base.hs	137;"	v

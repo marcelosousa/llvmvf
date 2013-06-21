@@ -160,7 +160,8 @@ data Γ = Γ {
 
 εΓ ∷ Parameters → M.Map String Int → Γ
 εΓ p mri = let ip = S.fromList $ map (\(Parameter i _ ) → i) p
-           in Γ ε Nothing 0 ip mri
+               vars = foldr (\(Parameter i τ) m → M.insert i (IR.Id i τ) m) ε p
+           in Γ vars Nothing 0 ip mri
 
 freshLocal ∷ State Γ Id
 freshLocal = do
@@ -211,16 +212,11 @@ buildTerminator = do
 		Just α  → (↣) $ Ret 0 $ ValueRet α
   
 buildInstruction ∷ Instructions → AS.GAS → State Γ Instructions
-buildInstruction is i = case i of
+buildInstruction is i = 
+ case i of
 	AS.Add τ' α β → do
-		let τ = τGas2τ τ'
-		αv ← buildValue τ α
-		βv ← buildValue τ β
-		βi ← ssaValue βv
-		γ@Γ{..} ← get
-		put γ{lastVar = Just βi}
-		let ι = Add 0 (valueIdentifier' "" βi) τ αv βv
-		(↣) $ ι:is
+		ιs ← buildAdd (τGas2τ τ') α β
+		(↣) $ ιs⧺is
 	AS.Sub τ' α β → do
 		let τ = τGas2τ τ'
 		αv ← buildValue τ α
@@ -260,6 +256,22 @@ buildInstruction is i = case i of
 		(↣) $ ι:is
 	_ → (↣) is
 
+buildAdd ∷ Type → AS.Operand → AS.Operand → State Γ Instructions
+buildAdd τ α β@(AS.Reg _) = do
+	αv ← buildValue τ  α
+	βv ← buildValue τ β
+	case typeOf βv of
+		TyInt n → do
+			βi ← freshLocal
+			(↣) $ [Add 0 βi τ αv βv]
+		TyPointer τ' → do
+			βii ← freshLocal
+			let βi = (IR.Id βii τ)
+			    li = Load 0 βii βv (Align 8)
+			j ← freshLocal
+			let ai = Add 0 j τ αv βi
+			    si = Store 0 τ (IR.Id j τ) βv (Align 8)
+			(↣) $ [li,ai,si]
 
 buildXchg ∷ Type → AS.Operand → AS.Operand → State Γ Instruction
 buildXchg τ α@(AS.Reg _) ρ@(AS.Reg _) = do
@@ -298,7 +310,7 @@ buildValue τ (AS.Lit n) = (↣) $ Constant $ SmpConst $ ConstantInt n τ
 buildValue τ (AS.Reg s) = do γ@Γ{..} ← get
                              let i = Local s
                              case M.lookup i vars of
-                             	Nothing → (↣) $ IR.Id i τ
+                             	Nothing → error $ "buildValue " ⧺ show s -- (↣) $ IR.Id i τ
                              	Just v  → (↣) v
 buildValue τ (AS.CReg s) = error "buildValue: does not support clobber registers"
 
