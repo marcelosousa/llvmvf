@@ -49,18 +49,18 @@ import qualified Data.Set as S
 
 -- Type Constraints for GEP
 τℂgep ∷ Id → Τ → Value → Values → ℂState
-τℂgep n τ α δs = do
+τℂgep n τn α δs = do
 	τℂα ← τℂ α
 	τℂs ← τList τℂα δs
-	let cτρ = ℂτ $ τ ↑^ T.TyRegAddr                 -- OK
+	let cτn = ℂτ $ τn ↑^ T.TyRegAddr                -- OK
 	    πα  = π α
 	    cℂ  = ℂp (ℂc TAgg) T.TyRegAddr              -- Pointer to agg in reg mem
 	    πδs = map π δs
 	    δsℂ = S.fromList $ map ((ℂc TInt) :=:) πδs
-	    α1ℂ = πα :=: cτρ
-	    α2ℂ = πα :=: cℂ
-	    nℂ  = ℂπ n :=: πgep α δs
-	(↣) $ nℂ ∘ (α1ℂ ∘ (α2ℂ ∘ (δsℂ ∪ τℂs)))
+	    n1ℂ = ℂπ n :=: cτn
+	    n2ℂ = ℂπ n :=: πgep α δs
+	    αℂ  = πα :=: cℂ
+	(↣) $ n1ℂ ∘ (n2ℂ ∘ (αℂ ∘ (δsℂ ∪ τℂs)))
 
 -- Type contraints for atomic instructions
 τℂaop ∷ Id → Value → Values → ℂState

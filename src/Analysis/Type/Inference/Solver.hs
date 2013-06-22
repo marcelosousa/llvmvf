@@ -93,13 +93,13 @@ rwEqτ ∷ ℂ → ℂ → ΩState ℂ
 rwEqτ α@(ℂτ τ1) β = 
   case β of
     ℂτ τ2 → case τ1 ≅ τ2 of
-              Nothing → error $ "rwEqτ (1) " ⧺ show α ⧺ " " ⧺ show β
+              Nothing → error $ "rwEqTy (1) " ⧺ show α ⧺ " " ⧺ show β
               Just c  → (↣) $ ℂτ c
     ℂc cl → if τ1 `classOf` cl 
             then (↣) α
-            else error $ "rwEqτ (2)"
+            else error $ "rwEqTy (2)"
     _ → rwEq β α                       
-rwEqτ _ _ = error $ "rwEqτ: FATAL"
+rwEqτ _ _ = error $ "rwEqTy: FATAL"
 
 -- Type Class
 rwEqc ∷ ℂ → ℂ → ΩState ℂ

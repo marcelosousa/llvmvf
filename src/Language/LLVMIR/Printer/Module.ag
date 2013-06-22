@@ -115,7 +115,7 @@ sem Instruction
   | PtrToInt loc.pp = pConvOp @id.pp "ptrtoint" @v.pp @ty.pp
   | IntToPtr loc.pp = pConvOp @id.pp "inttoptr" @v.pp @ty.pp
   | BitCast  loc.pp = pConvOp @id.pp "bitcast"  @v.pp @ty.pp
-  | GetElementPtr loc.pp = @id.pp <+> char '=' <+> text "getelementptr" <+> @struct.pp <> char ',' <+> @idxs.pp
+  | GetElementPtr loc.pp = @ty.pp <+> @id.pp <+> char '=' <+> text "getelementptr" <+> @struct.pp <> char ',' <+> @idxs.pp
   | Add  loc.pp = pBinOp @ty.pp @id.pp "add"  @op1.pp @op2.pp
   | FAdd loc.pp = pBinOp @ty.pp @id.pp "fadd" @op1.pp @op2.pp
   | Sub  loc.pp = pBinOp @ty.pp @id.pp "sub"  @op1.pp @op2.pp
