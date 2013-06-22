@@ -55,39 +55,39 @@ type Τα = TyAnn
 type Ταρ = TyAnnot
 type Id = Identifier
 
-data ΤClass = 
-  ΤInt | ΤFlt | ΤPtr | Τ1NA | Τ1 | ΤAgg
+data TClass = 
+  TInt | TFlt | TPtr | T1NA | T1 | TAgg
   deriving (Eq, Ord,Show)
 
-classOf ∷ Τα → ΤClass → Bool
-(TyPri (TyInt _))     `classOf` ΤInt = True
-(TyPri TyFloat)       `classOf` ΤFlt = True
-(TyDer (TyPtr _ _))   `classOf` ΤPtr = True
-(TyPri TyVoid)        `classOf` Τ1   = False
-(TyPri _)             `classOf` Τ1   = True
-(TyDer (TyFun _ _ _)) `classOf` Τ1   = False
-(TyDer _)             `classOf` Τ1   = True
-(TyDer (TyAgg _))     `classOf` ΤAgg = True
-τα                    `classOf` ΤAgg = False
-τα                    `classOf` Τ1NA = (τα `classOf` Τ1) && not (τα `classOf` ΤAgg)
+classOf ∷ Τα → TClass → Bool
+(TyPri (TyInt _))     `classOf` TInt = True
+(TyPri TyFloat)       `classOf` TFlt = True
+(TyDer (TyPtr _ _))   `classOf` TPtr = True
+(TyPri TyVoid)        `classOf` T1   = False
+(TyPri _)             `classOf` T1   = True
+(TyDer (TyFun _ _ _)) `classOf` T1   = False
+(TyDer _)             `classOf` T1   = True
+(TyDer (TyAgg _))     `classOf` TAgg = True
+τα                    `classOf` TAgg = False
+τα                    `classOf` T1NA = (τα `classOf` T1) && not (τα `classOf` TAgg)
 α `classOf` β = error $ "classOf error:" ⧺ show α ⧺ " " ⧺ show β
 
 -- Constraint Element
 data ℂ = ℂτ Τα -- Type α
        | ℂπ Id -- Type of Id
-       | ℂc ΤClass -- Class of
+       | ℂc TClass -- Class of
        | ℂι ℂ Int  -- for GEP instruction
        | ℂp ℂ Ταρ  -- Pointer to ℂ Τα
        | ℂλ [ℂ] ℂ  -- Function
   deriving (Eq, Ord)
 
 instance Show ℂ where
-  show (ℂτ τα)    = "ℂτ(" ⧺ show τα ⧺ ")"
-  show (ℂπ α)     = "ℂπ(" ⧺ (show $ pretty α) ⧺ ")"
-  show (ℂι c i)   = "ℂι(" ⧺ show c ⧺ "," ⧺ show i ⧺ ")"
-  show (ℂc τc)    = "ℂc(" ⧺ show τc ⧺ ")"
-  show (ℂp c ταρ) = "ℂp(" ⧺ show c ⧺ "," ⧺ show ταρ ⧺ ")"
-  show (ℂλ cl c)  = "ℂλ(" ⧺ show cl ⧺ "→" ⧺ show c ⧺ ")"
+  show (ℂτ τα)    = "Ctau(" ⧺ show τα ⧺ ")"
+  show (ℂπ α)     = "Cv(" ⧺ (show $ pretty α) ⧺ ")"
+  show (ℂι c i)   = "Cgep(" ⧺ show c ⧺ "," ⧺ show i ⧺ ")"
+  show (ℂc τc)    = "Ccl(" ⧺ show τc ⧺ ")"
+  show (ℂp c ταρ) = "Cptr(" ⧺ show c ⧺ "," ⧺ show ταρ ⧺ ")"
+  show (ℂλ cl c)  = "Cfn(" ⧺ show cl ⧺ "→" ⧺ show c ⧺ ")"
 
 -- Normalize the constraint
 (⤜) ∷ ℂ → Ταρ → ℂ
@@ -96,6 +96,7 @@ instance Show ℂ where
 c      ⤜ ταρ = ℂp c ταρ
 
 -- Type Constraint
+-- Simplify this later
 data Τℂ = ℂ :=: ℂ -- same type
         | ℂ :<: ℂ -- subtyping i1 :<: i2
         | ℂ :≤: ℂ -- less than 

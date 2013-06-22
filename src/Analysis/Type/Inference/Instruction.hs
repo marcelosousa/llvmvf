@@ -74,42 +74,42 @@ instance TyConstr Instruction where
 	τℂ i = case i of
 	-- Standard Binary Operations
 	-- Integer Operations
- 		Add  _ n τ α β → τℂbin ΤInt n τ α β 
- 		Sub  _ n τ α β → τℂbin ΤInt n τ α β  
- 		Mul  _ n τ α β → τℂbin ΤInt n τ α β  
- 		UDiv _ n τ α β → τℂbin ΤInt n τ α β  
- 		SDiv _ n τ α β → τℂbin ΤInt n τ α β  
- 		URem _ n τ α β → τℂbin ΤInt n τ α β  
- 		SRem _ n τ α β → τℂbin ΤInt n τ α β
+ 		Add  _ n τ α β → τℂbin TInt n τ α β 
+ 		Sub  _ n τ α β → τℂbin TInt n τ α β  
+ 		Mul  _ n τ α β → τℂbin TInt n τ α β  
+ 		UDiv _ n τ α β → τℂbin TInt n τ α β  
+ 		SDiv _ n τ α β → τℂbin TInt n τ α β  
+ 		URem _ n τ α β → τℂbin TInt n τ α β  
+ 		SRem _ n τ α β → τℂbin TInt n τ α β
  	-- Bitwise Binary Operations
-		Shl  _ n τ α β → τℂbin ΤInt n τ α β 
-		LShr _ n τ α β → τℂbin ΤInt n τ α β 
-		AShr _ n τ α β → τℂbin ΤInt n τ α β 
-		And  _ n τ α β → τℂbin ΤInt n τ α β 
-		Or   _ n τ α β → τℂbin ΤInt n τ α β 
-		Xor  _ n τ α β → τℂbin ΤInt n τ α β 
+		Shl  _ n τ α β → τℂbin TInt n τ α β 
+		LShr _ n τ α β → τℂbin TInt n τ α β 
+		AShr _ n τ α β → τℂbin TInt n τ α β 
+		And  _ n τ α β → τℂbin TInt n τ α β 
+		Or   _ n τ α β → τℂbin TInt n τ α β 
+		Xor  _ n τ α β → τℂbin TInt n τ α β 
     -- Float Operations
- 		FAdd _ n τ α β → τℂbin ΤFlt n τ α β
- 		FSub _ n τ α β → τℂbin ΤFlt n τ α β
- 		FMul _ n τ α β → τℂbin ΤFlt n τ α β
- 		FDiv _ n τ α β → τℂbin ΤFlt n τ α β
- 		FRem _ n τ α β → τℂbin ΤFlt n τ α β
+ 		FAdd _ n τ α β → τℂbin TFlt n τ α β
+ 		FSub _ n τ α β → τℂbin TFlt n τ α β
+ 		FMul _ n τ α β → τℂbin TFlt n τ α β
+ 		FDiv _ n τ α β → τℂbin TFlt n τ α β
+ 		FRem _ n τ α β → τℂbin TFlt n τ α β
     -- Cast Operations
-		Trunc    _ n α τ → τℂcast n (α,ΤInt) (τ,ΤInt) (>:)  -- Truncate integers
-		ZExt     _ n α τ → τℂcast n (α,ΤInt) (τ,ΤInt) (:<:) -- Zero extend integers
-		SExt     _ n α τ → τℂcast n (α,ΤInt) (τ,ΤInt) (:<:) -- Sign extend integers
-		FPTrunc  _ n α τ → τℂcast n (α,ΤFlt) (τ,ΤFlt) (>:)  -- Truncate floating point
-		FPExt    _ n α τ → τℂcast n (α,ΤFlt) (τ,ΤFlt) (:≤:) -- Extend floating point
-		FPToUI   _ n α τ → τℂcast n (α,ΤFlt) (τ,ΤInt) (:=:) -- floating point → UInt
-		FPToSI   _ n α τ → τℂcast n (α,ΤFlt) (τ,ΤInt) (:=:) -- floating point → SInt
-		UIToFP   _ n α τ → τℂcast n (α,ΤInt) (τ,ΤFlt) (:=:) -- UInt → floating point
-		SIToFP   _ n α τ → τℂcast n (α,ΤInt) (τ,ΤFlt) (:=:) -- SInt → floating point
-		PtrToInt _ n α τ → τℂcast n (α,ΤPtr) (τ,ΤInt) (:=:) -- Pointer → integer 
-		IntToPtr _ n α τ → τℂcast n (α,ΤInt) (τ,ΤPtr) (:=:) -- integer → Pointer
-		BitCast  _ n α τ → τℂcast n (α,Τ1NA) (τ,Τ1NA) (:≌:) -- 1stclass non agg → 1stclass non agg
+		Trunc    _ n α τ → τℂcast n (α,TInt) (τ,TInt) (>:)  -- Truncate integers
+		ZExt     _ n α τ → τℂcast n (α,TInt) (τ,TInt) (:<:) -- Zero extend integers
+		SExt     _ n α τ → τℂcast n (α,TInt) (τ,TInt) (:<:) -- Sign extend integers
+		FPTrunc  _ n α τ → τℂcast n (α,TFlt) (τ,TFlt) (>:)  -- Truncate floating point
+		FPExt    _ n α τ → τℂcast n (α,TFlt) (τ,TFlt) (:≤:) -- Extend floating point
+		FPToUI   _ n α τ → τℂcast n (α,TFlt) (τ,TInt) (:=:) -- floating point → UInt
+		FPToSI   _ n α τ → τℂcast n (α,TFlt) (τ,TInt) (:=:) -- floating point → SInt
+		UIToFP   _ n α τ → τℂcast n (α,TInt) (τ,TFlt) (:=:) -- UInt → floating point
+		SIToFP   _ n α τ → τℂcast n (α,TInt) (τ,TFlt) (:=:) -- SInt → floating point
+		PtrToInt _ n α τ → τℂcast n (α,TPtr) (τ,TInt) (:=:) -- Pointer → integer 
+		IntToPtr _ n α τ → τℂcast n (α,TInt) (τ,TPtr) (:=:) -- integer → Pointer
+		BitCast  _ n α τ → τℂcast n (α,T1NA) (τ,T1NA) (:≌:) -- 1stclass non agg → 1stclass non agg
     -- Comparison Operations
-		ICmp _ n _ τ α β → τℂcmp ΤInt n τ α β
-		FCmp _ n _ τ α β → τℂcmp ΤFlt n τ α β 
+		ICmp _ n _ τ α β → τℂcmp TInt n τ α β
+		FCmp _ n _ τ α β → τℂcmp TFlt n τ α β 
     -- Memory Operations
 		Alloca _ n τ   _ → τℂalloca n τ
 		Store  _ τ α β _ → τℂstore τ α β
@@ -126,7 +126,7 @@ instance TyConstr Instruction where
 		InsertValue  _ n α β δs → error "insert vector operations not supported"
 
 -- Type Constraints for Binary Operations
-τℂbin ∷ ΤClass → Id → Τ → Value → Value → ℂState
+τℂbin ∷ TClass → Id → Τ → Value → Value → ℂState
 τℂbin τc n τ α β = do
 	τℂα ← τℂ α
 	τℂβ ← τℂ β
@@ -140,7 +140,7 @@ instance TyConstr Instruction where
 	(↣) $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
 
 -- Type Constraints for Cast Operations
-τℂcast ∷ Id → (Value, ΤClass) → (Τ, ΤClass) → (ℂ → ℂ → Τℂ) → ℂState
+τℂcast ∷ Id → (Value, TClass) → (Τ, TClass) → (ℂ → ℂ → Τℂ) → ℂState
 τℂcast n (α,τcα) (τ,τcτ) (?:) = do
 	τℂα ← τℂ α
 	let cτρ = ℂτ $ (↑)τ
@@ -152,7 +152,7 @@ instance TyConstr Instruction where
 	(↣) $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
 
 -- Type Constraints for comparison operations
-τℂcmp ∷ ΤClass → Id → Τ → Value → Value → ℂState
+τℂcmp ∷ TClass → Id → Τ → Value → Value → ℂState
 τℂcmp τc n τ α β = do
 	τℂα ← τℂ α
 	τℂβ ← τℂ β
@@ -187,5 +187,5 @@ instance TyConstr Instruction where
 	    αℂ = πα :=: αcτ
 	    nℂ = ℂπ n :=: πβ
 	    βηℂ = πβ :=: πη
-	    βℂ = πβ :=: ℂc Τ1
+	    βℂ = πβ :=: ℂc T1
 	(↣) $ αℂ ∘ (nℂ ∘ (βηℂ ∘ (βℂ ∘ ε))) 

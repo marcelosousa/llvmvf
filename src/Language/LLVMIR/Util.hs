@@ -105,6 +105,7 @@ class Sizable α where
 instance Sizable Type where
   sizeOf τ = case τ of
     TyInt      p        → p
+    TyFloatPoint τ      → sizeOf τ 
     TyPointer  _        → 8
     TyVector   numEl τ  → numEl * sizeOf τ
     TyArray    numEl τ  → numEl * sizeOf τ
@@ -120,4 +121,3 @@ instance Sizable TyFloatPoint where
     TyFP128     → 128
     Tyx86FP80   → 80
     TyPPCFP128  → 128
-    _  → error $ "sizeOf float: " ⧺ show τ

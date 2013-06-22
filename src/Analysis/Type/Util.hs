@@ -1,3 +1,4 @@
+{-# LANGUAGE UnicodeSyntax #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Memory.Type.Util
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -8,6 +9,8 @@ module Analysis.Type.Util where
 
 import Language.LLVMIR
 import qualified Data.Map as M
+import Prelude.Unicode ((⧺))
+
 
 import Debug.Trace(trace)
 
@@ -47,7 +50,7 @@ isAgg _ = False
 
 getIntValue :: Value -> Int
 getIntValue (Constant (SmpConst (ConstantInt i _))) = i
-getIntValue _ = -1
+getIntValue v = error $ "getIntvalue: not const Int" ⧺ show v
 
 isTyOrVecOfTy :: TyClass -> Type -> Bool
 isTyOrVecOfTy TyClassInt (TyInt _) = True

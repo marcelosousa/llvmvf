@@ -34,7 +34,7 @@ import qualified Data.Set as S
 	    (πα,πβ) = (π α,π β)  -- 
 	    τℂ = ℂτ (T.TyPri T.TyVoid) :=: cτρ
 	    βℂ = πβ :=: (πα ⤜ T.TyRegAddr)
-	    αℂ = πα :=: ℂc Τ1
+	    αℂ = πα :=: ℂc T1
 	(↣) $ τℂ ∘ (αℂ ∘ (βℂ ∘ ε)) -- (τℂα ∪ τℂβ)))
 
 -- Type Constraints for Load
@@ -44,7 +44,7 @@ import qualified Data.Set as S
 	let πα = π α
 	    πn = ℂπ n
 	    αℂ = πα :=: (πn ⤜ T.TyRegAddr)
-	    nℂ = πn :=: ℂc Τ1
+	    nℂ = πn :=: ℂc T1
 	(↣) $ αℂ ∘ (nℂ ∘ τℂα)
 
 -- Type Constraints for GEP
@@ -54,9 +54,9 @@ import qualified Data.Set as S
 	τℂs ← τList τℂα δs
 	let cτρ = ℂτ $ τ ↑^ T.TyRegAddr                 -- OK
 	    πα  = π α
-	    cℂ  = ℂp (ℂc ΤAgg) T.TyRegAddr              -- Pointer to agg in reg mem
+	    cℂ  = ℂp (ℂc TAgg) T.TyRegAddr              -- Pointer to agg in reg mem
 	    πδs = map π δs
-	    δsℂ = S.fromList $ map ((ℂc ΤInt) :=:) πδs
+	    δsℂ = S.fromList $ map ((ℂc TInt) :=:) πδs
 	    α1ℂ = πα :=: cτρ
 	    α2ℂ = πα :=: cℂ
 	    nℂ  = ℂπ n :=: πgep α δs
