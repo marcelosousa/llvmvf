@@ -87,7 +87,7 @@ instance Show ℂ where
   show (ℂι c i)   = "Cgep(" ⧺ show c ⧺ "," ⧺ show i ⧺ ")"
   show (ℂc τc)    = "Ccl(" ⧺ show τc ⧺ ")"
   show (ℂp c ταρ) = "Cptr(" ⧺ show c ⧺ "," ⧺ show ταρ ⧺ ")"
-  show (ℂλ cl c)  = "Cfn(" ⧺ show cl ⧺ "→" ⧺ show c ⧺ ")"
+  show (ℂλ cl c)  = "Cfn(" ⧺ show cl ⧺ "->" ⧺ show c ⧺ ")"
 
 -- Normalize the constraint
 (⤜) ∷ ℂ → Ταρ → ℂ

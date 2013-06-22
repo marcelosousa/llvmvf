@@ -30,8 +30,8 @@ import Control.Monad.State
 
 import qualified Debug.Trace as Trace
 
---trace s f = f
-trace = Trace.trace
+trace s f = f
+--trace = Trace.trace
 
 data Ω = Ω 
   { 
@@ -59,7 +59,7 @@ type ΩState α = State Ω α
 iΩ c = Ω c M.empty 
 
 μrewriteEq ∷ ΩState ()
-μrewriteEq = do
+μrewriteEq = trace ("fixRewriteEq -----") $ do
   γ ← get
   let τℂs = S.toList $ rc γ
   put γ{rc = ε}
@@ -166,12 +166,16 @@ rwEqp α@(ℂp c1 τα1) β =
     ℂτ τ → case τ of
       TyDer (TyPtr τ1 τα2) → 
         case τα1 ≅ τα2 of
-          Just τα → rwEq c1 (ℂτ τ1)
+          Just τα → do c ← rwEq c1 (ℂτ τ1)
+                       case c of
+                        ℂτ τ' → (↣) $ ℂτ $ TyDer $ TyPtr τ' τα
+                        _     → error $ "rwEqp error: impossible case? " ⧺ show c
           Nothing → error $ "rwEqp error: " ⧺ show α ⧺ " " ⧺ show β
       _ → error $ "rwEqp: types dont match " ⧺ show α ⧺ " " ⧺ show β
     ℂp c2 τα2 → 
       case τα1 ≅ τα2 of
-        Just τα → rwEq c1 c2
+        Just τα → do c ← rwEq c1 c2
+                     (↣) $ ℂp c τα
         Nothing → error $ "rwEqp error: " ⧺ show α ⧺ " " ⧺ show β
     ℂλ ca cr → error "rwEqp: cant constraint pointer with function" 
     _ → rwEq β α
