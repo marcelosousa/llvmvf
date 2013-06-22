@@ -58,9 +58,10 @@ import qualified Data.Set as S
 	    πδs = map π δs
 	    δsℂ = S.fromList $ map ((ℂc TInt) :=:) πδs
 	    n1ℂ = ℂπ n :=: cτn
-	    n2ℂ = ℂπ n :=: πgep α δs
+	   -- n2ℂ = ℂπ n :=: πgep α δs
 	    αℂ  = πα :=: cℂ
-	(↣) $ n1ℂ ∘ (n2ℂ ∘ (αℂ ∘ (δsℂ ∪ τℂs)))
+	(↣) $ n1ℂ ∘ (αℂ ∘ (δsℂ ∪ τℂs))
+--	(↣) $ n1ℂ ∘ (n2ℂ ∘ (αℂ ∘ (δsℂ ∪ τℂs)))
 
 -- Type contraints for atomic instructions
 τℂaop ∷ Id → Value → Values → ℂState

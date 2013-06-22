@@ -185,30 +185,32 @@ rwEqp _ _ = error $ "rwEqp: FATAL"
 
 type Γ = M.Map Id Τα
 
-(⊨) ∷ S.Set Τℂ → Γ
-(⊨) τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ)
-             γ' = trace "solveEq" $ M.mapWithKey (\n c → solveEq mic [n] c) mic
-         in S.fold solveCast γ' rc
+(⊨) ∷ Γ → S.Set Τℂ → Γ
+(⊨) e τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ)
+               γ' = trace "solveEq" $ M.mapWithKey (\n c → solveEq e mic [n] c) mic
+           in S.fold solveCast γ' rc
 
 -- Solve 
 -- Input : Env, Constraints left
-solveEq ∷ M.Map Id ℂ → [Id] → ℂ → Τα
-solveEq γ n τℂ = case τℂ of
+solveEq ∷ Γ → M.Map Id ℂ → [Id] → ℂ → Τα
+solveEq e γ n τℂ = case τℂ of
   ℂτ τ → τ
-  ℂπ m → look γ n m
+  ℂπ m → look e γ n m
   ℂc cl → error "solve does not expect a class"
   ℂι c i → error "solve does not expect a gep"
-  ℂp c a → let cτ = solveEq γ n c 
+  ℂp c a → let cτ = solveEq e γ n c 
            in TyDer $ TyPtr cτ a  
-  ℂλ ca cr → let caτ = map (solveEq γ n) ca
-                 crτ = solveEq γ n cr
+  ℂλ ca cr → let caτ = map (solveEq e γ n) ca
+                 crτ = solveEq e γ n cr
              in TyDer $ TyFun caτ crτ False
 
-look ∷ M.Map Id ℂ → [Id] → Id → Τα 
-look γ l m | m ∈ l = error "look: same identifiers"
-           | otherwise = case M.lookup m γ of
-                Nothing → error "look: not in map" 
-                Just c  → solveEq γ (m:l) c
+look ∷ Γ → M.Map Id ℂ → [Id] → Id → Τα 
+look e γ l m | m ∈ l = error "look: same identifiers"
+             | otherwise = case M.lookup m γ of
+                  Nothing → case M.lookup m e of
+                    Nothing → error $ "look: not in maps " ⧺ show m ⧺ show l ⧺ show γ ⧺ show e
+                    Just τ  → τ
+                  Just c  → solveEq e γ (m:l) c
 
 solveCast ∷ Τℂ → Γ → Γ
 solveCast τℂ γ = case τℂ of

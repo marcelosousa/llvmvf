@@ -22,9 +22,13 @@ import Control.Monad.State
 import Prelude.Unicode ((⧺))
 
 typeAnnInference ∷ Module → M.Map Id Γ 
-typeAnnInference = M.map (⊨) . typeConstraints
+typeAnnInference mdl = 
+	let (gτℂ, fnτℂ) = typeConstraints mdl
+	    gγ = (⊨) M.empty gτℂ
+	    gnγ = M.map ((⊨) gγ) fnτℂ
+	in M.insert (Global "globals") gγ gnγ  
 
-typeConstraints ∷ Module → M.Map Id (S.Set Τℂ)
+typeConstraints ∷ Module → (S.Set Τℂ, M.Map Id (S.Set Τℂ))
 typeConstraints mdl = evalState (τℂs mdl) εΕ
 
 ioremap ∷ Τℂ
@@ -38,10 +42,10 @@ iτℂ = ioremap ∘ ε
 
 -- | Compute type constraints
 -- Compute individually for functions
-τℂs ∷ Module → State Ε (M.Map Id (S.Set Τℂ))
+τℂs ∷ Module → State Ε (S.Set Τℂ, M.Map Id (S.Set Τℂ))
 τℂs (Module i l t gvs fns nmdtys) = do
     gvsℂs ← τList iτℂ gvs
     --lℂs ← mapM (τℂu gvsℂs) $ M.elems fns
     lℂs ← mapM τℂ $ M.elems fns
-    (↣) $ M.fromList $ (zip (M.keys fns) lℂs) ⧺ [(Global "globals",gvsℂs)]
+    (↣) $ (gvsℂs, M.fromList $ zip (M.keys fns) lℂs)
     --τList gvsℂs $ M.elems fns
