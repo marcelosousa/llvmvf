@@ -1,17 +1,17 @@
 !-!	./Language/LTL/Base.hs	201;"	v
 !~!	./Language/LTL/Base.hs	257;"	v
 **>	./Language/Asm.hs	28;"	v
-:<:	./Analysis/Type/Inference/Base.hs	92;"	d
-:=:	./Analysis/Type/Inference/Base.hs	91;"	d
+:<:	./Analysis/Type/Inference/Base.hs	100;"	d
+:=:	./Analysis/Type/Inference/Base.hs	99;"	d
 :⇀	./Language/FeatherIR/Base/Syntax.hs	14;"	t
-:≌:	./Analysis/Type/Inference/Base.hs	94;"	d
-:≤:	./Analysis/Type/Inference/Base.hs	93;"	d
+:≌:	./Analysis/Type/Inference/Base.hs	102;"	d
+:≤:	./Analysis/Type/Inference/Base.hs	101;"	d
 <->	./Language/LTL/Base.hs	77;"	v
 <:	./Analysis/Type/Memory/Util.hs	62;"	v
 <=>	./Analysis/Type/Util.hs	121;"	v
 <>	./Language/LLVMIR/Extractor/Opcode.hs	82;"	v
 <~=~>	./Analysis/Type/Memory/Util.hs	78;"	v
->:	./Analysis/Type/Inference/Base.hs	98;"	v
+>:	./Analysis/Type/Inference/Base.hs	106;"	v
 AEq	./Analysis/Type/Memory/TyAnn.hs	83;"	c
 AShr	./Language/LLVMIR/Extractor/Opcode.hs	30;"	d
 AShr	src/Language/LLVMIR.hs	267;"	d
@@ -126,7 +126,7 @@ ConstantStruct	./Language/LLVMIR/Extractor/ConstantClass.hs	19;"	d
 ConstantStruct	src/Language/LLVMIR.hs	161;"	d
 ConstantVector	./Language/LLVMIR/Extractor/ConstantClass.hs	20;"	d
 ConstantVector	src/Language/LLVMIR.hs	163;"	d
-Constr	./Analysis/Type/Inference/Base.hs	140;"	c
+Constr	./Analysis/Type/Inference/Base.hs	148;"	c
 Constrs	./Analysis/Type/Memory/Context.hs	19;"	t
 Context	./Analysis/Type/Memory/Context.hs	21;"	t
 Context	./Language/LLVMIR/Extractor/Context.hs	28;"	d
@@ -465,6 +465,7 @@ LTL	./Language/LTL/Base.hs	62;"	t
 LabelFn	./Language/LTL/Base.hs	155;"	t
 LandingPad	./Language/LLVMIR/Extractor/Opcode.hs	66;"	d
 LiftAsm	Main.hs	64;"	d
+LiftDebug	./Analysis/Simplify/Intrinsics.hs	15;"	c	file:
 LinkOnceAnyLinkage	src/Language/LLVMIR.hs	329;"	d
 LinkOnceODRLinkage	src/Language/LLVMIR.hs	330;"	d
 Linkage	src/Language/LLVMIR.hs	327;"	t
@@ -924,7 +925,7 @@ TyBot	./Analysis/Type/Memory/TyAnn.hs	17;"	d
 TyClass	./Analysis/Type/Util.hs	17;"	t
 TyClassFloat	./Analysis/Type/Util.hs	17;"	d
 TyClassInt	./Analysis/Type/Util.hs	17;"	d
-TyConstr	./Analysis/Type/Inference/Base.hs	136;"	c
+TyConstr	./Analysis/Type/Inference/Base.hs	144;"	c
 TyDer	./Analysis/Type/Memory/TyAnn.hs	20;"	d
 TyDer	./Analysis/Type/Memory/TyAnn.hs	31;"	t
 TyDouble	src/Language/LLVMIR.hs	455;"	d
@@ -1045,7 +1046,7 @@ args_Instruction_InlineAsm	src/Language/LLVMIR.hs	290;"	v
 asm_Instruction_InlineAsm	src/Language/LLVMIR.hs	290;"	v
 asm_ModuleAsm_ModuleAsm	src/Language/LLVMIR.hs	379;"	v
 asmfn	./Analysis/Asm/Lift.hs	49;"	v	file:
-bb	./Analysis/Type/Inference/Base.hs	107;"	v
+bb	./Analysis/Type/Inference/Base.hs	115;"	v
 binOps	./Language/LLVMIR/Extractor/Instruction.hs	344;"	v
 bitbinOps	./Language/LLVMIR/Extractor/Instruction.hs	354;"	v
 bmcMode	Main.hs	92;"	v
@@ -1118,7 +1119,7 @@ filterIContext	./Analysis/Type/Memory/Context.hs	26;"	v
 findBasicBlock	./Analysis/Type/Util.hs	96;"	v
 findBasicBlock	./Language/LLVMIR/Util.hs	43;"	v
 fn	./Analysis/Asm/Lift.hs	47;"	v	file:
-fn	./Analysis/Type/Inference/Base.hs	106;"	v
+fn	./Analysis/Type/Inference/Base.hs	114;"	v
 fnBasicBlockIds	./Language/LLVMIR/Util.hs	52;"	v
 fp_SimpleConstant_ConstantFP	src/Language/LLVMIR.hs	433;"	v
 fptoint	./Analysis/Type/Standard/Instruction.hs	162;"	v
@@ -1295,6 +1296,8 @@ lastVar	./Analysis/Asm/Lift.hs	165;"	v	file:
 layout_Module_Module	src/Language/LLVMIR.hs	376;"	v
 lift	./Analysis/Asm/Lift.hs	101;"	v	file:
 liftAsm	./Analysis/Asm/Lift.hs	95;"	v
+liftDebug	./Analysis/Simplify/Intrinsics.hs	16;"	v
+liftDebugI	./Analysis/Simplify/Intrinsics.hs	37;"	v	file:
 liftElem	./Analysis/Asm/Lift.hs	107;"	v	file:
 liftList	./Analysis/Asm/Lift.hs	104;"	v	file:
 liftTy	./Analysis/Type/Memory/Util.hs	22;"	v
@@ -2367,10 +2370,10 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 Γ	./Analysis/Type/Inference/Solver.hs	144;"	t
 Ε	./Analysis/Asm/Lift.hs	46;"	d	file:
 Ε	./Analysis/Asm/Lift.hs	46;"	t	file:
-Ε	./Analysis/Type/Inference/Base.hs	104;"	d
-Ε	./Analysis/Type/Inference/Base.hs	104;"	t
+Ε	./Analysis/Type/Inference/Base.hs	112;"	d
+Ε	./Analysis/Type/Inference/Base.hs	112;"	t
 ΕState	./Analysis/Asm/Lift.hs	43;"	t	file:
-ΕState	./Analysis/Type/Inference/Base.hs	112;"	t
+ΕState	./Analysis/Type/Inference/Base.hs	120;"	t
 Σ	./Language/FeatherIR/Base/Syntax.hs	16;"	d
 Σ	./Language/FeatherIR/Base/Syntax.hs	16;"	t
 Τ	./Analysis/Type/Inference/Base.hs	53;"	t
@@ -2385,32 +2388,32 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 ΤPtr	./Analysis/Type/Inference/Base.hs	59;"	d
 Τα	./Analysis/Type/Inference/Base.hs	54;"	t
 Ταρ	./Analysis/Type/Inference/Base.hs	55;"	t
-Τℂ	./Analysis/Type/Inference/Base.hs	91;"	t
+Τℂ	./Analysis/Type/Inference/Base.hs	99;"	t
 Φ	./Language/FeatherIR/Base/Syntax.hs	28;"	d
 Φ	./Language/FeatherIR/Base/Syntax.hs	28;"	t
 Ω	./Analysis/Type/Inference/Solver.hs	30;"	t
-δbb	./Analysis/Type/Inference/Base.hs	132;"	v
+δbb	./Analysis/Type/Inference/Base.hs	140;"	v
 δfn	./Analysis/Asm/Lift.hs	69;"	v	file:
-δfn	./Analysis/Type/Inference/Base.hs	128;"	v
+δfn	./Analysis/Type/Inference/Base.hs	136;"	v
 δnames	./Analysis/Asm/Lift.hs	73;"	v	file:
 ε	./Analysis/Asm/Lift.hs	39;"	v	file:
 ε	./Analysis/Type/Inference/Base.hs	28;"	v
 εΓ	./Analysis/Asm/Lift.hs	172;"	v	file:
 εΕ	./Analysis/Asm/Lift.hs	91;"	v	file:
-εΕ	./Analysis/Type/Inference/Base.hs	110;"	v
+εΕ	./Analysis/Type/Inference/Base.hs	118;"	v
 εΩ	./Analysis/Type/Inference/Solver.hs	32;"	v
 νasmfn	./Analysis/Asm/Lift.hs	59;"	v	file:
-νbb	./Analysis/Type/Inference/Base.hs	124;"	v
+νbb	./Analysis/Type/Inference/Base.hs	132;"	v
 νfn	./Analysis/Asm/Lift.hs	55;"	v	file:
-νfn	./Analysis/Type/Inference/Base.hs	118;"	v
+νfn	./Analysis/Type/Inference/Base.hs	126;"	v
 νname	./Analysis/Asm/Lift.hs	64;"	v	file:
-π	./Analysis/Type/Inference/Base.hs	141;"	v
+π	./Analysis/Type/Inference/Base.hs	149;"	v
 πgep	./Analysis/Type/Inference/Value.hs	88;"	v
 τGas2τ	./Analysis/Asm/Lift.hs	342;"	v	file:
 τList	./Analysis/Type/Inference/Base.hs	47;"	v
 τncall	./Analysis/Type/Inference/Instruction.hs	180;"	v
 τselect	./Analysis/Type/Inference/Instruction.hs	184;"	v
-τℂ	./Analysis/Type/Inference/Base.hs	137;"	v
+τℂ	./Analysis/Type/Inference/Base.hs	145;"	v
 τℂalloca	./Analysis/Type/Inference/Instruction/Memory.hs	23;"	v
 τℂaop	./Analysis/Type/Inference/Instruction/Memory.hs	67;"	v
 τℂbin	./Analysis/Type/Inference/Instruction.hs	130;"	v
@@ -2422,14 +2425,14 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 τℂs	./Analysis/Type/Inference/Module.hs	42;"	v	file:
 τℂstore	./Analysis/Type/Inference/Instruction/Memory.hs	30;"	v
 τℂu	./Analysis/Type/Inference/Base.hs	50;"	v
-ℂ	./Analysis/Type/Inference/Base.hs	68;"	t
-ℂState	./Analysis/Type/Inference/Base.hs	113;"	t
-ℂc	./Analysis/Type/Inference/Base.hs	70;"	d
-ℂp	./Analysis/Type/Inference/Base.hs	72;"	d
-ℂι	./Analysis/Type/Inference/Base.hs	71;"	d
-ℂλ	./Analysis/Type/Inference/Base.hs	73;"	d
-ℂπ	./Analysis/Type/Inference/Base.hs	69;"	d
-ℂτ	./Analysis/Type/Inference/Base.hs	68;"	d
+ℂ	./Analysis/Type/Inference/Base.hs	76;"	t
+ℂState	./Analysis/Type/Inference/Base.hs	121;"	t
+ℂc	./Analysis/Type/Inference/Base.hs	78;"	d
+ℂp	./Analysis/Type/Inference/Base.hs	80;"	d
+ℂι	./Analysis/Type/Inference/Base.hs	79;"	d
+ℂλ	./Analysis/Type/Inference/Base.hs	81;"	d
+ℂπ	./Analysis/Type/Inference/Base.hs	77;"	d
+ℂτ	./Analysis/Type/Inference/Base.hs	76;"	d
 ↑	./Analysis/Type/Inference/Base.hs	37;"	v
 ↑^	./Analysis/Type/Inference/Base.hs	40;"	v
 ↣	./Analysis/Asm/Lift.hs	26;"	v	file:
@@ -2441,6 +2444,6 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 ∪	./Analysis/Asm/Lift.hs	36;"	v	file:
 ∪	./Analysis/Type/Inference/Base.hs	25;"	v
 ≅	./Analysis/Type/Memory/TyAnn.hs	84;"	v
-≥:	./Analysis/Type/Inference/Base.hs	101;"	v
+≥:	./Analysis/Type/Inference/Base.hs	109;"	v
 ⊨	./Analysis/Type/Inference/Solver.hs	147;"	v
-⤜	./Analysis/Type/Inference/Base.hs	86;"	v
+⤜	./Analysis/Type/Inference/Base.hs	94;"	v

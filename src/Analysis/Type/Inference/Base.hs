@@ -60,9 +60,17 @@ data ΤClass =
   deriving (Eq, Ord,Show)
 
 classOf ∷ Τα → ΤClass → Bool
-(TyPri (TyInt _)) `classOf` ΤInt = True
-(TyPri _)         `classOf` Τ1 = True
-_ `classOf` _ = undefined
+(TyPri (TyInt _))     `classOf` ΤInt = True
+(TyPri TyFloat)       `classOf` ΤFlt = True
+(TyDer (TyPtr _ _))   `classOf` ΤPtr = True
+(TyPri TyVoid)        `classOf` Τ1   = False
+(TyPri _)             `classOf` Τ1   = True
+(TyDer (TyFun _ _ _)) `classOf` Τ1   = False
+(TyDer _)             `classOf` Τ1   = True
+(TyDer (TyAgg _))     `classOf` ΤAgg = True
+τα                    `classOf` ΤAgg = False
+τα                    `classOf` Τ1NA = (τα `classOf` Τ1) && not (τα `classOf` ΤAgg)
+α `classOf` β = error $ "classOf error:" ⧺ show α ⧺ " " ⧺ show β
 
 -- Constraint Element
 data ℂ = ℂτ Τα -- Type α

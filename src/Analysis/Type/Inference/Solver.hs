@@ -37,9 +37,9 @@ collapse = S.fold rewrite εΩ
 rewrite ∷ Τℂ → Ω → Ω
 rewrite τℂ γ = case τℂ of
   c1 :=: c2 → snd $ rewriteEq γ c1 c2 
-  c1 :<: c2 → undefined
-  c1 :≤: c2 → undefined
-  c1 :≌: c2 → undefined
+  c1 :<: c2 → error ":<: constraint"
+  c1 :≤: c2 → error ":<=: constraint"
+  c1 :≌: c2 → error ":==: constraint"
 
 -- rewriteEq
 rewriteEq ∷ Ω → ℂ → ℂ → (ℂ,Ω)
@@ -47,7 +47,7 @@ rewriteEq γ α β = trace "rewriteEq " $
   case α of
     ℂτ τ     → rwEqτ γ α β -- type
     ℂc cl    → rwEqc γ α β -- class
-    ℂι c i   → undefined --rwEqι γ α β -- gep
+    ℂι c i   → error "rwEqι" --rwEqι γ α β -- gep
     ℂp c τα  → rwEqp γ α β -- pointer
     ℂλ ca cr → rwEqλ γ α β -- function
     ℂπ n     → rwEqπ γ α β -- var
@@ -104,7 +104,7 @@ rwEqλ γ α@(ℂλ ca1 cr1) β = trace "rwEqλ" $
             in (c:lca,g')
           (cr,γ'') = rewriteEq γ' cr1 cr2
       in (ℂλ ca cr,γ'')
-    ℂc c → undefined  
+    ℂc c → error $ "rwEqλ: class constraint"
     _    → rewriteEq γ β α
 rwEqλ γ _ _ = error $ "rwEqλ: FATAL"
 
@@ -154,7 +154,7 @@ solve γ n τℂ = case τℂ of
   ℂτ τ → τ
   ℂπ m → look γ n m
   ℂc cl → error "solve does not expect a class"
-  ℂι c i → undefined
+  ℂι c i → error "solve does not expect a gep"
   ℂp c a → let cτ = solve γ n c 
            in TyDer $ TyPtr cτ a  
   ℂλ ca cr → let caτ = map (solve γ n) ca

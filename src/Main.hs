@@ -129,7 +129,7 @@ runOption (TypeCheck bc) = do mdl <- extract bc
                              -- print mdl
                               print $ typeCheck mdl
 runOption (Type bc) = do mdl <- extract bc
-                         typeInference $ liftAsm mdl  --typeAnalysis mdl
+                         typeInference $ liftAsm $ liftDebug mdl  --typeAnalysis mdl
 runOption (TypeConstrs bc) = do mdl <- extract bc
                                 typeConstraint $ liftAsm $ liftDebug mdl  --typeAnalysis mdl
 --runOption bc Htm     = do mdl <- extract bc
