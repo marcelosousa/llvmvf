@@ -10,7 +10,7 @@ module Analysis.Type.Inference.Module (typeAnnInference,typeConstraints) where
 import qualified Data.Map as M
 import qualified Data.Set as S
 
-import Language.LLVMIR hiding (Type(..),Id)
+import Language.LLVMIR hiding (Type(..),Id, NamedTypes)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Global
 import Analysis.Type.Inference.Function
@@ -47,5 +47,6 @@ iτℂ = ioremap ∘ ε
     gvsℂs ← τList iτℂ gvs
     --lℂs ← mapM (τℂu gvsℂs) $ M.elems fns
     lℂs ← mapM τℂ $ M.elems fns
-    (↣) $ (nmdtys, gvsℂs, M.fromList $ zip (M.keys fns) lℂs)
+    let nτs = M.map (\τ → (↑^) τ TyAny) nmdtys
+    (↣) $ (nτs, gvsℂs, M.fromList $ zip (M.keys fns) lℂs)
     --τList gvsℂs $ M.elems fns

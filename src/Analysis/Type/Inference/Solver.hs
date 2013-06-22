@@ -10,7 +10,7 @@
 
 module Analysis.Type.Inference.Solver where
 
-import Language.LLVMIR hiding (Id)
+import Language.LLVMIR hiding (Id, NamedTypes)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.TyAnn as T

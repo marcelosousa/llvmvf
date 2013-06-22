@@ -7,10 +7,16 @@
 
 module Analysis.Type.Memory.TyAnn where
 
-import Language.LLVMIR (Identifier, Identifiers, NamedTypes)
+import Language.LLVMIR (Identifier, Identifiers)
 
 import Control.Applicative
-import Prelude.Unicode ((≡))
+import Prelude.Unicode ((≡),(⧺))
+
+import qualified Data.Map as M
+
+import Debug.Trace 
+
+type NamedTypes = M.Map String TyAnn
 
 type TysAnn = [TyAnn]
 
@@ -80,9 +86,6 @@ instance Show TyAnnot where
   show TyRegAddr = "RegAddr"
   show TyAny = "AnyAddr"
 
-class IEq α where
-  (≌) ∷ α → α → Maybe α
-
 class AEq α where
   (≅) ∷ NamedTypes → α → α → Maybe α
 
@@ -110,16 +113,52 @@ instance AEq TyAgg where
     if n ≡ m
     then TyArr n <$> (≅) nτ τ1 τ2
     else Nothing
-  (≅) nτ (TyStr n i τ1) (TyStr m j τ2) =
-    if n ≡ m && i ≡ j
-    then TyStr n i <$> cmpList nτ τ1 τ2
-    else Nothing
+  (≅) nτ (TyStr n i τ1) (TyStr m j τ2) = -- Source of all troubles
+    eqTyStr nτ (n,i,τ1) (m,j,τ2)
   (≅) nτ τ1 τ2 = Nothing
-
 
 cmpList ∷ NamedTypes → TysAnn → TysAnn → Maybe TysAnn
 cmpList nτ a1 a2 = sequence $ map (uncurry ((≅) nτ)) $ zip a1 a2
 
+eqTyStr :: NamedTypes -> (String,Int,[TyAnn]) -> (String,Int,[TyAnn]) -> Maybe TyAgg 
+eqTyStr nτ α β =
+  case α of 
+  ("",n,ατ) → case β of
+    ("",m,βτ) → if n ≡ m && length ατ ≡ length βτ
+                then TyStr "" n <$> cmpList nτ ατ βτ
+                else Nothing
+    (nβ,m,βτ) → case M.lookup nβ nτ of
+      Nothing → if n ≡ m && length ατ ≡ length βτ
+                then TyStr "" n <$> cmpList nτ ατ βτ
+                else Nothing
+      Just η@(TyDer (TyAgg (TyStr nη o ητ))) →
+        if nβ ≡ nη
+        then if n ≡ o
+             then TyStr "" n <$> cmpList nτ ατ ητ
+             else Nothing
+        else eqTyStr nτ α (nη,o,ητ)
+      Just _ → Nothing      
+  (nα,n,ατ) → case β of
+    ("",m,βτ) → eqTyStr nτ β α
+    (nβ,m,βτ) → 
+      if nα ≡ nβ
+      then Just $ TyStr nα n ατ 
+      else Nothing 
+{-
+    case M.lookup nr nmdtye of
+      Nothing -> case M.lookup ns nmdtye of
+        Nothing -> n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
+        Just (TyStruct ns' m' s') -> eqStruct nmdtye (nr,n,r) (ns',m',s')
+        Just _ -> False
+      Just (TyStruct nr' n' r') -> case M.lookup ns nmdtye of
+        Nothing -> eqStruct nmdtye (nr',n',r') (ns,m,s)
+        Just (TyStruct ns' m' s') -> n' == m' && nr == ns
+        Just _ -> False 
+      Just _ -> False
+-}
+class IEq α where
+  (≌) ∷ α → α → Maybe α
+ 
 instance IEq TyAnnot where
   TyIOAddr ≌ TyRegAddr = Nothing
   TyIOAddr ≌ _         = Just TyIOAddr
