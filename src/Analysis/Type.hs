@@ -47,7 +47,7 @@ printTyInfFn fn γ = do
 
 typeConstraint ∷ Module → IO ()
 typeConstraint mdl = do
-	let (gs, fncs) = typeConstraints mdl
+	let (_, gs, fncs) = typeConstraints mdl
 	    cs = M.assocs fncs
 	printTyℂFn (Global "globals") gs
 	forM_ cs (uncurry printTyℂFn)

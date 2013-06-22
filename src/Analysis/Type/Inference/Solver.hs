@@ -37,10 +37,11 @@ data Ω = Ω
   { 
     rc  ∷ S.Set Τℂ  -- remaining constraints
   , mic ∷ M.Map Id ℂ -- current map
+  , nmdtys ∷ NamedTypes 
   }
 
 instance Eq Ω where
-  (Ω rc1 mic1) == (Ω rc2 mic2) = rc1 ≡ rc2 && mic1 ≡ mic2 
+  (Ω rc1 mic1 _) == (Ω rc2 mic2 _) = rc1 ≡ rc2 && mic1 ≡ mic2 
 
 νΤℂ ∷ Τℂ → ΩState ()
 νΤℂ τℂ = do γ@Ω{..} ← get
@@ -52,11 +53,13 @@ instance Eq Ω where
              let mic' = M.insert i c mic
              put γ{mic=mic'}
 
+δNτ ∷ ΩState NamedTypes
+δNτ = do γ@Ω{..} ← get
+         (↣) nmdtys
+
 type ΩState α = State Ω α
 
-εΩ = Ω ε M.empty
-
-iΩ c = Ω c M.empty 
+iΩ c τs = Ω c M.empty τs
 
 μrewriteEq ∷ ΩState ()
 μrewriteEq = trace ("fixRewriteEq -----") $ do
@@ -90,9 +93,10 @@ rwEq α β = trace ("rwEq " ⧺ show α ⧺ " " ⧺ show β) $
 
 -- Type
 rwEqτ ∷ ℂ → ℂ → ΩState ℂ
-rwEqτ α@(ℂτ τ1) β = 
+rwEqτ α@(ℂτ τ1) β = do
+  nτs ← δNτ
   case β of
-    ℂτ τ2 → case τ1 ≅ τ2 of
+    ℂτ τ2 → case (≅) nτs τ1 τ2 of
               Nothing → error $ "rwEqTy (1) " ⧺ show α ⧺ " " ⧺ show β
               Just c  → (↣) $ ℂτ c
     ℂc cl → if τ1 `classOf` cl 
@@ -103,9 +107,10 @@ rwEqτ _ _ = error $ "rwEqTy: FATAL"
 
 -- Type Class
 rwEqc ∷ ℂ → ℂ → ΩState ℂ
-rwEqc α@(ℂc cl1) β = 
+rwEqc α@(ℂc cl1) β = do
+  nτs ← δNτ
   case β of 
-    ℂc cl2 → case cl1 ≅ cl2 of
+    ℂc cl2 → case (≅) nτs cl1 cl2 of
               Nothing → error $ "rwEqc (1) " ⧺ show α ⧺ " " ⧺ show β
               Just cl → (↣) $ ℂc cl
     _ → rwEq β α
@@ -165,7 +170,7 @@ rwEqp α@(ℂp c1 τα1) β =
   case β of
     ℂτ τ → case τ of
       TyDer (TyPtr τ1 τα2) → 
-        case τα1 ≅ τα2 of
+        case τα1 ≌ τα2 of
           Just τα → do c ← rwEq c1 (ℂτ τ1)
                        case c of
                         ℂτ τ' → (↣) $ ℂτ $ TyDer $ TyPtr τ' τα
@@ -173,7 +178,7 @@ rwEqp α@(ℂp c1 τα1) β =
           Nothing → error $ "rwEqp error: " ⧺ show α ⧺ " " ⧺ show β
       _ → error $ "rwEqp: types dont match " ⧺ show α ⧺ " " ⧺ show β
     ℂp c2 τα2 → 
-      case τα1 ≅ τα2 of
+      case τα1 ≌ τα2 of
         Just τα → do c ← rwEq c1 c2
                      (↣) $ ℂp c τα
         Nothing → error $ "rwEqp error: " ⧺ show α ⧺ " " ⧺ show β
@@ -185,10 +190,10 @@ rwEqp _ _ = error $ "rwEqp: FATAL"
 
 type Γ = M.Map Id Τα
 
-(⊨) ∷ Γ → S.Set Τℂ → Γ
-(⊨) e τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ)
-               γ' = trace "solveEq" $ M.mapWithKey (\n c → solveEq e mic [n] c) mic
-           in S.fold solveCast γ' rc
+(⊨) ∷ NamedTypes → Γ → S.Set Τℂ → Γ
+(⊨) nτ e τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ nτ)
+                  γ' = trace "solveEq" $ M.mapWithKey (\n c → solveEq e mic [n] c) mic
+              in S.fold (solveCast nτ) γ' rc
 
 -- Solve 
 -- Input : Env, Constraints left
@@ -212,15 +217,15 @@ look e γ l m | m ∈ l = error "look: same identifiers"
                     Just τ  → τ
                   Just c  → solveEq e γ (m:l) c
 
-solveCast ∷ Τℂ → Γ → Γ
-solveCast τℂ γ = case τℂ of
+solveCast ∷ NamedTypes → Τℂ → Γ → Γ
+solveCast nτ τℂ γ = case τℂ of
   c1 :=: c2 → error "solveCast :=: impossible"
   c1 :<: c2 → error "solveCast :<: constraint"
   c1 :≤: c2 → error "solveCast :<=: constraint"
-  c1 :≌: c2 → solveBitEq γ c1 c2
+  c1 :≌: c2 → solveBitEq nτ γ c1 c2
 
-solveBitEq ∷ Γ → ℂ → ℂ → Γ
-solveBitEq γ α@(ℂπ n) β =
+solveBitEq ∷ NamedTypes → Γ → ℂ → ℂ → Γ
+solveBitEq nτ γ α@(ℂπ n) β =
   let ατ = safeLookup n γ
   in case β of
     ℂτ βτ → if sizeOf ατ ≡ sizeOf βτ
@@ -228,7 +233,7 @@ solveBitEq γ α@(ℂπ n) β =
             else error $ "solveBitEq: bitsize mismatch " ⧺ show α ⧺ " " ⧺ show β
     ℂπ m  → undefined
     _ → error "solveBitEq: beta is not supported"
-solveBitEq γ α β = error "solveBitEq: fst arg is not Cpi" 
+solveBitEq nτ γ α β = error "solveBitEq: fst arg is not Cpi" 
 
 safeLookup ∷ Id → Γ → Τα
 safeLookup n γ = 
@@ -237,16 +242,21 @@ safeLookup n γ =
     Just τ  → τ 
 
 instance AEq TClass where
-  TInt ≅ T1NA = Just TInt
-  TInt ≅ T1   = Just TInt
-  TInt ≅ _    = Nothing
-  TFlt ≅ T1NA = Just TFlt 
-  TFlt ≅ T1   = Just TFlt
-  TFlt ≅ _    = Nothing
-  TPtr ≅ T1NA = Just TPtr 
-  TPtr ≅ T1   = Just TPtr
-  TPtr ≅ _    = Nothing
-  T1NA ≅ TAgg = Nothing
-  T1NA ≅ β    = β ≅ T1NA
-  TAgg ≅ β    = β ≅ TAgg
-  T1   ≅ β    = Just β   
+  (≅) nτs α β = case α of
+    TInt → case β of
+      T1NA → Just TInt
+      T1   → Just TInt
+      _    → Nothing
+    TFlt → case β of
+      T1NA → Just TFlt 
+      T1   → Just TFlt
+      _    → Nothing
+    TPtr → case β of
+      T1NA → Just TPtr 
+      T1   → Just TPtr
+      _    → Nothing
+    T1NA → case β of
+      TAgg → Nothing
+      _    → (≅) nτs β T1NA
+    TAgg → (≅) nτs β TAgg
+    T1   → Just β   

@@ -1,3 +1,4 @@
+{-# LANGUAGE UnicodeSyntax #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Type.Memory.Constant
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -14,15 +15,19 @@ import Language.LLVMIR.Util
 import Analysis.Type.Util
 import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.Context
-import Analysis.Type.Memory.TyAnn (TyAnn, TyAnnot)
+import Analysis.Type.Memory.TyAnn (TyAnn, TyAnnot, (≅))
 import Analysis.Type.Standard.Constant
 import qualified Analysis.Type.Memory.TyAnn as T
 
 import Debug.Trace (trace)
 
+m2b ∷ Maybe α → Bool
+m2b Nothing = False
+m2b _ = True
+
 -- type analyse value
 tyanValue :: NamedTypes -> TyAnnEnv -> Value -> TyLIdPair
-tyanValue nmdtye tye (Id v ty)    = (typeValueGen tye v (liftTy ty) ((<~=~>) nmdtye) "tyanValue:Id", [])
+tyanValue nmdtye tye (Id v ty)    = undefined --(typeValueGen tye v (liftTy ty) (m2b . ((≅) nmdtye)) "tyanValue:Id", [])
 tyanValue nmdtye tye (Constant c) = tyanConstant nmdtye tye c
 
 tyanConstant :: NamedTypes -> TyAnnEnv -> Constant -> TyLIdPair
@@ -32,7 +37,7 @@ tyanConstant nmdtye tye c = case c of
   BlockAddr       -> error "tyanConstant: BlockAddr not supported"
   SmpConst sc     -> (liftTy $ typeSimpleConstant sc, [])
   CmpConst cc     -> tyanComplexConstant nmdtye tye cc
-  GlobalValue gv  -> (typeGlobalValue tye liftTy ((<~=~>) nmdtye) gv, [])
+  GlobalValue gv  -> undefined --(typeGlobalValue tye liftTy (m2b . (≅) nmdtye) gv, [])
   ConstantExpr ec -> tyanExpression      nmdtye tye ec
 
 tyanComplexConstant :: NamedTypes -> TyAnnEnv -> ComplexConstant -> TyLIdPair
@@ -108,16 +113,20 @@ tyanCompareConstantExpr nmdtye tye (ICmpExpr _ ty op1 op2) =
       let (top1,lop1) = tyanValue nmdtye tye op1
           (top2,lop2) = tyanValue nmdtye tye op2
           (b,i) = isComparableTypeAnnInt top1
-      in if ((<~=~>) nmdtye top1 top2) && b && ((i==0 && isInt ty) || (i==1 && isVector ty)) 
-         then (liftTy ty, lop1++lop2)
-         else error "typeCompareConstantExpr: error" 
+      in case (≅) nmdtye top1 top2 of
+          Nothing → error "typeCompareConstantExpr: error" 
+          Just t  → if b && ((i==0 && isInt ty) || (i==1 && isVector ty)) 
+                    then (liftTy ty, lop1++lop2)
+                    else error "typeCompareConstantExpr: error" 
 tyanCompareConstantExpr nmdtye tye (FCmpExpr _ ty op1 op2) = 
       let (top1,lop1) = tyanValue nmdtye tye op1
           (top2,lop2) = tyanValue nmdtye tye op2
           (b,i) = isComparableTypeAnnFloat top1
-      in if ((<~=~>) nmdtye top1 top2) && b && ((i==0 && isInt ty) || (i==1 && isVector ty)) 
-         then (liftTy ty, lop1++lop2)
-         else error "typeCompareConstantExpr: error" 
+      in case (≅) nmdtye top1 top2 of
+          Nothing → error "typeCompareConstantExpr: error" 
+          Just t  → if b && ((i==0 && isInt ty) || (i==1 && isVector ty)) 
+                    then (liftTy ty, lop1++lop2)
+                    else error "typeCompareConstantExpr: error" 
 
 isComparableTypeAnnInt :: TyAnn -> (Bool, Int)
 isComparableTypeAnnInt (T.TyPri (T.TyInt _)) = (True, 0)

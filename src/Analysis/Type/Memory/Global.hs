@@ -1,3 +1,4 @@
+{-# LANGUAGE UnicodeSyntax #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Type.Memory.Global
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -29,7 +30,7 @@ tyanGlobal nmdtye (c,tye) (GlobalVar i l True  isUAddr ty (Just cn) align) =
       qt  = T.TyDer $ T.TyPtr t T.TyAny             -- lift the type of the constant to a qualified pointer
       qty = liftTy ty                               -- lift the type given 
       nc  = S.union c $ S.fromList $ map ((,) i) li -- update the set of constraints
-  in if (<~=~>) nmdtye qt qty                       -- if qualified types are equal
-     then (nc, insert i qt tye)
-     else error $ "tyanGlobal(1): " ++ show i ++ "\n" ++ show t ++ "\n" ++ show ty
+  in case (T.≅) nmdtye qt qty of                      -- if qualified types are equal
+  		Just _ → (nc, insert i qt tye)
+  		Nothing → error $ "tyanGlobal(1): " ++ show i ++ "\n" ++ show t ++ "\n" ++ show ty
 tyanGlobal nmdtye con gv = error $ "tyanGlobal(2): " ++ show gv

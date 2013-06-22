@@ -104,7 +104,6 @@ typeGetElementPtrConstantExpr nmdtye tye v idxs = --trace ("gep: " ++ show v ++ 
                       else error $ "typeGetElementPtrConstantExpr: not all indices are integers" 
       ty -> error $ "typeGetElementPtrConstantExpr: " ++ show ty 
 
-
 getTypeAgg :: NamedTypes -> Type -> [Int] -> Type
 getTypeAgg nmdtye ty [] = TyPointer ty
 getTypeAgg nmdtye ty (x:xs) = case ty of 

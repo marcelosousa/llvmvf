@@ -76,21 +76,3 @@ isAnnInt _ = False
 isAnnFloat :: TyAnn -> Bool
 isAnnFloat (T.TyPri T.TyFloat) = True
 isAnnFloat _ = False
-
-(<~=~>) :: NamedTypes -> TyAnn -> TyAnn -> Bool
-(<~=~>) nmdtye qtya qtyb = True
-{-
-(<=>) nmdtye TyVoid      TyVoid      = True
-(<=>) nmdtye Tyx86MMX    Tyx86MMX    = True
-(<=>) nmdtye TyLabel     TyLabel     = True
-(<=>) nmdtye TyMetadata  TyMetadata  = True
-(<=>) nmdtye TyOpaque    TyOpaque    = True
-(<=>) nmdtye TyUndefined TyUndefined = True
-(<=>) nmdtye (TyInt p)         (TyInt n)         = p == n
-(<=>) nmdtye (TyFloatPoint p)  (TyFloatPoint n)  = p == n
-(<=>) nmdtye (TyPointer p)     (TyPointer n)     = (<=>) nmdtye p n
-(<=>) nmdtye (TyVector n r)    (TyVector m s)    = n == m && (<=>) nmdtye r s
-(<=>) nmdtye (TyArray  n r)    (TyArray  m s)    = n == m && (<=>) nmdtye r s
-(<=>) nmdtye (TyStruct nr n r) (TyStruct ns m s) = eqStruct nmdtye (nr,n,r) (ns,m,s)
-(<=>) nmdtye x y = False
--}
