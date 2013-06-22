@@ -29,13 +29,13 @@ typeCheckModule (Module i _ _ gvars funs nmdtys) =
 	let tye = typeCheckGlo nmdtys initenv gvars 
     in STyRes i tye $ typeCheckFuns nmdtys tye funs
 
-typeCheckGlo :: NamedTyEnv -> TyEnv -> Globals -> TyEnv
+typeCheckGlo :: NamedTypes -> TyEnv -> Globals -> TyEnv
 typeCheckGlo nmdtye tye []     = tye
 typeCheckGlo nmdtye tye (x:xs) = 
 	let tye' = typeCheckGlobal nmdtye tye x
     in typeCheckGlo nmdtye tye' xs 
 
-typeCheckFuns :: NamedTyEnv -> TyEnv -> Functions -> M.Map Identifier TyEnv
+typeCheckFuns :: NamedTypes -> TyEnv -> Functions -> M.Map Identifier TyEnv
 typeCheckFuns nmdtye tye funs = let ntye =  M.fold (\f r -> typeFunction r f) tye funs
                                 in M.map (typeCheckFunction nmdtye ntye) funs
 

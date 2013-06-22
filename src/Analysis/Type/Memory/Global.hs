@@ -22,7 +22,7 @@ import qualified Analysis.Type.Memory.TyAnn as T
 import Debug.Trace (trace)
 
 -- Incomplete
-tyanGlobal :: NamedTyEnv -> Context -> Global -> Context
+tyanGlobal :: NamedTypes -> Context -> Global -> Context
 tyanGlobal nmdtye (c,tye) (GlobalVar i l False isUAddr ty Nothing  align) = (c,insert i (liftTy ty) tye)
 tyanGlobal nmdtye (c,tye) (GlobalVar i l True  isUAddr ty (Just cn) align) =
   let (t,li) = tyanConstant nmdtye tye cn           -- analyse the constant

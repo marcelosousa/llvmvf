@@ -27,7 +27,7 @@ typeCheckBranch (Id i ty) = i -- TODO need to check if ty is a TyLabel or *(TyIn
 typeCheckBranch v = error $ "typeCheckBranchs: Expected identifier and given " ++ show v
 
 -- Terminators
-typeCheckTerminator :: NamedTyEnv -> TyEnv -> Terminator -> (TyEnv, Type)
+typeCheckTerminator :: NamedTypes -> TyEnv -> Terminator -> (TyEnv, Type)
 typeCheckTerminator nmdtye tye i = case i of
 	Ret pc VoidRet      -> (tye, TyVoid)
 	Ret pc (ValueRet v) -> (tye, typeValue nmdtye tye v) 
@@ -39,7 +39,7 @@ typeCheckTerminator nmdtye tye i = case i of
 	Switch pc ty v elems -> error "typeCheckTerminator: Switch instruction not supported."
 
 -- Phi Instructions
-typeCheckPHI :: NamedTyEnv -> TyEnv -> PHI -> (TyEnv, Type)
+typeCheckPHI :: NamedTypes -> TyEnv -> PHI -> (TyEnv, Type)
 typeCheckPHI nmdtye tye i = case i of
  	PHI pc i ty vals -> let (vs,ls) = unzip vals
  	                        tyvs = map (typeValue nmdtye tye) vs
@@ -49,7 +49,7 @@ typeCheckPHI nmdtye tye i = case i of
  	                       then (insert i ty tye, ty)
  	                       else error $ "typeCheckPHI.PHI: " ++ show ty ++ " " ++ show tyvs
 
-typeCheckInstruction :: NamedTyEnv -> TyEnv -> Instruction -> (TyEnv, Type)
+typeCheckInstruction :: NamedTypes -> TyEnv -> Instruction -> (TyEnv, Type)
 typeCheckInstruction nmdtye tye i = case i of
   -- Standard Binary Operations
   -- Integer Operations
@@ -149,7 +149,7 @@ typeCheckInstruction nmdtye tye i = case i of
   			x -> error $ "AtomicRMW: Type of first element is not pointer: " ++ show x
 
 
-typeCastOp :: NamedTyEnv -> TyEnv -> Identifier -> Value -> Type -> (Type -> Bool) -> (Type -> Type -> Bool) -> (TyEnv, Type)
+typeCastOp :: NamedTypes -> TyEnv -> Identifier -> Value -> Type -> (Type -> Bool) -> (Type -> Type -> Bool) -> (TyEnv, Type)
 typeCastOp nmdtye tye i v ty top op = 
 	let tyv = typeValue nmdtye tye v
 	in if top tyv && top ty
@@ -158,7 +158,7 @@ typeCastOp nmdtye tye i v ty top op =
 		  	else error $ "typeCastOpInt: op failed " ++ show [tyv,ty]
 		else error $ "typeCastOpInt: not int " ++ show [tyv,ty]
 
-fptoint :: NamedTyEnv -> TyEnv -> Identifier -> Value -> Type -> (TyEnv, Type)
+fptoint :: NamedTypes -> TyEnv -> Identifier -> Value -> Type -> (TyEnv, Type)
 fptoint nmdtye tye i v ty = 
 	let tyv = typeValue nmdtye tye v
 	in case tyv of
@@ -172,7 +172,7 @@ fptoint nmdtye tye i v ty =
 			x -> error $ "fptoint: " ++ show x ++ " is not a vector of ints"
 		x -> error $ "fptoint: Type " ++ show x ++ " is not a float or vector of floats"
 
-inttofp :: NamedTyEnv -> TyEnv -> Identifier -> Value -> Type -> (TyEnv, Type)
+inttofp :: NamedTypes -> TyEnv -> Identifier -> Value -> Type -> (TyEnv, Type)
 inttofp nmdtye tye i v ty = 
 	let tyv = typeValue nmdtye tye v
 	in case tyv of
@@ -186,7 +186,7 @@ inttofp nmdtye tye i v ty =
 			x -> error $ "inttofp: " ++ show x ++ " is not a vector of floats"
 		x -> error $ "inttofp: Type " ++ show x ++ " is not an int or vector of ints"
 
-typeCheckCall :: NamedTyEnv -> TyEnv -> Identifier -> Type -> Identifier -> Values -> (TyEnv, Type)
+typeCheckCall :: NamedTypes -> TyEnv -> Identifier -> Type -> Identifier -> Values -> (TyEnv, Type)
 typeCheckCall nmdtye tye i rfnty c args = 
 	let ty = getFnType tye c 
 	in case ty of

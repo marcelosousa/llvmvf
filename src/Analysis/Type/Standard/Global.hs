@@ -14,7 +14,7 @@ import qualified Data.Map as M
 import Debug.Trace (trace)
 
 -- Type Check Global
-typeCheckGlobal :: NamedTyEnv -> TyEnv -> Global -> TyEnv
+typeCheckGlobal :: NamedTypes -> TyEnv -> Global -> TyEnv
 typeCheckGlobal nmdtye tye (GlobalVar i l False isUAddr ty Nothing align) = insert i ty tye
 typeCheckGlobal nmdtye tye (GlobalVar i l True isUAddr ty (Just c) align) = 
   let t = typeConstant nmdtye tye c

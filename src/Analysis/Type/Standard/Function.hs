@@ -22,7 +22,7 @@ typeFunction tye (FunctionDecl n l rty iv pms) = trace ("inserting " ++ show n) 
     in insert n tysig tye 
 
 -- Type Check Function
-typeCheckFunction :: NamedTyEnv -> TyEnv -> Function -> TyEnv
+typeCheckFunction :: NamedTypes -> TyEnv -> Function -> TyEnv
 typeCheckFunction nmdtye tye (FunctionDef  n l rty iv pms bbs) = 
     let (tysig, ntye) = typeSignature tye pms rty iv
     in typeCheckBasicBlock nmdtye ntye bbs (head bbs) -- assuming that head bbs is the entry block 
@@ -42,7 +42,7 @@ typeCheckParameters tye (x:xs) = let (tx,tye') = typeCheckParameter tye x
 typeCheckParameter :: TyEnv -> Parameter -> (Type, TyEnv)
 typeCheckParameter tye (Parameter i ty) = (ty, insert i ty tye)
 
-typeCheckBasicBlock :: NamedTyEnv -> TyEnv -> BasicBlocks -> BasicBlock -> TyEnv
+typeCheckBasicBlock :: NamedTypes -> TyEnv -> BasicBlocks -> BasicBlock -> TyEnv
 typeCheckBasicBlock nmdtye tye bbs (BasicBlock l phis instr tmn) = -- trace ("typeCheckBasicBlock " ++ show l) $
   let (tye', rty) = typeCheckInstructions nmdtye tye instr 
   in case M.lookup l tye of
@@ -52,7 +52,7 @@ typeCheckBasicBlock nmdtye tye bbs (BasicBlock l phis instr tmn) = -- trace ("ty
         ty -> tye'
     Just ty -> tye 
 
-typeCheckBasicBlocks :: NamedTyEnv -> TyEnv -> BasicBlocks -> BasicBlocks -> TyEnv
+typeCheckBasicBlocks :: NamedTypes -> TyEnv -> BasicBlocks -> BasicBlocks -> TyEnv
 typeCheckBasicBlocks nmdtye tye bbs [bb] = typeCheckBasicBlock nmdtye tye bbs bb
 typeCheckBasicBlocks nmdtye tye bbs [bbt,bbf] = let tybbt = typeCheckBasicBlock nmdtye tye bbs bbt 
                                                     tybbf = typeCheckBasicBlock nmdtye tye bbs bbf
@@ -61,7 +61,7 @@ typeCheckBasicBlocks nmdtye tye bbs x = error $ "typeCheckBasicBlocks: " ++ show
 
 
 -- typeCheckInstructions
-typeCheckInstructions :: NamedTyEnv -> TyEnv -> Instructions -> (TyEnv, Type)
+typeCheckInstructions :: NamedTypes -> TyEnv -> Instructions -> (TyEnv, Type)
 typeCheckInstructions nmdtye tye []  = error "typeCheckInstructions: emtpy list"
 typeCheckInstructions nmdtye tye [i] = typeCheckInstruction nmdtye tye i
 typeCheckInstructions nmdtye tye (x:xs) = 

@@ -15,7 +15,6 @@ import Prelude.Unicode ((⧺))
 import Debug.Trace(trace)
 
 type TyEnv = M.Map Identifier Type
-type NamedTyEnv = M.Map Id Type
 
 data TyClass = TyClassInt | TyClassFloat
   deriving (Show, Eq, Ord)
@@ -101,7 +100,7 @@ findBasicBlock (bb@(BasicBlock l _ _ _):bbs) i | i == l = Just bb
                                                | otherwise = findBasicBlock bbs i
                                                                                
 
-(<=>) :: NamedTyEnv -> Type -> Type -> Bool
+(<=>) :: NamedTypes -> Type -> Type -> Bool
 (<=>) nmdtye TyVoid      TyVoid      = True
 (<=>) nmdtye Tyx86MMX    Tyx86MMX    = True
 (<=>) nmdtye TyLabel     TyLabel     = True
@@ -116,7 +115,7 @@ findBasicBlock (bb@(BasicBlock l _ _ _):bbs) i | i == l = Just bb
 (<=>) nmdtye (TyStruct nr n r) (TyStruct ns m s) = eqStruct nmdtye (nr,n,r) (ns,m,s)
 (<=>) nmdtye x y = False
 
-eqStruct :: NamedTyEnv -> (String,Int,[Type]) -> (String,Int,[Type]) -> Bool
+eqStruct :: NamedTypes -> (String,Int,[Type]) -> (String,Int,[Type]) -> Bool
 eqStruct nmdtye ("",n,r) ("",m,s) = n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
 eqStruct nmdtye ("",n,r) (ns,m,s) = 
 	case M.lookup ns nmdtye of

@@ -21,11 +21,11 @@ import qualified Analysis.Type.Memory.TyAnn as T
 import Debug.Trace (trace)
 
 -- type analyse value
-tyanValue :: NamedTyEnv -> TyAnnEnv -> Value -> TyLIdPair
+tyanValue :: NamedTypes -> TyAnnEnv -> Value -> TyLIdPair
 tyanValue nmdtye tye (Id v ty)    = (typeValueGen tye v (liftTy ty) ((<~=~>) nmdtye) "tyanValue:Id", [])
 tyanValue nmdtye tye (Constant c) = tyanConstant nmdtye tye c
 
-tyanConstant :: NamedTyEnv -> TyAnnEnv -> Constant -> TyLIdPair
+tyanConstant :: NamedTypes -> TyAnnEnv -> Constant -> TyLIdPair
 tyanConstant nmdtye tye c = case c of
   UndefValue      -> (T.TyUndef, [])
   PoisonValue     -> error "tyanConstant: PoisonValue not supported"
@@ -35,7 +35,7 @@ tyanConstant nmdtye tye c = case c of
   GlobalValue gv  -> (typeGlobalValue tye liftTy ((<~=~>) nmdtye) gv, [])
   ConstantExpr ec -> tyanExpression      nmdtye tye ec
 
-tyanComplexConstant :: NamedTyEnv -> TyAnnEnv -> ComplexConstant -> TyLIdPair
+tyanComplexConstant :: NamedTypes -> TyAnnEnv -> ComplexConstant -> TyLIdPair
 tyanComplexConstant nmdtye tye c = case c of
   ConstantAggregateZero  ty  -> (liftTy $ ty, [])
   ConstantDataSequential cds -> (liftTy $ typeConstantDataSequential cds, [])
@@ -63,13 +63,13 @@ tyanComplexConstant nmdtye tye c = case c of
         _ -> error $ "typeComplexConstant: ConstantVector " ++ show ty
 
 -- typeExpression
-tyanExpression :: NamedTyEnv -> TyAnnEnv -> ConstantExpr -> TyLIdPair
+tyanExpression :: NamedTypes -> TyAnnEnv -> ConstantExpr -> TyLIdPair
 tyanExpression nmdtye tye (CompareConstantExpr ce)           = tyanCompareConstantExpr       nmdtye tye ce
 tyanExpression nmdtye tye (GetElementPtrConstantExpr v idxs) = tyanGetElementPtrConstantExpr nmdtye tye v idxs
 tyanExpression nmdtye tye e@(UnaryConstantExpr name i v ty)  = undefined --typeUnaryExpression nmdtye tye name i v ty
 tyanExpression nmdtye tye e = error $ "typeExpression: " ++ show e ++ " not supported."
 
-tyanGetElementPtrConstantExpr :: NamedTyEnv -> TyAnnEnv -> Value -> Values -> TyLIdPair
+tyanGetElementPtrConstantExpr :: NamedTypes -> TyAnnEnv -> Value -> Values -> TyLIdPair
 tyanGetElementPtrConstantExpr nmdtye tye v idxs = --trace ("gep analysis: " ++ show v ++ "\n" ++ show idxs ++ "\n" ++ show tye ++ "\n============\n") $
   let (ty,li) = tyanValue nmdtye tye v
       c = and $ map (isAnnInt . fst . tyanValue nmdtye tye) idxs
@@ -84,7 +84,7 @@ tyanGetElementPtrConstantExpr nmdtye tye v idxs = --trace ("gep analysis: " ++ s
       ty -> error $ "tyanGetElementPtrConstantExpr: " ++ show ty 
 
 
-getTypeAnnAgg :: NamedTyEnv -> TyAnn -> TyAnnot -> [Int] -> TyAnn 
+getTypeAnnAgg :: NamedTypes -> TyAnn -> TyAnnot -> [Int] -> TyAnn 
 getTypeAnnAgg nmdtye ty ann [] = T.TyDer $ T.TyPtr ty ann
 getTypeAnnAgg nmdtye ty ann (x:xs) = case ty of 
       T.TyDer (T.TyAgg (T.TyArr s t)) -> 
@@ -103,7 +103,7 @@ getTypeAnnAgg nmdtye ty ann (x:xs) = case ty of
               in getTypeAnnAgg nmdtye nt ann xs
       _  -> error $ "getTypeAnnAgg: " ++ show ty ++ " is not aggregate. (3)"   
 
-tyanCompareConstantExpr :: NamedTyEnv -> TyAnnEnv -> CompareConstantExpr -> TyLIdPair
+tyanCompareConstantExpr :: NamedTypes -> TyAnnEnv -> CompareConstantExpr -> TyLIdPair
 tyanCompareConstantExpr nmdtye tye (ICmpExpr _ ty op1 op2) = 
       let (top1,lop1) = tyanValue nmdtye tye op1
           (top2,lop2) = tyanValue nmdtye tye op2
@@ -131,7 +131,7 @@ isComparableTypeAnnFloat (T.TyDer (T.TyVec _ (T.TyPri T.TyFloat))) = (True,1)
 isComparableTypeAnnFloat (T.TyDer (T.TyPtr _ _)) = (True,0) -- Suspicious
 isComparableTypeAnnFloat _ = (False, 0)
 
-tyanUnaryExpression :: NamedTyEnv -> TyAnnEnv -> String -> Int -> Value -> Type -> TyAnn
+tyanUnaryExpression :: NamedTypes -> TyAnnEnv -> String -> Int -> Value -> Type -> TyAnn
 tyanUnaryExpression nmdtye tye n opcode val ty =
   case opcode of
     41 -> let (tyv,_) = tyanValue nmdtye tye val

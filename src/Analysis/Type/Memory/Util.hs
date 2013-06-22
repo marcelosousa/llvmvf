@@ -77,7 +77,7 @@ isAnnFloat :: TyAnn -> Bool
 isAnnFloat (T.TyPri T.TyFloat) = True
 isAnnFloat _ = False
 
-(<~=~>) :: NamedTyEnv -> TyAnn -> TyAnn -> Bool
+(<~=~>) :: NamedTypes -> TyAnn -> TyAnn -> Bool
 (<~=~>) nmdtye qtya qtyb = True
 {-
 (<=>) nmdtye TyVoid      TyVoid      = True

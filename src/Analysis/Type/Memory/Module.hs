@@ -27,6 +27,6 @@ tyanModule (Module i l t gvs fns nmdtys) =
     in RTyRes i con $ tyanFunctions nmdtys con fns
 
 
-tyanFunctions :: NamedTyEnv -> Context -> Functions -> M.Map Identifier Context
+tyanFunctions :: NamedTypes -> Context -> Functions -> M.Map Identifier Context
 tyanFunctions nmdtye (c,e) funs = let ntye =  M.fold (flip tyanFnSig) e funs
                                   in M.map (tyanFunction nmdtye (c,ntye)) funs

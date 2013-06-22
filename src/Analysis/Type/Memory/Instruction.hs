@@ -24,12 +24,12 @@ import qualified Analysis.Type.Memory.TyAnn as T
 import Debug.Trace (trace)
 
 
-rtyanValue :: NamedTyEnv -> TyAnnEnv -> Identifier -> Value -> (TyAnn, Constrs)
+rtyanValue :: NamedTypes -> TyAnnEnv -> Identifier -> Value -> (TyAnn, Constrs)
 rtyanValue nmdtye tye i v = let (ty, lid) = tyanValue nmdtye tye v
                             in (ty, S.fromList $ map (\j -> (i,j)) lid) 
 
 -- Terminators
-tyanCheckTerminator :: NamedTyEnv -> Context -> Terminator -> (Context, TyAnn)
+tyanCheckTerminator :: NamedTypes -> Context -> Terminator -> (Context, TyAnn)
 tyanCheckTerminator nmdtye c@(ctrs,tye) i = case i of
 	Ret pc VoidRet      -> (c, T.TyPri $ T.TyVoid)
 	Ret pc (ValueRet v) -> (c, fst $ tyanValue nmdtye tye v) 
@@ -41,7 +41,7 @@ tyanCheckTerminator nmdtye c@(ctrs,tye) i = case i of
 	Switch pc ty v elems -> error "tyanCheckTerminator: Switch instruction not supported."	
 
 -- Phi Instructions
-tyanCheckPHI :: NamedTyEnv -> Context -> PHI -> (Context, TyAnn)
+tyanCheckPHI :: NamedTypes -> Context -> PHI -> (Context, TyAnn)
 tyanCheckPHI nmdtye c@(ctrs,tye) i = case i of
  	PHI pc i ty vals -> let (vs,ls) = unzip vals
  	                        (tyvs, sctrs) = unzip $ map (rtyanValue nmdtye tye i) vs
@@ -53,7 +53,7 @@ tyanCheckPHI nmdtye c@(ctrs,tye) i = case i of
  	                       then ((nctrs, insert i tyl tye), tyl)
  	                       else error $ "tyanCheckPHI.PHI: " ++ show ty ++ " " ++ show tyvs
 
-tyanCheckInstruction :: NamedTyEnv -> Context -> Instruction -> (Context, TyAnn)
+tyanCheckInstruction :: NamedTypes -> Context -> Instruction -> (Context, TyAnn)
 tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
   -- Standard Binary Operations
   -- Integer Operations
@@ -187,7 +187,7 @@ tyanCheckInstruction nmdtye c@(ctrs,tye) i = case i of
  			T.TyDer (T.TyPtr ty T.TyIOAddr) -> error $ "AtomicRMW: Pointer to IOAddr: " ++ show tymptr  			    
   			x -> error $ "AtomicRMW: Type of first element is not pointer: " ++ show x
 
-tyanCheckCall :: NamedTyEnv -> Context -> Identifier -> Type -> Identifier -> Values -> (Context, TyAnn)
+tyanCheckCall :: NamedTypes -> Context -> Identifier -> Type -> Identifier -> Values -> (Context, TyAnn)
 tyanCheckCall nmdtye c@(ctrs,tye) i rfnty ci args = 
 	let ty = getFnTyAnn tye ci 
 	in case ty of
@@ -230,7 +230,7 @@ getFnTyAnn tye ident@(Global i) =
 		Just t -> t
 getFnTyAnn tye  (Local i) = error "getFnTyAnn: Local Identifier"
 
-tyanCheckBinInstr :: TyClass -> NamedTyEnv -> Context -> Identifier -> Type -> Value -> Value -> (Context, TyAnn)
+tyanCheckBinInstr :: TyClass -> NamedTypes -> Context -> Identifier -> Type -> Value -> Value -> (Context, TyAnn)
 tyanCheckBinInstr TyClassInt  nmdtye (c,tye) i ty@(TyInt x) v1 v2 = 
     let (tv1,cv1) = rtyanValue nmdtye tye i v1
         (tv2,cv2) = rtyanValue nmdtye tye i v2
@@ -245,7 +245,7 @@ tyanCheckBinInstr TyClassFloat nmdtye (c,tye) i ty@(TyFloatPoint x) v1 v2 =
     in ((nc,insert i tyl tye), f tyl tv1 tv2)
 tyanCheckBinInstr n _ _ _ _ _ _ = error "tyanCheckBinInstr"
 
-tyanCastOp :: NamedTyEnv -> Context -> Identifier -> Value -> Type -> (TyAnn -> Bool) -> (TyAnn -> TyAnn -> Bool) -> (Context, TyAnn)
+tyanCastOp :: NamedTypes -> Context -> Identifier -> Value -> Type -> (TyAnn -> Bool) -> (TyAnn -> TyAnn -> Bool) -> (Context, TyAnn)
 tyanCastOp nmdtye (c,tye) i v ty top op = 
 	let tyl = liftTy ty
 	    (tyv,cv) = rtyanValue nmdtye tye i v

@@ -8,7 +8,7 @@
 :≤:	./Analysis/Type/Inference/Base.hs	102;"	d
 <->	./Language/LTL/Base.hs	77;"	v
 <:	./Analysis/Type/Memory/Util.hs	65;"	v
-<=>	./Analysis/Type/Util.hs	105;"	v
+<=>	./Analysis/Type/Util.hs	104;"	v
 <>	./Language/LLVMIR/Extractor/Opcode.hs	82;"	v
 <~=~>	./Analysis/Type/Memory/Util.hs	81;"	v
 >:	./Analysis/Type/Inference/Base.hs	107;"	v
@@ -517,7 +517,6 @@ MutexUnlock	src/Language/LLVMIR.hs	301;"	d
 Naked	src/Language/LLVMIR.hs	209;"	d
 NakedAttribute	src/Language/LLVMIR.hs	125;"	d
 Name	./Analysis/Type/Memory/Context.hs	18;"	t
-NamedTyEnv	./Analysis/Type/Util.hs	18;"	t
 NamedTypes	src/Language/LLVMIR.hs	383;"	t
 Neg	./Language/LTL/Base.hs	27;"	d
 NestAttribute	src/Language/LLVMIR.hs	114;"	d
@@ -930,9 +929,9 @@ TyAny	./Analysis/Type/Memory/TyAnn.hs	45;"	d
 TyArr	./Analysis/Type/Memory/TyAnn.hs	39;"	d
 TyArray	src/Language/LLVMIR.hs	468;"	d
 TyBot	./Analysis/Type/Memory/TyAnn.hs	17;"	d
-TyClass	./Analysis/Type/Util.hs	20;"	t
-TyClassFloat	./Analysis/Type/Util.hs	20;"	d
-TyClassInt	./Analysis/Type/Util.hs	20;"	d
+TyClass	./Analysis/Type/Util.hs	19;"	t
+TyClassFloat	./Analysis/Type/Util.hs	19;"	d
+TyClassInt	./Analysis/Type/Util.hs	19;"	d
 TyConstr	./Analysis/Type/Inference/Base.hs	145;"	c
 TyDer	./Analysis/Type/Memory/TyAnn.hs	20;"	d
 TyDer	./Analysis/Type/Memory/TyAnn.hs	31;"	t
@@ -1107,7 +1106,7 @@ elDiv	./Language/LLVMIR/Printer/NamedTypes.hs	42;"	v
 elems_Terminator_Switch	src/Language/LLVMIR.hs	447;"	v
 emode	Main.hs	54;"	v
 emptyFunction	./Language/LLVMIR/Util.hs	21;"	v
-eqStruct	./Analysis/Type/Util.hs	120;"	v
+eqStruct	./Analysis/Type/Util.hs	119;"	v
 erase	./Analysis/Type/Memory/Util.hs	44;"	v
 eraseEnv	./Analysis/Type/Memory/Util.hs	58;"	v
 errorMsg	./Analysis/Type/Standard/Constant.hs	88;"	v
@@ -1123,7 +1122,7 @@ extractModule	./Language/LLVMIR/Extractor/Module.hs	58;"	v	file:
 f	./Analysis/Type/Standard/Instruction.hs	219;"	v
 f_Terminator_Br	src/Language/LLVMIR.hs	445;"	v
 filterIContext	./Analysis/Type/Memory/Context.hs	26;"	v
-findBasicBlock	./Analysis/Type/Util.hs	99;"	v
+findBasicBlock	./Analysis/Type/Util.hs	98;"	v
 findBasicBlock	./Language/LLVMIR/Util.hs	43;"	v
 fn	./Analysis/Asm/Lift.hs	46;"	v	file:
 fn	./Analysis/Type/Inference/Base.hs	115;"	v
@@ -1172,7 +1171,7 @@ getInitVal	./Language/LLVMIR/Extractor/Module.hs	123;"	v	file:
 getInstruction	./Language/LLVMIR/Extractor/Instruction.hs	71;"	v
 getInstructionValue	./Language/LLVMIR/Extractor/Instruction.hs	133;"	v
 getInsts	./Language/LLVMIR/Extractor/Instruction.hs	59;"	v
-getIntValue	./Analysis/Type/Util.hs	52;"	v
+getIntValue	./Analysis/Type/Util.hs	51;"	v
 getLogicalOp	./Language/LLVMIR/Extractor/Instruction.hs	186;"	v
 getMemoryOp	./Language/LLVMIR/Extractor/Instruction.hs	195;"	v
 getModFns	./Language/LLVMIR/Util.hs	59;"	v
@@ -1259,14 +1258,14 @@ index	./Language/LLVMIR/Printer/NamedTypes.hs	19;"	v
 infoValue	./Language/LLVMIR/Util.hs	62;"	v
 initenv	./Analysis/Type/Standard/Module.hs	21;"	v	file:
 input	Main.hs	54;"	v
-insert	./Analysis/Type/Util.hs	79;"	v
+insert	./Analysis/Type/Util.hs	78;"	v
 instr	./Language/LLVMIR/Extractor/Context.hs	24;"	v
 instrs_BasicBlock_BasicBlock	src/Language/LLVMIR.hs	130;"	v
 intConstantValue	./Language/LLVMIR/Util.hs	71;"	v
 inttofp	./Analysis/Type/Standard/Instruction.hs	176;"	v
 ioremap	./Analysis/Type/Inference/Module.hs	35;"	v	file:
 is	./Language/LLVMIR/Extractor/Instruction.hs	39;"	v
-isAgg	./Analysis/Type/Util.hs	47;"	v
+isAgg	./Analysis/Type/Util.hs	46;"	v
 isAnnAgg	./Analysis/Type/Memory/Util.hs	69;"	v
 isAnnFloat	./Analysis/Type/Memory/Util.hs	77;"	v
 isAnnInt	./Analysis/Type/Memory/Util.hs	73;"	v
@@ -1277,19 +1276,19 @@ isComparableTypeFloat	./Analysis/Type/Standard/Constant.hs	147;"	v
 isComparableTypeInt	./Analysis/Type/Standard/Constant.hs	141;"	v
 isConst_Global_GlobalVar	src/Language/LLVMIR.hs	235;"	v
 isConstant	./Language/LLVMIR/Extractor/Module.hs	45;"	v	file:
-isFloat	./Analysis/Type/Util.hs	35;"	v
-isFstClass	./Analysis/Type/Util.hs	64;"	v
-isInt	./Analysis/Type/Util.hs	31;"	v
+isFloat	./Analysis/Type/Util.hs	34;"	v
+isFstClass	./Analysis/Type/Util.hs	63;"	v
+isInt	./Analysis/Type/Util.hs	30;"	v
 isPathInitialized	./Language/LTL/Base.hs	196;"	v
-isPointer	./Analysis/Type/Util.hs	43;"	v
+isPointer	./Analysis/Type/Util.hs	42;"	v
 isSA_Instruction_InlineAsm	src/Language/LLVMIR.hs	290;"	v
-isSmpTy	./Analysis/Type/Util.hs	24;"	v
-isTyOrVecOfTy	./Analysis/Type/Util.hs	56;"	v
+isSmpTy	./Analysis/Type/Util.hs	23;"	v
+isTyOrVecOfTy	./Analysis/Type/Util.hs	55;"	v
 isUaddr_Global_GlobalVar	src/Language/LLVMIR.hs	235;"	v
 isVar_Function_FunctionDecl	src/Language/LLVMIR.hs	227;"	v
 isVar_Function_FunctionDef	src/Language/LLVMIR.hs	226;"	v
 isVar_Type_TyFunction	src/Language/LLVMIR.hs	469;"	v
-isVector	./Analysis/Type/Util.hs	39;"	v
+isVector	./Analysis/Type/Util.hs	38;"	v
 istates	./Language/LTL/Base.hs	160;"	v
 iv_SimpleConstant_ConstantInt	src/Language/LLVMIR.hs	432;"	v
 ival_Global_GlobalVar	src/Language/LLVMIR.hs	235;"	v
@@ -1353,7 +1352,7 @@ nextUnique	./Language/LLVMIR/Util.hs	18;"	v
 nmdtys	./Language/LLVMIR/Extractor/Context.hs	23;"	v
 nmdtys_Module_Module	src/Language/LLVMIR.hs	376;"	v
 nnf	./Language/LTL/Base.hs	141;"	v
-notAggFstClass	./Analysis/Type/Util.hs	76;"	v
+notAggFstClass	./Analysis/Type/Util.hs	75;"	v
 numEl_Type_TyArray	src/Language/LLVMIR.hs	468;"	v
 numEl_Type_TyStruct	src/Language/LLVMIR.hs	470;"	v
 numEl_Type_TyVector	src/Language/LLVMIR.hs	472;"	v
@@ -2237,7 +2236,7 @@ typeConstraints	./Analysis/Type/Inference/Module.hs	32;"	v
 typeExpression	./Analysis/Type/Standard/Constant.hs	92;"	v
 typeFunction	./Analysis/Type/Standard/Function.hs	17;"	v
 typeGetElementPtrConstantExpr	./Analysis/Type/Standard/Constant.hs	98;"	v
-typeGlobalValue	./Analysis/Type/Util.hs	94;"	v
+typeGlobalValue	./Analysis/Type/Util.hs	93;"	v
 typeInference	./Analysis/Type.hs	37;"	v
 typeMode	Main.hs	98;"	v
 typeOf	./Language/LLVMIR/Extractor/Type.hs	35;"	v
@@ -2246,7 +2245,7 @@ typeSignature	./Analysis/Type/Standard/Function.hs	32;"	v	file:
 typeSimpleConstant	./Analysis/Type/Standard/Constant.hs	35;"	v
 typeUnaryExpression	./Analysis/Type/Standard/Constant.hs	153;"	v
 typeValue	./Analysis/Type/Standard/Constant.hs	19;"	v
-typeValueGen	./Analysis/Type/Util.hs	87;"	v
+typeValueGen	./Analysis/Type/Util.hs	86;"	v
 types	./Language/LLVMIR/Printer/NamedTypes.hs	32;"	v
 types'	./Language/LLVMIR/Printer/NamedTypes.hs	39;"	v
 tys_Type_TyStruct	src/Language/LLVMIR.hs	470;"	v

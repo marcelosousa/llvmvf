@@ -55,13 +55,13 @@ tyanCheckParameter tye (Parameter i ty) = let tya = liftTy ty
                                           in (tya, insert i tya tye)
 
 -- Analyse a function
-tyanFunction :: NamedTyEnv -> Context -> Function -> Context
+tyanFunction :: NamedTypes -> Context -> Function -> Context
 tyanFunction nmdtye (c,tye) (FunctionDef  n l rty iv pms bbs) = 
     let (tysig, ntye) = tyanSignature tye n pms (liftTy rty) iv
     in tyanCheckBasicBlock nmdtye (c,ntye) bbs (head bbs) -- assuming that head bbs is the entry block 
 tyanFunction nmdtye c (FunctionDecl n l rty iv pms) = c
 
-tyanCheckBasicBlock :: NamedTyEnv -> Context -> BasicBlocks -> BasicBlock -> Context
+tyanCheckBasicBlock :: NamedTypes -> Context -> BasicBlocks -> BasicBlock -> Context
 tyanCheckBasicBlock nmdtye (c,tye) bbs (BasicBlock l phis instr tmn) = trace ("typeCheckBasicBlock " ++ show l) $
   let ((c', tye'),rty) = tyanCheckInstructions nmdtye (c,tye) instr 
   in case M.lookup l tye of
@@ -71,7 +71,7 @@ tyanCheckBasicBlock nmdtye (c,tye) bbs (BasicBlock l phis instr tmn) = trace ("t
         ty -> (c',tye')
     Just ty -> (c,tye) 
 
-tyanCheckBasicBlocks :: NamedTyEnv -> Context -> BasicBlocks -> BasicBlocks -> Context
+tyanCheckBasicBlocks :: NamedTypes -> Context -> BasicBlocks -> BasicBlocks -> Context
 tyanCheckBasicBlocks nmdtye c bbs [bb] = tyanCheckBasicBlock nmdtye c bbs bb
 tyanCheckBasicBlocks nmdtye c bbs [bbt,bbf] = let (ct,tybbt) = tyanCheckBasicBlock nmdtye c bbs bbt 
                                                   (cf,tybbf) = tyanCheckBasicBlock nmdtye c bbs bbf
@@ -80,7 +80,7 @@ tyanCheckBasicBlocks nmdtye c bbs x = error $ "tyanCheckBasicBlocks: " ++ show x
 
 
 -- typeCheckInstructions
-tyanCheckInstructions :: NamedTyEnv -> Context -> Instructions -> (Context, TyAnn)
+tyanCheckInstructions :: NamedTypes -> Context -> Instructions -> (Context, TyAnn)
 tyanCheckInstructions nmdtye c []  = error "typeCheckInstructions: emtpy list"
 tyanCheckInstructions nmdtye c [i] = tyanCheckInstruction nmdtye c i
 tyanCheckInstructions nmdtye c (x:xs) = 
