@@ -9,6 +9,7 @@ module Analysis.Type.Memory.Constant where
 import qualified Data.Map as M
 
 import Language.LLVMIR
+import Language.LLVMIR.Util
 
 import Analysis.Type.Util
 import Analysis.Type.Memory.Util
@@ -141,7 +142,7 @@ tyanUnaryExpression nmdtye tye n opcode val ty =
     43 -> let (tyv',_) = tyanValue nmdtye tye val
               tyv = erase tyv'
           in if notAggFstClass tyv && notAggFstClass ty
-             then if sizeof tyv == sizeof ty
+             then if sizeOf tyv == sizeOf ty
                   then case tyv' of
                         T.TyDer (T.TyPtr tyr a) -> liftTyGen ty a
                         _ -> liftTy ty

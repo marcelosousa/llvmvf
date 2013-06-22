@@ -10,6 +10,7 @@ module Analysis.Type.Standard.Constant where
 
 import Analysis.Type.Util
 import Language.LLVMIR
+import Language.LLVMIR.Util
 import qualified Data.Map as M
 import Debug.Trace (trace)
 
@@ -157,7 +158,7 @@ typeUnaryExpression nmdtye tye n opcode val ty =
              else error $ "PtrToInt(1): Either type is not pointer or not int: " ++ show [tyv, ty] ++ "\n" ++ show val
     43 -> let tyv = typeValue nmdtye tye val
           in if notAggFstClass tyv && notAggFstClass ty
-             then if sizeof tyv == sizeof ty
+             then if sizeOf tyv == sizeOf ty
                   then ty
                   else error $ "bitcast: types with different bit sizes:" ++ show tyv ++ "\n" ++ show ty
      else error $ "bitcast: One of the types " ++ show [tyv, ty] ++ " is aggregate or not fst class" 

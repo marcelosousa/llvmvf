@@ -9,6 +9,7 @@ module Analysis.Type.Memory.Util where
 import qualified Data.Map as M
 
 import Language.LLVMIR
+import Language.LLVMIR.Util
 
 import Analysis.Type.Util
 import Analysis.Type.Memory.TyAnn (TyAnn,TyAnnot)
@@ -51,11 +52,13 @@ erase (T.TyDer (T.TyAgg (T.TyStr n s tys))) = TyStruct n s $ map erase tys
 erase (T.TyDer (T.TyFun tys ty v))          = TyFunction (map erase tys) (erase ty) v
 erase (T.TyDer (T.TyPtr ty _))              = TyPointer $ erase ty
 erase (T.TyDer (T.TyVec s ty))              = TyVector s $ erase ty
---erase (T.TyJumpTo i)                        = TyJumpTo i
 erase x = error $ "erase " ++ show x 
 
 eraseEnv :: TyAnnEnv -> TyEnv
 eraseEnv = M.map erase
+
+instance Sizable TyAnn where
+	sizeOf τ = sizeOf $ erase τ
 
 -- Subtyping relation 
 (<:) :: TyAnn -> TyAnn -> Bool

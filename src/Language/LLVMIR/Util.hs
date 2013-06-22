@@ -12,7 +12,7 @@ import Data.Maybe
 import Data.List
 import qualified Data.Set as S
 import qualified Data.Map as M
-import UU.PPrint
+import Prelude.Unicode ((⧺))
 
 nextUnique :: Int -> (Int, Int)
 nextUnique u = (u+1, u)
@@ -99,7 +99,25 @@ instance Typing ConstantFP where
    typeOf (ConstantFPFloat  _ τ) = τ
    typeOf (ConstantFPDouble _ τ) = τ
 
-instance Pretty Identifier where
-  pretty (Local i) = text i
-  pretty (Global i) = text i
+class Sizable α where
+  sizeOf ∷ α → Int
 
+instance Sizable Type where
+  sizeOf τ = case τ of
+    TyInt      p        → p
+    TyPointer  _        → 8
+    TyVector   numEl τ  → numEl * sizeOf τ
+    TyArray    numEl τ  → numEl * sizeOf τ
+    TyStruct _ numEl τs → sum $ map sizeOf τs
+    Tyx86MMX            → 64
+    _ → error $ "sizeOf type: " ⧺ show τ
+
+instance Sizable TyFloatPoint where
+  sizeOf τ = case τ of
+    TyHalf      → 16
+    TyFloat     → 32
+    TyDouble    → 64
+    TyFP128     → 128
+    Tyx86FP80   → 80
+    TyPPCFP128  → 128
+    _  → error $ "sizeOf float: " ⧺ show τ

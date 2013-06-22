@@ -97,25 +97,6 @@ findBasicBlock [] l = Nothing
 findBasicBlock (bb@(BasicBlock l _ _ _):bbs) i | i == l = Just bb
                                                | otherwise = findBasicBlock bbs i
                                                                                
-sizeof :: Type -> Int
-sizeof (TyInt        p         ) = p  
-sizeof (TyFloatPoint TyHalf    ) = 16
-sizeof (TyFloatPoint TyFloat   ) = 32
-sizeof (TyFloatPoint TyDouble  ) = 64
-sizeof (TyFloatPoint TyFP128   ) = 128
-sizeof (TyFloatPoint Tyx86FP80 ) = 80
-sizeof (TyFloatPoint TyPPCFP128) = 128
-sizeof (TyPointer    ty        ) = 8 --sizeof ty 
-sizeof (TyVector     numEl ty  ) = numEl * sizeof ty
-sizeof (TyArray      numEl ty  ) = numEl * sizeof ty
-sizeof (TyStruct   _ numEl tys ) = sum $ map sizeof tys
-sizeof (TyVoid                 ) = error "sizeof"
-sizeof (Tyx86MMX               ) = error "sizeof"
-sizeof (TyLabel                ) = error "sizeof"
-sizeof (TyMetadata             ) = error "sizeof"
-sizeof (TyOpaque               ) = error "sizeof"
-sizeof (TyUndefined            ) = error "sizeof"
-sizeof (TyFunction pty rty iv  ) = error "sizeof"
 
 (<=>) :: NamedTyEnv -> Type -> Type -> Bool
 (<=>) nmdtye TyVoid      TyVoid      = True

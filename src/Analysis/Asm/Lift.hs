@@ -17,7 +17,6 @@ import qualified Data.Set as S
 import Data.List
 import Prelude.Unicode ((⧺),(≡))
 
-
 import Control.Monad
 import Control.Applicative
 import Control.Monad.State hiding (lift)
