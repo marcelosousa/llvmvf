@@ -13,10 +13,14 @@ import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.TyAnn as T
 import Analysis.Type.Util
 
+import Prelude.Unicode ((⧺),(≡))
+
+import Debug.Trace
+
 -- Type Constraints for values
 instance TyConstr Value where
-	τℂ (Id n τ) = τℂgen n τ
-	τℂ c = τℂ c
+	τℂ (Id n τ) = vτℂgen n τ 
+	τℂ (Constant c) = τℂ c
 
 instance TyConstr Constant where
 	τℂ c = case c of
@@ -29,15 +33,16 @@ instance TyConstr Constant where
 
 instance TyConstr GlobalValue where
 	τℂ v = case v of
-	  FunctionValue  n τ → τℂgen n τ
-	  GlobalAlias    n τ → τℂgen n τ
-	  GlobalVariable n τ → τℂgen n τ
+	  FunctionValue  n τ → vτℂgen n τ
+	  GlobalAlias    n τ → (↣) ε
+	  GlobalVariable n τ → (↣) ε
 
-τℂgen ∷ Identifier → Type → ℂState
-τℂgen n τ = do
+vτℂgen ∷ Identifier → Type → ℂState
+vτℂgen n τ = do
 	let τα = (↑)τ
 	    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε
 	(↣) nℂ
+
 
 instance Constr Value where
 	π (Id n τ) = ℂπ n
