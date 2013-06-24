@@ -37,11 +37,12 @@ data Ω = Ω
   { 
     rc  ∷ S.Set Τℂ  -- remaining constraints
   , mic ∷ M.Map Id ℂ -- current map
-  , nmdtys ∷ NamedTypes 
+  , nmdtys ∷ NamedTypes
+  , gmap ∷ Γ -- global map
   }
 
 instance Eq Ω where
-  (Ω rc1 mic1 _) == (Ω rc2 mic2 _) = rc1 ≡ rc2 && mic1 ≡ mic2 
+  (Ω rc1 mic1 _ _) == (Ω rc2 mic2 _ _) = rc1 ≡ rc2 && mic1 ≡ mic2 
 
 νΤℂ ∷ Τℂ → ΩState ()
 νΤℂ τℂ = do γ@Ω{..} ← get
@@ -59,7 +60,7 @@ instance Eq Ω where
 
 type ΩState α = State Ω α
 
-iΩ c τs = Ω c M.empty τs
+iΩ c = Ω c M.empty
 
 μrewriteEq ∷ ΩState ()
 μrewriteEq = trace ("fixRewriteEq -----") $ do
@@ -97,7 +98,7 @@ rwEqτ α@(ℂτ τ1) β = do
   nτs ← δNτ
   case β of
     ℂτ τ2 → case (≅) nτs τ1 τ2 of
-              Nothing → error $ "rwEqTy (1) " ⧺ show α ⧺ " " ⧺ show β
+              Nothing → error $ "rwEqTy (1) " ⧺ show α ⧺ "\n" ⧺ show β
               Just c  → (↣) $ ℂτ c
     ℂc cl → if τ1 `classOf` cl 
             then (↣) α
@@ -154,14 +155,10 @@ rwEqλ _ _ = error $ "rwEqλ: FATAL"
 
 -- Type gep
 rwEqι ∷ ℂ → ℂ → ΩState ℂ
-rwEqι α@(ℂι cin idxn) β =
-  case β of
-    ℂτ τ → error "rqEqgep type"
-    ℂπ n → error "rqEqgep pi"
-    ℂc c → error "rqEqgep class"
-    ℂι c2 i2 → error "rqEqgep gep"
-    ℂp c ταρ → error "rqEqgep pointer"
-    ℂλ ca cr → error "rqEqgep function"
+rwEqι α@(ℂι cin idxn) β = do
+  γ@Ω{..} ← get
+  let τα = solveEq nmdtys gmap mic [] α
+  rwEq β (ℂτ τα)
 
 -- Type pointer
 -- Missing ℂc
@@ -191,7 +188,7 @@ rwEqp _ _ = error $ "rwEqp: FATAL"
 type Γ = M.Map Id Τα
 
 (⊨) ∷ NamedTypes → Γ → S.Set Τℂ → Γ
-(⊨) nτ e τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ nτ)
+(⊨) nτ e τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ nτ e)
                   γ' = trace "solveEq" $ M.mapWithKey (\n c → solveEq nτ e mic [n] c) mic
               in S.fold (solveCast nτ) γ' rc
 
@@ -203,7 +200,7 @@ solveEq nτ e γ n τℂ = case τℂ of
   ℂπ m → look nτ e γ n m
   ℂc cl → error "solve does not expect a class"
   ℂι c i → let cτ = solveEq nτ e γ n c
-           in gepτ nτ cτ i
+           in TyDer $ TyPtr (gepτ nτ cτ i) TyAny
   ℂp c a → let cτ = solveEq nτ e γ n c 
            in TyDer $ TyPtr cτ a  
   ℂλ ca cr → let caτ = map (solveEq nτ e γ n) ca
@@ -232,9 +229,17 @@ solveBit op nτ γ α@(ℂπ n) β =
     ℂτ βτ → if sizeOf ατ `op` sizeOf βτ
             then γ
             else error $ "solveBit: bitsize mismatch " ⧺ show α ⧺ " " ⧺ show β
-    ℂπ m  → undefined
+    ℂπ m  → error "solveBit: both are Cv"
     _ → error "solveBit: beta is not supported"
-solveBit op nτ γ α β = error "solveBit: fst arg is not Cpi" 
+solveBit op nτ γ α β@(ℂπ n) =
+  let βτ = safeLookup n γ
+  in case α of
+    ℂτ ατ → if sizeOf ατ `op` sizeOf βτ
+            then γ
+            else error $ "solveBit: bitsize mismatch " ⧺ show α ⧺ " " ⧺ show β
+    ℂπ m  → error "solveBit: both are Cv"
+    _ → error "solveBit: beta is not supported"
+solveBit op nτ γ α β = error $ "solveBit: not Cpi (" ⧺ show α ⧺ ", " ⧺ show β ⧺ ")"
 
 safeLookup ∷ Id → Γ → Τα
 safeLookup n γ = 

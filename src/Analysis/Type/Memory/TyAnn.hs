@@ -74,12 +74,11 @@ instance Show TyDer where
   show (TyFun [] t _) = "fn :: " ++ show t
   show (TyFun tys t _) = "fn :: " ++ (foldr (\x s -> show x ++ " -> " ++ s) (show t) tys)
   show (TyPtr ty tya) = "*(" ++ show ty ++ ") " ++ show tya
---  show (TyOpa s) = "{" ++ s ++ "}"
 
 instance Show TyAgg where
   show (TyArr n t) = "[" ++ show n ++ " x " ++ show t ++ "]"
   show (TyStr nm n []) = "{" ++ nm ++ "}"
-  show (TyStr nm n t) = "{" ++ (foldr (\x s -> show x ++ ", " ++ show s) (show $ last t) (init t)) ++ "}"
+  show (TyStr nm n t) = "{" ++ (foldr (\x s -> show x ++ ", " ++ s) (show $ last t) (init t)) ++ "}"
 
 instance Show TyAnnot where
   show TyIOAddr = "IOAddr"
