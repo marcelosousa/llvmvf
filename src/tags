@@ -1060,18 +1060,18 @@ bitbinOps	./Language/LLVMIR/Extractor/Instruction.hs	360;"	v
 bmcMode	Main.hs	92;"	v
 body_Function_FunctionDef	src/Language/LLVMIR.hs	226;"	v
 bound	Main.hs	57;"	v
-buildAdd	./Analysis/Asm/Lift.hs	269;"	v	file:
+buildAdd	./Analysis/Asm/Lift.hs	270;"	v	file:
 buildBB	./Analysis/Asm/Lift.hs	200;"	v	file:
 buildBBName	./Analysis/Asm/Lift.hs	207;"	v	file:
 buildBody	./Analysis/Asm/Lift.hs	196;"	v	file:
-buildCmpxchg	./Analysis/Asm/Lift.hs	304;"	v	file:
+buildCmpxchg	./Analysis/Asm/Lift.hs	305;"	v	file:
 buildFn	./Analysis/Asm/Lift.hs	184;"	v	file:
 buildInstruction	./Analysis/Asm/Lift.hs	224;"	v	file:
 buildName	./Analysis/Asm/Lift.hs	76;"	v	file:
 buildParam	./Analysis/Asm/Lift.hs	193;"	v	file:
 buildTerminator	./Analysis/Asm/Lift.hs	217;"	v	file:
-buildValue	./Analysis/Asm/Lift.hs	322;"	v	file:
-buildXchg	./Analysis/Asm/Lift.hs	290;"	v	file:
+buildValue	./Analysis/Asm/Lift.hs	323;"	v	file:
+buildXchg	./Analysis/Asm/Lift.hs	291;"	v	file:
 cInt2Bool	./Language/LLVMIR/Extractor/Util.hs	20;"	v
 cUInt2Bool	./Language/LLVMIR/Extractor/Util.hs	16;"	v
 c_Value_Constant	src/Language/LLVMIR.hs	483;"	v
@@ -1132,7 +1132,7 @@ fnBasicBlockIds	./Language/LLVMIR/Util.hs	52;"	v
 fp_SimpleConstant_ConstantFP	src/Language/LLVMIR.hs	433;"	v
 fptoint	./Analysis/Type/Standard/Instruction.hs	162;"	v
 fpv_ConstantFP_ConstantFPFloat	src/Language/LLVMIR.hs	191;"	v
-fpτGas2τ	./Analysis/Asm/Lift.hs	345;"	v	file:
+fpτGas2τ	./Analysis/Asm/Lift.hs	346;"	v	file:
 freshLocal	./Analysis/Asm/Lift.hs	176;"	v	file:
 freshName	./Analysis/Asm/Lift.hs	80;"	v	file:
 funs_Module_Module	src/Language/LLVMIR.hs	376;"	v
@@ -2095,7 +2095,7 @@ solveBit	./Analysis/Type/Inference/Solver.hs	226;"	v
 solveCast	./Analysis/Type/Inference/Solver.hs	219;"	v
 solveEq	./Analysis/Type/Inference/Solver.hs	198;"	v
 splitConstrs	./Analysis/Type/Memory/Context.hs	33;"	v
-ssaValue	./Analysis/Asm/Lift.hs	331;"	v	file:
+ssaValue	./Analysis/Asm/Lift.hs	332;"	v	file:
 states	./Language/LTL/Base.hs	159;"	v
 struct_ConstantExpr_GetElementPtrConstantExpr	src/Language/LLVMIR.hs	183;"	v
 struct_Instruction_GetElementPtr	src/Language/LLVMIR.hs	274;"	v
@@ -2259,6 +2259,7 @@ valueIdentifier	./Language/LLVMIR/Util.hs	24;"	v
 valueIdentifier'	./Language/LLVMIR/Util.hs	30;"	v
 var_Parameter_Parameter	src/Language/LLVMIR.hs	402;"	v
 vars	./Analysis/Asm/Lift.hs	163;"	v	file:
+vτℂgen	./Analysis/Type/Inference/Value.hs	41;"	v
 withContext	./Language/LLVMIR/Extractor/Context.hs	35;"	v
 wrap_Alias	src/Language/LLVMIR/Printer/Module.hs	100;"	v
 wrap_Aliases	src/Language/LLVMIR/Printer/Module.hs	134;"	v
@@ -2351,8 +2352,10 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 |~	./Language/LTL/Base.hs	262;"	v
 |~|	./Language/LTL/Base.hs	317;"	v
 ~>	./Language/LTL/Base.hs	74;"	v
+Γ	./Analysis/Asm/Lift.hs	162;"	d	file:
 Γ	./Analysis/Asm/Lift.hs	162;"	t	file:
 Γ	./Analysis/Type/Inference/Solver.hs	188;"	t
+Ε	./Analysis/Asm/Lift.hs	45;"	d	file:
 Ε	./Analysis/Asm/Lift.hs	45;"	t	file:
 Ε	./Analysis/Type/Inference/Base.hs	113;"	d
 Ε	./Analysis/Type/Inference/Base.hs	113;"	t
@@ -2390,20 +2393,20 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 νname	./Analysis/Asm/Lift.hs	63;"	v	file:
 νΤℂ	./Analysis/Type/Inference/Solver.hs	48;"	v
 π	./Analysis/Type/Inference/Base.hs	150;"	v
-πgep	./Analysis/Type/Inference/Value.hs	88;"	v
-τGas2τ	./Analysis/Asm/Lift.hs	341;"	v	file:
+πgep	./Analysis/Type/Inference/Value.hs	111;"	v
+τGas2τ	./Analysis/Asm/Lift.hs	342;"	v	file:
 τList	./Analysis/Type/Inference/Base.hs	47;"	v
 τncall	./Analysis/Type/Inference/Instruction.hs	182;"	v
 τselect	./Analysis/Type/Inference/Instruction.hs	186;"	v
 τℂ	./Analysis/Type/Inference/Base.hs	146;"	v
 τℂalloca	./Analysis/Type/Inference/Instruction/Memory.hs	23;"	v
-τℂaop	./Analysis/Type/Inference/Instruction/Memory.hs	68;"	v
+τℂaop	./Analysis/Type/Inference/Instruction/Memory.hs	69;"	v
 τℂbin	./Analysis/Type/Inference/Instruction.hs	130;"	v
 τℂcall	./Analysis/Type/Inference/Instruction.hs	171;"	v
 τℂcast	./Analysis/Type/Inference/Instruction.hs	144;"	v
 τℂcmp	./Analysis/Type/Inference/Instruction.hs	156;"	v
-τℂgep	./Analysis/Type/Inference/Instruction/Memory.hs	52;"	v
-τℂload	./Analysis/Type/Inference/Instruction/Memory.hs	42;"	v
+τℂgep	./Analysis/Type/Inference/Instruction/Memory.hs	53;"	v
+τℂload	./Analysis/Type/Inference/Instruction/Memory.hs	43;"	v
 τℂs	./Analysis/Type/Inference/Module.hs	46;"	v	file:
 τℂstore	./Analysis/Type/Inference/Instruction/Memory.hs	30;"	v
 τℂu	./Analysis/Type/Inference/Base.hs	50;"	v

@@ -28,14 +28,14 @@ import qualified Data.Set as S
 -- Type Constraints for Store
 τℂstore ∷ Τ → Value → Value → ℂState
 τℂstore τ α β = do
---	τℂα ← τℂ α               -- τℂ of value
---	τℂβ ← τℂ β               -- τℂ of pointer
-	let cτρ = ℂτ $ (↑)τ      -- ref τ of value
+	τℂα ← τℂ α               -- τℂ of value
+	τℂβ ← τℂ β               -- τℂ of pointer
+	let cτρ = ℂτ $ (↑) τ -- ref τ of value
 	    (πα,πβ) = (π α,π β)  -- 
 	    τℂ = ℂτ (T.TyPri T.TyVoid) :=: cτρ
 	    βℂ = πβ :=: (πα ⤜ T.TyRegAddr)
 	    αℂ = πα :=: ℂc T1
-	(↣) $ τℂ ∘ (αℂ ∘ (βℂ ∘ ε)) -- (τℂα ∪ τℂβ)))
+	(↣) $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ)))
 
 -- Type Constraints for Load
 τℂload ∷ Id → Value → ℂState

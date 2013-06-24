@@ -224,17 +224,11 @@ buildInstruction ∷ Instructions → AS.GAS → State Γ Instructions
 buildInstruction is i = 
  case i of
 	AS.Add τ' α β → do
-		ιs ← buildAdd (τGas2τ τ') α β
+		ιs ← buildBinOp Add (τGas2τ τ') α β
 		(↣) $ ιs⧺is
 	AS.Sub τ' α β → do
-		let τ = τGas2τ τ'
-		αv ← buildValue τ α
-		βv ← buildValue τ β
-		βi ← ssaValue βv
-		γ@Γ{..} ← get
-		put γ{lastVar = Just βi}
-		let ι = Sub 0 (valueIdentifier' "" βi) τ αv βv
-		(↣) $ ι:is
+		ιs ← buildBinOp Sub (τGas2τ τ') α β
+		(↣) $ ιs⧺is
 	AS.Mov τ' α β → do
 		let τ = τGas2τ τ'
 		αv ← buildValue τ α
@@ -262,11 +256,14 @@ buildInstruction is i =
 		γ@Γ{..} ← get
 		let αι = valueIdentifier' "" αi
 		    ι = Call 0 αι τ fn [αv]
+		put γ{lastVar = Just αi}
 		(↣) $ ι:is
 	_ → (↣) is
 
-buildAdd ∷ Type → AS.Operand → AS.Operand → State Γ Instructions
-buildAdd τ α β@(AS.Reg _) = do
+type BinOpTy = (Int → Id → Type → Value → Value → Instruction)
+
+buildBinOp ∷ BinOpTy → Type → AS.Operand → AS.Operand → State Γ Instructions
+buildBinOp op τ α β@(AS.Reg _) = do
 	αv ← buildValue τ  α
 	βv ← buildValue τ β
 	case typeOf βv of
@@ -282,8 +279,8 @@ buildAdd τ α β@(AS.Reg _) = do
 			let βi = (IR.Id βii τ)
 			    li = Load 0 βii βv (Align 8)
 			j ← freshLocal
-			let ai = Add 0 j τ αv βi
-			    si = Store 0 τ (IR.Id j τ) βv (Align 8)
+			let ai = op 0 j τ αv βi
+			    si = Store 0 TyVoid (IR.Id j τ) βv (Align 8)
 			(↣) $ [li,ai,si]
 
 buildXchg ∷ Type → AS.Operand → AS.Operand → State Γ Instruction
