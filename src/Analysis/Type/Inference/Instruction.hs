@@ -100,12 +100,12 @@ instance TyConstr Instruction where
 		SExt     _ n α τ → τℂcast n (α,TInt) (τ,TInt) (:<:) -- Sign extend integers
 		FPTrunc  _ n α τ → τℂcast n (α,TFlt) (τ,TFlt) (>:)  -- Truncate floating point
 		FPExt    _ n α τ → τℂcast n (α,TFlt) (τ,TFlt) (:≤:) -- Extend floating point
-		FPToUI   _ n α τ → τℂcast n (α,TFlt) (τ,TInt) (:=:) -- floating point → UInt
-		FPToSI   _ n α τ → τℂcast n (α,TFlt) (τ,TInt) (:=:) -- floating point → SInt
-		UIToFP   _ n α τ → τℂcast n (α,TInt) (τ,TFlt) (:=:) -- UInt → floating point
-		SIToFP   _ n α τ → τℂcast n (α,TInt) (τ,TFlt) (:=:) -- SInt → floating point
-		PtrToInt _ n α τ → τℂcast n (α,TPtr) (τ,TInt) (:=:) -- Pointer → integer 
-		IntToPtr _ n α τ → τℂcast n (α,TInt) (τ,TPtr) (:=:) -- integer → Pointer
+		FPToUI   _ n α τ → τℂnastyCast n (α,TFlt) (τ,TInt) -- floating point → UInt
+		FPToSI   _ n α τ → τℂnastyCast n (α,TFlt) (τ,TInt) -- floating point → SInt
+		UIToFP   _ n α τ → τℂnastyCast n (α,TInt) (τ,TFlt) -- UInt → floating point
+		SIToFP   _ n α τ → τℂnastyCast n (α,TInt) (τ,TFlt) -- SInt → floating point
+		PtrToInt _ n α τ → τℂnastyCast n (α,TPtr) (τ,TInt) -- Pointer → integer 
+		IntToPtr _ n α τ → τℂnastyCast n (α,TInt) (τ,TPtr) -- integer → Pointer
 		BitCast  _ n α τ → τℂcast n (α,T1NA) (τ,T1NA) (:≌:) -- 1stclass non agg → 1stclass non agg
     -- Comparison Operations
 		ICmp _ n _ τ α β → τℂcmp TInt n τ α β
@@ -150,6 +150,16 @@ instance TyConstr Instruction where
 	    αℂ = πα ?: cτρ
 	    nℂ = ℂπ n :=: cτρ
 	(↣) $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
+
+τℂnastyCast ∷ Id → (Value, TClass) → (Τ, TClass) → ℂState
+τℂnastyCast n (α,τcα) (τ,τcτ) = do
+	τℂα ← τℂ α
+	let cτρ = ℂτ $ (↑)τ
+	    πα = π α
+	    cℂα = πα :=: ℂc τcα
+	    cℂτ = cτρ :=: ℂc τcτ
+	    nℂ = ℂπ n :=: cτρ
+	(↣) $ nℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα))
 
 -- Type Constraints for comparison operations
 τℂcmp ∷ TClass → Id → Τ → Value → Value → ℂState

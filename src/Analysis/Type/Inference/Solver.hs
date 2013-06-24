@@ -269,31 +269,31 @@ instance AEq TClass where
 
 gepτs ∷ NamedTypes → Τα → [Int] → Τα
 gepτs nτ τ [] = error "geps: no idxs"
-gepτs nτ τ (i:j) = case τ of 
+gepτs nτ τ (i:j) = trace ("gettys: " ⧺ show τ ⧺ "\n" ⧺ show (i:j) ⧺ "\n") $ case τ of 
   TyDer (TyPtr τα τann) → 
-    let τβ = foldr (flip (gepτ nτ)) τα j
+    let τβ = foldl (gepτ nτ) τα j
     in  τβ
   _ →  error $ "gepτs: wrong type " ⧺ show τ
 
 gepτ ∷ NamedTypes → Τα → Int → Τα
-gepτ nτ τ idx = case τ of
+gepτ nτ τ idx =  trace ("getty: " ⧺ show τ ⧺ "\n" ⧺ show idx ⧺ "\n") $  case τ of
   TyDer (TyVec c τβ) → 
     if c > idx
     then τβ
-    else error $ "gepτ: idx > c: " ⧺ show τ ⧺ " " ⧺ show idx 
+    else error $ "gepTy: idx > c: " ⧺ show τ ⧺ " " ⧺ show idx 
   TyDer (TyAgg τα)  → case τα of
     TyArr   c τβ → if c > idx
                    then τβ
-                   else error $ "gepτ: idx > c: " ⧺ show τ ⧺ " " ⧺ show idx 
+                   else error $ "gepTy: idx > c: " ⧺ show τ ⧺ " " ⧺ show idx 
     TyStr n c τβ → if length τβ > idx
                    then τβ !! idx
                    else case M.lookup n nτ of
-                    Nothing → error $ "gepτ: " ⧺ show τ ⧺ " " ⧺ show idx
+                    Nothing → error $ "gepTy: " ⧺ show τ ⧺ "\n" ⧺ show τα ⧺ show idx
                     Just τη → case τη of
                       TyDer (TyAgg (TyStr n' c' τβ')) →
                         if n' ≡ n
                         then if length τβ' > idx
                              then τβ' !! idx
-                             else error $ "gepτ(2): " ⧺ show τ ⧺ " " ⧺ show τη ⧺ " " ⧺ show idx
+                             else error $ "gepTy(2): " ⧺ show τ ⧺ " " ⧺ show τη ⧺ " " ⧺ show idx
                         else gepτ nτ τη idx
-  _ → error $ "gepτ: wrong type " ⧺ show τ
+  _ → error $ "gepTy: wrong type " ⧺ show τ

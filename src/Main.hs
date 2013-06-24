@@ -118,7 +118,7 @@ runOption :: Option -> IO ()
 runOption (Extract bc m) = do mdl <- extract bc
                               let bf = dropExtension bc
                                   p = case m of
-                                    Raw → show mdl
+                                    Raw → show $ liftAsm $ liftDebug mdl
                                     Pretty → show $ pretty mdl
                                     LiftAsm → show $ pretty $ liftAsm $ liftDebug mdl
                               writeFile (addExtension bf "llvf") p
