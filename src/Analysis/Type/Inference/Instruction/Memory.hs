@@ -60,7 +60,7 @@ import qualified Data.Set as S
 	    n1ℂ = ℂπ n :=: cτn
 	   -- n2ℂ = ℂπ n :=: πgep α δs
 	    αℂ  = πα :=: cℂ
-	(↣) $ n1ℂ ∘ (αℂ ∘ (δsℂ ∪ τℂs))
+	(↣) $ n1ℂ ∘ ε
 --	(↣) $ n1ℂ ∘ (n2ℂ ∘ (αℂ ∘ (δsℂ ∪ τℂs)))
 
 -- Type contraints for atomic instructions

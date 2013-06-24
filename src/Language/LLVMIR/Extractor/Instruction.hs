@@ -295,9 +295,15 @@ getOtherOp Call = do ival  <- getInstructionValue
 getOtherOp Select         = do ival <- getInstructionValue
                                pc   <- getPC
                                ident <- getIdent ival
-                               cond  <- (liftIO $ FFI.selectGetCondition ival)  >>= \i -> getValue (ident,i)
-                               valt  <- (liftIO $ FFI.selectGetTrueValue ival)  >>= \i -> getValue (ident,i)
-                               valf  <- (liftIO $ FFI.selectGetFalseValue ival) >>= \i -> getValue (ident,i)
+                               cval <- liftIO $ FFI.selectGetCondition ival
+                               cident <- getIdent cval 
+                               cond  <- getValue (cident,cval)
+                               altval <- liftIO $ FFI.selectGetTrueValue ival
+                               altident <- getIdent altval 
+                               valt  <- getValue (altident,altval)
+                               alfval <- liftIO $ FFI.selectGetFalseValue ival
+                               alfident <- getIdent alfval 
+                               valf  <- getValue (alfident,alfval)
                                return $ LL.Select pc (LL.Local ident) cond valt valf
 getOtherOp UserOp1        = error $ "TODO userop1"
 getOtherOp UserOp2        = error $ "TODO userop2"

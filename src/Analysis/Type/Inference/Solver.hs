@@ -101,7 +101,7 @@ rwEqτ α@(ℂτ τ1) β = do
               Just c  → (↣) $ ℂτ c
     ℂc cl → if τ1 `classOf` cl 
             then (↣) α
-            else error $ "rwEqTy (2)"
+            else error $ "rwEqTy " ⧺ show τ1 ⧺ " not class of " ⧺ show cl
     _ → rwEq β α                       
 rwEqτ _ _ = error $ "rwEqTy: FATAL"
 
@@ -192,48 +192,49 @@ type Γ = M.Map Id Τα
 
 (⊨) ∷ NamedTypes → Γ → S.Set Τℂ → Γ
 (⊨) nτ e τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ nτ)
-                  γ' = trace "solveEq" $ M.mapWithKey (\n c → solveEq e mic [n] c) mic
+                  γ' = trace "solveEq" $ M.mapWithKey (\n c → solveEq nτ e mic [n] c) mic
               in S.fold (solveCast nτ) γ' rc
 
 -- Solve 
 -- Input : Env, Constraints left
-solveEq ∷ Γ → M.Map Id ℂ → [Id] → ℂ → Τα
-solveEq e γ n τℂ = case τℂ of
+solveEq ∷ NamedTypes → Γ → M.Map Id ℂ → [Id] → ℂ → Τα
+solveEq nτ e γ n τℂ = case τℂ of
   ℂτ τ → τ
-  ℂπ m → look e γ n m
+  ℂπ m → look nτ e γ n m
   ℂc cl → error "solve does not expect a class"
-  ℂι c i → error "solve does not expect a gep"
-  ℂp c a → let cτ = solveEq e γ n c 
+  ℂι c i → let cτ = solveEq nτ e γ n c
+           in gepτ nτ cτ i
+  ℂp c a → let cτ = solveEq nτ e γ n c 
            in TyDer $ TyPtr cτ a  
-  ℂλ ca cr → let caτ = map (solveEq e γ n) ca
-                 crτ = solveEq e γ n cr
+  ℂλ ca cr → let caτ = map (solveEq nτ e γ n) ca
+                 crτ = solveEq nτ e γ n cr
              in TyDer $ TyFun caτ crτ False
 
-look ∷ Γ → M.Map Id ℂ → [Id] → Id → Τα 
-look e γ l m | m ∈ l = error "look: same identifiers"
-             | otherwise = case M.lookup m γ of
-                  Nothing → case M.lookup m e of
-                    Nothing → error $ "look: not in maps " ⧺ show m ⧺ show l ⧺ show γ ⧺ show e
-                    Just τ  → τ
-                  Just c  → solveEq e γ (m:l) c
+look ∷ NamedTypes → Γ → M.Map Id ℂ → [Id] → Id → Τα 
+look nτ e γ l m | m ∈ l = error "look: same identifiers"
+                | otherwise = case M.lookup m γ of
+                     Nothing → case M.lookup m e of
+                       Nothing → error $ "look: not in maps " ⧺ show m ⧺ show l ⧺ show γ ⧺ show e
+                       Just τ  → τ
+                     Just c  → solveEq nτ e γ (m:l) c
 
 solveCast ∷ NamedTypes → Τℂ → Γ → Γ
 solveCast nτ τℂ γ = case τℂ of
   c1 :=: c2 → error "solveCast :=: impossible"
-  c1 :<: c2 → error "solveCast :<: constraint"
-  c1 :≤: c2 → error "solveCast :<=: constraint"
-  c1 :≌: c2 → solveBitEq nτ γ c1 c2
+  c1 :<: c2 → solveBit (<) nτ γ c1 c2
+  c1 :≤: c2 → solveBit (<=) nτ γ c1 c2
+  c1 :≌: c2 → solveBit (≡) nτ γ c1 c2
 
-solveBitEq ∷ NamedTypes → Γ → ℂ → ℂ → Γ
-solveBitEq nτ γ α@(ℂπ n) β =
+solveBit ∷ (Int → Int → Bool) → NamedTypes → Γ → ℂ → ℂ → Γ
+solveBit op nτ γ α@(ℂπ n) β =
   let ατ = safeLookup n γ
   in case β of
-    ℂτ βτ → if sizeOf ατ ≡ sizeOf βτ
+    ℂτ βτ → if sizeOf ατ `op` sizeOf βτ
             then γ
-            else error $ "solveBitEq: bitsize mismatch " ⧺ show α ⧺ " " ⧺ show β
+            else error $ "solveBit: bitsize mismatch " ⧺ show α ⧺ " " ⧺ show β
     ℂπ m  → undefined
-    _ → error "solveBitEq: beta is not supported"
-solveBitEq nτ γ α β = error "solveBitEq: fst arg is not Cpi" 
+    _ → error "solveBit: beta is not supported"
+solveBit op nτ γ α β = error "solveBit: fst arg is not Cpi" 
 
 safeLookup ∷ Id → Γ → Τα
 safeLookup n γ = 
@@ -260,3 +261,23 @@ instance AEq TClass where
       _    → (≅) nτs β T1NA
     TAgg → (≅) nτs β TAgg
     T1   → Just β   
+
+gepτ ∷ NamedTypes → Τα → Int → Τα
+gepτ nτ τ idx = case τ of
+  TyDer (TyPtr _ _) → τ
+  TyDer (TyAgg τα)  → case τα of
+    TyArr   c τβ → if c > idx
+                   then τβ
+                   else error $ "gepτ: idx > c: " ⧺ show τ ⧺ " " ⧺ show idx 
+    TyStr n c τβ → if length τβ > idx
+                   then τβ !! idx
+                   else case M.lookup n nτ of
+                    Nothing → error $ "gepτ: " ⧺ show τ ⧺ " " ⧺ show idx
+                    Just τη → case τη of
+                      TyDer (TyAgg (TyStr n' c' τβ')) →
+                        if n' ≡ n
+                        then if length τβ' > idx
+                             then τβ' !! idx
+                             else error $ "gepτ(2): " ⧺ show τ ⧺ " " ⧺ show τη ⧺ " " ⧺ show idx
+                        else gepτ nτ τη idx
+  _ → error $ "gepτ: wrong type " ⧺ show τ

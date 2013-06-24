@@ -99,7 +99,7 @@ sem Instruction
   | Alloca loc.pp = @id.pp <+> char '=' <+> text "alloca" <+> @ty.pp <> char ',' <+> @align.pp
   | Load   loc.pp = @id.pp <+> char '=' <+> text "load"   <+> @v.pp  <> char ',' <+> @align.pp
   | Store  loc.pp = @ty.pp <+> text "store" <+> @v1.pp <> char ',' <+> @v2.pp <> char ',' <+> @align.pp
-  | ICmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
+  | ICmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> parens (@ty.pp) <+> @op1.pp <> char ',' <+> @op2.pp
   | FCmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
   | Call   loc.pp = @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
   | InlineAsm loc.pp = @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> text "asm" <+> bool @hasSE <+> bool @isSA <+> int @dlct <+> dquotes (text $ show @asm) <+> dquotes (text $ show @constr) <> char '(' <> @args.pp <> char ')'

@@ -159,11 +159,13 @@ instance TyConstr Instruction where
 	let cτρ = ℂτ $ (↑)τ
 	    (πα,πβ) = (π α,π β)
 	    αβℂ = πα :=: πβ
-	    cℂ  = πα :=: ℂc τc
+	    --cℂ  = πα :=: cτρ
+	    --cℂ  = πα :=: ℂc τc
 	    cτn = ℂτ $ T.TyPri $ T.TyInt 1
 	    nℂ = ℂπ n :=: cτn
-	    τℂ = cτρ :=: cτn
-	(↣) $ nℂ ∘ (τℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ))))
+	    --τℂ = cτρ :=: cτn
+	(↣) $ nℂ ∘ (αβℂ ∘ (τℂα ∪ τℂβ))
+--	(↣) $ nℂ ∘ (τℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ))))
 
 τℂcall ∷ Id → Τ → Id → Values → ℂState
 τℂcall n τ c χ = do

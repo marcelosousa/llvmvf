@@ -11,7 +11,7 @@
 <=>	./Analysis/Type/Util.hs	104;"	v
 <>	./Language/LLVMIR/Extractor/Opcode.hs	82;"	v
 >:	./Analysis/Type/Inference/Base.hs	107;"	v
-AEq	./Analysis/Type/Memory/TyAnn.hs	87;"	c
+AEq	./Analysis/Type/Memory/TyAnn.hs	89;"	c
 AShr	./Language/LLVMIR/Extractor/Opcode.hs	30;"	d
 AShr	src/Language/LLVMIR.hs	267;"	d
 Acquire	src/Language/LLVMIR.hs	100;"	d
@@ -235,7 +235,7 @@ IC	./Language/Asm.hs	136;"	d
 ICmp	./Language/LLVMIR/Extractor/Opcode.hs	53;"	d
 ICmp	src/Language/LLVMIR.hs	287;"	d
 ICmpExpr	src/Language/LLVMIR.hs	155;"	d
-IEq	./Analysis/Type/Memory/TyAnn.hs	152;"	c
+IEq	./Analysis/Type/Memory/TyAnn.hs	159;"	c
 IRegC	./Language/Asm.hs	142;"	d
 Id	./Analysis/Asm/Lift.hs	40;"	t	file:
 Id	./Analysis/Type/Inference/Base.hs	56;"	t
@@ -517,7 +517,7 @@ MutexUnlock	src/Language/LLVMIR.hs	301;"	d
 Naked	src/Language/LLVMIR.hs	209;"	d
 NakedAttribute	src/Language/LLVMIR.hs	125;"	d
 Name	./Analysis/Type/Memory/Context.hs	18;"	t
-NamedTypes	./Analysis/Type/Memory/TyAnn.hs	17;"	t
+NamedTypes	./Analysis/Type/Memory/TyAnn.hs	19;"	t
 NamedTypes	src/Language/LLVMIR.hs	383;"	t
 Neg	./Language/LTL/Base.hs	27;"	d
 NestAttribute	src/Language/LLVMIR.hs	114;"	d
@@ -921,55 +921,55 @@ Transition	./Language/LTL/Base.hs	156;"	t
 Triplet	src/Language/LLVMIR.hs	451;"	t
 Trunc	./Language/LLVMIR/Extractor/Opcode.hs	41;"	d
 Trunc	src/Language/LLVMIR.hs	275;"	d
-TyAgg	./Analysis/Type/Memory/TyAnn.hs	35;"	d
-TyAgg	./Analysis/Type/Memory/TyAnn.hs	43;"	t
-TyAnn	./Analysis/Type/Memory/TyAnn.hs	21;"	t
+TyAgg	./Analysis/Type/Memory/TyAnn.hs	37;"	d
+TyAgg	./Analysis/Type/Memory/TyAnn.hs	45;"	t
+TyAnn	./Analysis/Type/Memory/TyAnn.hs	23;"	t
 TyAnnEnv	./Analysis/Type/Memory/Context.hs	20;"	t
-TyAnnot	./Analysis/Type/Memory/TyAnn.hs	47;"	t
-TyAny	./Analysis/Type/Memory/TyAnn.hs	49;"	d
-TyArr	./Analysis/Type/Memory/TyAnn.hs	43;"	d
+TyAnnot	./Analysis/Type/Memory/TyAnn.hs	49;"	t
+TyAny	./Analysis/Type/Memory/TyAnn.hs	51;"	d
+TyArr	./Analysis/Type/Memory/TyAnn.hs	45;"	d
 TyArray	src/Language/LLVMIR.hs	468;"	d
-TyBot	./Analysis/Type/Memory/TyAnn.hs	21;"	d
+TyBot	./Analysis/Type/Memory/TyAnn.hs	23;"	d
 TyClass	./Analysis/Type/Util.hs	19;"	t
 TyClassFloat	./Analysis/Type/Util.hs	19;"	d
 TyClassInt	./Analysis/Type/Util.hs	19;"	d
 TyConstr	./Analysis/Type/Inference/Base.hs	145;"	c
-TyDer	./Analysis/Type/Memory/TyAnn.hs	24;"	d
-TyDer	./Analysis/Type/Memory/TyAnn.hs	35;"	t
+TyDer	./Analysis/Type/Memory/TyAnn.hs	26;"	d
+TyDer	./Analysis/Type/Memory/TyAnn.hs	37;"	t
 TyDouble	src/Language/LLVMIR.hs	455;"	d
 TyEnv	./Analysis/Type/Util.hs	17;"	t
 TyFP128	src/Language/LLVMIR.hs	456;"	d
-TyFloat	./Analysis/Type/Memory/TyAnn.hs	30;"	d
+TyFloat	./Analysis/Type/Memory/TyAnn.hs	32;"	d
 TyFloat	src/Language/LLVMIR.hs	454;"	d
 TyFloatPoint	src/Language/LLVMIR.hs	453;"	t
 TyFloatPoint	src/Language/LLVMIR.hs	467;"	d
-TyFun	./Analysis/Type/Memory/TyAnn.hs	37;"	d
+TyFun	./Analysis/Type/Memory/TyAnn.hs	39;"	d
 TyFunction	src/Language/LLVMIR.hs	469;"	d
 TyGas	./Language/Asm.hs	20;"	t
 TyHalf	src/Language/LLVMIR.hs	453;"	d
-TyIOAddr	./Analysis/Type/Memory/TyAnn.hs	47;"	d
-TyInt	./Analysis/Type/Memory/TyAnn.hs	29;"	d
+TyIOAddr	./Analysis/Type/Memory/TyAnn.hs	49;"	d
+TyInt	./Analysis/Type/Memory/TyAnn.hs	31;"	d
 TyInt	src/Language/LLVMIR.hs	466;"	d
-TyJumpTo	./Analysis/Type/Memory/TyAnn.hs	25;"	d
+TyJumpTo	./Analysis/Type/Memory/TyAnn.hs	27;"	d
 TyLIdPair	./Analysis/Type/Memory/Util.hs	19;"	t
-TyLabel	./Analysis/Type/Memory/TyAnn.hs	32;"	d
+TyLabel	./Analysis/Type/Memory/TyAnn.hs	34;"	d
 TyLabel	src/Language/LLVMIR.hs	463;"	d
-TyMetadata	./Analysis/Type/Memory/TyAnn.hs	31;"	d
+TyMetadata	./Analysis/Type/Memory/TyAnn.hs	33;"	d
 TyMetadata	src/Language/LLVMIR.hs	464;"	d
 TyOpaque	src/Language/LLVMIR.hs	465;"	d
 TyPPCFP128	src/Language/LLVMIR.hs	458;"	d
 TyPointer	src/Language/LLVMIR.hs	471;"	d
-TyPri	./Analysis/Type/Memory/TyAnn.hs	23;"	d
-TyPri	./Analysis/Type/Memory/TyAnn.hs	28;"	t
-TyPtr	./Analysis/Type/Memory/TyAnn.hs	38;"	d
-TyRegAddr	./Analysis/Type/Memory/TyAnn.hs	48;"	d
-TyStr	./Analysis/Type/Memory/TyAnn.hs	44;"	d
+TyPri	./Analysis/Type/Memory/TyAnn.hs	25;"	d
+TyPri	./Analysis/Type/Memory/TyAnn.hs	30;"	t
+TyPtr	./Analysis/Type/Memory/TyAnn.hs	40;"	d
+TyRegAddr	./Analysis/Type/Memory/TyAnn.hs	50;"	d
+TyStr	./Analysis/Type/Memory/TyAnn.hs	46;"	d
 TyStruct	src/Language/LLVMIR.hs	470;"	d
-TyUndef	./Analysis/Type/Memory/TyAnn.hs	22;"	d
+TyUndef	./Analysis/Type/Memory/TyAnn.hs	24;"	d
 TyUndefined	src/Language/LLVMIR.hs	473;"	d
-TyVec	./Analysis/Type/Memory/TyAnn.hs	36;"	d
+TyVec	./Analysis/Type/Memory/TyAnn.hs	38;"	d
 TyVector	src/Language/LLVMIR.hs	472;"	d
-TyVoid	./Analysis/Type/Memory/TyAnn.hs	28;"	d
+TyVoid	./Analysis/Type/Memory/TyAnn.hs	30;"	d
 TyVoid	src/Language/LLVMIR.hs	461;"	d
 Type	./Language/LLVMIR/Extractor/Type.hs	31;"	t
 Type	Main.hs	59;"	d
@@ -979,7 +979,7 @@ TypeConstrs	Main.hs	61;"	d
 TypeKind	./Language/LLVMIR/Extractor/Type.hs	32;"	t	file:
 Types	src/Language/LLVMIR.hs	476;"	t
 Typing	./Language/LLVMIR/Util.hs	83;"	c
-TysAnn	./Analysis/Type/Memory/TyAnn.hs	19;"	t
+TysAnn	./Analysis/Type/Memory/TyAnn.hs	21;"	t
 Tyx86FP80	src/Language/LLVMIR.hs	457;"	d
 Tyx86MMX	src/Language/LLVMIR.hs	462;"	d
 U	./Language/LTL/Base.hs	67;"	d
@@ -1055,8 +1055,8 @@ asm_Instruction_InlineAsm	src/Language/LLVMIR.hs	290;"	v
 asm_ModuleAsm_ModuleAsm	src/Language/LLVMIR.hs	379;"	v
 asmfn	./Analysis/Asm/Lift.hs	48;"	v	file:
 bb	./Analysis/Type/Inference/Base.hs	116;"	v
-binOps	./Language/LLVMIR/Extractor/Instruction.hs	344;"	v
-bitbinOps	./Language/LLVMIR/Extractor/Instruction.hs	354;"	v
+binOps	./Language/LLVMIR/Extractor/Instruction.hs	350;"	v
+bitbinOps	./Language/LLVMIR/Extractor/Instruction.hs	360;"	v
 bmcMode	Main.hs	92;"	v
 body_Function_FunctionDef	src/Language/LLVMIR.hs	226;"	v
 bound	Main.hs	57;"	v
@@ -1092,7 +1092,7 @@ cond_Instruction_FCmp	src/Language/LLVMIR.hs	288;"	v
 cond_Instruction_ICmp	src/Language/LLVMIR.hs	287;"	v
 cond_Instruction_Select	src/Language/LLVMIR.hs	291;"	v
 constr_Instruction_InlineAsm	src/Language/LLVMIR.hs	290;"	v
-convOps	./Language/LLVMIR/Extractor/Instruction.hs	334;"	v
+convOps	./Language/LLVMIR/Extractor/Instruction.hs	340;"	v
 convertLinkage	./Language/LLVMIR/Extractor/Linkage.hs	13;"	v
 counter	./Analysis/Asm/Lift.hs	165;"	v	file:
 cval_Instruction_Cmpxchg	src/Language/LLVMIR.hs	294;"	v
@@ -1136,6 +1136,7 @@ fpτGas2τ	./Analysis/Asm/Lift.hs	345;"	v	file:
 freshLocal	./Analysis/Asm/Lift.hs	176;"	v	file:
 freshName	./Analysis/Asm/Lift.hs	80;"	v	file:
 funs_Module_Module	src/Language/LLVMIR.hs	376;"	v
+gepτ	./Analysis/Type/Inference/Solver.hs	266;"	v
 getBBId	./Language/LLVMIR/Util.hs	56;"	v
 getBasicBlock	./Language/LLVMIR/Extractor/Module.hs	172;"	v	file:
 getBinaryOp	./Language/LLVMIR/Extractor/Instruction.hs	171;"	v
@@ -1201,7 +1202,7 @@ gv_Constant_GlobalValue	src/Language/LLVMIR.hs	171;"	v
 gvars_Module_Module	src/Language/LLVMIR.hs	376;"	v
 hasInitializer	./Language/LLVMIR/Extractor/Module.hs	49;"	v	file:
 hasSE_Instruction_InlineAsm	src/Language/LLVMIR.hs	290;"	v
-i	./Analysis/Type/Memory/TyAnn.hs	53;"	v
+i	./Analysis/Type/Memory/TyAnn.hs	55;"	v
 iPi	./Language/LTL/Base.hs	240;"	v
 id_Instruction_AShr	src/Language/LLVMIR.hs	267;"	v
 id_Instruction_Add	src/Language/LLVMIR.hs	253;"	v
@@ -1311,7 +1312,7 @@ linkage_Global_GlobalVar	src/Language/LLVMIR.hs	235;"	v
 livePEx	./Language/LTL/Base.hs	93;"	v
 llvmir2Htm	./Language/LLVMIR/Converter.hs	13;"	v
 locals	./Analysis/Asm/Lift.hs	166;"	v	file:
-look	./Analysis/Type/Inference/Solver.hs	213;"	v
+look	./Analysis/Type/Inference/Solver.hs	214;"	v
 main	Main.hs	114;"	v
 mdl	./Language/LLVMIR/Extractor/Context.hs	22;"	v
 mic	./Analysis/Type/Inference/Solver.hs	39;"	v
@@ -1592,7 +1593,7 @@ s5	./Test/Example.hs	39;"	v
 s_DataLayout_DataLayout	src/Language/LLVMIR.hs	197;"	v
 s_Section_Section	src/Language/LLVMIR.hs	429;"	v
 s_TargetData_TargetData	src/Language/LLVMIR.hs	441;"	v
-safeLookup	./Analysis/Type/Inference/Solver.hs	239;"	v
+safeLookup	./Analysis/Type/Inference/Solver.hs	240;"	v
 safePEx	./Language/LTL/Base.hs	89;"	v
 sc_Constant_SmpConst	src/Language/LLVMIR.hs	169;"	v
 self_Syn_Alias	src/Language/LLVMIR/Printer/Module.hs	96;"	v
@@ -2088,8 +2089,8 @@ sem_Visibility_Hidden	src/Language/LLVMIR/Printer/Module.hs	8007;"	v
 sem_Visibility_Protected	src/Language/LLVMIR/Printer/Module.hs	8015;"	v
 size	./Language/LTL/Base.hs	213;"	v
 sizeOf	./Language/LLVMIR/Util.hs	103;"	v
-solveBitEq	./Analysis/Type/Inference/Solver.hs	228;"	v
-solveCast	./Analysis/Type/Inference/Solver.hs	221;"	v
+solveBit	./Analysis/Type/Inference/Solver.hs	229;"	v
+solveCast	./Analysis/Type/Inference/Solver.hs	222;"	v
 solveEq	./Analysis/Type/Inference/Solver.hs	201;"	v
 splitConstrs	./Analysis/Type/Memory/Context.hs	33;"	v
 ssaValue	./Analysis/Asm/Lift.hs	331;"	v	file:
@@ -2348,10 +2349,8 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 |~	./Language/LTL/Base.hs	262;"	v
 |~|	./Language/LTL/Base.hs	317;"	v
 ~>	./Language/LTL/Base.hs	74;"	v
-Γ	./Analysis/Asm/Lift.hs	162;"	d	file:
 Γ	./Analysis/Asm/Lift.hs	162;"	t	file:
 Γ	./Analysis/Type/Inference/Solver.hs	191;"	t
-Ε	./Analysis/Asm/Lift.hs	45;"	d	file:
 Ε	./Analysis/Asm/Lift.hs	45;"	t	file:
 Ε	./Analysis/Type/Inference/Base.hs	113;"	d
 Ε	./Analysis/Type/Inference/Base.hs	113;"	t
@@ -2392,13 +2391,13 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 πgep	./Analysis/Type/Inference/Value.hs	88;"	v
 τGas2τ	./Analysis/Asm/Lift.hs	341;"	v	file:
 τList	./Analysis/Type/Inference/Base.hs	47;"	v
-τncall	./Analysis/Type/Inference/Instruction.hs	180;"	v
-τselect	./Analysis/Type/Inference/Instruction.hs	184;"	v
+τncall	./Analysis/Type/Inference/Instruction.hs	182;"	v
+τselect	./Analysis/Type/Inference/Instruction.hs	186;"	v
 τℂ	./Analysis/Type/Inference/Base.hs	146;"	v
 τℂalloca	./Analysis/Type/Inference/Instruction/Memory.hs	23;"	v
 τℂaop	./Analysis/Type/Inference/Instruction/Memory.hs	68;"	v
 τℂbin	./Analysis/Type/Inference/Instruction.hs	130;"	v
-τℂcall	./Analysis/Type/Inference/Instruction.hs	169;"	v
+τℂcall	./Analysis/Type/Inference/Instruction.hs	171;"	v
 τℂcast	./Analysis/Type/Inference/Instruction.hs	144;"	v
 τℂcmp	./Analysis/Type/Inference/Instruction.hs	156;"	v
 τℂgep	./Analysis/Type/Inference/Instruction/Memory.hs	52;"	v
@@ -2424,8 +2423,8 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	7995;"	v
 ∙	./Analysis/Type/Inference/Base.hs	31;"	v
 ∪	./Analysis/Asm/Lift.hs	35;"	v	file:
 ∪	./Analysis/Type/Inference/Base.hs	25;"	v
-≅	./Analysis/Type/Memory/TyAnn.hs	88;"	v
-≌	./Analysis/Type/Memory/TyAnn.hs	153;"	v
+≅	./Analysis/Type/Memory/TyAnn.hs	90;"	v
+≌	./Analysis/Type/Memory/TyAnn.hs	160;"	v
 ≥:	./Analysis/Type/Inference/Base.hs	110;"	v
 ⊨	./Analysis/Type/Inference/Solver.hs	194;"	v
 ⤜	./Analysis/Type/Inference/Base.hs	94;"	v
