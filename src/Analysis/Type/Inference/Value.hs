@@ -15,11 +15,29 @@ import Analysis.Type.Util
 
 -- Type Constraints for values
 instance TyConstr Value where
-	τℂ (Id n τ) = do
-		let τα = (↑)τ
-		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε
-		(↣) nℂ
-	τℂ c = (↣) ε -- this is incomplete?
+	τℂ (Id n τ) = τℂgen n τ
+	τℂ c = τℂ c
+
+instance TyConstr Constant where
+	τℂ c = case c of
+		UndefValue      → (↣) ε
+		SmpConst sc     → (↣) ε
+		CmpConst cc     → (↣) ε
+		GlobalValue gv  → τℂ gv
+		ConstantExpr ce → (↣) ε  -- TODO
+	  	_               → error "constant not supported"	
+
+instance TyConstr GlobalValue where
+	τℂ v = case v of
+	  FunctionValue  n τ → τℂgen n τ
+	  GlobalAlias    n τ → τℂgen n τ
+	  GlobalVariable n τ → τℂgen n τ
+
+τℂgen ∷ Identifier → Type → ℂState
+τℂgen n τ = do
+	let τα = (↑)τ
+	    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε
+	(↣) nℂ
 
 instance Constr Value where
 	π (Id n τ) = ℂπ n
@@ -86,9 +104,8 @@ instance Constr ConstantExpr where
 
 πgep ∷ Value → Values → ℂ
 πgep α δs = let πα = π α
-                (δi:δr) = map getIntValue δs
-                πδi = ℂι πα δi
-	        in foldr (\δ πδ → ℂι πδ δ) πδi δr
+                δis = map getIntValue δs
+	        in ℂι πα δis
 
 instance Constr CompareConstantExpr where
 	π e = case e of

@@ -199,8 +199,8 @@ solveEq nτ e γ n τℂ = case τℂ of
   ℂτ τ → τ
   ℂπ m → look nτ e γ n m
   ℂc cl → error "solve does not expect a class"
-  ℂι c i → let cτ = solveEq nτ e γ n c
-           in TyDer $ TyPtr (gepτ nτ cτ i) TyAny
+  ℂι c is → let cτ = solveEq nτ e γ n c
+            in TyDer $ TyPtr (gepτs nτ cτ is) TyAny
   ℂp c a → let cτ = solveEq nτ e γ n c 
            in TyDer $ TyPtr cτ a  
   ℂλ ca cr → let caτ = map (solveEq nτ e γ n) ca
@@ -267,9 +267,20 @@ instance AEq TClass where
     TAgg → (≅) nτs β TAgg
     T1   → Just β   
 
+gepτs ∷ NamedTypes → Τα → [Int] → Τα
+gepτs nτ τ [] = error "geps: no idxs"
+gepτs nτ τ (i:j) = case τ of 
+  TyDer (TyPtr τα τann) → 
+    let τβ = foldr (flip (gepτ nτ)) τα j
+    in  τβ
+  _ →  error $ "gepτs: wrong type " ⧺ show τ
+
 gepτ ∷ NamedTypes → Τα → Int → Τα
 gepτ nτ τ idx = case τ of
-  TyDer (TyPtr _ _) → τ
+  TyDer (TyVec c τβ) → 
+    if c > idx
+    then τβ
+    else error $ "gepτ: idx > c: " ⧺ show τ ⧺ " " ⧺ show idx 
   TyDer (TyAgg τα)  → case τα of
     TyArr   c τβ → if c > idx
                    then τβ

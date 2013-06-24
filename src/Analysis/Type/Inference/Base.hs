@@ -76,7 +76,7 @@ classOf ∷ Τα → TClass → Bool
 data ℂ = ℂτ Τα -- Type α
        | ℂπ Id -- Type of Id
        | ℂc TClass -- Class of
-       | ℂι ℂ Int  -- for GEP instruction
+       | ℂι ℂ [Int] -- for GEP instruction
        | ℂp ℂ Ταρ  -- Pointer to ℂ Τα
        | ℂλ [ℂ] ℂ  -- Function
   deriving (Eq, Ord)
