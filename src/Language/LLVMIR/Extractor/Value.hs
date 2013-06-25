@@ -134,8 +134,9 @@ unaryConstantExpr v c = do ty  <- typeOf v
 
 -- Seems fine
 getElementPtrConstant :: Value -> Context IO LL.ConstantExpr
-getElementPtrConstant v = do op <- getOperands v >>= mapM getValue
-                             return $ LL.GetElementPtrConstantExpr (head op) (tail op)
+getElementPtrConstant v = do ty <- typeOf v
+                             op <- getOperands v >>= mapM getValue
+                             return $ LL.GetElementPtrConstantExpr ty (head op) (tail op)
 
 getConstantFP :: Value -> Context IO LL.ConstantFP
 getConstantFP v = do vc <- liftIO $ FFI.getConstantFPClass v

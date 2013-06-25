@@ -206,7 +206,7 @@ data ConstantExpr
   | CompareConstantExpr       cmpExpr :: CompareConstantExpr 
   | ExtractElementConstantExpr
   | ExtractValueConstantExpr
-  | GetElementPtrConstantExpr struct :: Value idxs :: Values
+  | GetElementPtrConstantExpr ty :: Type struct :: Value idxs :: Values
   | InsertElementConstantExpr
   | InsertValueConstantExpr
   | SelectConstantExpr

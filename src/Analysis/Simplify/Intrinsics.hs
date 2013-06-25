@@ -35,4 +35,5 @@ instance LiftDebug BasicBlock where
 
 liftDebugI ∷ Instruction → Instructions → Instructions
 liftDebugI (Call _ _ _ (Global "llvm.dbg.value") _) is = is
+liftDebugI (Call _ _ _ (Global "llvm.dbg.declare") _) is = is
 liftDebugI i is = i:is 

@@ -60,7 +60,7 @@ getModFns (Module id layout target gvars funs nmdtys) = funs
 
 infoValue :: Value -> Either Identifier (Identifier, [Int])
 infoValue v = case v of
-  Constant (ConstantExpr (GetElementPtrConstantExpr i idxs)) ->
+  Constant (ConstantExpr (GetElementPtrConstantExpr τ i idxs)) ->
     let vi = valueIdentifier' "infovalue gep" i
         is = map intConstantValue idxs
     in Right $ (vi,is) 
@@ -88,7 +88,12 @@ instance Typing Value where
   typeOf (Constant c) = typeOf c
 
 instance Typing Constant where
-  typeOf (SmpConst sc) = typeOf sc
+  typeOf c = case c of
+    SmpConst sc    → typeOf sc
+    CmpConst cc    → typeOf cc
+    GlobalValue gv → typeOf gv
+    ConstantExpr e → typeOf e
+    _ → TyUndefined
 
 instance Typing SimpleConstant where
    typeOf (ConstantInt _ τ) = τ
@@ -98,6 +103,40 @@ instance Typing SimpleConstant where
 instance Typing ConstantFP where
    typeOf (ConstantFPFloat  _ τ) = τ
    typeOf (ConstantFPDouble _ τ) = τ
+
+instance Typing ComplexConstant where
+  typeOf cc = case cc of
+    ConstantAggregateZero  τ → τ
+    ConstantDataSequential c → typeOf c
+    ConstantStruct  τ _ → τ
+    ConstantArray   τ _ → τ
+    ConstantVector  τ _ → τ
+
+instance Typing ConstantDataSequential where
+   typeOf cds = case cds of
+    ConstantDataArray  τ _ → τ
+    ConstantDataVector τ _ → τ
+
+instance Typing GlobalValue where
+  typeOf gv = case gv of
+    FunctionValue  n τ → τ
+    GlobalAlias    n τ → τ
+    GlobalVariable n τ → τ
+
+instance Typing ConstantExpr where
+  typeOf expr = case expr of
+    UnaryConstantExpr         _ _ _ τ → τ
+    CompareConstantExpr       cmpExpr → error "typeOf CompareConstantExpr"
+    GetElementPtrConstantExpr τ s is  → τ
+    _ → error "typeOf other expression"
+{-    ExtractElementConstantExpr
+    ExtractValueConstantExpr
+    InsertElementConstantExpr
+    InsertValueConstantExpr
+    SelectConstantExpr
+    ShuffleVectorConstantExpr
+    BinaryConstantExpr
+-}
 
 class Sizable α where
   sizeOf ∷ α → Int

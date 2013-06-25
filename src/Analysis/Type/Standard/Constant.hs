@@ -90,7 +90,7 @@ errorMsg s r v = "typeConstantDataSequential: " ++ s ++ " does not have " ++ r +
 -- typeExpression
 typeExpression :: NamedTypes -> TyEnv -> ConstantExpr -> Type
 typeExpression nmdtye tye (CompareConstantExpr ce)           = typeCompareConstantExpr nmdtye tye ce
-typeExpression nmdtye tye (GetElementPtrConstantExpr v idxs) = typeGetElementPtrConstantExpr nmdtye tye v idxs
+typeExpression nmdtye tye (GetElementPtrConstantExpr ty v idxs) = typeGetElementPtrConstantExpr nmdtye tye v idxs
 typeExpression nmdtye tye e@(UnaryConstantExpr name i v ty)  = typeUnaryExpression nmdtye tye name i v ty
 typeExpression nmdtye tye e = error $ "typeExpression: " ++ show e ++ " not supported."
 

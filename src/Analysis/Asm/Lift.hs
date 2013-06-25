@@ -244,6 +244,9 @@ buildInstruction is i =
 	AS.Xchg τ' α β → do
 		ι ← buildXchg (τGas2τ τ') α β
 		(↣) $ ι:is
+	AS.Xadd τ' α β → do
+		ιs ← buildXAdd (τGas2τ τ') α β
+		(↣) $ ιs⧺is
 	AS.Sete α → (↣) is
 	AS.Bswap τ' α → do
 		let τ = τGas2τ τ'
@@ -273,7 +276,7 @@ buildBinOp op τ α β@(AS.Reg _) = do
 			let βvi = valueIdentifier' "" βv
 			    vars' = M.insert βvi (IR.Id βi τ) vars
 			put γ{vars = vars'}
-			(↣) $ [Add 0 βi τ αv βv]
+			(↣) $ [op 0 βi τ αv βv]
 		TyPointer τ' → do
 			βii ← freshLocal
 			let βi = (IR.Id βii τ)
@@ -296,6 +299,28 @@ buildXchg τ α@(AS.Reg _) ρ@(AS.Reg _) = do
 	(↣) $ AtomicRMW 0 j ρv αv OpXchg Monotonic
 buildXchg τ _ _ = error "buildXchg"
 	    
+
+buildXAdd ∷ Type → AS.Operand → AS.Operand → State Γ Instructions
+buildXAdd τ α β@(AS.Reg _) = do
+	αv ← buildValue τ  α
+	βv ← buildValue τ β
+	case typeOf βv of
+		TyInt n → error "error buildXAdd: expecting TyPointer"
+		TyPointer τ' → do
+			βii ← freshLocal
+			let βi = (IR.Id βii τ)
+			γ@Γ{..} ← get
+			put γ{lastVar = Just βi}
+			(↣) $ [AtomicRMW 0 βii αv βv OpAdd Monotonic]
+{-
+			    li = Load 0 βii βv (Align 8)
+			j ← freshLocal
+			let ai = Add 0 j τ αv βi
+			    si = Store 0 TyVoid (IR.Id j τ) βv (Align 8)
+			γ@Γ{..} ← get
+			put γ{lastVar = Just βi}
+			(↣) $ [li,ai,si]
+-}
 
 buildCmpxchg ∷ Type → AS.Operand → AS.Operand → State Γ Instruction
 buildCmpxchg τ n ρ@(AS.Reg ptr) = do

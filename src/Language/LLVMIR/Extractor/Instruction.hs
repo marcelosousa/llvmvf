@@ -287,6 +287,7 @@ getOtherOp Call = do ival  <- getInstructionValue
                              iasmdlct <- liftIO $ FFI.inlineAsmGetDialect iasmVal >>= (return . fromEnum)
                              args <- getOperands ival >>= (\l -> mapM getValue (init l))
                              let (hsd,isa) = (cInt2Bool iasmhsd, cInt2Bool iasmhsd)
+                             --liftIO $ print $ "parsing asm string: " ++ iasmStr
                              return $ LL.InlineAsm pc (LL.Local ident) ty hsd isa iasmdlct (parseAsm iasmStr) (parseAsmC iasmCtr) args
                      else do (callee, args) <- getOperands ival >>= getCallArgs
                              --liftIO $ print callee

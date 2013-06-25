@@ -295,7 +295,7 @@ sem ConstantExpr
   | CompareConstantExpr        lhs.pp = @cmpExpr.pp 
   | ExtractElementConstantExpr lhs.pp = text "ExtractElementConstantExpr"
   | ExtractValueConstantExpr   lhs.pp = text "ExtractValueConstantExpr"
-  | GetElementPtrConstantExpr  lhs.pp = text "getelementptr" <> parens (@struct.pp <> char ',' <+> @idxs.pp) 
+  | GetElementPtrConstantExpr  lhs.pp = text "getelementptr" <+> @ty.pp <+> parens (@struct.pp <> char ',' <+> @idxs.pp) 
   | InsertElementConstantExpr  lhs.pp = text "InsertElementConstantExpr"
   | InsertValueConstantExpr    lhs.pp = text "InsertValueConstantExpr"
   | SelectConstantExpr         lhs.pp = text "SelectConstantExpr"

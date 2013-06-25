@@ -40,6 +40,7 @@ data GAS = Nop
          | Sete Operand
          | Bswap TyGas Operand
          | Lock
+         | Xadd TyGas Operand Operand
   deriving (Eq,Ord,Show)
 
 data Directive = Pushsection String String
@@ -92,6 +93,8 @@ pBinOp =  Add <$> pToken "add" **> pType
       <|> Sub <$> pToken "sub" **> pType
       <|> Cmpxchg <$> pToken "cmpxchg" **> pType
       <|> Xchg <$> pToken "xchg" **> pType
+      <|> Xadd <$> pToken "xadd" **> pType
+
 
 pOperand ∷ Parser Operand
 pOperand =  Lit <$> pSym '$' **> pSym '$' **> pSNumeral
@@ -103,7 +106,7 @@ pCmd =  (\op b c → op b c) <$> pBinOp <*> pSpaces **> pOperand <*> pSym ',' **
 	<|> (\op a → op a)     <$> pUnOp <*> pSpaces **> pOperand
 	<|> (\τ α → Add τ (Lit (-1)) α) <$> pToken "dec" **> pType <*> pSpaces **> pOperand
 	<|> (\τ α → Add τ (Lit 1) α)    <$> pToken "inc" **> pType <*> pSpaces **> pOperand
-    <|> const Lock <$> pToken "lock"
+  <|> const Lock <$> pToken "lock"
 
 pGAS ∷ Parser GAS
 pGAS = pSpaces **> pCmd <* pSpaces **> pSym ';'
