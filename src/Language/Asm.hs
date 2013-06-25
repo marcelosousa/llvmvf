@@ -15,7 +15,7 @@ import Text.ParserCombinators.UU.Demo.Examples hiding (Parser)
 import Prelude.Unicode ((⧺),(≡))
 import Data.Char 
 
---import Debug.Trace
+import Debug.Trace
 
 data TyGas = I Int
            | Fp Int
@@ -131,8 +131,14 @@ pAsm = (,) <$> pList pDirective <*> pList pSection
 
 parseAsm ∷ String → Asm
 parseAsm "" = ([],[])
-parseAsm s | last s ≡ ';' = runParser "Error Asm2" pAsm s
-           | otherwise    = runParser "Error Asm" pAsm (s ⧺ ";")
+parseAsm s | last s ≡ ';' = parseAsm' s
+           | otherwise    = parseAsm' (s ⧺ ";")
+
+parseAsm' ∷ String → Asm
+parseAsm' s | (a,b) ← execParser pAsm s =
+  if null b
+  then a
+  else trace ("error parseAsm " ⧺ s) $ ([],[])
 
 type AsmCs = [AsmC]
 
@@ -144,10 +150,14 @@ data GasC = PosC Int
           | RegC
           | IRegC
           | CRegC String
+          | ImmC
   deriving (Eq,Ord,Show)
 
-parseAsmC ∷ String → [AsmC]
-parseAsmC = runParser "Error AsmC" (pComma `pListSep` pAsmC) 
+parseAsmC ∷ String → AsmCs
+parseAsmC s | (a,b) ← execParser (pComma `pListSep` pAsmC) s =
+  if null b
+  then a
+  else trace ("error parseAsmC " ⧺ s) $ []
 
 pAsmC ∷ Parser AsmC
 pAsmC =  OC <$> pSym '=' **> pGasC
@@ -163,5 +173,6 @@ pGasC =  const (CRegC "eax") <$> pToken "{ax}"
      <|> const MemC <$> (pToken "*m" <|> pToken "*qm")
      <|> const RegC <$> pToken "r"
      <|> const IRegC <$> pToken "ir"
+     <|> const ImmC <$> pToken "im"
      <|> (PosC . digit2Num)  <$> pDigit
 
