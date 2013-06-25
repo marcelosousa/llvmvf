@@ -114,6 +114,7 @@ data Ε = Ε
 	{ 
 	  fn ∷ (Id,[ℂ]) -- Current Function
 	, bb ∷ Id -- Current Basic Block
+  , vfns ∷ [Id] -- Variadic functions
   	}
 
 εΕ = Ε ((Global ""),[]) (Global "")
@@ -141,6 +142,10 @@ type ℂState = ΕState (S.Set Τℂ)
 δbb = do γ@Ε{..} ← get
          (↣) bb
 
+δvfns ∷ ΕState ([Id])
+δvfns = do γ@Ε{..} ← get
+           (↣) vfns
+           
 -- Type Constraint Class
 class TyConstr a where
     τℂ ∷ a → ℂState

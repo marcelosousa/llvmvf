@@ -311,7 +311,7 @@ buildXAdd τ α β@(AS.Reg _) = do
 			let βi = (IR.Id βii τ)
 			γ@Γ{..} ← get
 			put γ{lastVar = Just βi}
-			(↣) $ [AtomicRMW 0 βii αv βv OpAdd Monotonic]
+			(↣) $ [AtomicRMW 0 βii βv αv OpAdd Monotonic]
 {-
 			    li = Load 0 βii βv (Align 8)
 			j ← freshLocal

@@ -1,4 +1,4 @@
-{-# LANGUAGE UnicodeSyntax #-}
+{-# LANGUAGE UnicodeSyntax, DoAndIfThenElse #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Type.Inference.Instruction
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -17,6 +17,7 @@ import Analysis.Type.Inference.Value
 import Analysis.Type.Inference.Instruction.Memory
 
 import Prelude.Unicode ((⧺))
+import Data.List.Unicode ((∈))
 import Control.Monad.State
 
 import qualified Data.Set as S
@@ -186,7 +187,10 @@ instance TyConstr Instruction where
 	    nℂ = ℂπ n :=: cτρ   -- OK
 	    ς  = ℂλ πχ cτρ --ℂp (ℂλ πχ cτρ) T.TyRegAddr
 	    cℂ = πc :=: ς
-	(↣) $ nℂ ∘ (cℂ ∘ τℂχ)
+	vfns ← δvfns
+	if c ∈ vfns
+	then (↣) $ nℂ ∘ τℂχ
+	else (↣) $ nℂ ∘ (cℂ ∘ τℂχ)
 
 τncall ∷ Id → Τ → Τα
 τncall (Global "ioremap") τ = τ ↑^ T.TyIOAddr

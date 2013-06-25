@@ -11,6 +11,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 
 import Language.LLVMIR hiding (Type(..),Id, NamedTypes)
+import Language.LLVMIR.Util (variadicFns)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Global
 import Analysis.Type.Inference.Function
@@ -29,7 +30,7 @@ typeAnnInference mdl =
 	in M.insert (Global "globals") gγ gnγ  
 
 typeConstraints ∷ Module → (NamedTypes, S.Set Τℂ, M.Map Id (S.Set Τℂ))
-typeConstraints mdl = evalState (τℂs mdl) εΕ
+typeConstraints mdl = evalState (τℂs mdl) $ εΕ $ variadicFns mdl
 
 ioremap ∷ Τℂ
 ioremap = let nℂ = ℂπ (Global "ioremap") 

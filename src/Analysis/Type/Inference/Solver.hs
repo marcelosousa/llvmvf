@@ -29,6 +29,7 @@ import Control.Monad
 import Control.Monad.State
 
 import qualified Debug.Trace as Trace
+import UU.PPrint 
 
 trace s f = f
 --trace = Trace.trace
@@ -74,7 +75,7 @@ iΩ c = Ω c M.empty
   else μrewriteEq
 
 rewriteEq ∷ Τℂ → ΩState ()
-rewriteEq τℂ =
+rewriteEq τℂ =trace ("rewriteEq " ⧺ show τℂ) $ 
   case τℂ of
     c1 :=: c2 → do 
       rwEq c1 c2
@@ -94,7 +95,7 @@ rwEq α β = trace ("rwEq " ⧺ show α ⧺ " " ⧺ show β) $
 
 -- Type
 rwEqτ ∷ ℂ → ℂ → ΩState ℂ
-rwEqτ α@(ℂτ τ1) β = do
+rwEqτ α@(ℂτ τ1) β = trace ("rwEqTy " ⧺ show α ⧺ " " ⧺ show β) $ do
   nτs ← δNτ
   case β of
     ℂτ τ2 → case (≅) nτs τ1 τ2 of
@@ -108,7 +109,7 @@ rwEqτ _ _ = error $ "rwEqTy: FATAL"
 
 -- Type Class
 rwEqc ∷ ℂ → ℂ → ΩState ℂ
-rwEqc α@(ℂc cl1) β = do
+rwEqc α@(ℂc cl1) β = trace ("rwEqc " ⧺ show α ⧺ " " ⧺ show β) $  do
   nτs ← δNτ
   case β of 
     ℂc cl2 → case (≅) nτs cl1 cl2 of
@@ -119,7 +120,7 @@ rwEqc _ _ = error $ "rwEqc: FATAL"
 
 -- Type Var
 rwEqπ ∷ ℂ → ℂ → ΩState ℂ
-rwEqπ α@(ℂπ n) β = do
+rwEqπ α@(ℂπ n) β = trace ("rwEqv " ⧺ show α ⧺ " " ⧺ show β) $ do
   γ@Ω{..} ← get
   case M.lookup n mic of
     Nothing → do
@@ -136,14 +137,14 @@ rwEqπ α@(ℂπ n) β = do
                                (↣) β
                 _ → do νIℂ n β
                        (↣) β
-      _    → do c ← rwEq β ζ
+      _    → do c ← trace ("rwEqv: calling rwEq " ⧺ show (pretty n) ⧺ " " ⧺ show β ⧺ " " ⧺ show ζ) $ rwEq β ζ
                 νIℂ n c
                 (↣) c
 rwEqπ _ _ = error $ "rwEqπ: FATAL"
 
 -- Type Function
 rwEqλ ∷ ℂ → ℂ → ΩState ℂ
-rwEqλ α@(ℂλ ca1 cr1) β =
+rwEqλ α@(ℂλ ca1 cr1) β = trace ("rwEqFn " ⧺ show α ⧺ " " ⧺ show β) $ 
   case β of 
     ℂλ ca2 cr2 → do
       ca ← mapM (uncurry rwEq) $ zip ca1 ca2
@@ -155,7 +156,7 @@ rwEqλ _ _ = error $ "rwEqλ: FATAL"
 
 -- Type gep
 rwEqι ∷ ℂ → ℂ → ΩState ℂ
-rwEqι α@(ℂι cin idxn) β = do
+rwEqι α@(ℂι cin idxn) β = trace ("rwEqGep " ⧺ show α ⧺ " " ⧺ show β) $  do
   γ@Ω{..} ← get
   let τα = solveEq nmdtys gmap mic [] α
   rwEq β (ℂτ τα)
@@ -163,7 +164,7 @@ rwEqι α@(ℂι cin idxn) β = do
 -- Type pointer
 -- Missing ℂc
 rwEqp ∷ ℂ → ℂ → ΩState ℂ
-rwEqp α@(ℂp c1 τα1) β =
+rwEqp α@(ℂp c1 τα1) β = trace ("rwEqp " ⧺ show α ⧺ " " ⧺ show β) $ 
   case β of
     ℂτ τ → case τ of
       TyDer (TyPtr τ1 τα2) → 
@@ -195,7 +196,7 @@ type Γ = M.Map Id Τα
 -- Solve 
 -- Input : Env, Constraints left
 solveEq ∷ NamedTypes → Γ → M.Map Id ℂ → [Id] → ℂ → Τα
-solveEq nτ e γ n τℂ = case τℂ of
+solveEq nτ e γ n τℂ = trace ("solveEq " ⧺ show n) $ case τℂ of
   ℂτ τ → τ
   ℂπ m → look nτ e γ n m
   ℂc cl → error "solve does not expect a class"

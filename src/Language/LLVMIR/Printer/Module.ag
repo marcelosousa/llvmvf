@@ -68,8 +68,8 @@ sem Global
   | GlobalVar lhs.pp = @name.pp <+> text "=" <+>  @linkage.pp <+> ppKeyword @isUaddr "unnamed_addr" <+> ppKeyword @isConst "constant" <+> text "," <+> @ival.pp <> text "," <+> @align.pp 
 
 sem Function
-  | FunctionDef  lhs.pp = text "define"  <+> @linkage.pp <+> @retty.pp <+> @name.pp <> parens @params.pp <> char '{' <$> @body.pp <> char '}'
-  | FunctionDecl lhs.pp = text "declare" <+> @linkage.pp <+> @retty.pp <+> @name.pp <> parens @params.pp
+  | FunctionDef  lhs.pp = text "define"  <+> @linkage.pp <+> @retty.pp <+> bool @isVar <+> @name.pp <> parens @params.pp <> char '{' <$> @body.pp <> char '}'
+  | FunctionDecl lhs.pp = text "declare" <+> @linkage.pp <+> @retty.pp <+> bool @isVar <+> @name.pp <> parens @params.pp
 
 sem Parameter
   | Parameter lhs.pp = @ty.pp <> @var.pp

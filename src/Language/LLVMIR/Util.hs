@@ -58,6 +58,15 @@ getBBId (BasicBlock i _ _ _) = i
 getModFns :: Module -> Functions
 getModFns (Module id layout target gvars funs nmdtys) = funs
 
+variadicFns ∷ Module → [Identifier]
+variadicFns (Module id layout target gvars funs nmdtys) = 
+  let fns = M.filter isVariadic funs
+  in M.keys fns
+
+isVariadic ∷ Function → Bool
+isVariadic (FunctionDecl _ _ _ b _)   = b
+isVariadic (FunctionDef  _ _ _ b _ _) = b
+
 infoValue :: Value -> Either Identifier (Identifier, [Int])
 infoValue v = case v of
   Constant (ConstantExpr (GetElementPtrConstantExpr τ i idxs)) ->
