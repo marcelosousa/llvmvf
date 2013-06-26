@@ -89,6 +89,8 @@ class AEq α where
   (≅) ∷ NamedTypes → α → α → Maybe α
 
 instance AEq TyAnn where
+  (≅) nτ TyUndef τ = Just τ
+  (≅) nτ τ TyUndef = Just τ
   (≅) nτ (TyDer τ1) (TyDer τ2) = TyDer <$> (≅) nτ τ1 τ2
   (≅) nτ τ1 τ2 = if τ1 ≡ τ2
                  then Just τ1

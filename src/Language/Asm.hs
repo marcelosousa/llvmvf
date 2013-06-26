@@ -1,4 +1,4 @@
-{-# LANGUAGE UnicodeSyntax, FlexibleContexts #-}
+{-# LANGUAGE UnicodeSyntax, FlexibleContexts, PatternGuards #-}
 -------------------------------------------------------------------------------
 -- Module    :  Language.Asm
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -41,6 +41,7 @@ data GAS = Nop
          | Bswap TyGas Operand
          | Lock
          | Xadd TyGas Operand Operand
+         | Bug
   deriving (Eq,Ord,Show)
 
 data Directive = Pushsection String String
@@ -131,6 +132,8 @@ pAsm = (,) <$> pList pDirective <*> pList pSection
 
 parseAsm ∷ String → Asm
 parseAsm "" = ([],[])
+parseAsm "1:\tud2\n.pushsection __bug_table,\"a\"\n2:\t.long 1b - 2b, ${0:c} - 2b\n\t.word ${1:c}, 0\n\t.org 2b+${2:c}\n.popsection" = 
+  ([],[(Nothing,[Bug])])
 parseAsm s | last s ≡ ';' = parseAsm' s
            | otherwise    = parseAsm' (s ⧺ ";")
 
@@ -162,17 +165,26 @@ parseAsmC s | (a,b) ← execParser (pComma `pListSep` pAsmC) s =
 pAsmC ∷ Parser AsmC
 pAsmC =  OC <$> pSym '=' **> pGasC
      <|> IC <$> pGasC
-     <|> FC <$> pToken "~{memory}"
-     <|> FC <$> pToken "~{dirflag}"
-     <|> FC <$> pToken "~{fpsr}"
-     <|> FC <$> pToken "~{flags}"
-     <|> FC <$> pToken "~{cc}"
+     <|> FC <$> (pToken "~{memory}"
+             <|> pToken "~{dirflag}"
+             <|> pToken "~{fpsr}"
+             <|> pToken "~{flags}"
+             <|> pToken "~{cc}"
+             <|> pToken "~{rcx}"
+             <|> pToken "~{r8}"
+             <|> pToken "~{r9}"
+             <|> pToken "~{r10}"
+             <|> pToken "~{r11}"
+             )
 
 pGasC ∷ Parser GasC
 pGasC =  const (CRegC "eax") <$> pToken "{ax}"
+     <|> const (CRegC "edx") <$> (pToken "{edx}" <|> pToken "{dx}")
+     <|> const (CRegC "edi") <$> pToken "{di}"
+     <|> const (CRegC "esi") <$> pToken "{si}"
      <|> const MemC <$> (pToken "*m" <|> pToken "*qm")
-     <|> const RegC <$> pToken "r"
-     <|> const IRegC <$> pToken "ir"
-     <|> const ImmC <$> pToken "im"
+     <|> const RegC <$> (pToken "r" <|> pToken "&r" <|> pToken "rm")
+     <|> const IRegC <$> (pToken "ir" <|> pToken "Ir")
+     <|> const ImmC <$> (pToken "im" <|> pToken "imr" <|> pToken "i")
      <|> (PosC . digit2Num)  <$> pDigit
 

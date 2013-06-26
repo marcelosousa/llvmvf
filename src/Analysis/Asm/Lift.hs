@@ -194,6 +194,7 @@ buildParam (v,i) = Parameter (Local $ show i) $ typeOf v
 
 buildBody ∷ AS.Asm → State Γ BasicBlocks
 buildBody (_,[]) = (↣) $ [BasicBlock (Local "bb") [] [] (Ret 0 VoidRet)]
+buildBody (_,[(Nothing,[AS.Bug])]) = (↣) $ [BasicBlock (Local "bb") [] [] (Unreachable 0)]
 buildBody (_,sections) = mapM (buildBB . snd) sections
 
 buildBB ∷ [AS.GAS] → State Γ BasicBlock
