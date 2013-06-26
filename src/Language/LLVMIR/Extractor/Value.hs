@@ -77,13 +77,20 @@ getConstantArray v = do aty  <- liftIO $ FFI.constantArrayGetType v
 
 getConstantDataSequential :: Value -> Context IO LL.ConstantDataSequential
 getConstantDataSequential v = do vc  <- liftIO $ FFI.getConstantDataSequentialClass v
-                                 val <- liftIO $ FFI.constantValueGetAsString v >>= peekCString
+                                 val <- getConstantDataSequentialData v
                                  num <- liftIO $ FFI.constantValueGetNumElem v >>= (return . fromEnum)
                                  ety <- liftIO $ FFI.constantValueGetElemType v
                                  ty' <- getType ety
                                  case toConstantDataSequentialClass vc of
                                    ConstantDataArray  -> return $ LL.ConstantDataArray  (LL.TyArray  num ty') val 
                                    ConstantDataVector -> return $ LL.ConstantDataVector (LL.TyVector num ty') val
+
+getConstantDataSequentialData :: Value -> Context IO String
+getConstantDataSequentialData v = do 
+  isCString <- liftIO $ FFI.constantValueIsString v
+  if cUInt2Bool isCString
+  then liftIO $ FFI.constantValueGetAsString v >>= peekCString
+  else liftIO $ FFI.constantValueGetRawDataValues v >>= peekCString
 
 getConstantExpr :: Value -> Context IO LL.Constant
 getConstantExpr v = do opcode <- liftIO $ FFI.constGetOpcode v 
