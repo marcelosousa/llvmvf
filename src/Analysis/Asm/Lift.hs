@@ -121,9 +121,10 @@ instance Assembly BasicBlock where
 			instrs' ← mapM lift instrs
 			(↣) $ BasicBlock label phis instrs' tmn
 
+-- Try to Lift and change to False if cant
 instance Assembly Instruction where
 	lift i = case i of
-		InlineAsm pc α τ _ _ _ asm constr args → do
+		InlineAsm pc α τ True _ _ _ asm constr args → do
 			fname ← freshName		    
 			let fn = buildFn fname τ asm constr args
 			νasmfn (fname,fn)
@@ -131,33 +132,34 @@ instance Assembly Instruction where
 		_ → (↣) i
 
 -------------------------------------------------------------------------------
-analyzeConstr ∷ AS.AsmCs → (M.Map String Int, [Int])
-analyzeConstr s = let (m,l,_) = foldl analyzeC (M.empty,[],0) s
-                  in (m,l)
+analyzeConstr ∷ AS.AsmCs → (M.Map String Int, [Int], [Int])
+analyzeConstr s = let (m,l,i,_) = foldl analyzeC (M.empty,[],[],0) s
+                  in (m,l,i)
 
-analyzeC ∷ (M.Map String Int, [Int],Int) → AS.AsmC → (M.Map String Int, [Int],Int)
+analyzeC ∷ (M.Map String Int,[Int],[Int],Int) → AS.AsmC → (M.Map String Int, [Int], [Int],Int)
 analyzeC r (AS.IC gasC) = analyzeGasC gasC r 
 analyzeC r (AS.OC gasC) = analyzeOutC gasC r
 analyzeC r (AS.FC _)    = r
 
-analyzeOutC ∷ AS.GasC → (M.Map String Int, [Int], Int) → (M.Map String Int, [Int], Int)
-analyzeOutC gasc (mri,lpos,n) = case gasc of
-	AS.MemC → (mri,(lpos⧺[n]),n+1)
+analyzeOutC ∷ AS.GasC → (M.Map String Int, [Int], [Int], Int) → (M.Map String Int, [Int], [Int], Int)
+analyzeOutC gasc (mri,lpos,imr,n) = case gasc of
+	AS.MemC → (mri,(lpos⧺[n]),imr,n+1)
 	AS.PosC p  → if p `elem` lpos
 		         then let lpos' = delete p lpos
-		              in (mri,lpos'⧺[p],n)
-		         else (mri,lpos⧺[p],n)
-	AS.CRegC s → (M.insert s n mri,lpos,n+1)
-	_ → (mri,lpos,n+1)
+		              in (mri,lpos'⧺[p],imr,n)
+		         else (mri,lpos⧺[p],imr,n)
+	AS.CRegC s → (M.insert s n mri,lpos,imr,n+1)
+	_ → (mri,lpos,imr,n+1)
 
-analyzeGasC ∷ AS.GasC → (M.Map String Int, [Int], Int) → (M.Map String Int, [Int], Int)
-analyzeGasC gasc (mri,lpos,n) = case gasc of
+analyzeGasC ∷ AS.GasC → (M.Map String Int, [Int], [Int], Int) → (M.Map String Int, [Int], [Int], Int)
+analyzeGasC gasc (mri,lpos,imr,n) = case gasc of
 	AS.PosC p  → if p `elem` lpos
 		         then let lpos' = delete p lpos
-		              in (mri,lpos'⧺[p],n)
-		         else (mri,lpos⧺[p],n)
-	AS.CRegC s → (M.insert s n mri,lpos,n+1)
-	c       → (mri,(lpos⧺[n]),n+1)
+		              in (mri,lpos'⧺[p],imr,n)
+		         else (mri,lpos⧺[p],imr,n)
+	AS.CRegC s → (M.insert s n mri,lpos,imr,n+1)
+	AS.IRegC → (mri,(lpos⧺[n]),n:imr,n+1)
+	c       → (mri,(lpos⧺[n]),imr,n+1)
 
 data Γ = Γ {
 	  vars    ∷ M.Map Id Value
@@ -165,12 +167,13 @@ data Γ = Γ {
 	, counter ∷ Int -- Num of bbs
 	, locals  ∷ S.Set Id
 	, mri     ∷ M.Map String Int
+	, imr     ∷ [Int]
 }
 
-εΓ ∷ Parameters → M.Map String Int → Γ
-εΓ p mri = let ip = S.fromList $ map (\(Parameter i _ ) → i) p
-               vars = foldr (\(Parameter i τ) m → M.insert i (IR.Id i τ) m) ε p
-           in Γ vars Nothing 0 ip mri
+εΓ ∷ Parameters → M.Map String Int → [Int] → Γ
+εΓ p mri imr = let ip = S.fromList $ map (\(Parameter i _ ) → i) p
+                   vars = foldr (\(Parameter i τ) m → M.insert i (IR.Id i τ) m) ε p
+               in Γ vars Nothing 0 ip mri imr
 
 freshLocal ∷ State Γ Id
 freshLocal = do
@@ -182,11 +185,11 @@ freshLocal = do
 
 buildFn ∷ Id → Type → AS.Asm → AS.AsmCs → Values → Function
 buildFn n τ asm constr vals = 
-	let (mri,lpos) = analyzeConstr constr
+	let (mri,lpos,imr) = analyzeConstr constr
 	    params = if length lpos ≡ length vals
 	    	     then map buildParam $ zip vals lpos
 	    	     else error $ "buildFn: length of lists is different " ⧺ show lpos ⧺ show vals
-	    bbs = evalState (buildBody asm) $ εΓ params mri
+	    bbs = evalState (buildBody asm) $ εΓ params mri imr
 	in FunctionDef n PrivateLinkage τ False params bbs
 
 buildParam ∷ (Value,Int) → Parameter
@@ -231,14 +234,28 @@ buildInstruction is i =
 		ιs ← buildBinOp Sub (τGas2τ τ') α β
 		(↣) $ ιs⧺is
 	AS.Mov τ' α β → do
+		γ@Γ{..} ← get
 		let τ = τGas2τ τ'
 		αv ← buildValue τ α
 		βv ← buildValue τ β
-		γ@Γ{..} ← get
 		let βi = valueIdentifier' "" βv
-		    vars' = M.insert βi αv vars
-		put γ{vars=vars', lastVar = Just αv}
-		(↣) is
+		case typeOf βv of
+			TyPointer τ' → do
+				let si = Store 0 TyVoid αv βv (Align 8)
+				(↣) $ si:is
+			_ → case typeOf αv of
+				TyPointer τ' → do
+					case M.lookup βi vars of
+						Nothing → do 
+							let si = Load 0 βi αv (Align 8)
+							put γ{lastVar = Just (IR.Id βi τ')}
+							(↣) $ si:is
+						Just v  → undefined
+				_ → do 
+					let βi = valueIdentifier' "" βv
+					    vars' = M.insert βi αv vars
+					put γ{vars=vars', lastVar = Just αv}
+					(↣) is
 	AS.Cmpxchg τ α β → do
 		ι ← buildCmpxchg (τGas2τ τ) α β 
 		(↣) $ ι:is
@@ -261,6 +278,40 @@ buildInstruction is i =
 		let αι = valueIdentifier' "" αi
 		    ι = Call 0 αι τ fn [αv]
 		put γ{lastVar = Just αi}
+		(↣) $ ι:is
+	AS.Canary τ' α → do
+		let τ = τGas2τ τ'
+		αv ← buildValue τ α
+		let τβ = case typeOf αv of
+			TyPointer τ1 → τ1
+			_ → error "AS.Canary"
+		βi ← freshLocal
+		let βv = (IR.Id βi τβ)
+		    li = Load 0 βi αv (Align 8)
+		γ@Γ{..} ← get
+		put γ{lastVar = Just βv}
+		(↣) $ li:is
+--	AS.Bt  τ' α β → do
+--		let τ = τGas2τ τ'
+--		αv ← buildValue undefined α -- actually incorrect
+--		βv ← buildValue τ β
+	AS.Sbb τ' (AS.Reg "0") (AS.Reg "0") → do
+		let τ = τGas2τ τ'
+		γ@Γ{..} ← get
+		let α = case M.lookup (Local "0") vars of
+				Nothing → if null imr
+						  then IR.Id (Local "0") τ
+						  else let x = show $ head imr
+							   in case M.lookup (Local x) vars of
+							      Nothing → IR.Id (Local x) τ
+							      Just v  → v
+				Just v  → v
+		let τ1 = typeOf α
+		βj ← freshLocal
+		let β = IR.Id βj τ1
+		γ@Γ{..} ← get
+		put γ{lastVar = Just β}
+		let ι = Add 0 βj τ1 α α
 		(↣) $ ι:is
 	_ → (↣) is
 

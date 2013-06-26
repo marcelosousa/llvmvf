@@ -96,6 +96,7 @@ data Instruction
       pc     :: PC
       mres   :: Identifier
       ty     :: Type
+      isVerifiable :: Bool
       hasSE  :: Bool
       isSA   :: Bool
       dlct   :: Int

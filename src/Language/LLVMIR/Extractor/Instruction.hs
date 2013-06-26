@@ -10,7 +10,7 @@ import qualified LLVM.FFI.Core as FFI
 import LLVM.Core hiding (Value, getOperands)
 
 import Control.Monad(forM) 
-                     
+import Control.Applicative((<$>),(<*>))
 import Foreign.Marshal.Array (allocaArray, peekArray)
 import Foreign.C.String
 
@@ -288,7 +288,11 @@ getOtherOp Call = do ival  <- getInstructionValue
                              args <- getOperands ival >>= (\l -> mapM getValue (init l))
                              let (hsd,isa) = (cInt2Bool iasmhsd, cInt2Bool iasmhsd)
                              --liftIO $ print $ "parsing asm string: " ++ iasmStr
-                             return $ LL.InlineAsm pc (LL.Local ident) ty hsd isa iasmdlct (parseAsm iasmStr) (parseAsmC iasmCtr) args
+                             let asmInfo = (,) <$> parseAsm iasmStr <*> parseAsmC iasmCtr
+                             case asmInfo of
+                              Nothing -> do liftIO $ print $ "Cant support " ++ iasmStr
+                                            return $ LL.InlineAsm pc (LL.Local ident) ty False hsd isa iasmdlct ([],[]) [] args
+                              Just (piasmStr,piasmCtr) -> return $ LL.InlineAsm pc (LL.Local ident) ty True hsd isa iasmdlct piasmStr piasmCtr args
                      else do (callee, args) <- getOperands ival >>= getCallArgs
                              --liftIO $ print callee
                              callee' <- liftIO $ demangler callee

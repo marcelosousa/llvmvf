@@ -90,7 +90,10 @@ getConstantDataSequentialData v = do
   isCString <- liftIO $ FFI.constantValueIsString v
   if cUInt2Bool isCString
   then liftIO $ FFI.constantValueGetAsString v >>= peekCString
-  else liftIO $ FFI.constantValueGetRawDataValues v >>= peekCString
+  else do
+    val <- liftIO $ FFI.constantValueGetRawDataValues v >>= peekCString
+    liftIO $ print $ "getConstantDataSequentialData " ++ val
+    return val
 
 getConstantExpr :: Value -> Context IO LL.Constant
 getConstantExpr v = do opcode <- liftIO $ FFI.constGetOpcode v 

@@ -121,6 +121,14 @@ instance TyConstr Instruction where
 		AtomicRMW _ n α β _ _ → τℂaop n α [β]
     -- Call
 		Call _ n τ c χ → τℂcall n τ c χ
+		InlineAsm _ n τ β _ _ _ _ _ χ → 
+			if β
+			then error "error TypeInference InlineAsm: Could be lifted"
+			else do
+				χℂ ← τList ε χ
+				let nτ = ℂτ $ (↑)τ
+				    nℂ = ℂπ n :=: nτ
+				(↣) $ nℂ ∘ χℂ
     -- Vector Operations
 		Select       _ n α β η  → τselect n α β η
 		ExtractValue _ n τ α δs → τextract n τ α
