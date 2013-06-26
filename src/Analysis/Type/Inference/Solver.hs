@@ -199,7 +199,12 @@ solveEq ∷ NamedTypes → Γ → M.Map Id ℂ → [Id] → ℂ → Τα
 solveEq nτ e γ n τℂ = trace ("solveEq " ⧺ show n) $ case τℂ of
   ℂτ τ → τ
   ℂπ m → look nτ e γ n m
-  ℂc cl → error "solve does not expect a class"
+  ℂc cl → case n of 
+           (x:xs) → let τ = look nτ e γ xs x 
+                    in if τ `classOf` cl 
+                       then τ
+                       else error $ "solve does not expect a class " ⧺ show n ⧺ show τℂ
+           _ → error $ "solve does not expect a class !"
   ℂι c is → let cτ = solveEq nτ e γ n c
             in TyDer $ TyPtr (gepτs nτ cτ is) TyAny
   ℂp c a → let cτ = solveEq nτ e γ n c 
