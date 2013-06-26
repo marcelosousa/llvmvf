@@ -123,8 +123,8 @@ instance TyConstr Instruction where
 		Call _ n τ c χ → τℂcall n τ c χ
     -- Vector Operations
 		Select       _ n α β η  → τselect n α β η
-		ExtractValue _ n α δs   → error "extract vector operations not supported"
-		InsertValue  _ n α β δs → error "insert vector operations not supported"
+		ExtractValue _ n τ α δs → τextract n τ α
+		InsertValue  _ n α β δs → error "insert agg operations not supported"
 
 -- Type Constraints for Binary Operations
 τℂbin ∷ TClass → Id → Τ → Value → Value → ℂState
@@ -205,3 +205,12 @@ instance TyConstr Instruction where
 	    βηℂ = πβ :=: πη
 	    βℂ = πβ :=: ℂc T1
 	(↣) $ αℂ ∘ (nℂ ∘ (βηℂ ∘ (βℂ ∘ ε))) 
+
+τextract ∷ Id → Τ → Value → ℂState
+τextract n τ α = do
+	αℂ ← τℂ α
+	let (πn, πα) = (ℂπ n, π α)
+	    nτ = ℂτ $ (↑)τ
+	    nℂ = πn :=: nτ
+	    cℂ = πα :=: ℂc TAgg
+	(↣) $ nℂ ∘ (cℂ ∘ αℂ)

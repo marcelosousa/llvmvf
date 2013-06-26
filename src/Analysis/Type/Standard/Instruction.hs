@@ -122,7 +122,7 @@ typeCheckInstruction nmdtye tye i = case i of
   	Call pc i ty callee vs -> typeCheckCall nmdtye tye i ty callee vs
   -- Selection Operations
   	Select pc i cv vt vf       -> error "select operation not supported."
-  	ExtractValue pc i v idxs   -> 
+  	ExtractValue pc i ty v idxs   -> 
   	  let ty = typeValue nmdtye tye v
   	  in if length idxs > 0
          then if isAgg ty

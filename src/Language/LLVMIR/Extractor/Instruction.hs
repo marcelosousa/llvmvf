@@ -315,13 +315,14 @@ getOtherOp ShuffleVector  = error $ "TODO shufflevector"
 getOtherOp ExtractValue   = do ival  <- getInstructionValue
                                pc    <- getPC
                                ident <- getIdent ival
+                               ty    <- typeOf ival
                                ops   <- getOperands ival >>= mapM getValue
                                n     <- liftIO $ FFI.extractValueGetNumIndices ival >>= return . fromIntegral
                                idxs' <- liftIO $ allocaArray n $ \ args -> do
                                            FFI.extractValueGetIndices ival args
                                            peekArray n args
                                idxs <- forM idxs' (return . fromIntegral)
-                               return $ LL.ExtractValue pc (LL.Local ident) (ops!!0) idxs 
+                               return $ LL.ExtractValue pc (LL.Local ident) ty (ops!!0) idxs 
 getOtherOp InsertValue    = do ival <- getInstructionValue
                                pc <- getPC
                                ident <- getIdent ival

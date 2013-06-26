@@ -111,6 +111,7 @@ data Instruction
   | ExtractValue
       pc   :: PC
       id   :: Identifier
+      ty   :: Type
       aggr :: Value
       idxs :: Ints
   | InsertValue
@@ -133,6 +134,8 @@ data Instruction
       opval :: Value
       op  :: BinOp
       ord :: AtomicOrdering
+  -- Vector operations
+  -- | ExtractElement pc :: PC id :: Identifier ty :: Type val :: Value idx :: Int
   -- Concurrent Operations Added
   | CreateThread pc :: PC args :: Values
   | JoinThread   pc :: PC id :: Identifier
