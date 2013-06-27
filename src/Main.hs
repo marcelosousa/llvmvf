@@ -33,7 +33,7 @@ import Analysis.Simplify.Intrinsics
 --import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
 --import Concurrent.Model.Encoder    (encode)
-import Test.Example
+--import Test.Example
 
 import Util.Demangler
 import Debug.Trace

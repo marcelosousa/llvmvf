@@ -51,9 +51,10 @@ instance Eq Ω where
             put γ{rc=rc'}
 
 νIℂ ∷ Id → ℂ → ΩState ()
-νIℂ i c = do γ@Ω{..} ← get
-             let mic' = M.insert i c mic
-             put γ{mic=mic'}
+νIℂ i c = trace ("Adding to map: " ⧺ show i ⧺ " " ⧺ show c) $ 
+  do γ@Ω{..} ← get
+     let mic' = M.insert i c mic
+     put γ{mic=mic'}
 
 δNτ ∷ ΩState NamedTypes
 δNτ = do γ@Ω{..} ← get
@@ -120,27 +121,45 @@ rwEqc _ _ = error $ "rwEqc: FATAL"
 
 -- Type Var
 rwEqπ ∷ ℂ → ℂ → ΩState ℂ
-rwEqπ α@(ℂπ n) β = trace ("rwEqv " ⧺ show α ⧺ " " ⧺ show β) $ do
+rwEqπ α@(ℂπ n) β = trace ("rwEqv (start) " ⧺ show α ⧺ " " ⧺ show β) $ do
   γ@Ω{..} ← get
   case M.lookup n mic of
-    Nothing → do
+    Nothing → trace ("rwEqv (not in map) " ⧺ show α ⧺ " " ⧺ show β) $ do
       νIℂ n β
       (↣) β
     Just ζ  → case ζ of
       ℂπ m → if n ≡ m
-             then do νIℂ n β
-                     (↣) β
+             then trace ("rwEqv (in map, Cv equal): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m)) $ do 
+              νIℂ n β
+              (↣) β
              else case β of
                 ℂπ o → if n ≡ o || o ≡ m
-                       then (↣) β
-                       else do νIℂ m β
-                               (↣) β
-                _ → do νIℂ n β
-                       (↣) β
-      _    → do c ← trace ("rwEqv: calling rwEq " ⧺ show (pretty n) ⧺ " " ⧺ show β ⧺ " " ⧺ show ζ) $ rwEq β ζ
+                       then trace ("rwEqv (in map, Cv diff but messy): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m) ⧺ " " ⧺ show (pretty o)) $ (↣) β
+                       else trace ("rwEqv (in map, Cv diff but messy (2)): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m) ⧺ " " ⧺ show (pretty o)) $ do 
+                        νIℂ m β
+                        (↣) β
+                _ → do 
+                  if mutual m [n] mic
+                  then trace ("rwEqv (in map, Cv dif and not Cv but mutual): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m) ⧺ " " ⧺ show β) $ do 
+                    νIℂ n β
+                    νIℂ m β
+                    (↣) β
+                  else trace ("rwEqv (in map, Cv dif, not Cv, not mutual): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m) ⧺ " " ⧺ show β) $ do 
+                    c ← rwEq ζ β
+                    νIℂ n c
+                    (↣) c
+      _    → do c ← trace ("rwEqv (in map but not Cv): calling rwEq " ⧺ show (pretty n) ⧺ " " ⧺ show β ⧺ " " ⧺ show ζ) $ rwEq β ζ
                 νIℂ n c
                 (↣) c
 rwEqπ _ _ = error $ "rwEqπ: FATAL"
+
+mutual ∷ Id → [Id] → M.Map Id ℂ → Bool
+mutual n l γ | n ∈ l = True
+             | otherwise = 
+  case M.lookup n γ of
+    Nothing → False
+    Just (ℂπ m) → mutual m (n:l) γ
+    Just _ → False
 
 -- Type Function
 rwEqλ ∷ ℂ → ℂ → ΩState ℂ
@@ -190,8 +209,11 @@ type Γ = M.Map Id Τα
 
 (⊨) ∷ NamedTypes → Γ → S.Set Τℂ → Γ
 (⊨) nτ e τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ nτ e)
-                  γ' = trace "solveEq" $ M.mapWithKey (\n c → solveEq nτ e mic [n] c) mic
+                  γ' = trace ("solveEq\n" ⧺ traceSolveEq mic) $ M.mapWithKey (\n c → solveEq nτ e mic [n] c) mic
               in S.fold (solveCast nτ) γ' rc
+
+traceSolveEq ∷ M.Map Id ℂ → String
+traceSolveEq = M.foldrWithKey (\k v r → show (pretty k) ⧺ " , " ⧺ show v ⧺ "\n" ⧺ r ) ""
 
 -- Solve 
 -- Input : Env, Constraints left
@@ -199,12 +221,7 @@ solveEq ∷ NamedTypes → Γ → M.Map Id ℂ → [Id] → ℂ → Τα
 solveEq nτ e γ n τℂ = trace ("solveEq " ⧺ show n) $ case τℂ of
   ℂτ τ → τ
   ℂπ m → look nτ e γ n m
-  ℂc cl → case n of 
-           (x:xs) → let τ = look nτ e γ xs x 
-                    in if τ `classOf` cl 
-                       then τ
-                       else error $ "solve does not expect a class " ⧺ show n ⧺ show τℂ
-           _ → error $ "solve does not expect a class !"
+  ℂc cl → error $ "solve does not expect a class " ⧺ show n ⧺ show τℂ
   ℂι c is → let cτ = solveEq nτ e γ n c
             in TyDer $ TyPtr (gepτs nτ cτ is) TyAny
   ℂp c a → let cτ = solveEq nτ e γ n c 
@@ -288,9 +305,9 @@ gepτ nτ τ idx =  trace ("getty: " ⧺ show τ ⧺ "\n" ⧺ show idx ⧺ "\n")
     then τβ
     else error $ "gepTy: idx > c: " ⧺ show τ ⧺ " " ⧺ show idx 
   TyDer (TyAgg τα)  → case τα of
-    TyArr   c τβ → if c > idx
+    TyArr   c τβ → τβ {-if c > idx
                    then τβ
-                   else error $ "gepTy: idx > c: " ⧺ show τ ⧺ " " ⧺ show idx 
+                   else error $ "gepTy: idx > c: " ⧺ show τ ⧺ " " ⧺ show idx -}
     TyStr n c τβ → if length τβ > idx
                    then τβ !! idx
                    else case M.lookup n nτ of
