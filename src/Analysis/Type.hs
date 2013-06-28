@@ -19,7 +19,7 @@ import Analysis.Type.Util (TyEnv)
 import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
 --import Analysis.Type.Memory.Context (RTyRes)
 --import Analysis.Type.Memory.Module (tyanModule)
-import Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeInfModules)
+import Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeInfModules,typeAnnInferenceGlobals)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Solver
 import Data.Set
@@ -42,6 +42,11 @@ typeInfInter ∷ Module → IO ()
 typeInfInter mdl = do 
 	let γ = typeAnnInferenceIP mdl
 	forM_ (M.assocs γ) (\(a,b) → print (pretty a,b))
+
+typeInfGlobals ∷ Module → IO ()
+typeInfGlobals mdl = do 
+	let γ = M.assocs $ typeAnnInferenceGlobals mdl
+	forM_ γ (uncurry printTyInfFn)
 
 printTyInfFn ∷ Id → Γ → IO ()
 printTyInfFn fn γ = do

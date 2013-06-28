@@ -15,7 +15,10 @@ import Text.ParserCombinators.UU.Demo.Examples hiding (Parser)
 import Prelude.Unicode ((⧺),(≡))
 import Data.Char 
 
-import Debug.Trace
+import qualified Debug.Trace as Trace
+
+trace s f = f
+--trace = Trace.trace 
 
 data TyGas = I Int
            | Fp Int

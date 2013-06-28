@@ -69,7 +69,7 @@ data ExtractMode = Raw | Pretty | LiftAsm
 data Domain = PThread | SystemC
   deriving (Show, Data, Typeable, Eq)
 
-data TypeMode = Intra | Inter
+data TypeMode = Intra | Inter | Globals
   deriving (Show, Data, Typeable, Eq)
 
 instance Default ExtractMode where
@@ -104,7 +104,7 @@ bmcMode = BMC { input = def &= args
 
 typeMode :: Option
 typeMode = Type { input = def &= args 
-                , tmode = def &= help "kind of analysis: Intra | Inter"
+                , tmode = def &= help "kind of analysis: Intra | Inter | Globals"
                 } &= help _helpType
 
 typeCMode :: Option
@@ -144,7 +144,8 @@ runOption (TypeCheck bc) = do mdl <- extract bc
 runOption (Type bc m ) = do mdl <- extract bc
                             case m of
                               Intra → typeInfIntra $ liftAsm $ liftDebug mdl  
-                              Inter → typeInfInter $ liftAsm $ liftDebug mdl  
+                              Inter → typeInfInter $ liftAsm $ liftDebug mdl
+                              Globals → typeInfGlobals $ liftAsm $ liftDebug mdl
 runOption (TypeConstrs bc) = do mdl <- extract bc
                                 typeConstraint $ liftAsm $ liftDebug mdl  --typeAnalysis mdl
 runOption (TypeAnalyze lbc) = do 

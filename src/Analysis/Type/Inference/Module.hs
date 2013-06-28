@@ -5,7 +5,7 @@
 -- Type Inference
 -------------------------------------------------------------------------------
 
-module Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeInfModules) where
+module Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeInfModules,typeAnnInferenceGlobals) where
 
 import qualified Data.Map as M
 import qualified Data.Set as S

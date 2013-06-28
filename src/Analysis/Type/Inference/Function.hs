@@ -13,13 +13,14 @@ import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Instruction
 
 import Analysis.Type.Memory.Util
+import Analysis.Type.Memory.TyAnn
 
 instance TyConstr Function where
 	-- τℂ ∷ → Function → State Γ (S.Set Τℂ)
 	τℂ (FunctionDef  n _ τ _ ς bbs) = do
 		let πτ = ℂτ $ (↑)τ
 		    πς = map π ς
-		    πn = ℂλ πς πτ
+		    πn = ℂp (ℂλ πς πτ) TyRegAddr
 		    nℂ = (ℂπ n) :=: πn ∘ ε
 		ςℂs ← τList nℂ ς
 		νfn (n,πς)

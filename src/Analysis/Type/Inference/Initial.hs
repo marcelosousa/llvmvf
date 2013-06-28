@@ -25,25 +25,25 @@ import Prelude.Unicode ((⧺))
 ioremap ∷ Τℂ
 ioremap = let nℂ = ℂπ (Global "ioremap") 
               τℂr =  ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr
-              τℂ = ℂλ [ℂτ (i 64), ℂτ (i 64)] τℂr
+              τℂ = ℂp (ℂλ [ℂτ (i 64), ℂτ (i 64)] τℂr) TyRegAddr
           in nℂ :=: τℂ
 
 ioremap_cache ∷ Τℂ
 ioremap_cache = let nℂ = ℂπ (Global "ioremap_cache") 
                     τℂr =  ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr
-                    τℂ = ℂλ [ℂτ (i 64), ℂτ (i 64)] τℂr
+                    τℂ = ℂp (ℂλ [ℂτ (i 64), ℂτ (i 64)] τℂr) TyRegAddr
                 in nℂ :=: τℂ
 
 iounmap ∷ Τℂ        
 iounmap = let nℂ = ℂπ (Global "iounmap") 
               τℂr =  ℂτ $ TyPri TyVoid 
-              τℂ = ℂλ [ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr] τℂr
+              τℂ = ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr] τℂr) TyRegAddr
           in nℂ :=: τℂ
 
 kfree ∷ Τℂ        
 kfree = let nℂ = ℂπ (Global "kfree") 
             τℂr =  ℂτ $ TyPri TyVoid 
-            τℂ = ℂλ [ℂτ $ TyDer $ TyPtr (i 8) TyRegAddr] τℂr
+            τℂ = ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 8) TyRegAddr] τℂr) TyRegAddr
         in nℂ :=: τℂ
 
 
