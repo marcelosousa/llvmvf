@@ -36,6 +36,10 @@ identifierName :: Identifier -> String
 identifierName (Global n) = n
 identifierName (Local  n) = n
 
+isGlobalId ∷ Identifier → Bool
+isGlobalId (Global _) = True
+isGlobalId _ = False
+
 identifierValue :: Value -> String
 identifierValue v = identifierName $ valueIdentifier' "" v
 
@@ -57,6 +61,9 @@ getBBId (BasicBlock i _ _ _) = i
 
 getModFns :: Module -> Functions
 getModFns (Module id layout target gvars funs nmdtys) = funs
+
+δModNmds ∷ Module → NamedTypes
+δModNmds (Module id layout target gvars funs nmdtys) = nmdtys
 
 variadicFns ∷ Module → [Identifier]
 variadicFns (Module id layout target gvars funs nmdtys) = 

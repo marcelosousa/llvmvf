@@ -49,6 +49,7 @@ _helpCCFG = unlines ["llvmvf ccfg output a .dot file with the concurrent control
 _helpArch = unlines ["llvmvf arch outputs the concurrent architecture representation of the model into the .model file.","Example: llvmvf arch -d=pthread x.bc"]
 _helpTypeCheck = unlines ["llvmvf typecheck checks if the LLVM IR types are consistent with the typing rules defined in the Language Reference."]
 _helpType = unlines ["llvmvf type uses a refined type system for separation of regular (user/kernel) and I/O memory"]
+_helpTypeAnalyze = unlines ["llvmvf typeanalyze performs  inter and intra-procedural lightweight type analyses"]
 --_helpLiftAsm = unlines ["llvmvf liftasm lifts inline assembly code to LLVM IR functions"]
 
 data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
@@ -56,9 +57,10 @@ data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
             | Model     {input :: FilePath, domain :: Domain}
             | BMC       {input :: FilePath, domain :: Domain, bound :: Int}
             | Convert   {input :: FilePath}
-            | Type      {input :: FilePath}
+            | Type      {input :: FilePath, tmode ∷ TypeMode}
             | TypeCheck {input :: FilePath}
             | TypeConstrs {input ∷ FilePath}
+            | TypeAnalyze {files ∷ [FilePath]}
   deriving (Show, Data, Typeable, Eq)
 
 data ExtractMode = Raw | Pretty | LiftAsm
@@ -67,11 +69,17 @@ data ExtractMode = Raw | Pretty | LiftAsm
 data Domain = PThread | SystemC
   deriving (Show, Data, Typeable, Eq)
 
+data TypeMode = Intra | Inter
+  deriving (Show, Data, Typeable, Eq)
+
 instance Default ExtractMode where
   def = Pretty
 
 instance Default Domain where
   def = PThread
+
+instance Default TypeMode where
+  def = Intra
 
 extractMode :: Option
 extractMode = Extract  { input = def &= args
@@ -95,7 +103,9 @@ bmcMode = BMC { input = def &= args
               } &= help _helpBMC
 
 typeMode :: Option
-typeMode = Type { input = def &= args } &= help _helpType
+typeMode = Type { input = def &= args 
+                , tmode = def &= help "kind of analysis: Intra | Inter"
+                } &= help _helpType
 
 typeCMode :: Option
 typeCMode = TypeConstrs { input = def &= args } &= help _helpType
@@ -103,8 +113,11 @@ typeCMode = TypeConstrs { input = def &= args } &= help _helpType
 typeCheckMode :: Option
 typeCheckMode = TypeCheck { input = def &= args } &= help _helpTypeCheck
 
+typeAnalyze ∷ Option
+typeAnalyze = TypeAnalyze { files = def &= args &= typ "FILES/DIRS" }
+
 progModes :: Mode (CmdArgs Option)
-progModes = cmdArgsMode $ modes [extractMode, modelMode, ccfgMode, bmcMode, typeCheckMode, typeMode,typeCMode]
+progModes = cmdArgsMode $ modes [extractMode, modelMode, ccfgMode, bmcMode, typeCheckMode, typeMode,typeCMode,typeAnalyze]
          &= help _help
          &= program _program
          &= summary _summary
@@ -128,10 +141,16 @@ runOption (BMC bc d k) = undefined -- runBMC bc d k
 runOption (TypeCheck bc) = do mdl <- extract bc
                              -- print mdl
                               print $ typeCheck mdl
-runOption (Type bc) = do mdl <- extract bc
-                         typeInference $ liftAsm $ liftDebug mdl  --typeAnalysis mdl
+runOption (Type bc m ) = do mdl <- extract bc
+                            case m of
+                              Intra → typeInfIntra $ liftAsm $ liftDebug mdl  
+                              Inter → typeInfInter $ liftAsm $ liftDebug mdl  
 runOption (TypeConstrs bc) = do mdl <- extract bc
                                 typeConstraint $ liftAsm $ liftDebug mdl  --typeAnalysis mdl
+runOption (TypeAnalyze lbc) = do 
+  mdls ← mapM extract lbc
+  let mdls' = map (liftAsm . liftDebug) mdls
+  typeAnalysis mdls'
 --runOption bc Htm     = do mdl <- extract bc
 --                          let bf = dropExtension bc
 --                          writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)

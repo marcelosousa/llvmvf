@@ -19,7 +19,7 @@ import Analysis.Type.Util (TyEnv)
 import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
 --import Analysis.Type.Memory.Context (RTyRes)
 --import Analysis.Type.Memory.Module (tyanModule)
-import Analysis.Type.Inference.Module (typeAnnInference,typeConstraints)
+import Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeInfModules)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Solver
 import Data.Set
@@ -33,10 +33,15 @@ typeCheck = typeCheckModule
 --typeAnalysis = tyanModule
 
 -- Type Annotated Inference
-typeInference ∷ Module → IO () -- Γ -- Set Τℂ
-typeInference mdl = do 
+typeInfIntra ∷ Module → IO ()
+typeInfIntra mdl = do 
 	let γ = M.assocs $ typeAnnInference mdl 
 	forM_ γ (uncurry printTyInfFn)
+
+typeInfInter ∷ Module → IO ()
+typeInfInter mdl = do 
+	let γ = typeAnnInferenceIP mdl
+	forM_ (M.assocs γ) (\(a,b) → print (pretty a,b))
 
 printTyInfFn ∷ Id → Γ → IO ()
 printTyInfFn fn γ = do
@@ -58,3 +63,9 @@ printTyℂFn fn c = do
 	putStrLn $ show $ pretty fn
 	putStrLn "----------------------"
 	forM_ (S.toList c) print
+
+-- Type unify inter modular
+typeAnalysis ∷ [Module] → IO ()
+typeAnalysis mdls = do
+	let γ = typeInfModules mdls
+	forM_ (M.assocs γ) (\(a,b) → print (pretty a,b)) 
