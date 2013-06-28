@@ -17,6 +17,7 @@ import Analysis.Type.Inference.Global
 import Analysis.Type.Inference.Function
 import Analysis.Type.Inference.Solver
 import Analysis.Type.Memory.TyAnn
+import Analysis.Type.Inference.Initial
 
 import Control.Monad
 import Control.Monad.State
@@ -31,15 +32,6 @@ typeAnnInference mdl =
 
 typeConstraints ∷ Module → (NamedTypes, S.Set Τℂ, M.Map Id (S.Set Τℂ))
 typeConstraints mdl = evalState (τℂs mdl) $ εΕ $ variadicFns mdl
-
-ioremap ∷ Τℂ
-ioremap = let nℂ = ℂπ (Global "ioremap") 
-              τℂr =  ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr
-              τℂ = ℂλ [ℂτ (i 64), ℂτ (i 64)] τℂr
-          in nℂ :=: τℂ
-
-iτℂ ∷ S.Set Τℂ
-iτℂ = ioremap ∘ ε
 
 -- | Compute type constraints
 -- Compute individually for functions
