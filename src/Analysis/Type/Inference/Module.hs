@@ -43,7 +43,7 @@ typeAnnInferenceIP mdl =
   let nmdτ = M.map (\τ → (↑^) τ TyAny) $ δModNmds mdl
       γ  = typeAnnInferenceGlobals mdl
       γ' = M.map (M.mapWithKey toℂ) γ
-      gτℂ = M.foldr (\g s → (S.fromList (M.elems g)) ∪ s) ε γ'
+      gτℂ = M.fold (\g s → (S.fromList (M.elems g)) ∪ s) ε γ'
   in (⊨) nmdτ M.empty gτℂ
 
 toℂ ∷ Id → Τα → Τℂ
