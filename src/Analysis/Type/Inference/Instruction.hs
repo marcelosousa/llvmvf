@@ -22,6 +22,7 @@ import Control.Monad.State
 
 import qualified Data.Set as S
 
+import Debug.Trace
 instance TyConstr PHI where
 	-- τℂ ∷ → PHI → ℂState
 	τℂ (PHI _ n τ v) = do
@@ -190,19 +191,21 @@ instance TyConstr Instruction where
 τℂcall n τ c χ = do
 	τℂχ ← τList ε χ
 	let (πn,πc) = (ℂπ n,ℂπ c)
-	    cτρ = ℂτ $ τncall c τ       -- OK
+	    cτρ = ℂτ $ (↑)τ       -- OK
 	    πχ = map π χ
-	    nℂ = ℂπ n :=: cτρ   -- OK
-	    ς  = ℂp (ℂλ πχ cτρ) T.TyRegAddr -- ℂλ πχ cτρ
+	    nℂ = πn :=: cτρ   -- OK
+	    ς  = ℂp (ℂλ πχ πn) T.TyRegAddr -- ℂλ πχ cτρ
 	    cℂ = πc :=: ς
 	vfns ← δvfns
 	if c ∈ vfns
 	then (↣) $ nℂ ∘ τℂχ
 	else (↣) $ nℂ ∘ (cℂ ∘ τℂχ)
 
-τncall ∷ Id → Τ → Τα
-τncall (Global "ioremap") τ = τ ↑^ T.TyIOAddr
-τncall n τ = (↑)τ
+{-
+τncall ∷ Id → Maybe ℂ
+τncall (Global "ioremap") τ = Just $ ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr
+τncall n τ = Nothing
+-}
 
 τselect ∷ Id → Value → Value → Value → ℂState
 τselect n α β η = do

@@ -11,7 +11,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 
 import Language.LLVMIR hiding (Type(..),Id, NamedTypes)
-import Language.LLVMIR.Util (variadicFns,isGlobalId,δModNmds)
+import Language.LLVMIR.Util (variadicFns,isGlobalId,δModNmds,identifierName)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Global
 import Analysis.Type.Inference.Function
@@ -41,10 +41,15 @@ typeAnnInferenceGlobals mdl =
 typeAnnInferenceIP ∷ Module → Γ
 typeAnnInferenceIP mdl = 
   let nmdτ = M.map (\τ → (↑^) τ TyAny) $ δModNmds mdl
-      γ  = typeAnnInferenceGlobals mdl
+      γi  = typeAnnInference mdl
+      γtmps = M.map (\e → M.keys $ M.filterWithKey (const . not . isGlobalId) e) γi
+      γzip = M.intersectionWith (,) γi γtmps
+      γ = M.map (\(e,tmps) → let tmps' = map identifierName tmps
+                             in M.filterWithKey (const . not . (flip elem tmps') . identifierName) e) γzip
       γ' = M.map (M.mapWithKey toℂ) γ
       gτℂ = M.fold (\g s → (S.fromList (M.elems g)) ∪ s) ε γ'
   in (⊨) nmdτ M.empty gτℂ
+
 
 toℂ ∷ Id → Τα → Τℂ
 toℂ n τ = ℂπ n :=: ℂτ τ

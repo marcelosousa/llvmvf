@@ -11,16 +11,8 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 
 import Language.LLVMIR hiding (Type(..),Id, NamedTypes)
-import Language.LLVMIR.Util (variadicFns)
 import Analysis.Type.Inference.Base
-import Analysis.Type.Inference.Global
-import Analysis.Type.Inference.Function
-import Analysis.Type.Inference.Solver
 import Analysis.Type.Memory.TyAnn
-
-import Control.Monad
-import Control.Monad.State
-import Prelude.Unicode ((⧺))
 
 ioremap ∷ Τℂ
 ioremap = let nℂ = ℂπ (Global "ioremap") 
@@ -29,7 +21,7 @@ ioremap = let nℂ = ℂπ (Global "ioremap")
           in nℂ :=: τℂ
 
 ioremap_cache ∷ Τℂ
-ioremap_cache = let nℂ = ℂπ (Global "ioremap_cache") 
+ioremap_cache = let nℂ = ℂπ (Global "ioremap_nocache") 
                     τℂr =  ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr
                     τℂ = ℂp (ℂλ [ℂτ (i 64), ℂτ (i 64)] τℂr) TyRegAddr
                 in nℂ :=: τℂ

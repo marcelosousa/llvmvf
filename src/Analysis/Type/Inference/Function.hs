@@ -11,6 +11,7 @@ import Language.LLVMIR
 
 import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Instruction
+import Analysis.Type.Inference.Initial
 
 import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.TyAnn
@@ -42,4 +43,4 @@ instance TyConstr BasicBlock where
 		φℂs   ← τList ε φs
 		isℂs  ← τList φℂs is
 		tmnℂs ← τℂ tmn
-		(↣) $ isℂs ∪ tmnℂs
+		(↣) $ isℂs ∪ tmnℂs ∪ iτℂ
