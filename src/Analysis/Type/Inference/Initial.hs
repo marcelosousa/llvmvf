@@ -32,6 +32,12 @@ iounmap = let nℂ = ℂπ (Global "iounmap")
               τℂ = ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr] τℂr) TyRegAddr
           in nℂ :=: τℂ
 
+kmalloc ∷ Τℂ
+kmalloc = let nℂ = ℂπ (Global "kmalloc") 
+              τℂr =  ℂτ $ TyDer $ TyPtr (i 8) TyRegAddr
+              τℂ = ℂp (ℂλ [ℂτ (i 64), ℂτ (i 64)] τℂr) TyRegAddr
+          in nℂ :=: τℂ
+          
 kfree ∷ Τℂ        
 kfree = let nℂ = ℂπ (Global "kfree") 
             τℂr =  ℂτ $ TyPri TyVoid 
@@ -43,5 +49,6 @@ errorf = let nℂ = ℂπ (Global "e1000_clean_jumbo_rx_irq0")
          in nℂ :=: ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 64) TyIOAddr] (ℂτ $ i 64)) TyRegAddr
     
 iτℂ ∷ S.Set Τℂ
-iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kfree ∘ (errorf ∘ ε))))
+iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kmalloc ∘ (kfree ∘ (errorf ∘ ε)))))
+--iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kmalloc ∘ (kfree ∘ ε))))
 --iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kfree ∘ ε)))
