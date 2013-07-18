@@ -100,7 +100,7 @@ rwEqτ α@(ℂτ τ1) β = trace ("rwEqTy " ⧺ show α ⧺ " " ⧺ show β) $ d
   nτs ← δNτ
   case β of
     ℂτ τ2 → case (≅) nτs τ1 τ2 of
-              Nothing → error $ "rwEqTy (1) " ⧺ show α ⧺ "\n" ⧺ show β
+              Nothing → error $ "Type Unification failed: \n" ⧺ show α ⧺ "\n" ⧺ show β
               Just c  → (↣) $ ℂτ c
     ℂc cl → if τ1 `classOf` cl 
             then (↣) α
@@ -192,13 +192,13 @@ rwEqp α@(ℂp c1 τα1) β = trace ("rwEqp " ⧺ show α ⧺ " " ⧺ show β) $
                        case c of
                         ℂτ τ' → (↣) $ ℂτ $ TyDer $ TyPtr τ' τα
                         _     → error $ "rwEqp error: impossible case? " ⧺ show c
-          Nothing → error $ "rwEqp error: " ⧺ show α ⧺ " " ⧺ show β
+          Nothing → error $ "(rwEqp error) Type qualifier mismatch\n" ⧺ show α ⧺ "\n" ⧺ show β
       _ → error $ "rwEqp: types dont match " ⧺ show α ⧺ " " ⧺ show β
     ℂp c2 τα2 → 
       case τα1 ≌ τα2 of
         Just τα → do c ← rwEq c1 c2
                      (↣) $ ℂp c τα
-        Nothing → error $ "rwEqp error: " ⧺ show α ⧺ " " ⧺ show β
+        Nothing → error $ "rwEqp error: \n" ⧺ show α ⧺ "\n" ⧺ show β
     ℂλ ca cr → error "rwEqp: cant constraint pointer with function" 
     _ → rwEq β α
 rwEqp _ _ = error $ "rwEqp: FATAL"

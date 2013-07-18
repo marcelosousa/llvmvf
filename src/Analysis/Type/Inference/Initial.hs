@@ -38,6 +38,10 @@ kfree = let nℂ = ℂπ (Global "kfree")
             τℂ = ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 8) TyRegAddr] τℂr) TyRegAddr
         in nℂ :=: τℂ
 
-
+errorf ∷ Τℂ
+errorf = let nℂ = ℂπ (Global "e1000_clean_jumbo_rx_irq0")
+         in nℂ :=: ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 64) TyIOAddr] (ℂτ $ i 64)) TyRegAddr
+    
 iτℂ ∷ S.Set Τℂ
-iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kfree ∘ ε)))
+iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kfree ∘ (errorf ∘ ε))))
+--iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kfree ∘ ε)))
