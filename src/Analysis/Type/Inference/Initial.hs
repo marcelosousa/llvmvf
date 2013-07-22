@@ -49,6 +49,6 @@ errorf = let nℂ = ℂπ (Global "e1000_clean_jumbo_rx_irq0")
          in nℂ :=: ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 64) TyIOAddr] (ℂτ $ i 64)) TyRegAddr
     
 iτℂ ∷ S.Set Τℂ
-iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kmalloc ∘ (kfree ∘ (errorf ∘ ε)))))
---iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kmalloc ∘ (kfree ∘ ε))))
+--iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kmalloc ∘ (kfree ∘ (errorf ∘ ε)))))
+iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kmalloc ∘ (kfree ∘ ε))))
 --iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kfree ∘ ε)))
