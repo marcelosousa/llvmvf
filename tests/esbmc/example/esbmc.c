@@ -12,6 +12,7 @@ void *Tx(void *arg){
     assert(i>=0 && i<N);
     a[i]=*((int *)arg);
   }
+  pthread_exit(0);
 }
 
 void *Ty(void *arg){
@@ -20,6 +21,7 @@ void *Ty(void *arg){
   else{
     x=3;
   }
+  pthread_exit(0);
 }
 
 int main(){
