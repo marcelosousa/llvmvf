@@ -5,133 +5,116 @@ subgraph cluster_Tx {
 style=filled; color=lightblue;
 subgraph cluster_Tx1 {
 style=filled; color=gray; 
-1 [label="1 %tmp = alloca i8*"];
-2 [label="2 %tmp1 = alloca i8*"];
-3 [label="3 store %arg, %tmp1"];
-4 [label="4 %tmp2 = load @x"];
-5 [label="5 %tmp3 = icmp sgt (i1) i32 %tmp2, i32 3"];
+1 [label="1 %tmp = load @x"];
+2 [label="2 %tmp1 = icmp sgt (i1) i32 %tmp, i32 3"];
 
-6 [label="6 br i1 %tmp3, label %bb4, label %bb20"];
+3 [label="3 br i1 %tmp1, label %bb2, label %bb11"];
 label = "basic block %bb"; }
 subgraph cluster_Tx2 {
 style=filled; color=gray; 
-7 [label="7 %tmp5 = load @i"];
-8 [label="8 %tmp6 = icmp sge (i1) i32 %tmp5, i32 0"];
+4 [label="4 %tmp3 = load @i"];
+5 [label="5 %tmp4 = icmp ult (i1) i32 %tmp3, i32 10"];
 
-9 [label="9 br i1 %tmp6, label %bb7, label %bb11"];
-label = "basic block %bb4"; }
+6 [label="6 br i1 %tmp4, label %bb6, label %bb5"];
+label = "basic block %bb2"; }
 subgraph cluster_Tx3 {
 style=filled; color=gray; 
-10 [label="10 %tmp8 = load @i"];
-11 [label="11 %tmp9 = icmp slt (i1) i32 %tmp8, i32 10"];
-
-12 [label="12 br i1 %tmp9, label %bb10, label %bb11"];
-label = "basic block %bb7"; }
+7 [label="7 call __assert_fail"];
+ 8 [label="8 unreachable"];
+label = "basic block %bb5"; }
 subgraph cluster_Tx4 {
-style=filled; color=gray;  
-13 [label="13 br label %bb13"];
-label = "basic block %bb10"; }
+style=filled; color=gray; 
+9 [label="9 %tmp7 = bitcast i8* %arg to i32*"];
+10 [label="10 %tmp8 = load %tmp7"];
+11 [label="11 %tmp9 = sext i32 %tmp3 to i64"];
+12 [label="12 %tmp10 = gep @a, i64 0, i64 %tmp9"];
+13 [label="13 store %tmp8, %tmp10"];
+ 14 [label="14 br label %bb11"];
+label = "basic block %bb6"; }
 subgraph cluster_Tx5 {
 style=filled; color=gray; 
-14 [label="14 call __assert_fail"];
- 15 [label="15 unreachable"];
+15 [label="15 exit_thread"];
+ 16 [label="16 unreachable"];
 label = "basic block %bb11"; }
-subgraph cluster_Tx6 {
-style=filled; color=gray;  
-16 [label="16 br label %bb13"];
-label = "basic block %bb12"; }
-subgraph cluster_Tx7 {
-style=filled; color=gray; 
-17 [label="17 %tmp14 = load %tmp1"];
-18 [label="18 %tmp15 = bitcast i8* %tmp14 to i32*"];
-19 [label="19 %tmp16 = load %tmp15"];
-20 [label="20 %tmp17 = load @i"];
-21 [label="21 %tmp18 = sext i32 %tmp17 to i64"];
-22 [label="22 %tmp19 = gep @a, i32 0, i64 %tmp18"];
-23 [label="23 store %tmp16, %tmp19"];
- 24 [label="24 br label %bb20"];
-label = "basic block %bb13"; }
-subgraph cluster_Tx8 {
-style=filled; color=gray; 
-25 [label="25 exit_thread"];
- 26 [label="26 unreachable"];
-label = "basic block %bb20"; }
-subgraph cluster_Tx9 {
-style=filled; color=gray; 
-27 [label="27 %tmp22 = load %tmp"];
- 28 [label="28 ret i8* %tmp22"];
-label = "basic block %bb21"; }
  label = "function Tx"; }
 subgraph cluster_Ty {
 style=filled; color=lightblue;
 subgraph cluster_Ty1 {
 style=filled; color=gray; 
-29 [label="29 %tmp = alloca i8*"];
-30 [label="30 %tmp1 = alloca i8*"];
-31 [label="31 store %arg, %tmp1"];
-32 [label="32 %tmp2 = load @x"];
-33 [label="33 %tmp3 = icmp sgt (i1) i32 %tmp2, i32 3"];
+17 [label="17 %tmp = load @x"];
+18 [label="18 %tmp1 = icmp sgt (i1) i32 %tmp, i32 3"];
 
-34 [label="34 br i1 %tmp3, label %bb4, label %bb11"];
+19 [label="19 br i1 %tmp1, label %bb2, label %bb8"];
 label = "basic block %bb"; }
 subgraph cluster_Ty2 {
 style=filled; color=gray; 
-35 [label="35 %tmp5 = load %tmp1"];
-36 [label="36 %tmp6 = bitcast i8* %tmp5 to i32*"];
-37 [label="37 %tmp7 = load %tmp6"];
-38 [label="38 %tmp8 = load @j"];
-39 [label="39 %tmp9 = sext i32 %tmp8 to i64"];
-40 [label="40 %tmp10 = gep @a, i32 0, i64 %tmp9"];
-41 [label="41 store %tmp7, %tmp10"];
- 42 [label="42 br label %bb12"];
-label = "basic block %bb4"; }
+20 [label="20 %tmp3 = bitcast i8* %arg to i32*"];
+21 [label="21 %tmp4 = load %tmp3"];
+22 [label="22 %tmp5 = load @j"];
+23 [label="23 %tmp6 = sext i32 %tmp5 to i64"];
+24 [label="24 %tmp7 = gep @a, i64 0, i64 %tmp6"];
+25 [label="25 store %tmp4, %tmp7"];
+ 26 [label="26 br label %bb9"];
+label = "basic block %bb2"; }
 subgraph cluster_Ty3 {
 style=filled; color=gray; 
-43 [label="43 store i32 3, @x"];
- 44 [label="44 br label %bb12"];
-label = "basic block %bb11"; }
+27 [label="27 store i32 3, @x"];
+ 28 [label="28 br label %bb9"];
+label = "basic block %bb8"; }
 subgraph cluster_Ty4 {
 style=filled; color=gray; 
-45 [label="45 exit_thread"];
- 46 [label="46 unreachable"];
-label = "basic block %bb12"; }
-subgraph cluster_Ty5 {
-style=filled; color=gray; 
-47 [label="47 %tmp14 = load %tmp"];
- 48 [label="48 ret i8* %tmp14"];
-label = "basic block %bb13"; }
+29 [label="29 exit_thread"];
+ 30 [label="30 unreachable"];
+label = "basic block %bb9"; }
  label = "function Ty"; }
 subgraph cluster_main {
 style=filled; color=lightblue;
 subgraph cluster_main1 {
 style=filled; color=gray; 
-49 [label="49 %id1 = alloca i64"];
-50 [label="50 %id2 = alloca i64"];
-51 [label="51 %id3 = alloca i64"];
-52 [label="52 %arg1 = alloca i32"];
-53 [label="53 %arg2 = alloca i32"];
-54 [label="54 store i32 10, %arg1"];
-55 [label="55 store i32 20, %arg2"];
-56 [label="56 call nondet_uint"];
-57 [label="57 store %tmp, @i"];
-58 [label="58 %tmp1 = bitcast i32* %arg1 to i8*"];
-59 [label="59 create_thread (%id1) Tx"];
-60 [label="60 %tmp3 = bitcast i32* %arg2 to i8*"];
-61 [label="61 create_thread (%id2) Ty"];
-62 [label="62 %tmp5 = load %id1"];
-63 [label="63 join_thread tmp5"];
-64 [label="64 %tmp7 = load %id2"];
-65 [label="65 join_thread tmp7"];
- 66 [label="66 ret i32 0"];
+31 [label="31 %id1 = alloca i64"];
+32 [label="32 %id2 = alloca i64"];
+33 [label="33 %arg1 = alloca i32"];
+34 [label="34 %arg2 = alloca i32"];
+35 [label="35 store i32 10, %arg1"];
+36 [label="36 store i32 20, %arg2"];
+37 [label="37 call nondet_uint"];
+38 [label="38 store %tmp, @i"];
+39 [label="39 %tmp1 = bitcast i32* %arg1 to i8*"];
+40 [label="40 create_thread (%id1) Tx"];
+41 [label="41 %tmp3 = bitcast i32* %arg2 to i8*"];
+42 [label="42 create_thread (%id2) Ty"];
+43 [label="43 %tmp5 = load %id1"];
+44 [label="44 join_thread tmp5"];
+45 [label="45 %tmp7 = load %id2"];
+46 [label="46 join_thread tmp7"];
+ 47 [label="47 ret i32 0"];
 label = "basic block %bb"; }
  label = "function main"; }
-59 -> 1;
-61 -> 29;
-25 -> 63;
-6 -> 25;
-9 -> 14;
+40 -> 1;
+42 -> 17;
+15 -> 44;
+3 -> 15;
+7 -> 8;
+6 -> 7;
+15 -> 16;
 14 -> 15;
-12 -> 14;
+13 -> 14;
+12 -> 13;
+11 -> 12;
+10 -> 11;
+9 -> 10;
+6 -> 9;
+5 -> 6;
+4 -> 5;
+3 -> 4;
+2 -> 3;
+1 -> 2;
+29 -> 46;
+28 -> 29;
+27 -> 28;
+19 -> 27;
+29 -> 30;
+26 -> 29;
 25 -> 26;
 24 -> 25;
 23 -> 24;
@@ -141,25 +124,11 @@ label = "basic block %bb"; }
 19 -> 20;
 18 -> 19;
 17 -> 18;
-13 -> 17;
-12 -> 13;
-11 -> 12;
-10 -> 11;
-9 -> 10;
-8 -> 9;
-7 -> 8;
-6 -> 7;
-5 -> 6;
-4 -> 5;
-3 -> 4;
-2 -> 3;
-1 -> 2;
-45 -> 65;
+46 -> 47;
+45 -> 46;
 44 -> 45;
 43 -> 44;
-34 -> 43;
-45 -> 46;
-42 -> 45;
+42 -> 43;
 41 -> 42;
 40 -> 41;
 39 -> 40;
@@ -170,23 +139,4 @@ label = "basic block %bb"; }
 34 -> 35;
 33 -> 34;
 32 -> 33;
-31 -> 32;
-30 -> 31;
-29 -> 30;
-65 -> 66;
-64 -> 65;
-63 -> 64;
-62 -> 63;
-61 -> 62;
-60 -> 61;
-59 -> 60;
-58 -> 59;
-57 -> 58;
-56 -> 57;
-55 -> 56;
-54 -> 55;
-53 -> 54;
-52 -> 53;
-51 -> 52;
-50 -> 51;
-49 -> 50; }
+31 -> 32; }
