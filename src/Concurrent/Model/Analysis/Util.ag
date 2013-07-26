@@ -12,35 +12,49 @@ include "Base.ag"
 imports{
 import qualified Data.Map as Map
 import qualified Data.IntMap as IM
-import Data.Maybe 
+import Data.Maybe
 
 import Language.LLVMIR
+import Language.Asm (Asm, AsmC)
 }
 
-attr Instruction
-  syn instrpc :: {PC}
+attr Instruction PHI Terminator
+  syn entryPC:: {PC}
 
-sem Instruction
-  | * lhs.instrpc = @pc.self
+sem Instruction PHI Terminator
+  | * lhs.entryPC= @pc.self
 
 {
-instrpc :: Instruction -> PC
-instrpc i = instrpc_Syn_Instruction $ wrap_Instruction (sem_Instruction i) $ Inh_Instruction { }
 
 entryPCFunction :: Function -> Maybe PC
 entryPCFunction fn = case fn of
   FunctionDecl name _ rty iv pms -> Nothing
   FunctionDef  name _ rty iv pms bbs -> 
-    Just $ entryPCBB $ head bbs
+    Just $ entryPC $ head bbs
 
 entryBBFunction :: Function -> Maybe Identifier
 entryBBFunction fn = case fn of
   FunctionDecl name _ rty iv pms -> Nothing
   FunctionDef  name _ rty iv pms bbs -> 
     case bbs of
-	   [] -> Nothing
-	   ((BasicBlock i _):_) -> Just i
+     [] -> Nothing
+     ((BasicBlock i _ _ _):_) -> Just i
 
-entryPCBB :: BasicBlock -> PC
-entryPCBB (BasicBlock _ _ instrs _) = instrpc $ head instrs
+class EntryPC a where
+  entryPC :: a -> PC
+
+instance EntryPC PHI where
+  entryPC a = entryPC_Syn_PHI $ wrap_PHI (sem_PHI a) $ Inh_PHI { }
+
+instance EntryPC Instruction where
+  entryPC a = entryPC_Syn_Instruction $ wrap_Instruction (sem_Instruction a) $ Inh_Instruction { }
+
+instance EntryPC Terminator where
+  entryPC a = entryPC_Syn_Terminator $ wrap_Terminator (sem_Terminator a) $ Inh_Terminator { }
+
+instance EntryPC BasicBlock where
+  entryPC bb = case bb of
+    BasicBlock _ [] [] tmn       -> entryPC tmn
+    BasicBlock _ [] instrs tmn   -> entryPC $ head instrs
+    BasicBlock _ phis instrs tmn -> entryPC $ head phis
 }

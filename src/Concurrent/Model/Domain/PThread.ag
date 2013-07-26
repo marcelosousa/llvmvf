@@ -23,6 +23,8 @@ import Data.Maybe
 import Concurrent.Model
 import Language.LLVMIR
 import Language.LLVMIR.Util
+import Language.Asm (Asm, AsmC)
+
 import UU.PPrint
 
 import Debug.Trace (trace)

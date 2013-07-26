@@ -1,4 +1,4 @@
-{-#LANGUAGE RecordWildCards #-}
+{-#LANGUAGE UnicodeSyntax, RecordWildCards #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model.Analysis.Instruction
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -15,11 +15,11 @@ import Concurrent.Model.Analysis.Util
 import qualified Data.Map   as M
 import qualified Data.Maybe as MB
 
-analyseInstr :: Instruction -> Context ()
-analyseInstr i = do 
-  e@Env{..} <- getEnv
+analyseTmn ∷ Terminator → Context ()
+analyseTmn tmn = do
+  e@Env{..} ← getEnv
   let l@Location{..} = ploc
-  case i of
+  case tmn of
     -- Terminators
     Ret pc v -> do let l' = Location fn bb pc False
                        c  = flow pc ploc ccfg
@@ -50,6 +50,19 @@ analyseInstr i = do
                     el = updateLocs l' (ExitLoc l' $ BBLoc di) efloc
                     e' = e {ccfg = c, ploc = l', efloc = el}
                 in putEnv e'
+
+
+-- Phi Instructions
+analysePHI ∷ PHI → Context ()
+analysePHI (PHI pc i ty vals) = 
+  let (v,t) = unzip vals
+  in analyseNInstr pc [ty] $ v ++ t 
+
+analyseInstr :: Instruction -> Context ()
+analyseInstr i = do 
+  e@Env{..} <- getEnv
+  let l@Location{..} = ploc
+  case i of
     -- Call Operation
     Call pc i ty callee vs -> do let l' = Location fn bb pc False
                                      c  = flow pc ploc ccfg
@@ -58,9 +71,6 @@ analyseInstr i = do
                                  putEnv e'
                                  mapM_ analyseValue vs
                                  analyseType ty
-    -- Phi Instructions
-    PHI pc i ty vals -> let (v,t) = unzip vals
-                        in analyseNInstr pc [ty] $ v ++ t 
     -- Standard Binary Operations
     -- Integer Operations
     Add  pc i ty op1 op2 -> analyseNInstr pc [ty] [op1,op2] 
@@ -101,7 +111,7 @@ analyseInstr i = do
     FCmp pc i cond ty op1 op2 -> analyseNInstr pc [ty] [op1,op2]
     -- Selection Operations
     Select pc i cv vt vf       -> analyseNInstr pc [] [cv,vt,vf]
-    ExtractValue pc i v idxs   -> analyseNInstr pc [] [v]
+    ExtractValue pc i τ v idxs -> analyseNInstr pc [] [v]
     InsertValue pc i v vi idxs -> analyseNInstr pc [] [v,vi]
     -- Memory Operations
     Alloca pc i ty       align   -> analyseNInstr pc [ty] []

@@ -17,6 +17,7 @@ import Data.List
 
 import Language.LLVMIR
 import Language.LLVMIR.Util
+import Language.LLVMIR.Printer
 import Concurrent.Model.Analysis.ControlFlow
 import Concurrent.Model.Analysis.DataFlow
 

@@ -78,7 +78,7 @@ analyseLoc loc = do
             EndTh _ -> return () -- findout the exit locations of the callee
             BBLoc bbi -> do let fnf = MB.fromMaybe (error $ "ExitLoc " ++ show fn ++ show funs) $ M.lookup fn funs
                                 bba = findBasicBlock bbi fnf
-                                pc = entryPCBB bba
+                                pc = entryPC bba
                                 iLoc = Location fn bbi pc True
                                 c  = flow pc l ccfg
                                 e' = e {ccfg = c, ploc = iLoc}
@@ -111,12 +111,14 @@ analyseLoc loc = do
                           
 -- Add to seen
 analyseBB :: BasicBlock -> Context ()
-analyseBB (BasicBlock i instrs) = do
+analyseBB (BasicBlock i phis instrs tmn) = do
     e@Env{..} <- getEnv
     let fni = fn ploc
     trace ("Analyzing BB " ++ show i ++ " of function " ++ show fni) $ if bbWasAnalyzed fni i seen
     then return ()
-    else do mapM_ analyseInstr instrs
+    else do mapM_ analysePHI phis
+            mapM_ analyseInstr instrs
+            analyseTmn tmn
             o@Env{..} <- getEnv
             let seen' = addToSeen fni i seen
                 locs = getLocs ploc efloc

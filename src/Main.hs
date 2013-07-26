@@ -27,12 +27,12 @@ import Language.SMTLib2.Printer    (prettyprint)
 import qualified Data.Map as M
 import Analysis.Asm.Lift
 import Analysis.Simplify.Intrinsics
---import qualified Concurrent.Model as M
---import Concurrent.Model.Domain.PThread
+import qualified Concurrent.Model as M
+import Concurrent.Model.Domain.PThread
 -- import Concurrent.Model.SystemC
---import Concurrent.Model.Visualizer
+import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
---import Concurrent.Model.Encoder    (encode)
+-- import Concurrent.Model.Encoder    (encode)
 import Test.Example
 
 import Util.Demangler
@@ -135,8 +135,8 @@ runOption (Extract bc m) = do mdl <- extract bc
                                     Pretty → show $ pretty mdl
                                     LiftAsm → show $ pretty $ liftAsm $ liftDebug mdl
                               writeFile (addExtension bf "llvf") p
-runOption (Model bc d) = undefined -- extractModel bc d                           
-runOption (CCFG bc d)  = undefined -- runCCFG bc d
+runOption (Model bc d) = extractModel bc d                           
+runOption (CCFG bc d)  = runCCFG bc d
 runOption (BMC bc d k) = undefined -- runBMC bc d k
 runOption (TypeCheck bc) = do mdl <- extract bc
                              -- print mdl
@@ -177,7 +177,7 @@ runOption (TypeAnalyze lbc) = do
 --                              writeFile (addExtension bf "smt2")  (show $ prettyprint $ encodeSysC mod k)
 
 -- | 'extractModel' - extract the model
-{-
+
 extractModel :: FilePath -> Domain -> IO ()
 extractModel bc SystemC = error "llvmvf for SystemC is currently not available."
 extractModel bc PThread = do mdl <- extract bc
@@ -195,7 +195,7 @@ runCCFG bc PThread = do mdl <- extract bc
                             (m,ccfg,_) = M.analyse "main" mod
                             outfile = addExtension bf "dot"
                         writeFile outfile (show $ dumpccfg m ccfg)
-
+{-
 -- | 'runBMC' - main bmc function
 runBMC :: FilePath -> Domain -> M.Bound -> IO ()
 runBMC bc SystemC _ = error "llvmvf for SystemC is currently not available."
