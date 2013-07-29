@@ -6,11 +6,12 @@
 module Concurrent.Model.Analysis.DataFlow where
 
 import Language.LLVMIR
+import Language.SMTLib2.Base
 
 import qualified Data.Map    as M
 
-type TypeEnv   = M.Map Type () --(SSortExpr, SSort)
-
+type TypeEnv   = M.Map Type (SSortExpr, SSort)
+type Declarations = M.Map String (Type, Parameters) 
 {-
 data CS = ReadS
         | WriteS

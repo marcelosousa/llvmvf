@@ -1,4 +1,4 @@
-{-#LANGUAGE EmptyDataDecls, RecordWildCards #-}
+{-#LANGUAGE EmptyDataDecls, RecordWildCards, UnicodeSyntax #-}
 -------------------------------------------------------------------------------
 -- Module    :  Concurrent.Model
 -- Copyright :  (c) 2012 Marcelo Sousa
@@ -11,7 +11,7 @@ import qualified Data.Map    as M
 
 import Language.LLVMIR
 import Language.LLVMIR.Printer.Module
-import Concurrent.Model.Analysis.ControlFlow
+import Concurrent.Model.Analysis.ControlFlow (ControlFlow)
 import Concurrent.Model.Analysis.DataFlow
 import Concurrent.Model.Analysis.Module
 
@@ -41,20 +41,21 @@ analyse ep (Model m) =
 ---------------------------------------------------
 -- REMOVE THIS PART FROM THIS FILE
 type Bound = Int
-
-{-
 type Valuation = M.Map Id (Either Id Value)
 
--- GlobalState of a Concurrent System
--- type GlobalState = (M.Map String (PC, M.Map Id Value), M.Map Id Value, PC)
-nullGlobalState :: GlobalState
-nullGlobalState = GlobalState M.empty (-1) M.empty M.empty
+-- EncoderState of a Concurrent System
+-- type EncoderState = (M.Map String (PC, M.Map Id Value), M.Map Id Value, PC)
+nullEncoderState ∷ Int → Identifier → ControlFlow → EncoderState
+nullEncoderState = EncoderState M.empty (-1) M.empty M.empty
 
-data GlobalState = GlobalState { defsorts  :: TypeEnv
-                               , currentpc :: PC
-                               , gvals     :: Valuation
-                               , ti        :: M.Map Identifier ThreadState
-                               }
+data EncoderState = EncoderState { defsorts  ∷ TypeEnv
+                                 , currentpc ∷ PC
+                                 , gvals     ∷ Valuation
+                                 , ti        ∷ M.Map Identifier ThreadState
+                                 , bound     ∷ Int
+                                 , mainfId   ∷ Identifier
+                                 , ccfg      ∷ ControlFlow
+                                 }
   deriving Show
 
 data ThreadState = ThreadState { tipc  :: PC
@@ -63,7 +64,7 @@ data ThreadState = ThreadState { tipc  :: PC
   deriving Show
 
 type Transitions = [Transition]
-type Transition = (PC, Bool, GlobalState -> (GlobalState, SExpressions, ISExpr), PC) 
+type Transition = (PC, Bool, EncoderState -> (EncoderState, SExpressions, ISExpr), PC) 
 
 -- Intermediate SMT Expression
 data ISExpr = ISEmpty
@@ -74,4 +75,3 @@ fromISExpr :: ISExpr -> SExpr
 fromISExpr (ISExpr s)     = s
 fromISExpr ISEmpty        = error "ISEmpty"
 fromISExpr (ISFunction f) = error "ISFunction"
--}

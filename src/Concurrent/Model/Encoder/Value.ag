@@ -57,7 +57,7 @@ attr Functions Function
   inh mn     :: {Maybe SSort}
   inh mts :: {TypeEnv}
 
-attr NamedTypes PTyInt PValue PValueIdx PTyIntL PValues ValueIdxs ValId MValue Instructions BasicBlock BasicBlocks ValIdL
+attr NamedTypes PTyInt PValue PValueIdx PTyIntL PValues ValueIdxs ValId MValue Instructions BasicBlock BasicBlocks ValIdL PHIs PHI Terminator
   inh mn     :: {Maybe SSort}
   inh mts :: {TypeEnv}
   inh val    :: {Map.Map Id (Type, [PC])}

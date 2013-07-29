@@ -21,7 +21,7 @@ AGFLAGS := -P src/Language/LLVMIR/Grammar -P src/Language/LLVMIR/Type
 all : haskell
 
 #ag : base printer pthread ppccfg encoder converter auxiliar
-ag : base printer auxiliar pthread ppccfg
+ag : base printer auxiliar pthread ppccfg encoder
 
 base : $(BASEAG) $(TYPEAG)
 	uuagc -Hd --datarecords --self $(AGFLAGS) src/Language/LLVMIR.ag

@@ -16,7 +16,7 @@ attr Identifier
   syn declexpr :: {[SExpression]} -- Each identifier is able to generate a SExpression for its declaration.
   inh sortexpr :: {Maybe SSortExpr}
 
-attr Function Functions Instruction GlobalValue ValId ValIdL Value PValue MValue Argument CompareConstantExpr Arguments Constant ConstantExpr Global Globals Identifiers PValueIdx  PValues MConstant MIdentifier Parameter RetInst ValueIdxs Values ComplexConstant Parameters Instructions BasicBlock BasicBlocks
+attr Function Functions Instruction GlobalValue ValId ValIdL Value PValue MValue Argument CompareConstantExpr Arguments Constant ConstantExpr Global Globals Identifiers PValueIdx  PValues MConstant MIdentifier Parameter RetInst ValueIdxs Values ComplexConstant Parameters Instructions BasicBlock BasicBlocks PHIs PHI Terminator
   inh sortexpr :: {Maybe SSortExpr}
 
 sem Identifier

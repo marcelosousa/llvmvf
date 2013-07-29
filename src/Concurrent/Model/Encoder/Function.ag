@@ -29,8 +29,8 @@ sem Function
 
 sem BasicBlock
   | BasicBlock
-      lhs.expr = @instrs.expr 
-      lhs.latest = @instrs.latest
+      lhs.expr = @instrs.expr
+      lhs.latest =  @instrs.latest
 
 sem Instruction
   | Alloca Call BitCast CreateThread Store MutexInit
@@ -98,9 +98,6 @@ sem Instruction
       lhs.latest = Map.empty -- Map.singleton (fromJust @mutex.ident) (IdentExpr $ SymIdent @loc.gvp) 
  
 {
-nextUnique :: Int -> (Int, Int)
-nextUnique u = (u+1, u)
-
 encodeMain :: Function -> PreEncoder -> Declarations -> (Map.Map Id SExpr, SExpressions, [SExpr])
 encodeMain f pe fdcl = let fw = wrap_Function (sem_Function f) $ Inh_Function { pcc_Inh_Function = 0, tn_Inh_Function = "main", prenc_Inh_Function = pe, sortEnv_Inh_Function = sortEnv pe, fdcl_Inh_Function = fdcl, mn_Inh_Function = undefined, mts_Inh_Function = undefined, sortexpr_Inh_Function = undefined, val_Inh_Function = undefined } 
                   in (latest_Syn_Function fw, sexpres_Syn_Function fw, expr_Syn_Function fw)

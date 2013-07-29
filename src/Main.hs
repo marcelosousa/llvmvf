@@ -32,7 +32,7 @@ import Concurrent.Model.Domain.PThread
 -- import Concurrent.Model.SystemC
 import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
--- import Concurrent.Model.Encoder    (encode)
+--import Concurrent.Model.Encoder    (encode)
 import Test.Example
 
 import Util.Demangler
@@ -55,7 +55,7 @@ _helpTypeAnalyze = unlines ["llvmvf typeanalyze performs  inter and intra-proced
 data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
             | CCFG      {input :: FilePath, domain :: Domain}
             | Model     {input :: FilePath, domain :: Domain}
-            | BMC       {input :: FilePath, domain :: Domain, bound :: Int}
+            | BMC       {input :: FilePath, domain :: Domain, mainName ∷ String, bound :: Int}
             | Convert   {input :: FilePath}
             | Type      {input :: FilePath, tmode ∷ TypeMode}
             | TypeCheck {input :: FilePath}
@@ -100,6 +100,7 @@ bmcMode :: Option
 bmcMode = BMC { input = def &= args
               , domain = def &= help "domain of verification: PThread | SystemC (Super Beta)" 
               , bound  = def &= help "bound (k): Int"
+              , mainName = "main" &= help "name of the main function: String"
               } &= help _helpBMC
 
 typeMode :: Option
@@ -137,7 +138,7 @@ runOption (Extract bc m) = do mdl <- extract bc
                               writeFile (addExtension bf "llvf") p
 runOption (Model bc d) = extractModel bc d                           
 runOption (CCFG bc d)  = runCCFG bc d
-runOption (BMC bc d k) = undefined -- runBMC bc d k
+runOption (BMC bc d n k) = undefined --runBMC bc d n k
 runOption (TypeCheck bc) = do mdl <- extract bc
                              -- print mdl
                               print $ typeCheck mdl
@@ -195,14 +196,16 @@ runCCFG bc PThread = do mdl <- extract bc
                             (m,ccfg,_) = M.analyse "main" mod
                             outfile = addExtension bf "dot"
                         writeFile outfile (show $ dumpccfg m ccfg)
+
 {-
 -- | 'runBMC' - main bmc function
-runBMC :: FilePath -> Domain -> M.Bound -> IO ()
+runBMC ∷ FilePath → Domain → String → M.Bound → IO ()
 runBMC bc SystemC _ = error "llvmvf for SystemC is currently not available."
-runBMC bc PThread k = do mdl <- extract bc
-                         let bf  = dropExtension bc
-                             mod = (M.model mdl) :: M.Model PThread
-                             outfile = addExtension bf "smt2"
-                         putStrLn $ "Generating " ++ outfile ++ "..."  
-                         --writeFile outfile (show $ prettyprint $ encode mod k)
+runBMC bc PThread m k = do mdl <- extract bc
+                           let bf  = dropExtension bc
+                               mod = (M.model mdl) :: M.Model PThread
+                               (m,ccfg,_) = M.analyse m mod
+                               outfile = addExtension bf "smt2"
+                           putStrLn $ "Generating " ++ outfile ++ "..."  
+                           writeFile outfile (show $ prettyprint $ encode mod m ccfg k)
 -}

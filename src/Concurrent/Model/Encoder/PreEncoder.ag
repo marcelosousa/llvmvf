@@ -32,12 +32,12 @@ sem Functions
   | Nil
       lhs.fStore  = Map.empty
   | Entry 
-      val.tn      = @key
+      val.tn      = identifierName @key
       val.sortEnv = @lhs.sortEnv
       tl.sortEnv  = @val.sortEnv
       lhs.fStore  = Map.unionWith (\(a1,l1) (a2,l2) -> (a1, l1++l2)) @val.fStore @tl.fStore
 
-attr Function BasicBlocks BasicBlock Instructions Instruction
+attr Function BasicBlocks BasicBlock PHIs PHI Instructions Instruction Terminator
   inh tn :: {Id}
 
 sem Instructions BasicBlocks

@@ -6,7 +6,7 @@
 
 module Concurrent.Model.Analysis.Module where
 
-import Language.LLVMIR hiding (Switch)
+import Language.LLVMIR
 import Language.LLVMIR.Util
 
 import Concurrent.Model.Analysis.ControlFlow
@@ -71,7 +71,7 @@ analyseLoc loc = do
                 analyseFunction th
                 o@Env{..} <- getEnv -- Retrieve the new env
                 let p = getThreadExits tni efloc
-                    c = foldr (\l1 r -> (Switch l1 lpc):r) ccfg p 
+                    c = foldr (\l1 r -> (CSwitch fn l1 lpc):r) ccfg p 
                 putEnv $ o {ccfg = c}
         ExitLoc l@Location{..} w -> case w of
             EndFn   -> return () -- Its the job of the caller to
@@ -95,8 +95,9 @@ analyseLoc loc = do
                                 putEnv e'
                                 analyseFunction fn
                                 o@Env{..} <- getEnv -- Retrieve the new env
-                                let p = getFunctionExits fni efloc
-                                    c' = foldr (\l1 r -> (Inter l1 lpc):r) ccfg p 
+                                let ploc@Location{..} = ploc
+                                    p = getFunctionExits fni efloc
+                                    c' = foldr (\l1 r -> (Inter fn l1 lpc):r) ccfg p 
                                 putEnv $ o {ccfg = c'}
             ThLoc tni -> do let th = MB.fromMaybe (errorMsg "ThLoc" (show tni) $ M.keys funs) $ M.lookup tni funs 
                             case entryBBFunction th of

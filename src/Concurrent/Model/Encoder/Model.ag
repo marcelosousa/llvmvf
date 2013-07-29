@@ -25,12 +25,14 @@ imports
 {
 import Language.SMTLib2.Base
 import Language.SMTLib2.Builder
+import Language.Asm (Asm,AsmC)
 
 import Language.LLVMIR
+import Language.LLVMIR.Util
 
 import Concurrent.Model
-import Concurrent.Model.Analysis.ControlFlow (ControlFlow(..))
-import Concurrent.Model.Analysis.DataFlow    (DataFlow(..))
+import Concurrent.Model.Analysis.ControlFlow (ControlFlow)
+import Concurrent.Model.Analysis.DataFlow    
 
 import Data.Char
 import Data.Maybe

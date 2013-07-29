@@ -40,9 +40,6 @@ data Where = BBLoc Identifier -- Jump to Basic Block
            | EndTh Identifier -- End of Thread
   deriving (Show, Eq)
 
---instance Ord Where where
---  BBLoc < _ 
-
 data Loc = ExitLoc Location Where
          | SyncLoc Location Identifier
   deriving (Show, Eq)
