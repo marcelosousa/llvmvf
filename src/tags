@@ -11,7 +11,7 @@
 <>	./Language/LLVMIR/Extractor/Opcode.hs	82;"	v
 =:	./Analysis/Type/Inference/Initial.hs	30;"	v	file:
 >:	./Analysis/Type/Inference/Base.hs	107;"	v
-AEq	./Analysis/Type/Memory/TyAnn.hs	119;"	t
+AEq	./Analysis/Type/Memory/TyAnn.hs	123;"	t
 AShr	./Language/FeatherIR/Base/Syntax.hs	48;"	d
 AShr	./Language/LLVMIR/Extractor/Opcode.hs	30;"	d
 AShr	src/Language/LLVMIR.hs	267;"	d
@@ -283,7 +283,7 @@ IC	./Language/Asm.hs	191;"	d
 ICmp	./Language/LLVMIR/Extractor/Opcode.hs	53;"	d
 ICmp	src/Language/LLVMIR.hs	287;"	d
 ICmpExpr	src/Language/LLVMIR.hs	155;"	d
-IEq	./Analysis/Type/Memory/TyAnn.hs	191;"	t
+IEq	./Analysis/Type/Memory/TyAnn.hs	195;"	t
 ILabel	./src/Concurrent/Model/Visualizer.ag	197;"	t
 IRegC	./Language/Asm.hs	197;"	d
 ISEmpty	./Concurrent/Model.hs	70;"	d
@@ -2510,7 +2510,7 @@ ccfgMode	Main.hs	91;"	v
 cds_ComplexConstant_ConstantDataSequential	src/Language/LLVMIR.hs	160;"	v
 classOf	./Analysis/Type/Inference/Base.hs	63;"	v
 cmpExpr_ConstantExpr_CompareConstantExpr	src/Language/LLVMIR.hs	180;"	v
-cmpList	./Analysis/Type/Memory/TyAnn.hs	153;"	v
+cmpList	./Analysis/Type/Memory/TyAnn.hs	157;"	v
 compareConstantExpr	./Language/LLVMIR/Extractor/Value.hs	131;"	v
 cond_CompareConstantExpr_FCmpExpr	src/Language/LLVMIR.hs	156;"	v
 cond_CompareConstantExpr_ICmpExpr	src/Language/LLVMIR.hs	155;"	v
@@ -2556,7 +2556,7 @@ entryPC_Syn_Instruction	src/Concurrent/Model/Analysis/Util.hs	2145;"	v
 entryPC_Syn_PHI	src/Concurrent/Model/Analysis/Util.hs	4898;"	v
 entryPC_Syn_Terminator	src/Concurrent/Model/Analysis/Util.hs	5577;"	v
 eqStruct	./Analysis/Type/Util.hs	119;"	v
-eqTyStr	./Analysis/Type/Memory/TyAnn.hs	156;"	v
+eqTyStr	./Analysis/Type/Memory/TyAnn.hs	160;"	v
 erase	./Analysis/Type/Memory/Util.hs	44;"	v
 eraseEnv	./Analysis/Type/Memory/Util.hs	58;"	v
 errorMsg	./Analysis/Type/Standard/Constant.hs	88;"	v
@@ -2676,7 +2676,7 @@ gvals	./Concurrent/Model.hs	53;"	v
 gvars_Module_Module	src/Language/LLVMIR.hs	376;"	v
 hasInitializer	./Language/LLVMIR/Extractor/Module.hs	49;"	v	file:
 hasSE_Instruction_InlineAsm	src/Language/LLVMIR.hs	290;"	v
-i	./Analysis/Type/Memory/TyAnn.hs	78;"	v
+i	./Analysis/Type/Memory/TyAnn.hs	81;"	v
 iPi	./Language/LTL/Base.hs	240;"	v
 id_Instruction_AShr	src/Language/LLVMIR.hs	267;"	v
 id_Instruction_Add	src/Language/LLVMIR.hs	253;"	v
@@ -2746,7 +2746,7 @@ instr	./Language/LLVMIR/Extractor/Context.hs	24;"	v
 instrs_BasicBlock_BasicBlock	src/Language/LLVMIR.hs	130;"	v
 intConstantValue	./Language/LLVMIR/Util.hs	87;"	v
 inttofp	./Analysis/Type/Standard/Instruction.hs	176;"	v
-ioremapA	./Analysis/Type/Inference/Initial.hs	35;"	v	file:
+ioremap	./Analysis/Type/Inference/Initial.hs	35;"	v	file:
 iounmap	./Analysis/Type/Inference/Initial.hs	38;"	v	file:
 is	./Language/LLVMIR/Extractor/Instruction.hs	39;"	v
 isAgg	./Analysis/Type/Util.hs	46;"	v
@@ -2784,9 +2784,10 @@ iv_SimpleConstant_ConstantInt	src/Language/LLVMIR.hs	432;"	v
 ival_Global_GlobalVar	src/Language/LLVMIR.hs	235;"	v
 ival_Instruction_InsertValue	src/Language/LLVMIR.hs	293;"	v
 iΩ	./Analysis/Type/Inference/Solver.hs	65;"	v
-iτℂ	./Analysis/Type/Inference/Initial.hs	54;"	v
+iτℂ	./Analysis/Type/Inference/Initial.hs	60;"	v
 k	./Language/LTL/Base.hs	252;"	v
 kLogAddr	./Analysis/Type/Memory/TyAnn.hs	75;"	v
+kVirAddr	./Analysis/Type/Memory/TyAnn.hs	78;"	v
 kfree	./Analysis/Type/Inference/Initial.hs	44;"	v	file:
 kmalloc	./Analysis/Type/Inference/Initial.hs	41;"	v	file:
 l	./Language/LTL/Base.hs	252;"	v
@@ -5299,6 +5300,7 @@ val_ConstantDataSequential_ConstantDataArray	src/Language/LLVMIR.hs	175;"	v
 val_ConstantDataSequential_ConstantDataVector	src/Language/LLVMIR.hs	176;"	v
 val_ConstantExpr_UnaryConstantExpr	src/Language/LLVMIR.hs	188;"	v
 valf_Instruction_Select	src/Language/LLVMIR.hs	291;"	v
+valloc	./Analysis/Type/Inference/Initial.hs	47;"	v	file:
 vals_ComplexConstant_ConstantArray	src/Language/LLVMIR.hs	162;"	v
 vals_ComplexConstant_ConstantStruct	src/Language/LLVMIR.hs	161;"	v
 vals_ComplexConstant_ConstantVector	src/Language/LLVMIR.hs	163;"	v
@@ -5311,6 +5313,7 @@ variadicFns	./Language/LLVMIR/Util.hs	69;"	v
 vars	./Analysis/Asm/Lift.hs	165;"	v	file:
 vars	./Concurrent/Model/Analysis/Context.hs	75;"	v
 vfns	./Analysis/Type/Inference/Base.hs	117;"	v
+vfree	./Analysis/Type/Inference/Initial.hs	50;"	v	file:
 vτℂgen	./Analysis/Type/Inference/Value.hs	41;"	v
 withContext	./Language/LLVMIR/Extractor/Context.hs	35;"	v
 wrap_Alias	src/Concurrent/Model/Analysis/Util.hs	101;"	v
@@ -5729,8 +5732,8 @@ wrap_Visibility	src/Language/LLVMIR/Printer/Module.hs	8006;"	v
 ∙	./Analysis/Type/Inference/Base.hs	31;"	v
 ∪	./Analysis/Asm/Lift.hs	35;"	v	file:
 ∪	./Analysis/Type/Inference/Base.hs	25;"	v
-≅	./Analysis/Type/Memory/TyAnn.hs	120;"	v
-≌	./Analysis/Type/Memory/TyAnn.hs	192;"	v
+≅	./Analysis/Type/Memory/TyAnn.hs	124;"	v
+≌	./Analysis/Type/Memory/TyAnn.hs	196;"	v
 ≥:	./Analysis/Type/Inference/Base.hs	110;"	v
 ⊨	./Analysis/Type/Inference/Solver.hs	211;"	v
 ⤜	./Analysis/Type/Inference/Base.hs	94;"	v

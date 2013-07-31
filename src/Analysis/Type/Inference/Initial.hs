@@ -38,7 +38,7 @@ iounmap ∷ ℂ
 iounmap = cFn $ ℂλ [cPtr (i 8) TyIOAddr] cVoid
 
 kmalloc ∷ ℂ
-kmalloc = cFn $ ℂλ [cI 64, cI 64] $ cPtr (i 8) kLogAddr
+kmalloc = cFn $ ℂλ [cI 64, cI 32] $ cPtr (i 8) kLogAddr
           
 kfree ∷ ℂ
 kfree = cFn $ ℂλ [cPtr (i 8) kLogAddr] cVoid
