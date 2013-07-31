@@ -71,5 +71,5 @@ import qualified Data.Set as S
 	let πn = ℂπ n
 	    πα = π α
 	    nℂ = S.fromList $ map ((πn :=:) . π) βs
-	    αℂ = πα :=: (πn ⤜ anyRegAddr)
+	    αℂ = πα :=: (πn ⤜ kLogAddr)
 	(↣) $ αℂ ∘ ε --(nℂ ∪ τv)
