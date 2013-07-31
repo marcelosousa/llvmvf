@@ -31,8 +31,8 @@ import Control.Monad.State
 import qualified Debug.Trace as Trace
 import UU.PPrint 
 
---trace s f = f
-trace = Trace.trace
+trace s f = f
+--trace = Trace.trace
 
 data Ω = Ω 
   { 
@@ -222,7 +222,7 @@ type Γ = M.Map Id Τα
 
 (⊨) ∷ NamedTypes → Γ → S.Set Τℂ' → Γ
 (⊨) nτ e τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ nτ e)
-                  γ' = trace ("solveEq\n" ⧺ traceSolveEq mic) $ M.mapWithKey (\n c → solveEq nτ e mic [n] c) mic
+                  γ' = Trace.trace ("solveEq\n" ⧺ traceSolveEq mic) $ M.mapWithKey (\n c → solveEq nτ e mic [n] c) mic
               in S.fold (solveCast nτ) γ' rc
 
 traceSolveEq ∷ M.Map Id ℂ → String
@@ -244,13 +244,28 @@ solveEq nτ e γ n τℂ = trace ("solveEq " ⧺ show n) $ case τℂ of
              in TyDer $ TyFun caτ crτ False
 
 look ∷ NamedTypes → Γ → M.Map Id ℂ → [Id] → Id → Τα 
-look nτ e γ l m | m ∈ l = error "look: same identifiers"
+look nτ e γ l m | m ∈ l = case M.lookup m e of 
+                     Nothing → error "look: same identifiers and not in maps"
+                     Just τ  → τ
                 | otherwise = case M.lookup m γ of
                      Nothing → case M.lookup m e of
                        Nothing → error $ "look: not in maps " ⧺ show m ⧺ show l ⧺ show γ ⧺ show e
                        Just τ  → τ
                      Just c  → solveEq nτ e γ (m:l) c
-
+{-
+look ∷ NamedTypes → Γ → M.Map Id ℂ → [Id] → Id → Τα 
+look nτ e γ l m = case M.lookup m γ of
+                     Nothing → case M.lookup m e of
+                       Nothing → error $ "look: not in maps " ⧺ show m ⧺ show l ⧺ show γ ⧺ show e
+                       Just τ  → τ
+                     Just c  → case c of 
+                       ℂπ m' → if m' ∈ (m:l)
+                               then case M.lookup m e of 
+                                      Nothing → error $ "look: same identifiers: " ⧺ show m ⧺ show l
+                                      Just τ  → τ 
+                               else solveEq nτ e γ (m:l) c
+                       _ → solveEq nτ e γ (m:l) c
+-}
 solveCast ∷ NamedTypes → Τℂ' → Γ → Γ
 solveCast nτ τℂ γ = case fst τℂ of
   c1 :=: c2 → error "solveCast :=: impossible"
