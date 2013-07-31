@@ -40,7 +40,7 @@ iowrite n = cFn $ ℂλ [cI n, cPtr (i 8) TyIOAddr] $ cVoid
 ioOpRep = cFn $ ℂλ [cPtr (i 8) TyIOAddr, cPtr (i 8) kLogAddr, cI 64] $ cVoid
 -- Allocation on logical addresses
 kmalloc = cFn $ ℂλ [cI 64, cI 32] $ cPtr (i 8) kLogAddr
-kfree = cFn $ ℂλ [cPtr (i 8) TyIOAddr] cVoid
+kfree = cFn $ ℂλ [cPtr (i 8) kLogAddr] cVoid
 -- Allocation on virtual addresses 
 valloc = cFn $ ℂλ [cI 64] $ cPtr (i 8) kVirAddr
 vfree = cFn $ ℂλ [cPtr (i 8) kVirAddr] cVoid
