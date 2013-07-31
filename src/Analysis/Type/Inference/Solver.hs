@@ -170,6 +170,15 @@ rwEqλ pc α@(ℂλ ca1 cr1) β = trace ("rwEqFn " ⧺ show α ⧺ " " ⧺ show 
       cr ← rwEq pc cr1 cr2
       (↣) $ ℂλ ca cr
     ℂc c → error $ "rwEqλ: class constraint"
+    ℂτ τ → case τ of
+      TyDer (TyFun τa τr _) →
+        if length ca1 ≡ length τa
+        then do
+          mapM (\(a,b) → rwEqλ pc a b) $ zip ca1 (map ℂτ τa)
+          rwEq pc cr1 (ℂτ τr)
+          (↣) $ β
+        else error $ "rwEqλ: function type has different arity"          
+      _ → error $ "rwEqλ: type given is not a function type"
     _    → rwEq pc β α
 rwEqλ _ _ _ = error $ "rwEqλ: FATAL"
 
