@@ -148,7 +148,8 @@ instance TyConstr Instruction where
 	    αβℂ = πα :=: πβ
 	    cℂ = cτρ :=: ℂc τc
 	    nℂ = ℂπ n :=: cτρ
-	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
+	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (τℂα ∪ τℂβ))))
+	--(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
 
 -- Type Constraints for Cast Operations
 τℂcast ∷ Int → Id → (Value, TClass) → (Τ, TClass) → (ℂ → ℂ → Τℂ) → ℂState
@@ -160,7 +161,8 @@ instance TyConstr Instruction where
 	    cℂτ = cτρ :=: ℂc τcτ
 	    αℂ = πα ?: cτρ
 	    nℂ = ℂπ n :=: cτρ
-	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
+	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ τℂα)
+--	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
 
 τℂnastyCast ∷ Int → Id → (Value, TClass) → (Τ, TClass) → ℂState
 τℂnastyCast pc n (α,τcα) (τ,τcτ) = do
@@ -170,7 +172,8 @@ instance TyConstr Instruction where
 	    cℂα = πα :=: ℂc τcα
 	    cℂτ = cτρ :=: ℂc τcτ
 	    nℂ = ℂπ n :=: cτρ
-	(↣) $ liftΤℂ pc $ nℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα))
+	(↣) $ liftΤℂ pc $ nℂ ∘ τℂα
+--	(↣) $ liftΤℂ pc $ nℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα))
 
 -- Type Constraints for comparison operations
 τℂcmp ∷ Int → TClass → Id → Τ → Value → Value → ℂState
@@ -215,8 +218,9 @@ instance TyConstr Instruction where
 	    αℂ = πα :=: αcτ
 	    nℂ = ℂπ n :=: πβ
 	    βηℂ = πβ :=: πη
-	    βℂ = πβ :=: ℂc T1
-	(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ (βηℂ ∘ (βℂ ∘ ε))) 
+	    βℂ = πβ :=: ℂc T1	    
+	(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ (βηℂ ∘ ε)) 
+	--(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ (βηℂ ∘ (βℂ ∘ ε))) 
 
 τextract ∷ Int → Id → Τ → Value → ℂState
 τextract pc n τ α = do
@@ -225,4 +229,5 @@ instance TyConstr Instruction where
 	    nτ = ℂτ $ (↑)τ
 	    nℂ = πn :=: nτ
 	    cℂ = πα :=: ℂc TAgg
-	(↣) $ liftΤℂ pc $ nℂ ∘ (cℂ ∘ αℂ)
+	(↣) $ liftΤℂ pc $ nℂ ∘ αℂ
+	--(↣) $ liftΤℂ pc $ nℂ ∘ (cℂ ∘ αℂ)

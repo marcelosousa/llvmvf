@@ -35,7 +35,8 @@ import qualified Data.Set as S
 	    τℂ = ℂτ (T.TyPri T.TyVoid) :=: cτρ
 	    βℂ = πβ :=: (πα ⤜ anyRegAddr)
 	    αℂ = πα :=: ℂc T1
-	(↣) $ liftΤℂ pc $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ))) 
+	(↣) $ liftΤℂ pc $ τℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ))
+--	(↣) $ liftΤℂ pc $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ))) 
 
 -- Type Constraints for Load
 τℂload ∷ Int → Id → Value → ℂState
@@ -45,7 +46,8 @@ import qualified Data.Set as S
 	    πn = ℂπ n
 	    αℂ = πα :=: (πn ⤜ anyRegAddr)
 	    nℂ = πn :=: ℂc T1
-	(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ τℂα)
+	(↣) $ liftΤℂ pc $ αℂ ∘ τℂα
+	--(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ τℂα)
 
 -- Type Constraints for GEP
 τℂgep ∷ Int → Id → Τ → Value → Values → ℂState
