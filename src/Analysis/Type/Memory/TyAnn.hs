@@ -77,6 +77,9 @@ kLogAddr = TyRegAddr $ KernelAddr $ KernelLogicalAddr
 kVirAddr ∷ TyAnnot
 kVirAddr = TyRegAddr $ KernelAddr $ KernelVirtualAddr
 
+uVirAddr ∷ TyAnnot
+uVirAddr = TyRegAddr UserAddr
+
 i ∷ Int → TyAnn
 i n = TyPri $ TyInt n
 

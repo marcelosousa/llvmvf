@@ -49,6 +49,12 @@ valloc = cFn $ ℂλ [cI 64] $ cPtr (i 8) kVirAddr
 vfree ∷ ℂ
 vfree = cFn $ ℂλ [cPtr (i 8) kVirAddr] cVoid
 
+copyFromUser ∷ ℂ 
+copyFromUser = cFn $ ℂλ [cPtr (i 8) kVirAddr, cPtr (i 8) uVirAddr, cI 32] $ cI 64
+
+copyToUser ∷ ℂ 
+copyToUser = cFn $ ℂλ [cPtr (i 8) uVirAddr, cPtr (i 8) kVirAddr, cI 32] $ cI 64
+
 {-
 errorf ∷ Τℂ
 errorf = let nℂ = ℂπ (Global "e1000_probe2")
@@ -65,4 +71,6 @@ iτℂ = S.fromList $
   , "kfree"   =: kfree
   , "vzalloc" =: valloc
   , "vfree"   =: vfree
+  , "_copy_to_user" =: copyToUser
+  , "_copy_from_user" =: copyFromUser
   ]
