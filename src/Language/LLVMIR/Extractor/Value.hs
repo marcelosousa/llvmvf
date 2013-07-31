@@ -27,6 +27,9 @@ import Language.LLVMIR.Extractor.Predicate
 
 import Language.LLVMIR.Extractor.Context
 
+debug :: Bool
+debug = False
+
 getValue :: (String, Value) -> Context IO LL.Value
 getValue (n, v) = do isC <- liftIO $ FFI.isConstant v
                      if cInt2Bool isC
@@ -92,8 +95,10 @@ getConstantDataSequentialData v = do
   then liftIO $ FFI.constantValueGetAsString v >>= peekCString
   else do
     val <- liftIO $ FFI.constantValueGetRawDataValues v >>= peekCString
-    liftIO $ print $ "getConstantDataSequentialData " ++ val
-    return val
+    if debug 
+    then do liftIO $ print $ "getConstantDataSequentialData " ++ val
+            return val
+    else return val
 
 getConstantExpr :: Value -> Context IO LL.Constant
 getConstantExpr v = do opcode <- liftIO $ FFI.constGetOpcode v 
