@@ -197,7 +197,6 @@ instance IEq TyAnnot where
   (TyRegAddr α) ≌ TyIOAddr = Nothing
   (TyRegAddr α) ≌ TyAny     = Just $ TyRegAddr α
   (TyRegAddr α) ≌ (TyRegAddr β) = TyRegAddr <$> α ≌ β
-  TyAny ≌ TyAny = Just TyAny
   TyAny ≌ α     = Just α
 
 instance IEq TyRegAddr where
@@ -209,5 +208,6 @@ instance IEq TyRegAddr where
     if α == β
     then Just (KernelAddr α)
     else Nothing
+  AnyRegAddr  ≌ α = Just α
 
 
