@@ -31,29 +31,24 @@ name =: τℂ =
   let nℂ = ℂπ (Global name)
   in  nℂ :=: τℂ
 
-ioremap ∷ ℂ
+--ioremap, iounmap, kmalloc, kfree, valloc, vfree, copyFromUser ∷ ℂ
+-- Memory mapped IO API
 ioremap = cFn $ ℂλ [cI 64, cI 64] $ cPtr (i 8) TyIOAddr
-
-iounmap ∷ ℂ        
 iounmap = cFn $ ℂλ [cPtr (i 8) TyIOAddr] cVoid
-
-kmalloc ∷ ℂ
+ioread  = cFn $ ℂλ [cPtr (i 8) TyIOAddr] $ cI 32
+iowrite n = cFn $ ℂλ [cI n, cPtr (i 8) TyIOAddr] $ cVoid
+ioOpRep = cFn $ ℂλ [cPtr (i 8) TyIOAddr, cPtr (i 8) kLogAddr, cI 64] $ cVoid
+-- Allocation on logical addresses
 kmalloc = cFn $ ℂλ [cI 64, cI 32] $ cPtr (i 8) kLogAddr
-          
-kfree ∷ ℂ
 kfree = cFn $ ℂλ [cPtr (i 8) kLogAddr] cVoid
-
-valloc ∷ ℂ
+-- Allocation on virtual addresses 
 valloc = cFn $ ℂλ [cI 64] $ cPtr (i 8) kVirAddr
-
-vfree ∷ ℂ
 vfree = cFn $ ℂλ [cPtr (i 8) kVirAddr] cVoid
-
-copyFromUser ∷ ℂ 
+putPage = cFn $ ℂλ [cPtr (TyDer $ TyAgg $ TyStr "struct.page" 5 []) kVirAddr] $ cVoid
+-- Kernel to User Analysis
 copyFromUser = cFn $ ℂλ [cPtr (i 8) kVirAddr, cPtr (i 8) uVirAddr, cI 32] $ cI 64
-
-copyToUser ∷ ℂ 
 copyToUser = cFn $ ℂλ [cPtr (i 8) uVirAddr, cPtr (i 8) kVirAddr, cI 32] $ cI 64
+mightSleep = cFn $ ℂλ [cPtr (i 8) kVirAddr, cI 32, cI 32] $ cVoid
 
 {-
 errorf ∷ Τℂ
@@ -67,10 +62,24 @@ iτℂ = S.fromList $
   [ "ioremap" =: ioremap
   , "ioremap_nocache" =: ioremap
   , "iounmap" =: iounmap
+  , "ioread8" =: ioread
+  , "ioread16" =: ioread
+  , "ioread32" =: ioread
+  , "iowrite8" =: iowrite 8
+  , "iowrite16" =: iowrite 16
+  , "iowrite32" =: iowrite 32
+  , "ioread8_rep" =: ioOpRep
+  , "ioread16_rep" =: ioOpRep
+  , "ioread32_rep" =: ioOpRep
+  , "iowrite8_rep" =: ioOpRep
+  , "iowrite16_rep" =: ioOpRep
+  , "iowrite32_rep" =: ioOpRep
   , "__kmalloc" =: kmalloc
   , "kfree"   =: kfree
   , "vzalloc" =: valloc
   , "vfree"   =: vfree
   , "_copy_to_user" =: copyToUser
   , "_copy_from_user" =: copyFromUser
+  , "put_page" =: putPage
+  , "__might_sleep" =: mightSleep
   ]
