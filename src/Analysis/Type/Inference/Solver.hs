@@ -31,8 +31,8 @@ import Control.Monad.State
 import qualified Debug.Trace as Trace
 import UU.PPrint 
 
-trace s f = f
---trace = Trace.trace
+--trace s f = f
+trace = Trace.trace
 
 data Ω = Ω 
   { 
@@ -174,7 +174,7 @@ rwEqλ pc α@(ℂλ ca1 cr1) β = trace ("rwEqFn " ⧺ show α ⧺ " " ⧺ show 
       TyDer (TyFun τa τr _) →
         if length ca1 ≡ length τa
         then do
-          mapM (\(a,b) → rwEqλ pc a b) $ zip ca1 (map ℂτ τa)
+          mapM (\(a,b) → rwEq pc a b) $ zip ca1 (map ℂτ τa)
           rwEq pc cr1 (ℂτ τr)
           (↣) $ β
         else error $ "rwEqλ: function type has different arity"          
