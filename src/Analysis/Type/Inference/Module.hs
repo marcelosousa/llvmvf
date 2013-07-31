@@ -30,7 +30,7 @@ typeAnnInference mdl =
 	    gnγ = M.map ((⊨) nmdτ gγ) fnτℂ
 	in M.insert (Global "globals") gγ gnγ  
 
-typeConstraints ∷ Module → (NamedTypes, S.Set Τℂ, M.Map Id (S.Set Τℂ))
+typeConstraints ∷ Module → (NamedTypes, S.Set Τℂ', M.Map Id (S.Set Τℂ'))
 typeConstraints mdl = evalState (τℂs mdl) $ εΕ $ variadicFns mdl
 
 typeAnnInferenceGlobals ∷ Module → M.Map Id Γ
@@ -48,7 +48,7 @@ typeAnnInferenceIP mdl =
                              in M.filterWithKey (const . not . (flip elem tmps') . identifierName) e) γzip
       γ' = M.map (M.mapWithKey toℂ) γ
       gτℂ = M.fold (\g s → (S.fromList (M.elems g)) ∪ s) ε γ'
-  in (⊨) nmdτ M.empty gτℂ
+  in (⊨) nmdτ M.empty (liftΤℂ 0 gτℂ)
 
 
 toℂ ∷ Id → Τα → Τℂ
@@ -56,9 +56,10 @@ toℂ n τ = ℂπ n :=: ℂτ τ
 
 -- | Compute type constraints
 -- Compute individually for functions
-τℂs ∷ Module → State Ε (NamedTypes, S.Set Τℂ, M.Map Id (S.Set Τℂ))
+τℂs ∷ Module → State Ε (NamedTypes, S.Set Τℂ', M.Map Id (S.Set Τℂ'))
 τℂs (Module i l t gvs fns nmdtys) = do
-    gvsℂs ← τList iτℂ gvs
+    let iτℂ' = liftΤℂ 0 iτℂ
+    gvsℂs ← τList iτℂ' gvs
     --lℂs ← mapM (τℂu gvsℂs) $ M.elems fns
     lℂs ← mapM τℂ $ M.elems fns
     let nτs = M.map (\τ → (↑^) τ TyAny) nmdtys
@@ -72,4 +73,4 @@ typeInfModules mdls =
       mτℂ = foldr (\g s → (S.fromList (M.elems g)) ∪ s) ε γs'
       nmdtys = map (M.map (\τ → (↑^) τ TyAny) . δModNmds) mdls
       nmdτs = foldr M.union M.empty nmdtys
-  in (⊨) nmdτs M.empty mτℂ
+  in (⊨) nmdτs M.empty (liftΤℂ 0 mτℂ)

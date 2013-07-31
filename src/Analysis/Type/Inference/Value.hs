@@ -13,31 +13,32 @@ import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.TyAnn as T
 import Analysis.Type.Util
 
+import qualified Data.Set as S
 import Prelude.Unicode ((⧺),(≡))
 
 import Debug.Trace
 
 -- Type Constraints for values
-instance TyConstr Value where
-	τℂ (Id n τ) = vτℂgen n τ 
-	τℂ (Constant c) = τℂ c
+instance TyConstrR Value where
+	τℂr (Id n τ) = vτℂgen n τ 
+	τℂr (Constant c) = τℂr c
 
-instance TyConstr Constant where
-	τℂ c = case c of
+instance TyConstrR Constant where
+	τℂr c = case c of
 		UndefValue      → (↣) ε
 		SmpConst sc     → (↣) ε
 		CmpConst cc     → (↣) ε
-		GlobalValue gv  → τℂ gv
+		GlobalValue gv  → τℂr gv
 		ConstantExpr ce → (↣) ε  -- TODO
 	  	_               → error "constant not supported"	
 
-instance TyConstr GlobalValue where
-	τℂ v = case v of
+instance TyConstrR GlobalValue where
+	τℂr v = case v of
 	  FunctionValue  n τ → vτℂgen n τ
 	  GlobalAlias    n τ → (↣) ε
 	  GlobalVariable n τ → (↣) ε
 
-vτℂgen ∷ Identifier → Type → ℂState
+vτℂgen ∷ Identifier → Type → ΕState (S.Set Τℂ)
 vτℂgen n τ = do
 	let τα = (↑)τ
 	    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε

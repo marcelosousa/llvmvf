@@ -19,39 +19,39 @@ import Analysis.Type.Util
 import qualified Data.Set as S
 
 -- Type Constraints for Alloca
-τℂalloca ∷ Id → Τ → ℂState
-τℂalloca n τ = do
+τℂalloca ∷ Int → Id → Τ → ℂState
+τℂalloca pc n τ = do
 	let cτρ = ℂτ $ T.TyDer $ T.TyPtr (τ ↑^ anyRegAddr) anyRegAddr
 	    nℂ = ℂπ n :=: cτρ
-	(↣) $ nℂ ∘ ε
+	(↣) $ liftΤℂ pc $ nℂ ∘ ε
 
 -- Type Constraints for Store
-τℂstore ∷ Τ → Value → Value → ℂState
-τℂstore τ α β = do
-	τℂα ← τℂ α               -- τℂ of value
-	τℂβ ← τℂ β               -- τℂ of pointer
+τℂstore ∷ Int → Τ → Value → Value → ℂState
+τℂstore pc τ α β = do
+	τℂα ← τℂr α               -- τℂ of value
+	τℂβ ← τℂr β               -- τℂ of pointer
 	let cτρ = ℂτ $ (↑) τ -- ref τ of value
 	    (πα,πβ) = (π α,π β)  -- 
 	    τℂ = ℂτ (T.TyPri T.TyVoid) :=: cτρ
 	    βℂ = πβ :=: (πα ⤜ anyRegAddr)
 	    αℂ = πα :=: ℂc T1
-	(↣) $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ)))
+	(↣) $ liftΤℂ pc $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ))) 
 
 -- Type Constraints for Load
-τℂload ∷ Id → Value → ℂState
-τℂload n α = do
-	τℂα ← τℂ α               -- τℂ of value
+τℂload ∷ Int → Id → Value → ℂState
+τℂload pc n α = do
+	τℂα ← τℂr α               -- τℂ of value
 	let πα = π α
 	    πn = ℂπ n
 	    αℂ = πα :=: (πn ⤜ anyRegAddr)
 	    nℂ = πn :=: ℂc T1
-	(↣) $ αℂ ∘ (nℂ ∘ τℂα)
+	(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ τℂα)
 
 -- Type Constraints for GEP
-τℂgep ∷ Id → Τ → Value → Values → ℂState
-τℂgep n τn α δs = do
-	τℂα ← τℂ α
-	τℂs ← τList τℂα δs
+τℂgep ∷ Int → Id → Τ → Value → Values → ℂState
+τℂgep pc n τn α δs = do
+	τℂα ← τℂr α	
+	τℂs ← τListR τℂα δs
 	let cτn = ℂτ $ τn ↑^ anyRegAddr                -- OK
 	    πα  = π α
 	    cℂ  = ℂp (ℂc TAgg) anyRegAddr              -- Pointer to agg in reg mem
@@ -60,16 +60,16 @@ import qualified Data.Set as S
 	    n1ℂ = ℂπ n :=: cτn
 	   -- n2ℂ = ℂπ n :=: πgep α δs
 	    αℂ  = πα :=: cℂ
-	(↣) $ n1ℂ ∘ ε
+	(↣) $ liftΤℂ pc $ n1ℂ ∘ ε
 --	(↣) $ n1ℂ ∘ (n2ℂ ∘ (αℂ ∘ (δsℂ ∪ τℂs)))
 
 -- Type contraints for atomic instructions
-τℂaop ∷ Id → Value → Values → ℂState
-τℂaop n α βs = do
+τℂaop ∷ Int → Id → Value → Values → ℂState
+τℂaop pc n α βs = do
 --	τℂα ← τℂ α
 --	τv ← τList τℂα βs
 	let πn = ℂπ n
 	    πα = π α
 	    nℂ = S.fromList $ map ((πn :=:) . π) βs
 	    αℂ = πα :=: (πn ⤜ kLogAddr)
-	(↣) $ αℂ ∘ ε --(nℂ ∪ τv)
+	(↣) $ liftΤℂ pc $ αℂ ∘ ε --(nℂ ∪ τv)

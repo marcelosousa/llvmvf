@@ -96,62 +96,62 @@ sem PHI
 sem Instruction
   | Alloca Load Store ICmp FCmp Call Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue InsertValue AtomicRMW Cmpxchg CreateThread JoinThread ExitThread MutexInit MutexLock MutexUnlock MutexDestroy
            lhs.pp = @pp
-  | Alloca loc.pp = @id.pp <+> char '=' <+> text "alloca" <+> @ty.pp <> char ',' <+> @align.pp
-  | Load   loc.pp = @id.pp <+> char '=' <+> text "load"   <+> @v.pp  <> char ',' <+> @align.pp
-  | Store  loc.pp = @ty.pp <+> text "store" <+> @v1.pp <> char ',' <+> @v2.pp <> char ',' <+> @align.pp
-  | ICmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> parens (@ty.pp) <+> @op1.pp <> char ',' <+> @op2.pp
-  | FCmp   loc.pp = @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
-  | Call   loc.pp = @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
-  | InlineAsm loc.pp = @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> text "asm" <+> bool @isVerifiable <+> bool @hasSE <+> bool @isSA <+> int @dlct <+> dquotes (text $ show @asm) <+> dquotes (text $ show @constr) <> char '(' <> @args.pp <> char ')'
-  | Trunc    loc.pp = pConvOp @id.pp "trunc"    @v.pp @ty.pp
-  | ZExt     loc.pp = pConvOp @id.pp "zext"     @v.pp @ty.pp
-  | SExt     loc.pp = pConvOp @id.pp "sext"     @v.pp @ty.pp
-  | FPToUI   loc.pp = pConvOp @id.pp "fptoui"   @v.pp @ty.pp
-  | FPToSI   loc.pp = pConvOp @id.pp "fptosi"   @v.pp @ty.pp
-  | UIToFP   loc.pp = pConvOp @id.pp "uitofp"   @v.pp @ty.pp
-  | SIToFP   loc.pp = pConvOp @id.pp "sitofp"   @v.pp @ty.pp
-  | FPTrunc  loc.pp = pConvOp @id.pp "fptrunc"  @v.pp @ty.pp
-  | FPExt    loc.pp = pConvOp @id.pp "fpext"    @v.pp @ty.pp
-  | PtrToInt loc.pp = pConvOp @id.pp "ptrtoint" @v.pp @ty.pp
-  | IntToPtr loc.pp = pConvOp @id.pp "inttoptr" @v.pp @ty.pp
-  | BitCast  loc.pp = pConvOp @id.pp "bitcast"  @v.pp @ty.pp
-  | GetElementPtr loc.pp = @ty.pp <+> @id.pp <+> char '=' <+> text "getelementptr" <+> @struct.pp <> char ',' <+> @idxs.pp
-  | Add  loc.pp = pBinOp @ty.pp @id.pp "add"  @op1.pp @op2.pp
-  | FAdd loc.pp = pBinOp @ty.pp @id.pp "fadd" @op1.pp @op2.pp
-  | Sub  loc.pp = pBinOp @ty.pp @id.pp "sub"  @op1.pp @op2.pp
-  | FSub loc.pp = pBinOp @ty.pp @id.pp "fsub" @op1.pp @op2.pp
-  | Mul  loc.pp = pBinOp @ty.pp @id.pp "mul"  @op1.pp @op2.pp
-  | FMul loc.pp = pBinOp @ty.pp @id.pp "fmul" @op1.pp @op2.pp
-  | UDiv loc.pp = pBinOp @ty.pp @id.pp "udiv" @op1.pp @op2.pp
-  | SDiv loc.pp = pBinOp @ty.pp @id.pp "sdiv" @op1.pp @op2.pp
-  | FDiv loc.pp = pBinOp @ty.pp @id.pp "fdiv" @op1.pp @op2.pp
-  | URem loc.pp = pBinOp @ty.pp @id.pp "urem" @op1.pp @op2.pp
-  | SRem loc.pp = pBinOp @ty.pp @id.pp "srem" @op1.pp @op2.pp
-  | FRem loc.pp = pBinOp @ty.pp @id.pp "frem" @op1.pp @op2.pp
-  | Shl  loc.pp = pBitBinOp @ty.pp @id.pp "shl"  @op1.pp @op2.pp
-  | LShr loc.pp = pBitBinOp @ty.pp @id.pp "lshr" @op1.pp @op2.pp
-  | AShr loc.pp = pBitBinOp @ty.pp @id.pp "ashr" @op1.pp @op2.pp
-  | And  loc.pp = pBitBinOp @ty.pp @id.pp "and"  @op1.pp @op2.pp
-  | Or   loc.pp = pBitBinOp @ty.pp @id.pp "or"   @op1.pp @op2.pp
-  | Xor  loc.pp = pBitBinOp @ty.pp @id.pp "xor"  @op1.pp @op2.pp
-  | Select loc.pp = @id.pp <+> char '=' <+> text "select" <+> @cond.pp <> char ',' <+> @valt.pp <> char ',' <+> @valf.pp
-  | ExtractValue loc.pp = @id.pp <> parens (@ty.pp) <+> char '=' <+> text "extractvalue" <+> @aggr.pp <> char ',' <+> @idxs.pp
-  | InsertValue loc.pp = @id.pp <+> char '=' <+> text "insertvalue" <+> @aggr.pp <> char ',' <+> @ival.pp <> char ',' <+> @idxs.pp
-  | Cmpxchg loc.pp = @id.pp <+> char '=' <+> text "cmpxchg" <+> @mptr.pp <+> @cval.pp <+> @nval.pp <+> @ord.pp
-  | AtomicRMW loc.pp = @id.pp <+> char '=' <+> text "atomicrmw" <+> @mptr.pp <+> @opval.pp <+> @ord.pp
-  | CreateThread loc.pp = text "create_thread" <+> parens @args.pp
-  | JoinThread   loc.pp = text "join_thread" <+> parens @id.pp
-  | ExitThread   loc.pp = text "exit_thread" 
-  | MutexInit    loc.pp = text "mutex_init"    <+> @mutex.pp 
-  | MutexLock    loc.pp = text "mutex_lock"    <+> @mutex.pp
-  | MutexUnlock  loc.pp = text "mutex_unlock"  <+> @mutex.pp
-  | MutexDestroy loc.pp = text "mutex_destroy" <+> @mutex.pp
-  | CondInit     loc.pp = text "cond_init"     <+> @cond.pp 
-  | CondWait     loc.pp = text "cond_wait"     <+> @cond.pp <+> @mutex.pp 
-  | CondSignal   loc.pp = text "cond_signal"   <+> @cond.pp 
-  | WaitEvent    loc.pp = text "wait_event"    <+> int @event
-  | NotifyEvent  loc.pp = text "notify_event"  <+> int @event
-  | WaitTime     loc.pp = text "wait_time"     <+> @time.pp
+  | Alloca loc.pp = parens (int @pc.self) <+> @id.pp <+> char '=' <+> text "alloca" <+> @ty.pp <> char ',' <+> @align.pp
+  | Load   loc.pp = parens (int @pc.self) <+> @id.pp <+> char '=' <+> text "load"   <+> @v.pp  <> char ',' <+> @align.pp
+  | Store  loc.pp = parens (int @pc.self) <+> @ty.pp <+> text "store" <+> @v1.pp <> char ',' <+> @v2.pp <> char ',' <+> @align.pp
+  | ICmp   loc.pp = parens (int @pc.self) <+> @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> parens (@ty.pp) <+> @op1.pp <> char ',' <+> @op2.pp
+  | FCmp   loc.pp = parens (int @pc.self) <+> @id.pp <+> char '=' <+> text "icmp"   <+> @cond.pp <+> @op1.pp <> char ',' <+> @op2.pp
+  | Call   loc.pp = parens (int @pc.self) <+> @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> @callee.pp <> char '(' <> @args.pp <> char ')'
+  | InlineAsm loc.pp = parens (int @pc.self) <+> @mres.pp <+> char '=' <+> text "call" <+> @ty.pp <+> text "asm" <+> bool @isVerifiable <+> bool @hasSE <+> bool @isSA <+> int @dlct <+> dquotes (text $ show @asm) <+> dquotes (text $ show @constr) <> char '(' <> @args.pp <> char ')'
+  | Trunc    loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "trunc"    @v.pp @ty.pp
+  | ZExt     loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "zext"     @v.pp @ty.pp
+  | SExt     loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "sext"     @v.pp @ty.pp
+  | FPToUI   loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "fptoui"   @v.pp @ty.pp
+  | FPToSI   loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "fptosi"   @v.pp @ty.pp
+  | UIToFP   loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "uitofp"   @v.pp @ty.pp
+  | SIToFP   loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "sitofp"   @v.pp @ty.pp
+  | FPTrunc  loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "fptrunc"  @v.pp @ty.pp
+  | FPExt    loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "fpext"    @v.pp @ty.pp
+  | PtrToInt loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "ptrtoint" @v.pp @ty.pp
+  | IntToPtr loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "inttoptr" @v.pp @ty.pp
+  | BitCast  loc.pp = parens (int @pc.self) <+> pConvOp @id.pp "bitcast"  @v.pp @ty.pp
+  | GetElementPtr loc.pp = parens (int @pc.self) <+> @ty.pp <+> @id.pp <+> char '=' <+> text "getelementptr" <+> @struct.pp <> char ',' <+> @idxs.pp
+  | Add  loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "add"  @op1.pp @op2.pp
+  | FAdd loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "fadd" @op1.pp @op2.pp
+  | Sub  loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "sub"  @op1.pp @op2.pp
+  | FSub loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "fsub" @op1.pp @op2.pp
+  | Mul  loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "mul"  @op1.pp @op2.pp
+  | FMul loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "fmul" @op1.pp @op2.pp
+  | UDiv loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "udiv" @op1.pp @op2.pp
+  | SDiv loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "sdiv" @op1.pp @op2.pp
+  | FDiv loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "fdiv" @op1.pp @op2.pp
+  | URem loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "urem" @op1.pp @op2.pp
+  | SRem loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "srem" @op1.pp @op2.pp
+  | FRem loc.pp = parens (int @pc.self) <+> pBinOp @ty.pp @id.pp "frem" @op1.pp @op2.pp
+  | Shl  loc.pp = parens (int @pc.self) <+> pBitBinOp @ty.pp @id.pp "shl"  @op1.pp @op2.pp
+  | LShr loc.pp = parens (int @pc.self) <+> pBitBinOp @ty.pp @id.pp "lshr" @op1.pp @op2.pp
+  | AShr loc.pp = parens (int @pc.self) <+> pBitBinOp @ty.pp @id.pp "ashr" @op1.pp @op2.pp
+  | And  loc.pp = parens (int @pc.self) <+> pBitBinOp @ty.pp @id.pp "and"  @op1.pp @op2.pp
+  | Or   loc.pp = parens (int @pc.self) <+> pBitBinOp @ty.pp @id.pp "or"   @op1.pp @op2.pp
+  | Xor  loc.pp = parens (int @pc.self) <+> pBitBinOp @ty.pp @id.pp "xor"  @op1.pp @op2.pp
+  | Select loc.pp = parens (int @pc.self) <+> @id.pp <+> char '=' <+> text "select" <+> @cond.pp <> char ',' <+> @valt.pp <> char ',' <+> @valf.pp
+  | ExtractValue loc.pp = parens (int @pc.self) <+> @id.pp <> parens (@ty.pp) <+> char '=' <+> text "extractvalue" <+> @aggr.pp <> char ',' <+> @idxs.pp
+  | InsertValue loc.pp = parens (int @pc.self) <+> @id.pp <+> char '=' <+> text "insertvalue" <+> @aggr.pp <> char ',' <+> @ival.pp <> char ',' <+> @idxs.pp
+  | Cmpxchg loc.pp = parens (int @pc.self) <+> @id.pp <+> char '=' <+> text "cmpxchg" <+> @mptr.pp <+> @cval.pp <+> @nval.pp <+> @ord.pp
+  | AtomicRMW loc.pp = parens (int @pc.self) <+> @id.pp <+> char '=' <+> text "atomicrmw" <+> @mptr.pp <+> @opval.pp <+> @ord.pp
+  | CreateThread loc.pp = parens (int @pc.self) <+> text "create_thread" <+> parens @args.pp
+  | JoinThread   loc.pp = parens (int @pc.self) <+> text "join_thread" <+> parens @id.pp
+  | ExitThread   loc.pp = parens (int @pc.self) <+> text "exit_thread" 
+  | MutexInit    loc.pp = parens (int @pc.self) <+> text "mutex_init"    <+> @mutex.pp 
+  | MutexLock    loc.pp = parens (int @pc.self) <+> text "mutex_lock"    <+> @mutex.pp
+  | MutexUnlock  loc.pp = parens (int @pc.self) <+> text "mutex_unlock"  <+> @mutex.pp
+  | MutexDestroy loc.pp = parens (int @pc.self) <+> text "mutex_destroy" <+> @mutex.pp
+  | CondInit     loc.pp = parens (int @pc.self) <+> text "cond_init"     <+> @cond.pp 
+  | CondWait     loc.pp = parens (int @pc.self) <+> text "cond_wait"     <+> @cond.pp <+> @mutex.pp 
+  | CondSignal   loc.pp = parens (int @pc.self) <+> text "cond_signal"   <+> @cond.pp 
+  | WaitEvent    loc.pp = parens (int @pc.self) <+> text "wait_event"    <+> int @event
+  | NotifyEvent  loc.pp = parens (int @pc.self) <+> text "notify_event"  <+> int @event
+  | WaitTime     loc.pp = parens (int @pc.self) <+> text "wait_time"     <+> @time.pp
 
 {
 pConvOp :: Doc -> String -> Doc -> Doc -> Doc

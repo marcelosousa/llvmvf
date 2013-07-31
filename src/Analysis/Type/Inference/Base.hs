@@ -1,4 +1,4 @@
-{-# LANGUAGE UnicodeSyntax, RecordWildCards #-}
+{-# LANGUAGE UnicodeSyntax, RecordWildCards, TupleSections #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Type.Inference.Base
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -43,12 +43,19 @@ import Control.Monad.State
 (↣) = return
 
 -- | Auxiliar Function
-τList ∷ (TyConstr α) ⇒ S.Set Τℂ → [α] → ℂState
+τList ∷ (TyConstr α) ⇒ S.Set Τℂ' → [α] → ℂState
 τList = foldM τℂu
 
-τℂu ∷ (TyConstr α) ⇒ S.Set Τℂ → α → ℂState
+τℂu ∷ (TyConstr α) ⇒ S.Set Τℂ' → α → ℂState
 τℂu τℂs α = do ατℂ ← τℂ α
                (↣) $ τℂs ∪ ατℂ
+
+τListR ∷ (TyConstrR α) ⇒ S.Set Τℂ → [α] → ΕState (S.Set Τℂ)
+τListR = foldM τℂuR
+
+τℂuR ∷ (TyConstrR α) ⇒ S.Set Τℂ → α → ΕState (S.Set Τℂ)
+τℂuR τℂs α = do ατℂ ← τℂr α
+                (↣) $ τℂs ∪ ατℂ
 
 type Τ = Type
 type Τα = TyAnn
@@ -97,6 +104,11 @@ c      ⤜ ταρ = ℂp c ταρ
 
 -- Type Constraint
 -- Simplify this later
+type Τℂ' = (Τℂ,Int)
+
+liftΤℂ ∷ Int → S.Set Τℂ → S.Set Τℂ'
+liftΤℂ pc = S.map (,pc)
+
 data Τℂ = ℂ :=: ℂ -- same type
         | ℂ :<: ℂ -- subtyping i1 :<: i2
         | ℂ :≤: ℂ -- less than 
@@ -120,7 +132,7 @@ data Ε = Ε
 εΕ = Ε ((Global ""),[]) (Global "")
 
 type ΕState α = State Ε α
-type ℂState = ΕState (S.Set Τℂ)
+type ℂState = ΕState (S.Set Τℂ')
 
 -- update the function in the
 -- environment
@@ -149,6 +161,9 @@ type ℂState = ΕState (S.Set Τℂ)
 -- Type Constraint Class
 class TyConstr a where
     τℂ ∷ a → ℂState
+
+class TyConstrR a where
+    τℂr ∷ a → ΕState (S.Set Τℂ)
 
 -- Type Inference Class
 class Constr a where

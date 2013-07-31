@@ -62,7 +62,7 @@ typeConstraint mdl = do
 	printTyℂFn (Global "globals") gs
 	forM_ cs (uncurry printTyℂFn)
 
-printTyℂFn ∷ Id → S.Set Τℂ → IO ()
+printTyℂFn ∷ Id → S.Set Τℂ' → IO ()
 printTyℂFn fn c = do
 	putStrLn "----------------------"
 	putStrLn $ show $ pretty fn

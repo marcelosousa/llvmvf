@@ -17,7 +17,7 @@ import Analysis.Type.Memory.TyAnn as T
 
 instance TyConstr Global where
 	-- τℂ ∷ → Global → State Γ (S.Set Τℂ)
-	τℂ (GlobalVar i _ False _ τ Nothing   _) = (↣) $ (ℂπ i) :=: (ℂτ $ (↑)τ) ∘ ε
+	τℂ (GlobalVar i _ False _ τ Nothing   _) = (↣) $ liftΤℂ 0 $ (ℂπ i) :=: (ℂτ $ (↑)τ) ∘ ε
 	τℂ (GlobalVar i _ True  _ τ (Just cn) _) = 
 		let τα1 = (↑)τ 
 		    τα2 = π cn
@@ -26,5 +26,5 @@ instance TyConstr Global where
 		    	_     → τα2
 		    c1 = (ℂπ i) :=: (ℂτ τα1)
 		    c2 = (ℂτ τα1) :=: τcn
-		in (↣) $ c1 ∘ (c2 ∘ ε)
+		in (↣) $ liftΤℂ 0 $ c1 ∘ (c2 ∘ ε)
 	τℂ gv = error $ "τℂ(2): " ++ show gv

@@ -36,7 +36,7 @@ trace s f = f
 
 data Ω = Ω 
   { 
-    rc  ∷ S.Set Τℂ  -- remaining constraints
+    rc  ∷ S.Set Τℂ'  -- remaining constraints
   , mic ∷ M.Map Id ℂ -- current map
   , nmdtys ∷ NamedTypes
   , gmap ∷ Γ -- global map
@@ -45,7 +45,7 @@ data Ω = Ω
 instance Eq Ω where
   (Ω rc1 mic1 _ _) == (Ω rc2 mic2 _ _) = rc1 ≡ rc2 && mic1 ≡ mic2 
 
-νΤℂ ∷ Τℂ → ΩState ()
+νΤℂ ∷ Τℂ' → ΩState ()
 νΤℂ τℂ = do γ@Ω{..} ← get
             let rc' = τℂ ∘ rc
             put γ{rc=rc'}
@@ -75,53 +75,53 @@ iΩ c = Ω c M.empty
   then (↣) ()
   else μrewriteEq
 
-rewriteEq ∷ Τℂ → ΩState ()
-rewriteEq τℂ =trace ("rewriteEq " ⧺ show τℂ) $ 
+rewriteEq ∷ Τℂ' → ΩState ()
+rewriteEq (τℂ, pc) = trace ("rewriteEq " ⧺ show τℂ) $ 
   case τℂ of
     c1 :=: c2 → do 
-      rwEq c1 c2
+      rwEq pc c1 c2
       (↣) ()
-    _  → νΤℂ τℂ
+    _  → νΤℂ (τℂ,pc)
 
 -- rwEq
-rwEq ∷ ℂ → ℂ → ΩState ℂ
-rwEq α β = trace ("rwEq " ⧺ show α ⧺ " " ⧺ show β) $ 
+rwEq ∷ Int → ℂ → ℂ → ΩState ℂ
+rwEq pc α β = trace ("rwEq " ⧺ show α ⧺ " " ⧺ show β) $ 
   case α of
-    ℂτ τ     → rwEqτ α β -- type
-    ℂc cl    → rwEqc α β -- class
-    ℂι c i   → rwEqι α β -- gep
-    ℂp c τα  → rwEqp α β -- pointer
-    ℂλ ca cr → rwEqλ α β -- function
-    ℂπ n     → rwEqπ α β -- var
+    ℂτ τ     → rwEqτ pc α β -- type
+    ℂc cl    → rwEqc pc α β -- class
+    ℂι c i   → rwEqι pc α β -- gep
+    ℂp c τα  → rwEqp pc α β -- pointer
+    ℂλ ca cr → rwEqλ pc α β -- function
+    ℂπ n     → rwEqπ pc α β -- var
 
 -- Type
-rwEqτ ∷ ℂ → ℂ → ΩState ℂ
-rwEqτ α@(ℂτ τ1) β = trace ("rwEqTy " ⧺ show α ⧺ " " ⧺ show β) $ do
+rwEqτ ∷ Int → ℂ → ℂ → ΩState ℂ
+rwEqτ pc α@(ℂτ τ1) β = trace ("rwEqTy " ⧺ show α ⧺ " " ⧺ show β) $ do
   nτs ← δNτ
   case β of
     ℂτ τ2 → case (≅) nτs τ1 τ2 of
-              Nothing → error $ "Type Unification failed: \n" ⧺ show α ⧺ "\n" ⧺ show β
+              Nothing → error $ "Type Unification failed in pc=: " ⧺ show pc ⧺ "\n" ⧺ show α ⧺ "\n" ⧺ show β
               Just c  → (↣) $ ℂτ c
     ℂc cl → if τ1 `classOf` cl 
             then (↣) α
             else error $ "rwEqTy " ⧺ show τ1 ⧺ " not class of " ⧺ show cl
-    _ → rwEq β α                       
-rwEqτ _ _ = error $ "rwEqTy: FATAL"
+    _ → rwEq pc β α                       
+rwEqτ _ _ _ = error $ "rwEqTy: FATAL"
 
 -- Type Class
-rwEqc ∷ ℂ → ℂ → ΩState ℂ
-rwEqc α@(ℂc cl1) β = trace ("rwEqc " ⧺ show α ⧺ " " ⧺ show β) $  do
+rwEqc ∷ Int → ℂ → ℂ → ΩState ℂ
+rwEqc pc α@(ℂc cl1) β = trace ("rwEqc " ⧺ show α ⧺ " " ⧺ show β) $  do
   nτs ← δNτ
   case β of 
     ℂc cl2 → case (≅) nτs cl1 cl2 of
               Nothing → error $ "rwEqc (1) " ⧺ show α ⧺ " " ⧺ show β
               Just cl → (↣) $ ℂc cl
-    _ → rwEq β α
-rwEqc _ _ = error $ "rwEqc: FATAL"
+    _ → rwEq pc β α
+rwEqc _ _ _ = error $ "rwEqc: FATAL"
 
 -- Type Var
-rwEqπ ∷ ℂ → ℂ → ΩState ℂ
-rwEqπ α@(ℂπ n) β = trace ("rwEqv (start) " ⧺ show α ⧺ " " ⧺ show β) $ do
+rwEqπ ∷ Int → ℂ → ℂ → ΩState ℂ
+rwEqπ pc α@(ℂπ n) β = trace ("rwEqv (start) " ⧺ show α ⧺ " " ⧺ show β) $ do
   γ@Ω{..} ← get
   case M.lookup n mic of
     Nothing → trace ("rwEqv (not in map) " ⧺ show α ⧺ " " ⧺ show β) $ do
@@ -145,13 +145,13 @@ rwEqπ α@(ℂπ n) β = trace ("rwEqv (start) " ⧺ show α ⧺ " " ⧺ show β
                     νIℂ m β
                     (↣) β
                   else trace ("rwEqv (in map, Cv dif, not Cv, not mutual): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m) ⧺ " " ⧺ show β) $ do 
-                    c ← rwEq ζ β
+                    c ← rwEq pc ζ β
                     νIℂ n c
                     (↣) c
-      _    → do c ← trace ("rwEqv (in map but not Cv): calling rwEq " ⧺ show (pretty n) ⧺ " " ⧺ show β ⧺ " " ⧺ show ζ) $ rwEq β ζ
+      _    → do c ← trace ("rwEqv (in map but not Cv): calling rwEq " ⧺ show (pretty n) ⧺ " " ⧺ show β ⧺ " " ⧺ show ζ) $ rwEq pc β ζ
                 νIℂ n c
                 (↣) c
-rwEqπ _ _ = error $ "rwEqπ: FATAL"
+rwEqπ _ _ _ = error $ "rwEqπ: FATAL"
 
 mutual ∷ Id → [Id] → M.Map Id ℂ → Bool
 mutual n l γ | n ∈ l = True
@@ -162,33 +162,33 @@ mutual n l γ | n ∈ l = True
     Just _ → False
 
 -- Type Function
-rwEqλ ∷ ℂ → ℂ → ΩState ℂ
-rwEqλ α@(ℂλ ca1 cr1) β = trace ("rwEqFn " ⧺ show α ⧺ " " ⧺ show β) $ 
+rwEqλ ∷ Int → ℂ → ℂ → ΩState ℂ
+rwEqλ pc α@(ℂλ ca1 cr1) β = trace ("rwEqFn " ⧺ show α ⧺ " " ⧺ show β) $ 
   case β of 
     ℂλ ca2 cr2 → do
-      ca ← mapM (uncurry rwEq) $ zip ca1 ca2
-      cr ← rwEq cr1 cr2
+      ca ← mapM (uncurry (rwEq pc)) $ zip ca1 ca2
+      cr ← rwEq pc cr1 cr2
       (↣) $ ℂλ ca cr
     ℂc c → error $ "rwEqλ: class constraint"
-    _    → rwEq β α
-rwEqλ _ _ = error $ "rwEqλ: FATAL"
+    _    → rwEq pc β α
+rwEqλ _ _ _ = error $ "rwEqλ: FATAL"
 
 -- Type gep
-rwEqι ∷ ℂ → ℂ → ΩState ℂ
-rwEqι α@(ℂι cin idxn) β = trace ("rwEqGep " ⧺ show α ⧺ " " ⧺ show β) $  do
+rwEqι ∷ Int → ℂ → ℂ → ΩState ℂ
+rwEqι pc α@(ℂι cin idxn) β = trace ("rwEqGep " ⧺ show α ⧺ " " ⧺ show β) $  do
   γ@Ω{..} ← get
   let τα = solveEq nmdtys gmap mic [] α
-  rwEq β (ℂτ τα)
+  rwEq pc β (ℂτ τα)
 
 -- Type pointer
 -- Missing ℂc
-rwEqp ∷ ℂ → ℂ → ΩState ℂ
-rwEqp α@(ℂp c1 τα1) β = trace ("rwEqp " ⧺ show α ⧺ " " ⧺ show β) $ 
+rwEqp ∷ Int → ℂ → ℂ → ΩState ℂ
+rwEqp pc α@(ℂp c1 τα1) β = trace ("rwEqp " ⧺ show α ⧺ " " ⧺ show β) $ 
   case β of
     ℂτ τ → case τ of
       TyDer (TyPtr τ1 τα2) → 
         case τα1 ≌ τα2 of
-          Just τα → do c ← rwEq c1 (ℂτ τ1)
+          Just τα → do c ← rwEq pc c1 (ℂτ τ1)
                        case c of
                         ℂτ τ' → (↣) $ ℂτ $ TyDer $ TyPtr τ' τα
                         _     → error $ "rwEqp error: impossible case? " ⧺ show c
@@ -196,18 +196,18 @@ rwEqp α@(ℂp c1 τα1) β = trace ("rwEqp " ⧺ show α ⧺ " " ⧺ show β) $
       _ → error $ "rwEqp: types dont match " ⧺ show α ⧺ " " ⧺ show β
     ℂp c2 τα2 → 
       case τα1 ≌ τα2 of
-        Just τα → do c ← rwEq c1 c2
+        Just τα → do c ← rwEq pc c1 c2
                      (↣) $ ℂp c τα
         Nothing → error $ "rwEqp error: \n" ⧺ show α ⧺ "\n" ⧺ show β
     ℂλ ca cr → error "rwEqp: cant constraint pointer with function" 
-    _ → rwEq β α
-rwEqp _ _ = error $ "rwEqp: FATAL"
+    _ → rwEq pc β α
+rwEqp _ _ _ = error $ "rwEqp: FATAL"
 
 ------------------------------------------
 
 type Γ = M.Map Id Τα
 
-(⊨) ∷ NamedTypes → Γ → S.Set Τℂ → Γ
+(⊨) ∷ NamedTypes → Γ → S.Set Τℂ' → Γ
 (⊨) nτ e τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ nτ e)
                   γ' = trace ("solveEq\n" ⧺ traceSolveEq mic) $ M.mapWithKey (\n c → solveEq nτ e mic [n] c) mic
               in S.fold (solveCast nτ) γ' rc
@@ -238,8 +238,8 @@ look nτ e γ l m | m ∈ l = error "look: same identifiers"
                        Just τ  → τ
                      Just c  → solveEq nτ e γ (m:l) c
 
-solveCast ∷ NamedTypes → Τℂ → Γ → Γ
-solveCast nτ τℂ γ = case τℂ of
+solveCast ∷ NamedTypes → Τℂ' → Γ → Γ
+solveCast nτ τℂ γ = case fst τℂ of
   c1 :=: c2 → error "solveCast :=: impossible"
   c1 :<: c2 → solveBit (<) nτ γ c1 c2
   c1 :≤: c2 → solveBit (<=) nτ γ c1 c2

@@ -22,7 +22,7 @@ instance TyConstr Function where
 		let πτ = ℂτ $ (↑)τ
 		    πς = map π ς
 		    πn = ℂp (ℂλ πς πτ) anyRegAddr
-		    nℂ = (ℂπ n) :=: πn ∘ ε
+		    nℂ = liftΤℂ 0 $ (ℂπ n) :=: πn ∘ ε
 		ςℂs ← τList nℂ ς
 		νfn (n,πς)
 		τList ςℂs bbs
@@ -32,7 +32,7 @@ instance TyConstr Parameter where
 	τℂ (Parameter n τ) = do
 		let τα = (↑)τ
 		    nℂ = (ℂπ n) :=: (ℂτ τα) ∘ ε
-		(↣) nℂ 
+		(↣) $ liftΤℂ 0 nℂ 
 
 instance Constr Parameter where
 	π (Parameter n τ) = ℂπ n
@@ -43,4 +43,4 @@ instance TyConstr BasicBlock where
 		φℂs   ← τList ε φs
 		isℂs  ← τList φℂs is
 		tmnℂs ← τℂ tmn
-		(↣) $ isℂs ∪ tmnℂs ∪ iτℂ
+		(↣) $ isℂs ∪ tmnℂs ∪ (liftΤℂ 0 iτℂ)
