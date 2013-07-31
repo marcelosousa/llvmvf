@@ -111,6 +111,7 @@ instance Show TyAnnot where
 instance Show TyRegAddr where
   show UserAddr = "UVirtualAddr"
   show (KernelAddr ka) = show ka
+  show AnyRegAddr = "AnyRegAddr"
 
 instance Show KernelAddr where
   show KernelLogicalAddr = "KLogicalAddr"
