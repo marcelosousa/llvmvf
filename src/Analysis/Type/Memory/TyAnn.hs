@@ -20,6 +20,8 @@ type NamedTypes = M.Map String TyAnn
 
 type TysAnn = [TyAnn]
 
+-- I want to make this a TyAnn A
+-- which receives the TyAnnot as A
 data TyAnn = TyBot
            | TyUndef
            | TyPri TyPri
@@ -47,8 +49,22 @@ data TyAgg = TyArr  Int TyAnn        -- Derived + Aggregate
   deriving (Eq, Ord)
 
 data TyAnnot = TyIOAddr
-             | TyRegAddr
-             | TyAny
+             | TyRegAddr TyRegAddr
+             | TyAny 
+  deriving (Eq, Ord)
+
+data TyRegAddr = 
+    UserAddr
+  | KernelAddr KernelAddr
+  deriving (Eq, Ord)
+
+data UserAddr = UserVirtualAddr
+  deriving (Eq, Ord)
+
+data KernelAddr = 
+    KernelLogicalAddr 
+  | KernelVirtualAddr
+--  | KernelPhysicalAddr
   deriving (Eq, Ord)
 
 i ∷ Int → TyAnn
@@ -82,8 +98,16 @@ instance Show TyAgg where
 
 instance Show TyAnnot where
   show TyIOAddr = "IOAddr"
-  show TyRegAddr = "RegAddr"
+  show (TyRegAddr t) = show t
   show TyAny = "AnyAddr"
+
+instance Show TyRegAddr where
+  show UserAddr = "UVirtualAddr"
+  show (KernelAddr ka) = show ka
+
+instance Show KernelAddr where
+  show KernelLogicalAddr = "KLogicalAddr"
+  show KernelVirtualAddr = "KVirtualAddr"
 
 class AEq α where
   (≅) ∷ NamedTypes → α → α → Maybe α
@@ -161,9 +185,10 @@ class IEq α where
   (≌) ∷ α → α → Maybe α
  
 instance IEq TyAnnot where
-  TyIOAddr ≌ TyRegAddr = Nothing
-  TyIOAddr ≌ _         = Just TyIOAddr
-  TyRegAddr ≌ TyIOAddr = Nothing
-  TyRegAddr ≌ _        = Just TyRegAddr
+  TyIOAddr ≌ (TyRegAddr t) = Nothing
+  TyIOAddr ≌ _             = Just TyIOAddr
+  (TyRegAddr t) ≌ TyIOAddr = Nothing
+  (TyRegAddr t) ≌ TyAny     = Just $ TyRegAddr t
+  (TyRegAddr α) ≌ (TyRegAddr b) = Nothing
   TyAny ≌ TyAny = Just TyAny
   TyAny ≌ α     = Just α
