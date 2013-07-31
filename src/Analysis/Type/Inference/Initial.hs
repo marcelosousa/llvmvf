@@ -31,8 +31,8 @@ name =: τℂ =
   let nℂ = ℂπ (Global name)
   in  nℂ :=: τℂ
 
-ioremapA ∷ ℂ
-ioremapA = cFn $ ℂλ [cI 64, cI 64] $ cPtr (i 8) TyIOAddr
+ioremap ∷ ℂ
+ioremap = cFn $ ℂλ [cI 64, cI 64] $ cPtr (i 8) TyIOAddr
 
 iounmap ∷ ℂ        
 iounmap = cFn $ ℂλ [cPtr (i 8) TyIOAddr] cVoid
@@ -40,8 +40,14 @@ iounmap = cFn $ ℂλ [cPtr (i 8) TyIOAddr] cVoid
 kmalloc ∷ ℂ
 kmalloc = cFn $ ℂλ [cI 64, cI 64] $ cPtr (i 8) kLogAddr
           
-kfree ∷ ℂ        
+kfree ∷ ℂ
 kfree = cFn $ ℂλ [cPtr (i 8) kLogAddr] cVoid
+
+valloc ∷ ℂ
+valloc = cFn $ ℂλ [cI 64] $ cPtr (i 8) kVirAddr
+
+vfree ∷ ℂ
+vfree = cFn $ ℂλ [cPtr (i 8) kVirAddr] cVoid
 
 {-
 errorf ∷ Τℂ
@@ -52,9 +58,11 @@ errorf = let nℂ = ℂπ (Global "e1000_probe2")
 --iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kmalloc ∘ (kfree ∘ (errorf ∘ ε)))))
 iτℂ ∷ S.Set Τℂ
 iτℂ = S.fromList $ 
-  [ "ioremap" =: ioremapA
-  , "ioremap_nocache" =: ioremapA
+  [ "ioremap" =: ioremap
+  , "ioremap_nocache" =: ioremap
   , "iounmap" =: iounmap
-  , "kmalloc" =: kmalloc
+  , "__kmalloc" =: kmalloc
   , "kfree"   =: kfree
+  , "vzalloc" =: valloc
+  , "vfree"   =: vfree
   ]
