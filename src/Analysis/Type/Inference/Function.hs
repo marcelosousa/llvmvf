@@ -21,7 +21,7 @@ instance TyConstr Function where
 	τℂ (FunctionDef  n _ τ _ ς bbs) = do
 		let πτ = ℂτ $ (↑)τ
 		    πς = map π ς
-		    πn = ℂp (ℂλ πς πτ) TyRegAddr
+		    πn = ℂp (ℂλ πς πτ) anyRegAddr
 		    nℂ = (ℂπ n) :=: πn ∘ ε
 		ςℂs ← τList nℂ ς
 		νfn (n,πς)

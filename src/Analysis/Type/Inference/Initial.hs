@@ -14,41 +14,47 @@ import Language.LLVMIR hiding (Type(..),Id, NamedTypes)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Memory.TyAnn
 
-ioremap ∷ Τℂ
-ioremap = let nℂ = ℂπ (Global "ioremap") 
-              τℂr =  ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr
-              τℂ = ℂp (ℂλ [ℂτ (i 64), ℂτ (i 64)] τℂr) TyRegAddr
-          in nℂ :=: τℂ
+cFn ∷ ℂ → ℂ
+cFn λτ = ℂp λτ anyRegAddr
 
-ioremap_cache ∷ Τℂ
-ioremap_cache = let nℂ = ℂπ (Global "ioremap_nocache") 
-                    τℂr =  ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr
-                    τℂ = ℂp (ℂλ [ℂτ (i 64), ℂτ (i 64)] τℂr) TyRegAddr
-                in nℂ :=: τℂ
+cPtr ∷ Τα → Ταρ → ℂ
+cPtr τ τα = ℂτ $ TyDer $ TyPtr τ τα
 
-iounmap ∷ Τℂ        
-iounmap = let nℂ = ℂπ (Global "iounmap") 
-              τℂr =  ℂτ $ TyPri TyVoid 
-              τℂ = ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr] τℂr) TyRegAddr
-          in nℂ :=: τℂ
+cI ∷ Int → ℂ
+cI x = ℂτ $ i x
 
-kmalloc ∷ Τℂ
-kmalloc = let nℂ = ℂπ (Global "kmalloc") 
-              τℂr =  ℂτ $ TyDer $ TyPtr (i 8) TyRegAddr
-              τℂ = ℂp (ℂλ [ℂτ (i 64), ℂτ (i 64)] τℂr) TyRegAddr
-          in nℂ :=: τℂ
+cVoid ∷ ℂ
+cVoid = ℂτ $ TyPri TyVoid 
+
+(=:) ∷ String → ℂ → Τℂ
+name =: τℂ = 
+  let nℂ = ℂπ (Global name)
+  in  nℂ :=: τℂ
+
+ioremapA ∷ ℂ
+ioremapA = cFn $ ℂλ [cI 64, cI 64] $ cPtr (i 8) TyIOAddr
+
+iounmap ∷ ℂ        
+iounmap = cFn $ ℂλ [cPtr (i 8) TyIOAddr] cVoid
+
+kmalloc ∷ ℂ
+kmalloc = cFn $ ℂλ [cI 64, cI 64] $ cPtr (i 8) kLogAddr
           
-kfree ∷ Τℂ        
-kfree = let nℂ = ℂπ (Global "kfree") 
-            τℂr =  ℂτ $ TyPri TyVoid 
-            τℂ = ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 8) TyRegAddr] τℂr) TyRegAddr
-        in nℂ :=: τℂ
+kfree ∷ ℂ        
+kfree = cFn $ ℂλ [cPtr (i 8) kLogAddr] cVoid
 
+{-
 errorf ∷ Τℂ
 errorf = let nℂ = ℂπ (Global "e1000_probe2")
          in nℂ :=: ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 32) TyIOAddr, ℂτ $ i 32, ℂτ $ i 32, ℂτ $ TyDer $ TyPtr (i 32) TyIOAddr] (ℂτ $ i 32)) TyRegAddr
-    
-iτℂ ∷ S.Set Τℂ
+-}
+
 --iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kmalloc ∘ (kfree ∘ (errorf ∘ ε)))))
-iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kmalloc ∘ (kfree ∘ ε))))
---iτℂ = ioremap ∘ (ioremap_cache ∘ (iounmap ∘ (kfree ∘ ε)))
+iτℂ ∷ S.Set Τℂ
+iτℂ = S.fromList $ 
+  [ "ioremap" =: ioremapA
+  , "ioremap_nocache" =: ioremapA
+  , "iounmap" =: iounmap
+  , "kmalloc" =: kmalloc
+  , "kfree"   =: kfree
+  ]

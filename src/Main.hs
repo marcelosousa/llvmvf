@@ -50,7 +50,7 @@ _helpArch = unlines ["llvmvf arch outputs the concurrent architecture representa
 _helpTypeCheck = unlines ["llvmvf typecheck checks if the LLVM IR types are consistent with the typing rules defined in the Language Reference."]
 _helpType = unlines ["llvmvf type uses a refined type system for separation of regular (user/kernel) and I/O memory"]
 _helpTypeAnalyze = unlines ["llvmvf typeanalyze performs  inter and intra-procedural lightweight type analyses"]
---_helpLiftAsm = unlines ["llvmvf liftasm lifts inline assembly code to LLVM IR functions"]
+_helpLiftAsm = unlines ["llvmvf liftasm lifts inline assembly code to LLVM IR functions"]
 
 data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
             | CCFG      {input :: FilePath, domain :: Domain}
@@ -58,6 +58,7 @@ data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
             | BMC       {input :: FilePath, domain :: Domain, mainName ∷ String, bound :: Int}
             | Convert   {input :: FilePath}
             | Type      {input :: FilePath, tmode ∷ TypeMode}
+            | LiftInline {input ∷ FilePath}
             | TypeCheck {input :: FilePath}
             | TypeConstrs {input ∷ FilePath}
             | TypeAnalyze {files ∷ [FilePath]}

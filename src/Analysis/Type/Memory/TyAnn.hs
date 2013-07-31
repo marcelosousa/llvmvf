@@ -56,6 +56,7 @@ data TyAnnot = TyIOAddr
 data TyRegAddr = 
     UserAddr
   | KernelAddr KernelAddr
+  | AnyRegAddr
   deriving (Eq, Ord)
 
 data UserAddr = UserVirtualAddr
@@ -66,6 +67,12 @@ data KernelAddr =
   | KernelVirtualAddr
 --  | KernelPhysicalAddr
   deriving (Eq, Ord)
+
+anyRegAddr ∷ TyAnnot
+anyRegAddr = TyRegAddr AnyRegAddr
+
+kLogAddr ∷ TyAnnot
+kLogAddr = TyRegAddr $ KernelAddr $ KernelLogicalAddr
 
 i ∷ Int → TyAnn
 i n = TyPri $ TyInt n
@@ -185,10 +192,22 @@ class IEq α where
   (≌) ∷ α → α → Maybe α
  
 instance IEq TyAnnot where
-  TyIOAddr ≌ (TyRegAddr t) = Nothing
+  TyIOAddr ≌ (TyRegAddr α) = Nothing
   TyIOAddr ≌ _             = Just TyIOAddr
-  (TyRegAddr t) ≌ TyIOAddr = Nothing
-  (TyRegAddr t) ≌ TyAny     = Just $ TyRegAddr t
-  (TyRegAddr α) ≌ (TyRegAddr b) = Nothing
+  (TyRegAddr α) ≌ TyIOAddr = Nothing
+  (TyRegAddr α) ≌ TyAny     = Just $ TyRegAddr α
+  (TyRegAddr α) ≌ (TyRegAddr β) = TyRegAddr <$> α ≌ β
   TyAny ≌ TyAny = Just TyAny
   TyAny ≌ α     = Just α
+
+instance IEq TyRegAddr where
+  UserAddr ≌ (KernelAddr β) = Nothing
+  UserAddr ≌ _ = Just UserAddr
+  (KernelAddr α) ≌ UserAddr = Nothing
+  (KernelAddr α) ≌ AnyRegAddr = Just $ KernelAddr α
+  (KernelAddr α) ≌ (KernelAddr β) = 
+    if α == β
+    then Just (KernelAddr α)
+    else Nothing
+
+

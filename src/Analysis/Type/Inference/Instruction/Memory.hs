@@ -21,7 +21,7 @@ import qualified Data.Set as S
 -- Type Constraints for Alloca
 τℂalloca ∷ Id → Τ → ℂState
 τℂalloca n τ = do
-	let cτρ = ℂτ $ T.TyDer $ T.TyPtr (τ ↑^ T.TyRegAddr) T.TyRegAddr
+	let cτρ = ℂτ $ T.TyDer $ T.TyPtr (τ ↑^ anyRegAddr) anyRegAddr
 	    nℂ = ℂπ n :=: cτρ
 	(↣) $ nℂ ∘ ε
 
@@ -33,7 +33,7 @@ import qualified Data.Set as S
 	let cτρ = ℂτ $ (↑) τ -- ref τ of value
 	    (πα,πβ) = (π α,π β)  -- 
 	    τℂ = ℂτ (T.TyPri T.TyVoid) :=: cτρ
-	    βℂ = πβ :=: (πα ⤜ T.TyRegAddr)
+	    βℂ = πβ :=: (πα ⤜ anyRegAddr)
 	    αℂ = πα :=: ℂc T1
 	(↣) $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ)))
 
@@ -43,7 +43,7 @@ import qualified Data.Set as S
 	τℂα ← τℂ α               -- τℂ of value
 	let πα = π α
 	    πn = ℂπ n
-	    αℂ = πα :=: (πn ⤜ T.TyRegAddr)
+	    αℂ = πα :=: (πn ⤜ anyRegAddr)
 	    nℂ = πn :=: ℂc T1
 	(↣) $ αℂ ∘ (nℂ ∘ τℂα)
 
@@ -52,9 +52,9 @@ import qualified Data.Set as S
 τℂgep n τn α δs = do
 	τℂα ← τℂ α
 	τℂs ← τList τℂα δs
-	let cτn = ℂτ $ τn ↑^ T.TyRegAddr                -- OK
+	let cτn = ℂτ $ τn ↑^ anyRegAddr                -- OK
 	    πα  = π α
-	    cℂ  = ℂp (ℂc TAgg) T.TyRegAddr              -- Pointer to agg in reg mem
+	    cℂ  = ℂp (ℂc TAgg) anyRegAddr              -- Pointer to agg in reg mem
 	    πδs = map π δs
 	    δsℂ = S.fromList $ map ((ℂc TInt) :=:) πδs
 	    n1ℂ = ℂπ n :=: cτn
@@ -71,5 +71,5 @@ import qualified Data.Set as S
 	let πn = ℂπ n
 	    πα = π α
 	    nℂ = S.fromList $ map ((πn :=:) . π) βs
-	    αℂ = πα :=: (πn ⤜ T.TyRegAddr)
+	    αℂ = πα :=: (πn ⤜ anyRegAddr)
 	(↣) $ αℂ ∘ ε --(nℂ ∪ τv)

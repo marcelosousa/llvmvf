@@ -38,7 +38,7 @@ instance TyConstr Terminator where
 	τℂ tmn = do
 		(fn,πς) ← δfn
 		bb ← δbb
-		let cλ c = ℂp (ℂλ πς c) T.TyRegAddr
+		let cλ c = ℂp (ℂλ πς c) anyRegAddr
 		case tmn of
 			Ret _ VoidRet → do
 				let τα = T.TyPri T.TyVoid
@@ -194,7 +194,7 @@ instance TyConstr Instruction where
 	    cτρ = ℂτ $ (↑)τ       -- OK
 	    πχ = map π χ
 	    nℂ = πn :=: cτρ   -- OK
-	    ς  = ℂp (ℂλ πχ πn) T.TyRegAddr -- ℂλ πχ cτρ
+	    ς  = ℂp (ℂλ πχ πn) anyRegAddr -- ℂλ πχ cτρ
 	    cℂ = πc :=: ς
 	vfns ← δvfns
 	if c ∈ vfns

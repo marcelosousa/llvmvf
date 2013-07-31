@@ -290,7 +290,7 @@ getOtherOp Call = do ival  <- getInstructionValue
                              --liftIO $ print $ "parsing asm string: " ++ iasmStr
                              let asmInfo = (,) <$> parseAsm iasmStr <*> parseAsmC iasmCtr
                              case asmInfo of
-                              Nothing -> do -- liftIO $ print $ "Cant support " ++ iasmStr
+                              Nothing -> do liftIO $ print $ "Cant support " ++ iasmStr
                                             return $ LL.InlineAsm pc (LL.Local ident) ty False hsd isa iasmdlct ([],[]) [] args
                               Just (piasmStr,piasmCtr) -> return $ LL.InlineAsm pc (LL.Local ident) ty True hsd isa iasmdlct piasmStr piasmCtr args
                      else do (callee, args) <- getOperands ival >>= getCallArgs
