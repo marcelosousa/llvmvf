@@ -208,7 +208,11 @@ rwEqp pc α@(ℂp c1 τα1) β = trace ("rwEqp " ⧺ show α ⧺ " " ⧺ show β
         Just τα → do c ← rwEq pc c1 c2
                      (↣) $ ℂp c τα
         Nothing → error $ "rwEqp error: \n" ⧺ show α ⧺ "\n" ⧺ show β
-    ℂλ ca cr → error "rwEqp: cant constraint pointer with function" 
+    ℂλ ca cr → error "rwEqp: cant constraint pointer with function"
+    ℂc cc → case cc of
+      T1 → (↣) $ α
+      TPtr → (↣) $ α
+      _ → error "rwEqp: type class given is not compatible with pointer"
     _ → rwEq pc β α
 rwEqp _ _ _ = error $ "rwEqp: FATAL"
 
