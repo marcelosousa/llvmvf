@@ -84,14 +84,14 @@ sem RetInst
 sem Terminator
   | Ret UBr Br Unreachable
            lhs.pp = @pp
-  | Ret    loc.pp = text "ret" <+> @r.pp 
-  | UBr    loc.pp = text "br" <+> @d.pp
-  | Br     loc.pp = text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
-  | Unreachable loc.pp = text "unreachable"
+  | Ret    loc.pp = parens (int @pc.self) <+> text "ret" <+> @r.pp 
+  | UBr    loc.pp = parens (int @pc.self) <+> text "br" <+> @d.pp
+  | Br     loc.pp = parens (int @pc.self) <+> text "br" <+> @v.pp <> comma <+> @t.pp <> comma <+> @f.pp
+  | Unreachable loc.pp = parens (int @pc.self) <+> text "unreachable"
 
 sem PHI
   | PHI lhs.pp = @pp
-        loc.pp = @id.pp <+> char '=' <+> text "phi" <+> @ty.pp <+> @vals.pp
+        loc.pp = parens (int @pc.self) <+> @id.pp <+> char '=' <+> text "phi" <+> @ty.pp <+> @vals.pp
 
 sem Instruction
   | Alloca Load Store ICmp FCmp Call Trunc ZExt SExt FPToUI FPToSI UIToFP SIToFP FPTrunc FPExt PtrToInt IntToPtr BitCast GetElementPtr Add FAdd Sub FSub Mul FMul UDiv SDiv FDiv URem SRem FRem Shl LShr AShr And Or Xor Select ExtractValue InsertValue AtomicRMW Cmpxchg CreateThread JoinThread ExitThread MutexInit MutexLock MutexUnlock MutexDestroy
