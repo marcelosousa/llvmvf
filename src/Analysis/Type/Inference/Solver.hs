@@ -222,7 +222,7 @@ type Γ = M.Map Id Τα
 
 (⊨) ∷ NamedTypes → Γ → S.Set Τℂ' → Γ
 (⊨) nτ e τℂ = let γ@Ω{..} = trace "rewriteEq" $ execState μrewriteEq (iΩ τℂ nτ e)
-                  γ' = Trace.trace ("solveEq\n" ⧺ traceSolveEq mic) $ M.mapWithKey (\n c → solveEq nτ e mic [n] c) mic
+                  γ' = trace ("solveEq\n" ⧺ traceSolveEq mic) $ M.mapWithKey (\n c → solveEq nτ e mic [n] c) mic
               in S.fold (solveCast nτ) γ' rc
 
 traceSolveEq ∷ M.Map Id ℂ → String
@@ -249,7 +249,7 @@ look nτ e γ l m | m ∈ l = case M.lookup m e of
                      Just τ  → τ
                 | otherwise = case M.lookup m γ of
                      Nothing → case M.lookup m e of
-                       Nothing → error $ "look: not in maps " ⧺ show m ⧺ show l ⧺ show γ ⧺ show e
+                       Nothing → error $ "look: not in maps " ⧺ show m ⧺ show l -- ⧺ show γ ⧺ show e
                        Just τ  → τ
                      Just c  → solveEq nτ e γ (m:l) c
 {-
