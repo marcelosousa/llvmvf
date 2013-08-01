@@ -201,7 +201,7 @@ rwEqp pc α@(ℂp c1 τα1) β = trace ("rwEqp " ⧺ show α ⧺ " " ⧺ show β
                        case c of
                         ℂτ τ' → (↣) $ ℂτ $ TyDer $ TyPtr τ' τα
                         _     → error $ "rwEqp error: impossible case? " ⧺ show c
-          Nothing → error $ "(rwEqp error) Type qualifier mismatch\n" ⧺ show α ⧺ "\n" ⧺ show β
+          Nothing → error $ "(rwEqp error) Type qualifier mismatch " ⧺ show pc ⧺ "\n" ⧺ show α ⧺ "\n" ⧺ show β
       _ → error $ "rwEqp: types dont match " ⧺ show α ⧺ " " ⧺ show β
     ℂp c2 τα2 → 
       case τα1 ≌ τα2 of
