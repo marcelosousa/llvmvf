@@ -290,10 +290,10 @@ getOtherOp Call = do ival  <- getInstructionValue
                              --liftIO $ print $ "parsing asm string: " ++ iasmStr
                              let asmInfo = (,) <$> parseAsm iasmStr <*> parseAsmC iasmCtr
                              case asmInfo of
-                              Nothing -> do liftIO $ appendFile "/home/marcelosousa/Research/llvmlinux/targets/x86_64/src/linux/llvmvf.asm.fail" iasmStr
+                              Nothing -> do --liftIO $ appendFile "/home/marcelosousa/Research/llvmlinux/targets/x86_64/src/linux/llvmvf.asm.fail" iasmStr
                                             return $ LL.InlineAsm pc (LL.Local ident) ty False hsd isa iasmdlct ([],[]) [] args
                               Just (piasmStr,piasmCtr) -> do
-                                liftIO $ appendFile "/home/marcelosousa/Research/llvmlinux/targets/x86_64/src/linux/llvmvf.asm.lifted" iasmStr
+                               -- liftIO $ appendFile "/home/marcelosousa/Research/llvmlinux/targets/x86_64/src/linux/llvmvf.asm.lifted" iasmStr
                                 return $ LL.InlineAsm pc (LL.Local ident) ty True hsd isa iasmdlct piasmStr piasmCtr args
                      else do (callee, args) <- getOperands ival >>= getCallArgs
                              --liftIO $ print callee
