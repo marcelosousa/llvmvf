@@ -33,7 +33,7 @@ import Concurrent.Model.Domain.PThread
 import Concurrent.Model.Visualizer
 -- import Concurrent.Model.ESEncoder  (esencode)    
 --import Concurrent.Model.Encoder    (encode)
-import Test.Example
+--import Test.Example
 
 import Util.Demangler
 import Debug.Trace
@@ -142,7 +142,7 @@ runOption (CCFG bc d)  = runCCFG bc d
 runOption (BMC bc d n k) = undefined --runBMC bc d n k
 runOption (TypeCheck bc) = do mdl <- extract bc
                              -- print mdl
-                              print $ typeCheck mdl
+                              print "" -- $ typeCheck mdl
 runOption (Type bc m ) = do mdl <- extract bc
                             case m of
                               Intra → typeInfIntra $ liftAsm $ liftDebug mdl  

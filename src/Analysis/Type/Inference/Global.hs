@@ -12,8 +12,8 @@ import Language.LLVMIR
 import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Value
 
-import Analysis.Type.Memory.Util
-import Analysis.Type.Memory.TyAnn as T
+import Analysis.Type.Util
+import Analysis.Type.TypeQual as T
 
 instance TyConstr Global where
 	-- τℂ ∷ → Global → State Γ (S.Set Τℂ)

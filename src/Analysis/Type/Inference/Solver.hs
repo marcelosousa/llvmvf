@@ -12,8 +12,7 @@ module Analysis.Type.Inference.Solver where
 
 import Language.LLVMIR hiding (Id, NamedTypes)
 import Analysis.Type.Inference.Base
-import Analysis.Type.Memory.Util
-import Analysis.Type.Memory.TyAnn as T
+import Analysis.Type.TypeQual as T
 import Language.LLVMIR.Util
 import Analysis.Type.Inference.Value
 import Control.Monad.State
@@ -129,26 +128,26 @@ rwEqπ pc α@(ℂπ n) β = trace ("rwEqv (start) " ⧺ show α ⧺ " " ⧺ show
       (↣) β
     Just ζ  → case ζ of
       ℂπ m → if n ≡ m
-             then trace ("rwEqv (in map, Cv equal): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m)) $ do 
+             then trace ("rwEqv (in map, Cv equal): " ⧺ show n ⧺ " " ⧺ show m) $ do 
               νIℂ n β
               (↣) β
              else case β of
                 ℂπ o → if n ≡ o || o ≡ m
-                       then trace ("rwEqv (in map, Cv diff but messy): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m) ⧺ " " ⧺ show (pretty o)) $ (↣) β
-                       else trace ("rwEqv (in map, Cv diff but messy (2)): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m) ⧺ " " ⧺ show (pretty o)) $ do 
+                       then trace ("rwEqv (in map, Cv diff but messy): " ⧺ show n ⧺ " " ⧺ show m ⧺ " " ⧺ show o) $ (↣) β
+                       else trace ("rwEqv (in map, Cv diff but messy (2)): " ⧺ show n ⧺ " " ⧺ show m ⧺ " " ⧺ show o) $ do 
                         νIℂ m β
                         (↣) β
                 _ → do 
                   if mutual m [n] mic
-                  then trace ("rwEqv (in map, Cv dif and not Cv but mutual): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m) ⧺ " " ⧺ show β) $ do 
+                  then trace ("rwEqv (in map, Cv dif and not Cv but mutual): " ⧺ show n ⧺ " " ⧺ show m ⧺ " " ⧺ show β) $ do 
                     νIℂ n β
                     νIℂ m β
                     (↣) β
-                  else trace ("rwEqv (in map, Cv dif, not Cv, not mutual): " ⧺ show (pretty n) ⧺ " " ⧺ show (pretty m) ⧺ " " ⧺ show β) $ do 
+                  else trace ("rwEqv (in map, Cv dif, not Cv, not mutual): " ⧺ show n ⧺ " " ⧺ show m ⧺ " " ⧺ show β) $ do 
                     c ← rwEq pc ζ β
                     νIℂ n c
                     (↣) c
-      _    → do c ← trace ("rwEqv (in map but not Cv): calling rwEq " ⧺ show (pretty n) ⧺ " " ⧺ show β ⧺ " " ⧺ show ζ) $ rwEq pc β ζ
+      _    → do c ← trace ("rwEqv (in map but not Cv): calling rwEq " ⧺ show n ⧺ " " ⧺ show β ⧺ " " ⧺ show ζ) $ rwEq pc β ζ
                 νIℂ n c
                 (↣) c
 rwEqπ _ _ _ = error $ "rwEqπ: FATAL"
@@ -226,7 +225,7 @@ type Γ = M.Map Id Τα
               in S.fold (solveCast nτ) γ' rc
 
 traceSolveEq ∷ M.Map Id ℂ → String
-traceSolveEq = M.foldrWithKey (\k v r → show (pretty k) ⧺ " , " ⧺ show v ⧺ "\n" ⧺ r ) ""
+traceSolveEq = M.foldrWithKey (\k v r → show k ⧺ " , " ⧺ show v ⧺ "\n" ⧺ r ) ""
 
 -- Solve 
 -- Input : Env, Constraints left

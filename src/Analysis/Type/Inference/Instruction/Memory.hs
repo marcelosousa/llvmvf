@@ -9,8 +9,7 @@ module Analysis.Type.Inference.Instruction.Memory where
 
 import Language.LLVMIR hiding (Id)
 import Analysis.Type.Inference.Base
-import Analysis.Type.Memory.Util
-import Analysis.Type.Memory.TyAnn as T
+import Analysis.Type.TypeQual as T
 
 import Analysis.Type.Inference.Value
 import Control.Monad.State

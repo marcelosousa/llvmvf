@@ -12,7 +12,7 @@ import qualified Data.Set as S
 
 import Language.LLVMIR hiding (Type(..),Id, NamedTypes)
 import Analysis.Type.Inference.Base
-import Analysis.Type.Memory.TyAnn
+import Analysis.Type.TypeQual
 
 cFn ∷ ℂ → ℂ
 cFn λτ = ℂp λτ anyRegAddr
@@ -52,6 +52,9 @@ copyFromUser = cFn $ ℂλ [cPtr (i 8) anyRegAddr, cPtr (i 8) anyRegAddr, cI 32]
 copyToUser = cFn $ ℂλ [cPtr (i 8) anyRegAddr, cPtr (i 8) anyRegAddr, cI 32] $ cI 64
 mightSleep = cFn $ ℂλ [cPtr (i 8) anyRegAddr, cI 32, cI 32] $ cVoid
 
+f = cFn $ ℂλ [cPtr (i 8) kVirAddr] $ cPtr (i 8) kLogAddr
+g = cFn $ ℂλ [cPtr (i 8) kLogAddr] $ cPtr (i 8) kVirAddr
+m = cFn $ ℂλ [cPtr (i 8) kVirAddr] $ cPtr (i 8) kVirAddr
 {-
 ioOpRep = cFn $ ℂλ [cPtr (i 8) TyIOAddr, cPtr (i 8) kLogAddr, cI 64] $ cVoid
 -- Allocation on logical addresses
@@ -68,6 +71,7 @@ mightSleep = cFn $ ℂλ [cPtr (i 8) kVirAddr, cI 32, cI 32] $ cVoid
 -}
 
 {-
+
 errorf ∷ Τℂ
 errorf = let nℂ = ℂπ (Global "e1000_probe2")
          in nℂ :=: ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 32) TyIOAddr, ℂτ $ i 32, ℂτ $ i 32, ℂτ $ TyDer $ TyPtr (i 32) TyIOAddr] (ℂτ $ i 32)) TyRegAddr
@@ -75,7 +79,8 @@ errorf = let nℂ = ℂπ (Global "e1000_probe2")
 
 iτℂ ∷ S.Set Τℂ
 iτℂ = S.fromList $ 
-  [ "ioremap" =: ioremap
+  [ 
+{-    "ioremap" =: ioremap
   , "ioremap_nocache" =: ioremap
   , "iounmap" =: iounmap
   , "ioread8" =: ioread
@@ -97,7 +102,10 @@ iτℂ = S.fromList $
   , "_copy_to_user" =: copyToUser
   , "_copy_from_user" =: copyFromUser
   , "put_page" =: putPage
-  , "__might_sleep" =: mightSleep
+  , "__might_sleep" =: mightSleep-}
+    "f" =: f 
+  , "g" =: g 
+  , "m" =: m   
 --  , "f" =: ioremap
 --  , "g" =: kmalloc
   ]

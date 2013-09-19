@@ -10,8 +10,7 @@ module Analysis.Type.Inference.Base where
 import qualified Data.Set as S
 
 import Language.LLVMIR (Identifier(..), Identifiers, Type)
-import Analysis.Type.Memory.TyAnn
-import Analysis.Type.Memory.Util
+import Analysis.Type.TypeQual
 import Analysis.Type.Util
 import Prelude.Unicode ((⧺))
 import UU.PPrint 
@@ -58,7 +57,7 @@ import Control.Monad.State
                 (↣) $ τℂs ∪ ατℂ
 
 type Τ = Type
-type Τα = TyAnn
+type Τα α = TypeQual α
 type Ταρ = TyAnnot
 type Id = Identifier
 
@@ -80,17 +79,17 @@ classOf ∷ Τα → TClass → Bool
 α `classOf` β = error $ "classOf error:" ⧺ show α ⧺ " " ⧺ show β
 
 -- Constraint Element
-data ℂ = ℂτ Τα -- Type α
-       | ℂπ Id -- Type of Id
-       | ℂc TClass -- Class of
-       | ℂι ℂ [Int] -- for GEP instruction
-       | ℂp ℂ Ταρ  -- Pointer to ℂ Τα
-       | ℂλ [ℂ] ℂ  -- Function
+data ℂ α = ℂτ Τα -- Type α
+         | ℂπ Id -- Type of Id
+         | ℂc TClass -- Class of
+         | ℂι (ℂ α) [Int] -- for GEP instruction
+         | ℂp (ℂ α) α  -- Pointer to ℂ Τα
+         | ℂλ [(ℂ α)] (ℂ α)  -- Function
   deriving (Eq, Ord)
 
 instance Show ℂ where
   show (ℂτ τα)    = "Ctau(" ⧺ show τα ⧺ ")"
-  show (ℂπ α)     = "Cv(" ⧺ (show $ pretty α) ⧺ ")"
+  show (ℂπ α)     = "Cv(" ⧺ (show α) ⧺ ")"
   show (ℂι c i)   = "Cgep(" ⧺ show c ⧺ "," ⧺ show i ⧺ ")"
   show (ℂc τc)    = "Ccl(" ⧺ show τc ⧺ ")"
   show (ℂp c ταρ) = "Cptr(" ⧺ show c ⧺ "," ⧺ show ταρ ⧺ ")"

@@ -1,67 +1,72 @@
-{-# LANGUAGE TypeOperators, UnicodeSyntax #-}
+{-# LANGUAGE TypeOperators, UnicodeSyntax, KindSignatures, GADTs, RankNTypes, ImpredicativeTypes, DataKinds, TypeFamilies #-}
 -------------------------------------------------------------------------------
 -- Module    :  Language.FeatherIR.Base.Syntax
 -- Copyright :  (c) 2013 Marcelo Sousa
--- Feather-weight Intermediate Representation Base
+-- Featherweight Intermediate Representation Base
 -------------------------------------------------------------------------------
 
 module Language.FeatherIR.Base.Syntax where
 
 import Language.FeatherIR.Base.Type
-import Data.Map
+import Data.Map (Map)
+import qualified Data.Map as Map
 
-type Id = String
+type Op = String
+type IdGlobal = String
+type IdNamedType = String
+type Register = String
+type BBs = Map Register BB
+type Values = [Value]
 
+data Id = GlobalId  IdGlobal
+        | Register  Register
 
-data P = 
-	P { namedTypes      ∷ Map Id Τ 
-	  , globalVariables ∷ Map Id G 
-	  , functions       ∷ Map Id F
+data Module = 
+	Module 
+	{ 
+		module_name ∷ String
+	  , named_types ∷ Map IdNamedType Type
+	  , global_vars ∷ Map IdGlobal    Global
+	  , functions   ∷ Map IdGlobal    Function 
 	}
 
-data G = G Id Τ C
+newtype Global = Global (Type, Maybe Constant)
 
-data F = F Id Σ [BB]
+newtype Function = Function (Σ, BBs)
 
-data Σ = Σ [(Id,Τ)] Τ
+
+newtype Σ = Σ ([(Register,Type)], Type)
 
 -- Basic Block
-data BB = BB Id [Φ] [I] T
+newtype BB = BB ([Φ], [Instruction], Terminator)
 
 -- φ-instruction
-data Φ = Φ Id Τ [(V,Id)]
+newtype Φ = Φ (Register, Type, [(Value, Register)])
 
 -- instruction
-data I =
-	  BinOp Id Τ BinI V V
-	| BitOp Id Τ BitI V V
-    | DerOp DerI
-    | Cast  Id Τ V
-    | Call  Id Τ Id [V]
-    | Cmp   Id Τ V V
-    | MemOp MemI
-
-data BinI =
-	Add | Sub | Mul | Div | Rem
-
-data BitI = 
-	Shl | LShr | AShr | And | Or | Xor
-
-data DerI = 
-	  Extract Id Τ V [V]
-	| Insert  Id Τ V V [V]
-
-data MemI = 
-	  Alloca Id Τ V
+data Instruction =
+      Cast   Register Value Type
+	| BinOp  Register Type Op Value Value
+	| Cmp    Register Type Op Value Value
+    | Call   (Maybe Register) Type Id Values  
+    | Alloca Register Type Int -- V?
+    | Load   Register Type
+    | Store  Value Value
+    | Gep    Value [Int]
 
 -- terminator
-data T = T
-
--- constant
-data C = Constant
+newtype Terminator = Return Values
 
 -- value
-data V = 
-	  VI Id Τ
-	| VC C
+data Value = 
+	  Local Register Type
+	| Constant Constant
 
+-- constant
+data Constant = 
+	  GlobalConstant  		 IdGlobal
+	| ConstantInt            Int Type
+    | ConstantFP             Type
+    | ConstantPointerNull    Type
+	| ConstantAggregate      Type Values
+    | ConstantDataSequential Type String	  

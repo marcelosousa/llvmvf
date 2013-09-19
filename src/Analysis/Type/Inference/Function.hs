@@ -13,8 +13,8 @@ import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Instruction
 import Analysis.Type.Inference.Initial
 
-import Analysis.Type.Memory.Util
-import Analysis.Type.Memory.TyAnn
+import Analysis.Type.Util
+import Analysis.Type.TypeQual
 
 instance TyConstr Function where
 	-- τℂ ∷ → Function → State Γ (S.Set Τℂ)

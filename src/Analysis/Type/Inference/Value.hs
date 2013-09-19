@@ -9,8 +9,6 @@ module Analysis.Type.Inference.Value where
 
 import Language.LLVMIR
 import Analysis.Type.Inference.Base
-import Analysis.Type.Memory.Util
-import Analysis.Type.Memory.TyAnn as T
 import Analysis.Type.Util
 
 import qualified Data.Set as S
@@ -52,7 +50,7 @@ instance Constr Value where
 instance Constr Constant where
 	-- π ∷ Constant → ℂ
 	π c = case c of
-	  UndefValue      → ℂτ T.TyUndef 
+	  UndefValue      → error "we don't support undefined values" 
 	  SmpConst sc     → π sc
 	  CmpConst cc     → π cc
 	  GlobalValue gv  → π gv

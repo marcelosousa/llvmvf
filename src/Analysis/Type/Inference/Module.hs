@@ -16,7 +16,7 @@ import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Global
 import Analysis.Type.Inference.Function
 import Analysis.Type.Inference.Solver
-import Analysis.Type.Memory.TyAnn
+import Analysis.Type.TypeQual
 import Analysis.Type.Inference.Initial
 
 import Control.Monad

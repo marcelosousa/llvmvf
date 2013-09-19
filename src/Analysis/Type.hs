@@ -15,23 +15,31 @@ import qualified Data.Set as S
 
 import Language.LLVMIR hiding (Id)
 
-import Analysis.Type.Util (TyEnv)
-import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
+--import Analysis.Type.Util (TyEnv)
+--import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
 --import Analysis.Type.Memory.Context (RTyRes)
 --import Analysis.Type.Memory.Module (tyanModule)
-import Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeInfModules,typeAnnInferenceGlobals)
-import Analysis.Type.Inference.Base
-import Analysis.Type.Inference.Solver
+--import Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeInfModules,typeAnnInferenceGlobals)
+--import Analysis.Type.Inference.Base
+--import Analysis.Type.Inference.Solver
 import Data.Set
 import Control.Monad
 import UU.PPrint
 
-typeCheck :: Module -> STyRes 
-typeCheck = typeCheckModule
+typeCheck :: Module -> α --STyRes 
+typeCheck = undefined --typeCheckModule
 -- 
 --typeAnalysis :: Module -> RTyRes
 --typeAnalysis = tyanModule
+typeInfIntra = undefined
+typeInfInter = undefined
+typeInfGlobals = undefined
+printTyInfFn = undefined
+typeConstraint = undefined
+printTyℂFn = undefined
+typeAnalysis = undefined
 
+{-
 -- Type Annotated Inference
 typeInfIntra ∷ Module → IO ()
 typeInfIntra mdl = do 
@@ -74,3 +82,5 @@ typeAnalysis ∷ [Module] → IO ()
 typeAnalysis mdls = do
 	let γ = typeInfModules mdls
 	forM_ (M.assocs γ) (\(a,b) → print (pretty a,b)) 
+
+-}

@@ -9,8 +9,7 @@ module Analysis.Type.Inference.Instruction where
 
 import Language.LLVMIR hiding (Id)
 import Analysis.Type.Inference.Base
-import Analysis.Type.Memory.Util
-import Analysis.Type.Memory.TyAnn as T
+import Analysis.Type.TypeQual as T
 import Analysis.Type.Util
 
 import Analysis.Type.Inference.Value
@@ -53,7 +52,7 @@ instance TyConstr Terminator where
 				    bbℂ = ℂπ bb :=: πv
 				(↣) $ liftΤℂ pc $ fnℂ ∘ (bbℂ ∘ τℂv)
 			Unreachable pc → do
-				let τα = T.TyUndef 
+				let τα = T.TyBot 
 				    fnℂ = ℂπ fn :=: cλ (ℂτ τα)
 				    bbℂ = ℂπ bb :=: ℂτ τα
 				(↣) $ liftΤℂ pc $ fnℂ ∘ (bbℂ ∘ ε)

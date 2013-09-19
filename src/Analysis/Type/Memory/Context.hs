@@ -13,7 +13,8 @@ import Language.LLVMIR (Identifier, Identifiers)
 import Language.LLVMIR.Printer
 import UU.PPrint 
 
-import Analysis.Type.Memory.TyAnn
+import Analysis.Type.TyAnn
+import Analysis.Type.Util
 import Debug.Trace (trace)
 type Name = String
 type Constrs  = S.Set (Identifier, Identifier)
@@ -21,6 +22,9 @@ type TyAnnEnv = M.Map Identifier TyAnn
 type Context  = (Constrs, TyAnnEnv)
 
 data RTyRes = RTyRes Name Context (M.Map Identifier Context)
+
+eraseEnv :: TyAnnEnv -> TyEnv
+eraseEnv = M.map erase
 
 filterIContext :: Context -> Identifier -> Context
 filterIContext (cnstrs, tyen) i = let c = S.toList cnstrs

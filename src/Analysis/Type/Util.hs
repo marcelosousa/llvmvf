@@ -1,6 +1,6 @@
 {-# LANGUAGE UnicodeSyntax #-}
 -------------------------------------------------------------------------------
--- Module    :  Analysis.Memory.Type.Util
+-- Module    :  Analysis.Type.Util
 -- Copyright :  (c) 2013 Marcelo Sousa
 -- A Type System for Memory Analysis of LLVM IR Modules
 -------------------------------------------------------------------------------
@@ -8,8 +8,13 @@
 module Analysis.Type.Util where
 
 import Language.LLVMIR
+import Language.LLVMIR.Util
+
 import qualified Data.Map as M
 import Prelude.Unicode ((⧺))
+
+import Analysis.Type.TypeQual (TypeQual)
+import qualified Analysis.Type.TypeQual as T
 
 
 import Debug.Trace(trace)
@@ -19,60 +24,12 @@ type TyEnv = M.Map Identifier Type
 data TyClass = TyClassInt | TyClassFloat
   deriving (Show, Eq, Ord)
   
-isSmpTy :: Type -> Bool
-isSmpTy (TyInt x)  = let n = div x 8
-                     in n == 1 || n == 2 || n == 4 || n == 8
-isSmpTy (TyFloatPoint TyFloat) = True
-isSmpTy (TyFloatPoint TyDouble) = True
-isSmpTy _ = False 
-
-isInt :: Type -> Bool
-isInt (TyInt _) = True
-isInt _ = False
-
-isFloat :: Type -> Bool
-isFloat (TyFloatPoint _) = True
-isFloat _ = False
-
-isVector :: Type -> Bool
-isVector (TyVector s ty) = True
-isVector _ = False
-
-isPointer :: Type -> Bool
-isPointer (TyPointer _) = True
-isPointer _ = False
-
-isAgg :: Type -> Bool
-isAgg (TyArray _ _) = True
-isAgg (TyStruct _ _ _) = True
-isAgg _ = False
-
-getIntValue :: Value -> Int
-getIntValue (Constant (SmpConst (ConstantInt i _))) = i
-getIntValue v = error $ "getIntvalue: not const Int" ⧺ show v
-
 isTyOrVecOfTy :: TyClass -> Type -> Bool
 isTyOrVecOfTy TyClassInt (TyInt _) = True
 isTyOrVecOfTy TyClassInt (TyVector _ (TyInt _)) = True
 isTyOrVecOfTy TyClassFloat (TyFloatPoint _) = True
 isTyOrVecOfTy TyClassFloat (TyVector _ (TyFloatPoint _)) = True
 isTyOrVecOfTy _ _ = False
-
--- TODO: Complete this definition
-isFstClass :: Type -> Bool
-isFstClass (TyInt _)        = True
-isFstClass (TyFloatPoint _) = True
-isFstClass (TyPointer _)    = True
-isFstClass (TyVector _ _)   = True
-isFstClass (TyStruct _ _ _) = True
-isFstClass (TyArray _ _)    = True
-isFstClass TyLabel          = True
-isFstClass TyMetadata       = True
-isFstClass _ = False
-
-
-notAggFstClass :: Type -> Bool
-notAggFstClass ty = (not $ isAgg ty) && isFstClass ty
 
 insert :: (Show a) => Identifier -> a -> M.Map Identifier a -> M.Map Identifier a
 insert k@(Global i) v m = case M.lookup k m of
@@ -94,47 +51,59 @@ typeGlobalValue tye f op (FunctionValue  n ty) = typeValueGen tye n (f ty) op "t
 typeGlobalValue tye f op (GlobalAlias    n ty) = typeValueGen tye n (f ty) op "typeGlobalValue:GlobalAlias"
 typeGlobalValue tye f op (GlobalVariable n ty) = typeValueGen tye n (f ty) op "typeGlobalValue:GlobalVariable"
                              
-findBasicBlock :: BasicBlocks -> Identifier -> Maybe BasicBlock
-findBasicBlock [] l = Nothing
-findBasicBlock (bb@(BasicBlock l _ _ _):bbs) i | i == l = Just bb
-                                               | otherwise = findBasicBlock bbs i
                                                                                
 
-(<=>) :: NamedTypes -> Type -> Type -> Bool
-(<=>) nmdtye TyVoid      TyVoid      = True
-(<=>) nmdtye Tyx86MMX    Tyx86MMX    = True
-(<=>) nmdtye TyLabel     TyLabel     = True
-(<=>) nmdtye TyMetadata  TyMetadata  = True
-(<=>) nmdtye TyOpaque    TyOpaque    = True
-(<=>) nmdtye TyUndefined TyUndefined = True
-(<=>) nmdtye (TyInt p)         (TyInt n)         = p == n
-(<=>) nmdtye (TyFloatPoint p)  (TyFloatPoint n)  = p == n
-(<=>) nmdtye (TyPointer p)     (TyPointer n)     = (<=>) nmdtye p n
-(<=>) nmdtye (TyVector n r)    (TyVector m s)    = n == m && (<=>) nmdtye r s
-(<=>) nmdtye (TyArray  n r)    (TyArray  m s)    = n == m && (<=>) nmdtye r s
-(<=>) nmdtye (TyStruct nr n r) (TyStruct ns m s) = eqStruct nmdtye (nr,n,r) (ns,m,s)
-(<=>) nmdtye x y = False
 
-eqStruct :: NamedTypes -> (String,Int,[Type]) -> (String,Int,[Type]) -> Bool
-eqStruct nmdtye ("",n,r) ("",m,s) = n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
-eqStruct nmdtye ("",n,r) (ns,m,s) = 
-	case M.lookup ns nmdtye of
-		Nothing -> n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
-		Just (TyStruct ns' m' s') -> n==m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s')
-		Just _ -> False
-eqStruct nmdtye (nr,n,r) ("",m,s) = 
-	case M.lookup nr nmdtye of
-		Nothing -> n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
-		Just (TyStruct nr' n' r') -> eqStruct nmdtye (nr',n',r') ("",m,s)
-		Just _ -> False
-eqStruct nmdtye (nr,n,r) (ns,m,s) = 
-	case M.lookup nr nmdtye of
-		Nothing -> case M.lookup ns nmdtye of
-			Nothing -> n == m && (and $ map (uncurry ((<=>) nmdtye)) $ zip r s)
-			Just (TyStruct ns' m' s') -> eqStruct nmdtye (nr,n,r) (ns',m',s')
-			Just _ -> False
-		Just (TyStruct nr' n' r') -> case M.lookup ns nmdtye of
-			Nothing -> eqStruct nmdtye (nr',n',r') (ns,m,s)
-			Just (TyStruct ns' m' s') -> n' == m' && nr == ns
-			Just _ -> False 
-		Just _ -> False
+--type TyLIdPair = (TyAnn, Identifiers)
+
+-- Lift a LLVM IR Type to the most generic Type Annotation
+liftTy :: Type -> TyAnn
+liftTy ty = liftTyGen ty T.TyAny
+
+
+liftTyGen :: Type -> TyAnnot -> TyAnn
+liftTyGen TyVoid              a = T.TyPri T.TyVoid
+liftTyGen TyLabel             a = T.TyPri T.TyLabel
+liftTyGen TyMetadata          a = T.TyPri T.TyMetadata
+liftTyGen (TyFloatPoint f)    a = T.TyPri T.TyFloat
+liftTyGen Tyx86MMX            a = error "liftTy: Tyx86MMX not supported"
+liftTyGen TyOpaque            a = error "liftTy: TyOpaque"
+liftTyGen (TyInt s)           a = T.TyPri $ T.TyInt s
+liftTyGen (TyArray s ty)      a = T.TyDer $ T.TyAgg $ T.TyArr s $ liftTyGen ty a
+liftTyGen (TyStruct n s ty)   a = T.TyDer $ T.TyAgg $ T.TyStr n s $ map (flip liftTyGen a) ty
+liftTyGen (TyFunction as r iv) a = T.TyDer $ T.TyFun (map (flip liftTyGen a) as) (liftTyGen r a) iv
+liftTyGen (TyPointer ty)      a = T.TyDer $ T.TyPtr (liftTyGen ty a) a
+liftTyGen (TyVector s ty)     a = T.TyDer $ T.TyVec s $ liftTyGen ty a
+
+erase :: TyAnn -> Type
+erase (T.TyPri T.TyVoid)                    = TyVoid
+erase (T.TyPri T.TyLabel)                   = TyLabel
+erase (T.TyPri T.TyMetadata)                = TyMetadata
+erase (T.TyPri T.TyFloat)                   = TyFloatPoint $ TyFloat
+erase (T.TyPri (T.TyInt s))                 = TyInt s
+erase (T.TyDer (T.TyAgg (T.TyArr s ty)))    = TyArray s $ erase ty
+erase (T.TyDer (T.TyAgg (T.TyStr n s tys))) = TyStruct n s $ map erase tys
+erase (T.TyDer (T.TyFun tys ty v))          = TyFunction (map erase tys) (erase ty) v
+erase (T.TyDer (T.TyPtr ty _))              = TyPointer $ erase ty
+erase (T.TyDer (T.TyVec s ty))              = TyVector s $ erase ty
+erase x = error $ "erase " ++ show x 
+
+instance Sizable TyAnn where
+	sizeOf τ = sizeOf $ erase τ
+
+-- Subtyping relation 
+--(<:) :: TyAnn -> TyAnn -> Bool
+--(T.TyDer (T.TyPtr t2 k)) <: (T.TyDer (T.TyPtr t1 T.TyAny)) = True
+--t1 <: t2 = t1 == t2
+
+isAnnAgg :: TyAnn -> Bool
+isAnnAgg (T.TyDer (T.TyAgg _)) = True
+isAnnAgg _ = False
+
+isAnnInt :: TyAnn -> Bool
+isAnnInt (T.TyPri (T.TyInt _)) = True
+isAnnInt _ = False
+
+isAnnFloat :: TyAnn -> Bool
+isAnnFloat (T.TyPri T.TyFloat) = True
+isAnnFloat _ = False
