@@ -24,7 +24,7 @@ data Id = GlobalId  IdGlobal
 data Module = 
 	Module 
 	{ 
-		module_name ∷ String
+	    module_name ∷ String
 	  , named_types ∷ Map IdNamedType Type
 	  , global_vars ∷ Map IdGlobal    Global
 	  , functions   ∷ Map IdGlobal    Function 
@@ -46,8 +46,8 @@ newtype Φ = Φ (Register, Type, [(Value, Register)])
 -- instruction
 data Instruction =
       Cast   Register Value Type
-	| BinOp  Register Type Op Value Value
-	| Cmp    Register Type Op Value Value
+    | BinOp  Register Type Op Value Value
+    | Cmp    Register Type Op Value Value
     | Call   (Maybe Register) Type Id Values  
     | Alloca Register Type Int -- V?
     | Load   Register Type
@@ -64,9 +64,9 @@ data Value =
 
 -- constant
 data Constant = 
-	  GlobalConstant  		 IdGlobal
-	| ConstantInt            Int Type
+      GlobalConstant         IdGlobal
+    | ConstantInt            Int Type
     | ConstantFP             Type
     | ConstantPointerNull    Type
-	| ConstantAggregate      Type Values
+    | ConstantAggregate      Type Values
     | ConstantDataSequential Type String	  
