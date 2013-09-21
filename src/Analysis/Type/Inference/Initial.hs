@@ -76,7 +76,8 @@ errorf = let nℂ = ℂπ (Global "e1000_probe2")
 iτℂ ∷ S.Set Τℂ
 iτℂ = S.fromList $ 
   [ "ioremap" =: ioremap
-  , "ioremap_nocache" =: ioremap
+  , "__kmalloc" =: kmalloc
+{-  , "ioremap_nocache" =: ioremap
   , "iounmap" =: iounmap
   , "ioread8" =: ioread
   , "ioread16" =: ioread
@@ -90,7 +91,7 @@ iτℂ = S.fromList $
   , "iowrite8_rep" =: ioOpRep
   , "iowrite16_rep" =: ioOpRep
   , "iowrite32_rep" =: ioOpRep
-  , "__kmalloc" =: kmalloc
+
   , "kfree"   =: kfree
   , "vzalloc" =: valloc
   , "vfree"   =: vfree
@@ -98,6 +99,7 @@ iτℂ = S.fromList $
   , "_copy_from_user" =: copyFromUser
   , "put_page" =: putPage
   , "__might_sleep" =: mightSleep
+-}
 --  , "f" =: ioremap
 --  , "g" =: kmalloc
   ]

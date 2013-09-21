@@ -52,7 +52,7 @@ erase (T.TyDer (T.TyAgg (T.TyStr n s tys))) = TyStruct n s $ map erase tys
 erase (T.TyDer (T.TyFun tys ty v))          = TyFunction (map erase tys) (erase ty) v
 erase (T.TyDer (T.TyPtr ty _))              = TyPointer $ erase ty
 erase (T.TyDer (T.TyVec s ty))              = TyVector s $ erase ty
-erase x = error $ "erase " ++ show x 
+erase x = error $ "erase TODO" -- ++ show x 
 
 eraseEnv :: TyAnnEnv -> TyEnv
 eraseEnv = M.map erase

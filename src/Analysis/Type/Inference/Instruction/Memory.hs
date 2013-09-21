@@ -33,7 +33,7 @@ import qualified Data.Set as S
 	let cτρ = ℂτ $ (↑) τ -- ref τ of value
 	    (πα,πβ) = (π α,π β)  -- 
 	    τℂ = ℂτ (T.TyPri T.TyVoid) :=: cτρ
-	    βℂ = πβ :=: (πα ⤜ anyRegAddr)
+	    βℂ = πβ :=: (πα ⤜ T.TyAny)
 	    αℂ = πα :=: ℂc T1
 	(↣) $ liftΤℂ pc $ τℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ))
 --	(↣) $ liftΤℂ pc $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ))) 
@@ -54,9 +54,9 @@ import qualified Data.Set as S
 τℂgep pc n τn α δs = do
 	τℂα ← τℂr α	
 	τℂs ← τListR τℂα δs
-	let cτn = ℂτ $ τn ↑^ anyRegAddr                -- OK
+	let cτn = ℂτ $ τn ↑^ T.TyAny                -- OK
 	    πα  = π α
-	    cℂ  = ℂp (ℂc TAgg) anyRegAddr              -- Pointer to agg in reg mem
+	    cℂ  = ℂp (ℂc TAgg) T.TyAny              -- Pointer to agg in reg mem
 	    πδs = map π δs
 	    δsℂ = S.fromList $ map ((ℂc TInt) :=:) πδs
 	    n1ℂ = ℂπ n :=: cτn
