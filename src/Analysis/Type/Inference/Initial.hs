@@ -72,6 +72,8 @@ errorf ∷ Τℂ
 errorf = let nℂ = ℂπ (Global "e1000_probe2")
          in nℂ :=: ℂp (ℂλ [ℂτ $ TyDer $ TyPtr (i 32) TyIOAddr, ℂτ $ i 32, ℂτ $ i 32, ℂτ $ TyDer $ TyPtr (i 32) TyIOAddr] (ℂτ $ i 32)) TyRegAddr
 -}
+--iIds ∷ [Id]
+--iIds = [ Global "ioremap" ]
 
 iτℂ ∷ S.Set Τℂ
 iτℂ = S.fromList $ 

@@ -153,7 +153,7 @@ runOption (TypeConstrs bc) = do mdl <- extract bc
 runOption (TypeAnalyze lbc) = do 
   mdls ← mapM extract lbc
   let mdls' = map (liftAsm . liftDebug) mdls
-  typeAnalysis mdls'
+  undefined --typeAnalysis mdls'
 --runOption bc Htm     = do mdl <- extract bc
 --                          let bf = dropExtension bc
 --                          writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)

@@ -101,14 +101,14 @@ instance ShowType TyDer where
   showType γ (TyVec n t) = "<" ++ show n ++ " x " ++ showType γ t ++ ">"
   showType γ (TyFun [] t _) = "fn :: " ++ showType γ t
   showType γ (TyFun tys t _) = "fn :: " ++ (foldr (\x s -> showType γ x ++ " -> " ++ s) (showType γ t) tys)
-  showType γ (TyPtr ty tya) = "*(" ++ showType γ ty ++ ") " ++ show tya
+  showType γ (TyPtr ty tya) = "*" ++ show tya ++ "(" ++ showType γ ty ++ ")"
 
 instance ShowType TyAgg where
   showType γ (TyArr n t) = "[" ++ show n ++ " x " ++ showType γ t ++ "]"
   showType γ (TyStr nm n []) = 
     case M.lookup nm γ of
       Nothing → error "showType failed in struct"
-      Just t  → nm ++ showType γ t
+      Just t  → nm ++ "=" ++ showType γ t
   showType γ (TyStr nm n t) = "{" ++ (foldr (\x s -> showType γ x ++ ", " ++ s) (showType γ $ last t) (init t)) ++ "}"
 
 instance Show TyAnnot where

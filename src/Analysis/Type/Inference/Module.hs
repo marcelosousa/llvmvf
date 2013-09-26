@@ -5,7 +5,7 @@
 -- Type Inference
 -------------------------------------------------------------------------------
 
-module Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeInfModules,typeAnnInferenceGlobals) where
+module Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeAnnInferenceGlobals) where
 
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -23,32 +23,32 @@ import Control.Monad
 import Control.Monad.State
 import Prelude.Unicode ((⧺))
 
-typeAnnInference ∷ Module → M.Map Id Γ 
+typeAnnInference ∷ Module → (NamedTypes, M.Map Id Γ)
 typeAnnInference mdl = 
 	let (nmdτ, gτℂ, fnτℂ) = typeConstraints mdl
 	    gγ = (⊨) nmdτ M.empty gτℂ
 	    gnγ = M.map ((⊨) nmdτ gγ) fnτℂ
-	in M.insert (Global "globals") gγ gnγ  
+	in (nmdτ, M.insert (Global "globals") gγ gnγ)
 
 typeConstraints ∷ Module → (NamedTypes, S.Set Τℂ', M.Map Id (S.Set Τℂ'))
 typeConstraints mdl = evalState (τℂs mdl) $ εΕ $ variadicFns mdl
 
-typeAnnInferenceGlobals ∷ Module → M.Map Id Γ
+typeAnnInferenceGlobals ∷ Module → (NamedTypes, M.Map Id Γ)
 typeAnnInferenceGlobals mdl = 
-  let γ = typeAnnInference mdl
-  in M.map (M.filterWithKey (const . isGlobalId)) γ
+  let (nmdτ, γ) = typeAnnInference mdl
+  in (nmdτ, M.map (M.filterWithKey (const . isGlobalId)) γ)
 
-typeAnnInferenceIP ∷ Module → Γ
+typeAnnInferenceIP ∷ Module → (NamedTypes, Γ)
 typeAnnInferenceIP mdl = 
   let nmdτ = M.map (\τ → (↑^) τ TyAny) $ δModNmds mdl
-      γi  = typeAnnInference mdl
+      (nmdτ', γi)  = typeAnnInference mdl
       γtmps = M.map (\e → M.keys $ M.filterWithKey (const . not . isGlobalId) e) γi
       γzip = M.intersectionWith (,) γi γtmps
       γ = M.map (\(e,tmps) → let tmps' = map identifierName tmps
                              in M.filterWithKey (const . not . (flip elem tmps') . identifierName) e) γzip
       γ' = M.map (M.mapWithKey toℂ) γ
       gτℂ = M.fold (\g s → (S.fromList (M.elems g)) ∪ s) ε γ'
-  in (⊨) nmdτ M.empty (liftΤℂ 0 gτℂ)
+  in (nmdτ', (⊨) nmdτ M.empty (liftΤℂ 0 gτℂ))
 
 
 toℂ ∷ Id → Τα → Τℂ
@@ -66,6 +66,7 @@ toℂ n τ = ℂπ n :=: ℂτ τ
     (↣) $ (nτs, gvsℂs, M.fromList $ zip (M.keys fns) lℂs)
     --τList gvsℂs $ M.elems fns
 
+{-
 typeInfModules ∷ [Module] → Γ
 typeInfModules mdls =
   let γs = map typeAnnInferenceIP mdls
@@ -74,3 +75,4 @@ typeInfModules mdls =
       nmdtys = map (M.map (\τ → (↑^) τ TyAny) . δModNmds) mdls
       nmdτs = foldr M.union M.empty nmdtys
   in (⊨) nmdτs M.empty (liftΤℂ 0 mτℂ)
+-}
