@@ -111,6 +111,7 @@ rwEq pc α β = --trace ("rwEq " ⧺ show α ⧺ " " ⧺ show β) $
     ℂp c τα  → rwEqp pc α β -- pointer
     ℂλ ca cr → rwEqλ pc α β -- function
     ℂπ n     → rwEqπ pc α β -- var
+    ℂq τ c   → rwEqq pc α β 
 
 traceString ∷ String → NamedTypes → ℂ → ℂ → String
 traceString s nt α β = s ⧺ " " ⧺ showType nt α ⧺ " " ⧺ showType nt β
@@ -128,6 +129,12 @@ rwEqτ pc α@(ℂτ τ1) β = do
             else error $ "rwEqTy " ⧺ showType nτs τ1 ⧺ " not class of " ⧺ show cl
     _ → rwEq pc β α                       
 rwEqτ _ _ _ = error $ "rwEqTy: FATAL"
+
+rwEqq ∷ Int → ℂ → ℂ → ΩState ℂ
+rwEqq pc α@(ℂq τ c) β = do
+  νΤℂ (α :=: β,pc)
+  (↣) α
+
 
 -- Type Class
 rwEqc ∷ Int → ℂ → ℂ → ΩState ℂ
@@ -370,6 +377,7 @@ solveEqSimple ∷ NamedTypes → Γ → Id → ℂ → Maybe Τα
 solveEqSimple nτ e n τℂ = trace ("solveEq " ⧺ show n) $ case τℂ of
   ℂτ τ → Just τ
   ℂπ m → Nothing
+  ℂq τ c → Nothing
   ℂc cl → error $ "solve does not expect a class " ⧺ show n ⧺ showType nτ τℂ
   ℂι c is → error $ "solve does not expect a gep "
   ℂp c a → (\cτ → TyDer $ TyPtr cτ a) <$> solveEqSimple nτ e n c 
@@ -383,12 +391,15 @@ solveEq nτ e γ n τℂ = trace ("solveEq " ⧺ show n) $ case τℂ of
   ℂπ m → look nτ e γ n m
   ℂc cl → error $ "solve does not expect a class " ⧺ show n ⧺ showType nτ τℂ
   ℂι c is → let cτ = solveEq nτ e γ n c
-            in TyDer $ TyPtr (gepτs nτ cτ is) TyAny
+            in TyDer $ TyPtr (gepτs nτ cτ is) AnyAddr
   ℂp c a → let cτ = solveEq nτ e γ n c 
            in TyDer $ TyPtr cτ a  
   ℂλ ca cr → let caτ = map (solveEq nτ e γ n) ca
                  crτ = solveEq nτ e γ n cr
              in TyDer $ TyFun caτ crτ False
+  ℂq τ c → let cτ = solveEq nτ e γ n c
+           in case (τ,cτ) of
+            (TyDer (TyPtr t1 _),TyDer (TyPtr _ a)) → TyDer (TyPtr t1 a)
 
 look ∷ NamedTypes → Γ → M.Map Id ℂ → [Id] → Id → Τα 
 look nτ e γ l m | m ∈ l = case M.lookup m e of 
@@ -402,7 +413,14 @@ look nτ e γ l m | m ∈ l = case M.lookup m e of
 
 solveCast ∷ NamedTypes → Τℂ' → Γ → Γ
 solveCast nτ τℂ γ = case fst τℂ of
-  c1 :=: c2 → error "solveCast :=: impossible"
+  (ℂq (TyDer (TyPtr t1 t1a)) (ℂπ x)) :=: (ℂτ t2) → 
+    let (TyDer (TyPtr _ t1b)) = safeLookup x γ
+    in case t1a ≌ t1b of
+      Nothing → error $ "Type Unification failed solveCast\n" ++ show t1a ++"\n" ++ show t1b
+      Just t1a' → case (≅) nτ (TyDer (TyPtr t1 t1a')) t2 of
+        Nothing → error $ "Type Unification failed solveCast\n" ++ showType nτ (TyDer (TyPtr t1 t1a')) ++"\n" ++ showType nτ t2
+        Just k  → M.insert x k γ
+  c1 :=: c2 → error $ "solveCast :=: impossible " ++ showType nτ τℂ
   c1 :<: c2 → solveBit (<) nτ γ c1 c2
   c1 :≤: c2 → solveBit (<=) nτ γ c1 c2
   c1 :≌: c2 → solveBit (≡) nτ γ c1 c2
@@ -414,7 +432,15 @@ solveBit op nτ γ α@(ℂπ n) β =
     ℂτ βτ → if sizeOf ατ `op` sizeOf βτ
             then γ
             else error $ traceString "solveBit: bitsize mismatch" nτ α β
-    ℂπ m  → error "solveBit: both are Cv"
+    ℂπ m  → let βτ = safeLookup m γ
+            in if sizeOf ατ `op` sizeOf βτ
+               then case (ατ, βτ) of 
+                  (TyDer (TyPtr at ata), TyDer (TyPtr bt bta)) → 
+                      case ata ≌ bta of
+                      Nothing  → error $ "Type Unification failed in solveBit\n" ++ showType nτ ατ ++"\n" ++ showType nτ βτ
+                      Just nta → M.insert n (TyDer (TyPtr at nta)) γ
+                  _ → error "solveBit: TODO"
+               else error "solveBit: invalid cast"                  
     _ → error "solveBit: beta is not supported"
 solveBit op nτ γ α β@(ℂπ n) =
   let βτ = safeLookup n γ
@@ -422,7 +448,6 @@ solveBit op nτ γ α β@(ℂπ n) =
     ℂτ ατ → if sizeOf ατ `op` sizeOf βτ
             then γ
             else error $ traceString "solveBit: bitsize mismatch" nτ α β
-    ℂπ m  → error "solveBit: both are Cv"
     _ → error "solveBit: beta is not supported"
 solveBit op nτ γ α β = error $ "solveBit: not Cpi (" ⧺ showType nτ α ⧺ ", " ⧺ showType nτ β ⧺ ")"
 

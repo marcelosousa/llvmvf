@@ -19,9 +19,11 @@ import qualified Analysis.Type.Memory.TyAnn as T
 type TyLIdPair = (TyAnn, Identifiers)
 
 -- Lift a LLVM IR Type to the most generic Type Annotation
-liftTy :: Type -> TyAnn
-liftTy ty = liftTyGen ty T.TyAny
+--liftTy :: Type -> TyAnn
+--liftTy ty = liftTyGen ty T.TyAny
 
+liftTy :: Type -> TyAnn
+liftTy ty = liftTyGen ty T.AnyAddr
 
 liftTyGen :: Type -> TyAnnot -> TyAnn
 liftTyGen TyUndefined         a = T.TyUndef
@@ -61,9 +63,9 @@ instance Sizable TyAnn where
 	sizeOf τ = sizeOf $ erase τ
 
 -- Subtyping relation 
-(<:) :: TyAnn -> TyAnn -> Bool
-(T.TyDer (T.TyPtr t2 k)) <: (T.TyDer (T.TyPtr t1 T.TyAny)) = True
-t1 <: t2 = t1 == t2
+--(<:) :: TyAnn -> TyAnn -> Bool
+--(T.TyDer (T.TyPtr t2 k)) <: (T.TyDer (T.TyPtr t1 T.TyAny)) = True
+--t1 <: t2 = t1 == t2
 
 isAnnAgg :: TyAnn -> Bool
 isAnnAgg (T.TyDer (T.TyAgg _)) = True

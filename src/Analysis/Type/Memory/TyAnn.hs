@@ -45,6 +45,12 @@ data TyAgg = TyArr  Int TyAnn        -- Derived + Aggregate
            | TyStr String Int TysAnn -- Derived + Aggregate
   deriving (Eq, Ord, Show)
 
+data TyAnnot = UserAddr
+             | KernelAddr
+             | AnyAddr 
+  deriving (Eq, Ord, Show)
+
+{-
 data TyAnnot = TyIOAddr
              | TyRegAddr TyRegAddr
              | TyAny 
@@ -76,7 +82,7 @@ kVirAddr = TyRegAddr $ KernelAddr $ KernelVirtualAddr
 
 uVirAddr ∷ TyAnnot
 uVirAddr = TyRegAddr UserAddr
-
+-}
 i ∷ Int → TyAnn
 i n = TyPri $ TyInt n
 
@@ -111,6 +117,7 @@ instance ShowType TyAgg where
       Just t  → nm ++ "=" ++ showType γ t
   showType γ (TyStr nm n t) = "{" ++ (foldr (\x s -> showType γ x ++ ", " ++ s) (showType γ $ last t) (init t)) ++ "}"
 
+{-
 instance Show TyAnnot where
   show TyIOAddr = "IOAddr"
   show (TyRegAddr t) = show t
@@ -124,6 +131,7 @@ instance Show TyRegAddr where
 instance Show KernelAddr where
   show KernelLogicalAddr = "KLogicalAddr"
   show KernelVirtualAddr = "KVirtualAddr"
+-}
 
 class AEq α where
   (≅) ∷ NamedTypes → α → α → Maybe α
@@ -199,7 +207,14 @@ eqTyStr nτ α β =
 -}
 class IEq α where
   (≌) ∷ α → α → Maybe α
- 
+
+instance IEq TyAnnot where
+  UserAddr   ≌ KernelAddr = Nothing
+  UserAddr   ≌ UserAddr   = Just UserAddr
+  KernelAddr ≌ KernelAddr = Just KernelAddr
+  AnyAddr    ≌ a = Just a
+  a ≌ β = β ≌ a 
+{-
 instance IEq TyAnnot where
   TyIOAddr ≌ (TyRegAddr α) = Nothing
   TyIOAddr ≌ _             = Just TyIOAddr
@@ -218,5 +233,5 @@ instance IEq TyRegAddr where
     then Just (KernelAddr α)
     else Nothing
   AnyRegAddr  ≌ α = Just α
-
+-}
 

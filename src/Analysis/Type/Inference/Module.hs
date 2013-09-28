@@ -40,7 +40,7 @@ typeAnnInferenceGlobals mdl =
 
 typeAnnInferenceIP ∷ Module → (NamedTypes, Γ)
 typeAnnInferenceIP mdl = 
-  let nmdτ = M.map (\τ → (↑^) τ TyAny) $ δModNmds mdl
+  let nmdτ = M.map (\τ → (↑^) τ AnyAddr) $ δModNmds mdl
       (nmdτ', γi)  = typeAnnInference mdl
       γtmps = M.map (\e → M.keys $ M.filterWithKey (const . not . isGlobalId) e) γi
       γzip = M.intersectionWith (,) γi γtmps
@@ -62,7 +62,7 @@ toℂ n τ = ℂπ n :=: ℂτ τ
     gvsℂs ← τList iτℂ' gvs
     --lℂs ← mapM (τℂu gvsℂs) $ M.elems fns
     lℂs ← mapM τℂ $ M.elems fns
-    let nτs = M.map (\τ → (↑^) τ TyAny) nmdtys
+    let nτs = M.map (\τ → (↑^) τ AnyAddr) nmdtys
     (↣) $ (nτs, gvsℂs, M.fromList $ zip (M.keys fns) lℂs)
     --τList gvsℂs $ M.elems fns
 

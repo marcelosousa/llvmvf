@@ -86,6 +86,7 @@ data ℂ = ℂτ Τα -- Type α
        | ℂι ℂ [Int] -- for GEP instruction
        | ℂp ℂ Ταρ  -- Pointer to ℂ Τα
        | ℂλ [ℂ] ℂ  -- Function
+       | ℂq Τα ℂ
   deriving (Eq, Ord, Show)
 
 instance ShowType ℂ where
@@ -95,6 +96,7 @@ instance ShowType ℂ where
   showType γ (ℂc τc)    = "Ccl(" ⧺ show τc ⧺ ")"
   showType γ (ℂp c ταρ) = "Cptr(" ⧺ showType γ c ⧺ "," ⧺ show ταρ ⧺ ")"
   showType γ (ℂλ cl c)  = "Cfn(" ⧺ foldr (\a r → showType γ a ⧺ "->" ⧺ r) "" cl ⧺ showType γ c ⧺ ")"
+  showType γ (ℂq τ c)   = "Cq(" ⧺ showType γ τ ⧺ " " ⧺ showType γ c ⧺ ")"
 
 -- Normalize the constraint
 (⤜) ∷ ℂ → Ταρ → ℂ
