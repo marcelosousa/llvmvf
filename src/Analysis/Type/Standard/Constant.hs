@@ -24,7 +24,7 @@ typeConstant :: NamedTypes -> TyEnv -> Constant -> Type
 typeConstant nmdtye tye c = case c of
   UndefValue      -> TyUndefined
   PoisonValue     -> error "typeConstant: PoisonValue not supported"
-  BlockAddr       -> error "typeConstant: BlockAddr not supported"
+  BlockAddr fn bb -> error "typeConstant: BlockAddr not supported"
   SmpConst sc     -> typeSimpleConstant             sc
   CmpConst cc     -> typeComplexConstant nmdtye tye cc
   GlobalValue gv  -> typeGlobalValue            tye id (==) gv  

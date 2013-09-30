@@ -1,3 +1,4 @@
+{-# LANGUAGE UnicodeSyntax #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Type.Memory.Context
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -39,35 +40,35 @@ splitConstrs ((a,b):xs) i li ol | i == b = if a `elem` li
 splitConstrs ((a,b):xs) i li ol | otherwise = splitConstrs xs i li ol 
 
 -- 
-instance Show RTyRes where
-	show (RTyRes s gs fns) = 
+instance ShowType RTyRes where
+	showType γ (RTyRes s gs fns) = 
 		 "Memory Type Analysis\n"
 	  ++ "Module " ++ s ++ "\n"
 	  ++ del 
 	  ++ "Global Variables\n"
-	  ++ prettyContext gs ++ "\n"
+	  ++ prettyContext γ gs ++ "\n"
 	  ++ del 
-	  ++ foldr prettyFn del (M.toList fns)
+	  ++ foldr (prettyFn γ) del (M.toList fns)
 
 del :: String 
 del = "========================\n"
 
-prettyFn :: (Identifier, Context) -> String -> String
-prettyFn (n,ty) r = "Function " ++ show n ++ "\n"
-	  		   ++ prettyContext ty
+prettyFn ∷ NamedTypes → (Identifier, Context) → String → String
+prettyFn γ (n,ty) r = "Function " ++ show n ++ "\n"
+	  		   ++ prettyContext γ ty
 	  		   ++ r 
 
-prettyContext :: Context -> String
-prettyContext (c,e) = "Constraints\n"
+prettyContext ∷ NamedTypes → Context → String
+prettyContext γ (c,e) = "Constraints\n"
                   ++ prettyConstrs c
                   ++ "Type Environment\n"
-                  ++ prettyTyAnnEnv e
+                  ++ prettyTyAnnEnv γ e
                   ++ "\n-----------------------\n"
 
 prettyConstrs :: Constrs -> String
 prettyConstrs = foldr prettyC "" . S.toList
 	where prettyC (x,y) c = (show $ pretty x) ++ "<~" ++ (show $ pretty y) ++ "\n" ++ c
 	
-prettyTyAnnEnv :: TyAnnEnv -> String
-prettyTyAnnEnv m = foldr prettyE "" $ M.toList m
-  where prettyE (i,ty) s = (show $ pretty i) ++ "::" ++ (show ty) ++ "\n" ++ s
+prettyTyAnnEnv ∷ NamedTypes → TyAnnEnv → String
+prettyTyAnnEnv γ m = foldr prettyE "" $ M.toList m
+  where prettyE (i,ty) s = (show $ pretty i) ++ "::" ++ (showType γ ty) ++ "\n" ++ s

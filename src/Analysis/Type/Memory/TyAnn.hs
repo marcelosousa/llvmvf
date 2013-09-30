@@ -26,8 +26,7 @@ data TyAnn = TyBot
            | TyUndef
            | TyPri TyPri
            | TyDer TyDer
-           | TyJumpTo Identifiers
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Show)
 
 data TyPri = TyVoid
            | TyInt Int
@@ -40,14 +39,18 @@ data TyDer = TyAgg TyAgg
            | TyVec Int TyAnn
            | TyFun TysAnn TyAnn Bool
            | TyPtr TyAnn  TyAnnot
---           | TyLab TysAnn TyAnn
---           | TyOpa String
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Show)
 
 data TyAgg = TyArr  Int TyAnn        -- Derived + Aggregate  
            | TyStr String Int TysAnn -- Derived + Aggregate
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Show)
 
+data TyAnnot = UserAddr
+             | KernelAddr
+             | AnyAddr 
+  deriving (Eq, Ord, Show)
+
+{-
 data TyAnnot = TyIOAddr
              | TyRegAddr TyRegAddr
              | TyAny 
@@ -79,16 +82,18 @@ kVirAddr = TyRegAddr $ KernelAddr $ KernelVirtualAddr
 
 uVirAddr ∷ TyAnnot
 uVirAddr = TyRegAddr UserAddr
-
+-}
 i ∷ Int → TyAnn
 i n = TyPri $ TyInt n
 
-instance Show TyAnn where
-  show TyBot = "⊥"
-  show TyUndef = "undef"
-  show (TyPri t) = show t
-  show (TyDer t) = show t
-  show (TyJumpTo ids) = "{#" ++ show ids ++ "}"
+class ShowType α where
+  showType ∷ NamedTypes → α → String
+
+instance ShowType TyAnn where
+  showType γ TyBot = "⊥"
+  showType γ TyUndef = "undef"
+  showType γ (TyPri t) = show t
+  showType γ (TyDer t) = showType γ t
 
 instance Show TyPri where
   show TyVoid     = "void"
@@ -97,18 +102,22 @@ instance Show TyPri where
   show TyMetadata = "metadata"
   show (TyInt n)  = "i"++show n
 
-instance Show TyDer where
-  show (TyAgg t) = show t
-  show (TyVec n t) = "<" ++ show n ++ " x " ++ show t ++ ">"
-  show (TyFun [] t _) = "fn :: " ++ show t
-  show (TyFun tys t _) = "fn :: " ++ (foldr (\x s -> show x ++ " -> " ++ s) (show t) tys)
-  show (TyPtr ty tya) = "*(" ++ show ty ++ ") " ++ show tya
+instance ShowType TyDer where
+  showType γ (TyAgg t) = showType γ t
+  showType γ (TyVec n t) = "<" ++ show n ++ " x " ++ showType γ t ++ ">"
+  showType γ (TyFun [] t _) = "fn :: " ++ showType γ t
+  showType γ (TyFun tys t _) = "fn :: " ++ (foldr (\x s -> showType γ x ++ " -> " ++ s) (showType γ t) tys)
+  showType γ (TyPtr ty tya) = "*" ++ show tya ++ "(" ++ showType γ ty ++ ")"
 
-instance Show TyAgg where
-  show (TyArr n t) = "[" ++ show n ++ " x " ++ show t ++ "]"
-  show (TyStr nm n []) = "{" ++ nm ++ "}"
-  show (TyStr nm n t) = "{" ++ (foldr (\x s -> show x ++ ", " ++ s) (show $ last t) (init t)) ++ "}"
+instance ShowType TyAgg where
+  showType γ (TyArr n t) = "[" ++ show n ++ " x " ++ showType γ t ++ "]"
+  showType γ (TyStr nm n []) = 
+    case M.lookup nm γ of
+      Nothing → error "showType failed in struct"
+      Just t  → nm ++ "=" ++ showType γ t
+  showType γ (TyStr nm n t) = "{" ++ (foldr (\x s -> showType γ x ++ ", " ++ s) (showType γ $ last t) (init t)) ++ "}"
 
+{-
 instance Show TyAnnot where
   show TyIOAddr = "IOAddr"
   show (TyRegAddr t) = show t
@@ -122,6 +131,7 @@ instance Show TyRegAddr where
 instance Show KernelAddr where
   show KernelLogicalAddr = "KLogicalAddr"
   show KernelVirtualAddr = "KVirtualAddr"
+-}
 
 class AEq α where
   (≅) ∷ NamedTypes → α → α → Maybe α
@@ -197,7 +207,14 @@ eqTyStr nτ α β =
 -}
 class IEq α where
   (≌) ∷ α → α → Maybe α
- 
+
+instance IEq TyAnnot where
+  UserAddr   ≌ KernelAddr = Nothing
+  UserAddr   ≌ UserAddr   = Just UserAddr
+  KernelAddr ≌ KernelAddr = Just KernelAddr
+  AnyAddr    ≌ a = Just a
+  a ≌ β = β ≌ a 
+{-
 instance IEq TyAnnot where
   TyIOAddr ≌ (TyRegAddr α) = Nothing
   TyIOAddr ≌ _             = Just TyIOAddr
@@ -216,5 +233,5 @@ instance IEq TyRegAddr where
     then Just (KernelAddr α)
     else Nothing
   AnyRegAddr  ≌ α = Just α
-
+-}
 

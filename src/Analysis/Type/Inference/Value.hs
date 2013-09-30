@@ -29,7 +29,7 @@ instance TyConstrR Constant where
 		SmpConst sc     → (↣) ε
 		CmpConst cc     → (↣) ε
 		GlobalValue gv  → τℂr gv
-		ConstantExpr ce → (↣) ε  -- TODO
+		ConstantExpr ce → (↣) ε
 	  	_               → error "constant not supported"	
 
 instance TyConstrR GlobalValue where
@@ -106,7 +106,7 @@ instance Constr ConstantExpr where
  	  InsertValueConstantExpr        → error "π of InsertValueConstantExpr"
  	  SelectConstantExpr             → error "π of SelectConstantExpr"
  	  ShuffleVectorConstantExpr      → error "π of ShuffleVectorConstantExpr"
- 	  UnaryConstantExpr n op α τ     → ℂτ $ (↑)τ
+ 	  UnaryConstantExpr n op α τ     → ℂq ((↑)τ) $ π α
 
 πgep ∷ Value → Values → ℂ
 πgep α δs = let πα = π α

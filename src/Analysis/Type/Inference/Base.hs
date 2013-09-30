@@ -1,4 +1,4 @@
-{-# LANGUAGE UnicodeSyntax, RecordWildCards, TupleSections #-}
+{-# LANGUAGE UnicodeSyntax, RecordWildCards, TupleSections, TypeSynonymInstances, FlexibleInstances #-}
 -------------------------------------------------------------------------------
 -- Module    :  Analysis.Type.Inference.Base
 -- Copyright :  (c) 2013 Marcelo Sousa
@@ -77,7 +77,7 @@ classOf ∷ Τα → TClass → Bool
 (TyDer (TyAgg _))     `classOf` TAgg = True
 τα                    `classOf` TAgg = False
 τα                    `classOf` T1NA = (τα `classOf` T1) && not (τα `classOf` TAgg)
-α `classOf` β = error $ "classOf error:" ⧺ show α ⧺ " " ⧺ show β
+α `classOf` β = error $ "classOf error: " -- ⧺ show α ⧺ " " ⧺ show β
 
 -- Constraint Element
 data ℂ = ℂτ Τα -- Type α
@@ -86,15 +86,17 @@ data ℂ = ℂτ Τα -- Type α
        | ℂι ℂ [Int] -- for GEP instruction
        | ℂp ℂ Ταρ  -- Pointer to ℂ Τα
        | ℂλ [ℂ] ℂ  -- Function
-  deriving (Eq, Ord)
+       | ℂq Τα ℂ
+  deriving (Eq, Ord, Show)
 
-instance Show ℂ where
-  show (ℂτ τα)    = "Ctau(" ⧺ show τα ⧺ ")"
-  show (ℂπ α)     = "Cv(" ⧺ (show $ pretty α) ⧺ ")"
-  show (ℂι c i)   = "Cgep(" ⧺ show c ⧺ "," ⧺ show i ⧺ ")"
-  show (ℂc τc)    = "Ccl(" ⧺ show τc ⧺ ")"
-  show (ℂp c ταρ) = "Cptr(" ⧺ show c ⧺ "," ⧺ show ταρ ⧺ ")"
-  show (ℂλ cl c)  = "Cfn(" ⧺ show cl ⧺ "->" ⧺ show c ⧺ ")"
+instance ShowType ℂ where
+  showType γ (ℂτ τα)    = "Ctau(" ⧺ showType γ τα ⧺ ")"
+  showType γ (ℂπ α)     = "Cv(" ⧺ (show $ pretty α) ⧺ ")"
+  showType γ (ℂι c i)   = "Cgep(" ⧺ showType γ c ⧺ "," ⧺ show i ⧺ ")"
+  showType γ (ℂc τc)    = "Ccl(" ⧺ show τc ⧺ ")"
+  showType γ (ℂp c ταρ) = "Cptr(" ⧺ showType γ c ⧺ "," ⧺ show ταρ ⧺ ")"
+  showType γ (ℂλ cl c)  = "Cfn(" ⧺ foldr (\a r → showType γ a ⧺ "->" ⧺ r) "" cl ⧺ showType γ c ⧺ ")"
+  showType γ (ℂq τ c)   = "Cq(" ⧺ showType γ τ ⧺ " " ⧺ showType γ c ⧺ ")"
 
 -- Normalize the constraint
 (⤜) ∷ ℂ → Ταρ → ℂ
@@ -113,7 +115,16 @@ data Τℂ = ℂ :=: ℂ -- same type
         | ℂ :<: ℂ -- subtyping i1 :<: i2
         | ℂ :≤: ℂ -- less than 
         | ℂ :≌: ℂ -- bit size equality
-  deriving (Eq, Ord,Show)
+  deriving (Eq, Ord)
+
+instance ShowType Τℂ' where
+  showType γ (c,i) = showType γ c -- ⧺ "@pc(" ⧺ show i ⧺ ")"
+
+instance ShowType Τℂ where
+  showType γ (α :=: β) = showType γ α ⧺ " :=: " ⧺ showType γ β
+  showType γ (α :<: β) = showType γ α ⧺ " :<: " ⧺ showType γ β
+  showType γ (α :≤: β) = showType γ α ⧺ " :≤: " ⧺ showType γ β
+  showType γ (α :≌: β) = showType γ α ⧺ " :≌: " ⧺ showType γ β
 
 (>:) ∷ ℂ → ℂ → Τℂ
 c1 >: c2 = c2 :<: c1

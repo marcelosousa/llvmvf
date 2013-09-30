@@ -59,7 +59,9 @@ getConstantValue v = do vc <- liftIO $ FFI.getConstantClass v
                         
 
 getBlockAddr :: Value -> Context IO LL.Constant
-getBlockAddr = error "TODO getBlockAddr"
+getBlockAddr v = do els <- getOperands v
+                    let (n,_) = unzip els
+                    return $ LL.BlockAddr (LL.Global $ n!!0) (LL.Local $ n!!1)
 
 getConstantAggregateZero :: Value -> Context IO LL.Constant
 getConstantAggregateZero v = do ty <- typeOf v

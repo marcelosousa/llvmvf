@@ -170,7 +170,7 @@ data Value
 data Constant
   | UndefValue
   | PoisonValue -- Not supported
-  | BlockAddr   -- Not supported 
+  | BlockAddr     fn :: Identifier bb :: Identifier 
   | SmpConst      sc :: SimpleConstant
   | CmpConst      cc :: ComplexConstant
   | GlobalValue   gv :: GlobalValue

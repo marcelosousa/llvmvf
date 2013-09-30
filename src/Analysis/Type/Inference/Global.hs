@@ -22,7 +22,7 @@ instance TyConstr Global where
 		let τα1 = (↑)τ 
 		    τα2 = π cn
 		    τcn = case τα2 of
-		    	ℂτ τn → ℂτ $ TyDer $ T.TyPtr τn T.TyAny
+		    	ℂτ τn → ℂτ $ TyDer $ T.TyPtr τn T.AnyAddr
 		    	_     → τα2 
 		    c1 = (ℂπ i) :=: (ℂτ τα1)
 		 --   c2 = (ℂτ τα1) :=: τcn

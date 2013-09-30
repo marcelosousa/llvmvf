@@ -11,7 +11,8 @@ Executable llvmvf
     Main-Is:          Main.hs
     Build-Depends:    base          >= 4 && < 5
                     , containers    >= 0.2
-                    , filepath
+                    , filepath   
+                    , directory
                     , uu-parsinglib >= 2.7.1
                     , mtl           
                     , fgl           

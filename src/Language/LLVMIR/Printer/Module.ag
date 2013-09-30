@@ -263,7 +263,7 @@ sem Value
 
 sem Constant
   | UndefValue             lhs.pp = text "undef"
-  | BlockAddr              lhs.pp = text "blockaddr" 
+  | BlockAddr              lhs.pp = text "blockaddr" <+> @fn.pp <+> @bb.pp 
   | PoisonValue            lhs.pp = text "poison"
   | SmpConst               lhs.pp = @sc.pp
   | CmpConst               lhs.pp = @cc.pp

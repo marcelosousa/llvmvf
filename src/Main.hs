@@ -11,6 +11,7 @@ import Control.Monad
 import System.Console.CmdArgs
 import System.IO               
 import System.FilePath
+import System.Directory
 import Language.LLVMIR             (Module)
 import Language.LLVMIR.Extractor   (extract)
 import Language.LLVMIR.Printer
@@ -27,6 +28,7 @@ import Language.SMTLib2.Printer    (prettyprint)
 import qualified Data.Map as M
 import Analysis.Asm.Lift
 import Analysis.Simplify.Intrinsics
+import Analysis.Metadata.Call
 import qualified Concurrent.Model as M
 import Concurrent.Model.Domain.PThread
 -- import Concurrent.Model.SystemC
@@ -62,6 +64,7 @@ data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
             | TypeCheck {input :: FilePath}
             | TypeConstrs {input ∷ FilePath}
             | TypeAnalyze {files ∷ [FilePath]}
+            | Analyse {input :: FilePath}
   deriving (Show, Data, Typeable, Eq)
 
 data ExtractMode = Raw | Pretty | LiftAsm
@@ -115,11 +118,14 @@ typeCMode = TypeConstrs { input = def &= args } &= help _helpType
 typeCheckMode :: Option
 typeCheckMode = TypeCheck { input = def &= args } &= help _helpTypeCheck
 
+analyseMode :: Option
+analyseMode = Analyse { input = def &= args } &= help _helpTypeCheck
+
 typeAnalyze ∷ Option
 typeAnalyze = TypeAnalyze { files = def &= args &= typ "FILES/DIRS" }
 
 progModes :: Mode (CmdArgs Option)
-progModes = cmdArgsMode $ modes [extractMode, modelMode, ccfgMode, bmcMode, typeCheckMode, typeMode,typeCMode,typeAnalyze]
+progModes = cmdArgsMode $ modes [extractMode, modelMode, ccfgMode, bmcMode, typeCheckMode, typeMode,typeCMode,typeAnalyze, analyseMode]
          &= help _help
          &= program _program
          &= summary _summary
@@ -150,10 +156,12 @@ runOption (Type bc m ) = do mdl <- extract bc
                               Globals → typeInfGlobals $ liftAsm $ liftDebug mdl
 runOption (TypeConstrs bc) = do mdl <- extract bc
                                 typeConstraint $ liftAsm $ liftDebug mdl  --typeAnalysis mdl
+runOption (Analyse dir) = do res <- iterateAnalyse M.empty dir
+                             putStrLn $ infoToString res
 runOption (TypeAnalyze lbc) = do 
   mdls ← mapM extract lbc
   let mdls' = map (liftAsm . liftDebug) mdls
-  typeAnalysis mdls'
+  undefined --typeAnalysis mdls'
 --runOption bc Htm     = do mdl <- extract bc
 --                          let bf = dropExtension bc
 --                          writeFile (addExtension bf "htm") (show $ pretty $ llvmir2Htm mdl)
@@ -179,6 +187,29 @@ runOption (TypeAnalyze lbc) = do
 --                              writeFile (addExtension bf "smt2")  (show $ prettyprint $ encodeSysC mod k)
 
 -- | 'extractModel' - extract the model
+
+
+iterateAnalyse :: Info -> FilePath -> IO Info
+iterateAnalyse i d = do --print $ "processing directory " ++ d
+                        filex <- getDirectoryContents d
+                        let files = map (\s -> d ++ "/" ++ s) $ filter adhocF filex
+	                dirs <- filterM doesDirectoryExist files
+	                rdirs <- foldM iterateAnalyse i dirs 
+	                let bfiles = filter isOptBytecode files
+                        foldM iterateFile rdirs bfiles
+
+iterateFile :: Info -> FilePath -> IO Info
+iterateFile i bc = do --print $ "processing " ++ bc
+                      mdl <- extract bc
+		      return $ debugInfo i $ liftDebug mdl
+
+adhocF :: FilePath -> Bool
+adhocF "." = False
+adhocF ".." = False
+adhocF x = True
+
+isOptBytecode :: FilePath -> Bool
+isOptBytecode p = snd (splitExtensions p) == ".o.bc" 
 
 extractModel :: FilePath -> Domain -> IO ()
 extractModel bc SystemC = error "llvmvf for SystemC is currently not available."

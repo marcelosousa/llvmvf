@@ -19,9 +19,11 @@ import qualified Analysis.Type.Memory.TyAnn as T
 type TyLIdPair = (TyAnn, Identifiers)
 
 -- Lift a LLVM IR Type to the most generic Type Annotation
-liftTy :: Type -> TyAnn
-liftTy ty = liftTyGen ty T.TyAny
+--liftTy :: Type -> TyAnn
+--liftTy ty = liftTyGen ty T.TyAny
 
+liftTy :: Type -> TyAnn
+liftTy ty = liftTyGen ty T.AnyAddr
 
 liftTyGen :: Type -> TyAnnot -> TyAnn
 liftTyGen TyUndefined         a = T.TyUndef
@@ -52,7 +54,7 @@ erase (T.TyDer (T.TyAgg (T.TyStr n s tys))) = TyStruct n s $ map erase tys
 erase (T.TyDer (T.TyFun tys ty v))          = TyFunction (map erase tys) (erase ty) v
 erase (T.TyDer (T.TyPtr ty _))              = TyPointer $ erase ty
 erase (T.TyDer (T.TyVec s ty))              = TyVector s $ erase ty
-erase x = error $ "erase " ++ show x 
+erase x = error $ "erase TODO" -- ++ show x 
 
 eraseEnv :: TyAnnEnv -> TyEnv
 eraseEnv = M.map erase
@@ -61,9 +63,9 @@ instance Sizable TyAnn where
 	sizeOf τ = sizeOf $ erase τ
 
 -- Subtyping relation 
-(<:) :: TyAnn -> TyAnn -> Bool
-(T.TyDer (T.TyPtr t2 k)) <: (T.TyDer (T.TyPtr t1 T.TyAny)) = True
-t1 <: t2 = t1 == t2
+--(<:) :: TyAnn -> TyAnn -> Bool
+--(T.TyDer (T.TyPtr t2 k)) <: (T.TyDer (T.TyPtr t1 T.TyAny)) = True
+--t1 <: t2 = t1 == t2
 
 isAnnAgg :: TyAnn -> Bool
 isAnnAgg (T.TyDer (T.TyAgg _)) = True

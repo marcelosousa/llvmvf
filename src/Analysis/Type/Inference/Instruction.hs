@@ -39,7 +39,7 @@ instance TyConstr Terminator where
 	τℂ tmn = do
 		(fn,πς) ← δfn
 		bb ← δbb
-		let cλ c = ℂp (ℂλ πς c) anyRegAddr
+		let cλ c = ℂp (ℂλ πς c) T.AnyAddr
 		case tmn of
 			Ret pc VoidRet → do
 				let τα = T.TyPri T.TyVoid
@@ -109,7 +109,7 @@ instance TyConstr Instruction where
 		SIToFP   pc n α τ → τℂnastyCast pc n (α,TInt) (τ,TFlt) -- SInt → floating point
 		PtrToInt pc n α τ → τℂnastyCast pc n (α,TPtr) (τ,TInt) -- Pointer → integer 
 		IntToPtr pc n α τ → τℂnastyCast pc n (α,TInt) (τ,TPtr) -- integer → Pointer
-		BitCast  pc n α τ → τℂcast pc n (α,T1NA) (τ,T1NA) (:≌:) -- 1stclass non agg → 1stclass non agg
+		BitCast  pc n α τ → τℂcast pc n (α,T1NA) (τ,T1NA) (:≤:) -- 1stclass non agg → 1stclass non agg
     -- Comparison Operations
 		ICmp pc n _ τ α β → τℂcmp pc TInt n τ α β
 		FCmp pc n _ τ α β → τℂcmp pc TFlt n τ α β 
@@ -141,6 +141,19 @@ instance TyConstr Instruction where
 		ExtractValue pc n τ α δs → τextract pc n τ α
 		InsertValue  pc n α β δs → error "insert agg operations not supported"
 
+-- Type Constraints for Cast Operations
+τℂcast ∷ Int → Id → (Value, TClass) → (Τ, TClass) → (ℂ → ℂ → Τℂ) → ℂState
+τℂcast pc n (α,τcα) (τ,τcτ) (?:) = do
+	τℂα ← τℂr α
+	let cτρ = ℂτ $ (↑)τ
+	    πα = π α
+	    cℂα = πα :=: ℂc τcα
+	    cℂτ = cτρ :=: ℂc τcτ
+	    αℂ = ℂπ n ?: πα
+	    nℂ = ℂπ n :=: cτρ
+	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ ε)-- τℂα)
+--	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
+
 -- Type Constraints for Binary Operations
 τℂbin ∷ Int → TClass → Id → Τ → Value → Value → ℂState
 τℂbin pc τc n τ α β = do
@@ -155,19 +168,6 @@ instance TyConstr Instruction where
 	    nℂ = ℂπ n :=: cτρ
 	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (τℂα ∪ τℂβ))))
 	--(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
-
--- Type Constraints for Cast Operations
-τℂcast ∷ Int → Id → (Value, TClass) → (Τ, TClass) → (ℂ → ℂ → Τℂ) → ℂState
-τℂcast pc n (α,τcα) (τ,τcτ) (?:) = do
-	τℂα ← τℂr α
-	let cτρ = ℂτ $ (↑)τ
-	    πα = π α
-	    cℂα = πα :=: ℂc τcα
-	    cℂτ = cτρ :=: ℂc τcτ
-	    αℂ = πα ?: cτρ
-	    nℂ = ℂπ n :=: cτρ
-	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ τℂα)
---	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
 
 τℂnastyCast ∷ Int → Id → (Value, TClass) → (Τ, TClass) → ℂState
 τℂnastyCast pc n (α,τcα) (τ,τcτ) = do
@@ -203,7 +203,7 @@ instance TyConstr Instruction where
 	    cτρ = ℂτ $ (↑)τ       -- OK
 	    πχ = map π χ
 	    nℂ = πn :=: cτρ   -- OK
-	    ς  = ℂp (ℂλ πχ πn) anyRegAddr -- ℂλ πχ cτρ
+	    ς  = ℂp (ℂλ πχ πn) T.AnyAddr -- ℂλ πχ cτρ
 	    cℂ = πc :=: ς
 	vfns ← δvfns
 	if c ∈ vfns
