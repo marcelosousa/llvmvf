@@ -39,6 +39,7 @@ ioread  = cFn $ ℂλ [cPtr (i 8) TyIOAddr] $ cI 32
 iowrite n = cFn $ ℂλ [cI n, cPtr (i 8) TyIOAddr] $ cVoid
 
 
+{-
 ioOpRep = cFn $ ℂλ [cPtr (i 8) TyIOAddr, cPtr (i 8) anyRegAddr, cI 64] $ cVoid
 -- Allocation on logical addresses
 kmalloc = cFn $ ℂλ [cI 64, cI 32] $ cPtr (i 8) anyRegAddr
@@ -51,8 +52,8 @@ putPage = cFn $ ℂλ [cPtr (TyDer $ TyAgg $ TyStr "struct.page" 5 []) anyRegAdd
 copyFromUser = cFn $ ℂλ [cPtr (i 8) anyRegAddr, cPtr (i 8) anyRegAddr, cI 32] $ cI 64
 copyToUser = cFn $ ℂλ [cPtr (i 8) anyRegAddr, cPtr (i 8) anyRegAddr, cI 32] $ cI 64
 mightSleep = cFn $ ℂλ [cPtr (i 8) anyRegAddr, cI 32, cI 32] $ cVoid
+-}
 
-{-
 ioOpRep = cFn $ ℂλ [cPtr (i 8) TyIOAddr, cPtr (i 8) kLogAddr, cI 64] $ cVoid
 -- Allocation on logical addresses
 kmalloc = cFn $ ℂλ [cI 64, cI 32] $ cPtr (i 8) kLogAddr
@@ -65,7 +66,7 @@ putPage = cFn $ ℂλ [cPtr (TyDer $ TyAgg $ TyStr "struct.page" 5 []) kVirAddr]
 copyFromUser = cFn $ ℂλ [cPtr (i 8) kVirAddr, cPtr (i 8) uVirAddr, cI 32] $ cI 64
 copyToUser = cFn $ ℂλ [cPtr (i 8) uVirAddr, cPtr (i 8) kVirAddr, cI 32] $ cI 64
 mightSleep = cFn $ ℂλ [cPtr (i 8) kVirAddr, cI 32, cI 32] $ cVoid
--}
+
 
 {-
 errorf ∷ Τℂ

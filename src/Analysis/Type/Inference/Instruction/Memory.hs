@@ -21,7 +21,7 @@ import qualified Data.Set as S
 -- Type Constraints for Alloca
 τℂalloca ∷ Int → Id → Τ → ℂState
 τℂalloca pc n τ = do
-	let cτρ = ℂτ $ T.TyDer $ T.TyPtr (τ ↑^ anyRegAddr) anyRegAddr
+	let cτρ = ℂτ $ T.TyDer $ T.TyPtr (τ ↑^ T.TyAny) T.TyAny --anyRegAddr) anyRegAddr
 	    nℂ = ℂπ n :=: cτρ
 	(↣) $ liftΤℂ pc $ nℂ ∘ ε
 
@@ -33,7 +33,7 @@ import qualified Data.Set as S
 	let cτρ = ℂτ $ (↑) τ -- ref τ of value
 	    (πα,πβ) = (π α,π β)  -- 
 	    τℂ = ℂτ (T.TyPri T.TyVoid) :=: cτρ
-	    βℂ = πβ :=: (πα ⤜ anyRegAddr)
+	    βℂ = πβ :=: (πα ⤜ T.TyAny) --anyRegAddr)
 	    αℂ = πα :=: ℂc T1
 	(↣) $ liftΤℂ pc $ τℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ))
 --	(↣) $ liftΤℂ pc $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ))) 
@@ -44,7 +44,7 @@ import qualified Data.Set as S
 	τℂα ← τℂr α               -- τℂ of value
 	let πα = π α
 	    πn = ℂπ n
-	    αℂ = πα :=: (πn ⤜ anyRegAddr)
+	    αℂ = πα :=: (πn ⤜ T.TyAny) --anyRegAddr)
 	    nℂ = πn :=: ℂc T1
 	(↣) $ liftΤℂ pc $ αℂ ∘ τℂα
 	--(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ τℂα)
@@ -54,9 +54,9 @@ import qualified Data.Set as S
 τℂgep pc n τn α δs = do
 	τℂα ← τℂr α	
 	τℂs ← τListR τℂα δs
-	let cτn = ℂτ $ τn ↑^ anyRegAddr                -- OK
+	let cτn = ℂτ $ τn ↑^ T.TyAny --anyRegAddr                -- OK
 	    πα  = π α
-	    cℂ  = ℂp (ℂc TAgg) anyRegAddr              -- Pointer to agg in reg mem
+	    cℂ  = ℂp (ℂc TAgg) T.TyAny --anyRegAddr              -- Pointer to agg in reg mem
 	    πδs = map π δs
 	    δsℂ = S.fromList $ map ((ℂc TInt) :=:) πδs
 	    n1ℂ = ℂπ n :=: cτn

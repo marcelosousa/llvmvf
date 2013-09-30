@@ -23,8 +23,8 @@ instance TyConstr Global where
 		    τα2 = π cn
 		    τcn = case τα2 of
 		    	ℂτ τn → ℂτ $ TyDer $ T.TyPtr τn T.TyAny
-		    	_     → τα2
+		    	_     → τα2 
 		    c1 = (ℂπ i) :=: (ℂτ τα1)
-		    c2 = (ℂτ τα1) :=: τcn
-		in (↣) $ liftΤℂ 0 $ c1 ∘ (c2 ∘ ε)
+		 --   c2 = (ℂτ τα1) :=: τcn
+		in (↣) $ liftΤℂ 0 $ c1 ∘ ε--)(c2 ∘ ε)
 	τℂ gv = error $ "τℂ(2): " ++ show gv

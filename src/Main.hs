@@ -146,7 +146,7 @@ runOption (TypeCheck bc) = do mdl <- extract bc
 runOption (Type bc m ) = do mdl <- extract bc
                             case m of
                               Intra → typeInfIntra $ liftAsm $ liftDebug mdl  
-                              Inter → typeInfInter $ liftAsm $ liftDebug mdl
+                              Inter → typeInfInter $ liftDebug mdl -- liftAsm $ liftDebug mdl
                               Globals → typeInfGlobals $ liftAsm $ liftDebug mdl
 runOption (TypeConstrs bc) = do mdl <- extract bc
                                 typeConstraint $ liftAsm $ liftDebug mdl  --typeAnalysis mdl

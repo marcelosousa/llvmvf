@@ -121,6 +121,7 @@ rwEqc _ _ _ = error $ "rwEqc: FATAL"
 
 -- Type Var
 rwEqπ ∷ Int → ℂ → ℂ → ΩState ℂ
+rwEqπ pc α@(ℂπ (Global "llvm.used")) β = return β 
 rwEqπ pc α@(ℂπ n) β = trace ("rwEqv (start) " ⧺ show α ⧺ " " ⧺ show β) $ do
   γ@Ω{..} ← get
   case M.lookup n mic of
