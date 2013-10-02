@@ -101,17 +101,20 @@ instance Constr ConstantExpr where
  	  CompareConstantExpr ce         → π ce
  	  ExtractElementConstantExpr     → error "π of ExtractElementConstantExpr"
  	  ExtractValueConstantExpr       → error "π of ExtractValueConstantExpr"
- 	  GetElementPtrConstantExpr τ α δs → πgep α δs
+ 	  GetElementPtrConstantExpr τ α δs → 
+            case πgep α δs of
+              Nothing → ℂτ $ (↑)τ
+              Just c  → c                               
  	  InsertElementConstantExpr      → error "π of InsertElementConstantExpr"
  	  InsertValueConstantExpr        → error "π of InsertValueConstantExpr"
  	  SelectConstantExpr             → error "π of SelectConstantExpr"
  	  ShuffleVectorConstantExpr      → error "π of ShuffleVectorConstantExpr"
  	  UnaryConstantExpr n op α τ     → ℂq ((↑)τ) $ π α
 
-πgep ∷ Value → Values → ℂ
-πgep α δs = let πα = π α
-                δis = map getIntValue δs
-	        in ℂι πα δis
+πgep ∷ Value → Values → Maybe ℂ
+πgep α δs = do let πα = π α
+               δis <- mapM getIntValue δs
+	       return $ ℂι πα δis
 
 instance Constr CompareConstantExpr where
 	π e = case e of

@@ -8,6 +8,7 @@
 module Analysis.Type.Inference.Instruction where
 
 import Language.LLVMIR hiding (Id)
+import Language.LLVMIR.Util (typeOf)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Memory.Util
 import Analysis.Type.Memory.TyAnn as T
@@ -149,7 +150,7 @@ instance TyConstr Instruction where
 	    πα = π α
 	    cℂα = πα :=: ℂc τcα
 	    cℂτ = cτρ :=: ℂc τcτ
-	    αℂ = ℂπ n ?: πα
+	    αℂ = πα ?: ℂπ n
 	    nℂ = ℂπ n :=: cτρ
 	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ ε)-- τℂα)
 --	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
@@ -202,29 +203,27 @@ instance TyConstr Instruction where
 	let (πn,πc) = (ℂπ n,ℂπ c)
 	    cτρ = ℂτ $ (↑)τ       -- OK
 	    πχ = map π χ
+            τχ = map ((↑) . typeOf) χ
 	    nℂ = πn :=: cτρ   -- OK
 	    ς  = ℂp (ℂλ πχ πn) T.AnyAddr -- ℂλ πχ cτρ
+	    ςt = ℂτ $ T.TyDer $ T.TyPtr (T.TyDer $ T.TyFun τχ ((↑)τ) False) T.AnyAddr -- ℂλ πχ cτρ
 	    cℂ = πc :=: ς
+            aℂ = πc :=: ςt 
 	vfns ← δvfns
 	if c ∈ vfns
 	then (↣) $ liftΤℂ pc $ nℂ ∘ τℂχ
-	else (↣) $ liftΤℂ pc $ nℂ ∘ (cℂ ∘ τℂχ)
-
-{-
-τncall ∷ Id → Maybe ℂ
-τncall (Global "ioremap") τ = Just $ ℂτ $ TyDer $ TyPtr (i 8) TyIOAddr
-τncall n τ = Nothing
--}
+	else (↣) $ liftΤℂ pc $ nℂ ∘ (cℂ ∘ (aℂ ∘ τℂχ))
 
 τselect ∷ Int → Id → Value → Value → Value → ℂState
 τselect pc n α β η = do
 	let (πα,πβ,πη) = (π α,π β,π η)
 	    αcτ = ℂτ $ T.TyPri $ T.TyInt 1
 	    αℂ = πα :=: αcτ
+            nτℂ = ℂπ n :=: (ℂτ $ (↑)(typeOf β))
 	    nℂ = ℂπ n :=: πβ
-	    βηℂ = πβ :=: πη
+	    βηℂ = ℂπ n  :=: πη
 	    βℂ = πβ :=: ℂc T1	    
-	(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ (βηℂ ∘ ε)) 
+	(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ (βηℂ ∘ (nτℂ ∘ ε))) 
 	--(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ (βηℂ ∘ (βℂ ∘ ε))) 
 
 τextract ∷ Int → Id → Τ → Value → ℂState

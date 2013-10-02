@@ -87,13 +87,15 @@ i ∷ Int → TyAnn
 i n = TyPri $ TyInt n
 
 class ShowType α where
+  showTypeAux :: [String] -> NamedTypes -> α -> String
   showType ∷ NamedTypes → α → String
+  showType n a = showTypeAux [] n a
 
 instance ShowType TyAnn where
-  showType γ TyBot = "⊥"
-  showType γ TyUndef = "undef"
-  showType γ (TyPri t) = show t
-  showType γ (TyDer t) = showType γ t
+  showTypeAux log γ TyBot = "⊥"
+  showTypeAux log γ TyUndef = "undef"
+  showTypeAux log γ (TyPri t) = show t
+  showTypeAux log γ (TyDer t) = showTypeAux log γ t
 
 instance Show TyPri where
   show TyVoid     = "void"
@@ -103,19 +105,25 @@ instance Show TyPri where
   show (TyInt n)  = "i"++show n
 
 instance ShowType TyDer where
-  showType γ (TyAgg t) = showType γ t
-  showType γ (TyVec n t) = "<" ++ show n ++ " x " ++ showType γ t ++ ">"
-  showType γ (TyFun [] t _) = "fn :: " ++ showType γ t
-  showType γ (TyFun tys t _) = "fn :: " ++ (foldr (\x s -> showType γ x ++ " -> " ++ s) (showType γ t) tys)
-  showType γ (TyPtr ty tya) = "*" ++ show tya ++ "(" ++ showType γ ty ++ ")"
+  showTypeAux log γ (TyAgg t) = showTypeAux log γ t
+  showTypeAux log γ (TyVec n t) = "<" ++ show n ++ " x " ++ showTypeAux log γ t ++ ">"
+  showTypeAux log γ (TyFun [] t _) = "fn :: " ++ showTypeAux log γ t
+  showTypeAux log γ (TyFun tys t _) = "fn :: " ++ (foldr (\x s -> showTypeAux log γ x ++ " -> " ++ s) (showTypeAux log γ t) tys)
+  showTypeAux log γ (TyPtr ty tya) = "*" ++ show tya ++ "(" ++ showTypeAux log γ ty ++ ")"
 
 instance ShowType TyAgg where
-  showType γ (TyArr n t) = "[" ++ show n ++ " x " ++ showType γ t ++ "]"
-  showType γ (TyStr nm n []) = 
-    case M.lookup nm γ of
-      Nothing → error "showType failed in struct"
-      Just t  → nm ++ "=" ++ showType γ t
-  showType γ (TyStr nm n t) = "{" ++ (foldr (\x s -> showType γ x ++ ", " ++ s) (showType γ $ last t) (init t)) ++ "}"
+  showTypeAux log γ (TyArr n t) = "[" ++ show n ++ " x " ++ showTypeAux log γ t ++ "]"
+  showTypeAux log g (TyStr "" 0 []) = "{}*"
+  showTypeAux log γ t@(TyStr nm n []) = 
+    if nm `elem` log
+    then nm
+    else case M.lookup nm γ of
+      Nothing → error $ "showType failed in struct " ++ show t
+      Just t  → nm ++ "=" ++ showTypeAux (nm:log) γ t
+  showTypeAux log γ (TyStr nm n t) = 
+    if nm `elem` log
+    then nm 
+    else "{" ++ (foldr (\x s -> showTypeAux (nm:log) γ x ++ ", " ++ s) (showTypeAux (nm:log) γ $ last t) (init t)) ++ "}"
 
 {-
 instance Show TyAnnot where
@@ -174,16 +182,16 @@ eqTyStr nτ α β =
   case α of 
   ("",n,ατ) → case β of
     ("",m,βτ) → if n ≡ m && length ατ ≡ length βτ
-                then TyStr "" n <$> cmpList nτ ατ βτ
+                then TyStr "BLA" n <$> cmpList nτ ατ βτ
                 else Nothing
     (nβ,m,βτ) → case M.lookup nβ nτ of
       Nothing → if n ≡ m && length ατ ≡ length βτ
-                then TyStr "" n <$> cmpList nτ ατ βτ
+                then TyStr "BLA" n <$> cmpList nτ ατ βτ
                 else Nothing
       Just η@(TyDer (TyAgg (TyStr nη o ητ))) →
         if nβ ≡ nη
         then if n ≡ o
-             then TyStr "" n <$> cmpList nτ ατ ητ
+             then TyStr "BLA" n <$> cmpList nτ ατ ητ
              else Nothing
         else eqTyStr nτ α (nη,o,ητ)
       Just _ → Nothing      

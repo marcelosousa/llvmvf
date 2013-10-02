@@ -26,7 +26,7 @@ instance TyConstr Function where
 		ςℂs ← τList nℂ ς
 		νfn (n,πς)
 		τList ςℂs bbs
-	τℂ (FunctionDecl _ _ _ _ _) = (↣) ε
+	τℂ (FunctionDecl n _ τ _ ς) = (↣) ε 
 
 instance TyConstr Parameter where
 	τℂ (Parameter n τ) = do

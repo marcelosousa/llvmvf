@@ -99,7 +99,7 @@ typeGetElementPtrConstantExpr nmdtye tye v idxs = --trace ("gep: " ++ show v ++ 
   case typeValue nmdtye tye v of
       TyPointer ty -> if and $ map (isInt . typeValue nmdtye tye) idxs
                       then if isAgg ty
-                           then getTypeAgg nmdtye ty $ map getIntValue $ tail idxs
+                           then error $ "typeGetElementPtrConstantExpr: TODO" -- getTypeAgg nmdtye ty $ map getIntValue $ tail idxs
                            else error $ "typeGetElementPtrConstantExpr: " ++ show ty ++ " is not aggregate."  
                       else error $ "typeGetElementPtrConstantExpr: not all indices are integers" 
       ty -> error $ "typeGetElementPtrConstantExpr: " ++ show ty 

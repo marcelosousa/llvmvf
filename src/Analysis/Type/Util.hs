@@ -47,9 +47,9 @@ isAgg (TyArray _ _) = True
 isAgg (TyStruct _ _ _) = True
 isAgg _ = False
 
-getIntValue :: Value -> Int
-getIntValue (Constant (SmpConst (ConstantInt i _))) = i
-getIntValue v = error $ "getIntvalue: not const Int" ⧺ show v
+getIntValue :: Value -> Maybe Int
+getIntValue (Constant (SmpConst (ConstantInt i _))) = Just i
+getIntValue v = Nothing -- error $ "getIntvalue: not const Int" ⧺ show v
 
 isTyOrVecOfTy :: TyClass -> Type -> Bool
 isTyOrVecOfTy TyClassInt (TyInt _) = True

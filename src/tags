@@ -10,7 +10,7 @@
 <>	./Language/LLVMIR/Extractor/Opcode.hs	82;"	v
 =:	./Analysis/Type/Inference/Initial.hs	30;"	v	file:
 >:	./Analysis/Type/Inference/Base.hs	130;"	v
-AEq	./Analysis/Type/Memory/TyAnn.hs	136;"	t
+AEq	./Analysis/Type/Memory/TyAnn.hs	144;"	t
 AShr	./Language/FeatherIR/Base/Syntax.hs	48;"	d
 AShr	./Language/LLVMIR/Extractor/Opcode.hs	30;"	d
 AShr	src/Language/LLVMIR.hs	267;"	d
@@ -283,7 +283,7 @@ IC	./Language/Asm.hs	191;"	d
 ICmp	./Language/LLVMIR/Extractor/Opcode.hs	53;"	d
 ICmp	src/Language/LLVMIR.hs	287;"	d
 ICmpExpr	src/Language/LLVMIR.hs	155;"	d
-IEq	./Analysis/Type/Memory/TyAnn.hs	208;"	t
+IEq	./Analysis/Type/Memory/TyAnn.hs	216;"	t
 ILabel	./src/Concurrent/Model/Visualizer.ag	197;"	t
 IRegC	./Language/Asm.hs	197;"	d
 ISEmpty	./Concurrent/Model.hs	70;"	d
@@ -2506,7 +2506,7 @@ ccfgMode	Main.hs	94;"	v
 cds_ComplexConstant_ConstantDataSequential	src/Language/LLVMIR.hs	160;"	v
 classOf	./Analysis/Type/Inference/Base.hs	70;"	v
 cmpExpr_ConstantExpr_CompareConstantExpr	src/Language/LLVMIR.hs	180;"	v
-cmpList	./Analysis/Type/Memory/TyAnn.hs	170;"	v
+cmpList	./Analysis/Type/Memory/TyAnn.hs	178;"	v
 compareConstantExpr	./Language/LLVMIR/Extractor/Value.hs	138;"	v
 cond_CompareConstantExpr_FCmpExpr	src/Language/LLVMIR.hs	156;"	v
 cond_CompareConstantExpr_ICmpExpr	src/Language/LLVMIR.hs	155;"	v
@@ -2561,7 +2561,7 @@ entryPC_Syn_Instruction	src/Concurrent/Model/Analysis/Util.hs	2153;"	v
 entryPC_Syn_PHI	src/Concurrent/Model/Analysis/Util.hs	4906;"	v
 entryPC_Syn_Terminator	src/Concurrent/Model/Analysis/Util.hs	5585;"	v
 eqStruct	./Analysis/Type/Util.hs	119;"	v
-eqTyStr	./Analysis/Type/Memory/TyAnn.hs	173;"	v
+eqTyStr	./Analysis/Type/Memory/TyAnn.hs	181;"	v
 erase	./Analysis/Type/Memory/Util.hs	46;"	v
 eraseEnv	./Analysis/Type/Memory/Util.hs	60;"	v
 errorMsg	./Analysis/Type/Standard/Constant.hs	88;"	v
@@ -2609,10 +2609,10 @@ functions	./Language/FeatherIR/Base/Syntax.hs	19;"	v
 funs	./Concurrent/Model/Analysis/Context.hs	76;"	v
 funs_Module_Module	src/Language/LLVMIR.hs	376;"	v
 gMap	./Analysis/Type/Inference/Solver.hs	45;"	v
-general	./Analysis/Type/Inference/Solver.hs	190;"	v
+general	./Analysis/Type/Inference/Solver.hs	177;"	v
 gepMap	./Analysis/Type/Inference/Solver.hs	44;"	v
-gepτ	./Analysis/Type/Inference/Solver.hs	489;"	v
-gepτs	./Analysis/Type/Inference/Solver.hs	481;"	v
+gepτ	./Analysis/Type/Inference/Solver.hs	494;"	v
+gepτs	./Analysis/Type/Inference/Solver.hs	486;"	v
 getBBId	./Language/LLVMIR/Util.hs	60;"	v
 getBasicBlock	./Language/LLVMIR/Extractor/Module.hs	172;"	v	file:
 getBinaryOp	./Language/LLVMIR/Extractor/Instruction.hs	171;"	v
@@ -2674,7 +2674,7 @@ getTargetData	./Language/LLVMIR/Extractor/Module.hs	89;"	v	file:
 getTerminator	./Language/LLVMIR/Extractor/Instruction.hs	86;"	v
 getTerminatorOp	./Language/LLVMIR/Extractor/Instruction.hs	147;"	v
 getThreadExits	./Concurrent/Model/Analysis/Context.hs	173;"	v
-getType	./Analysis/Type/Inference/Solver.hs	322;"	v
+getType	./Analysis/Type/Inference/Solver.hs	309;"	v
 getType	./Language/LLVMIR/Extractor/Type.hs	39;"	v
 getTypeAgg	./Analysis/Type/Standard/Constant.hs	108;"	v
 getTypeNameWithKind	./Language/LLVMIR/Extractor/Type.hs	82;"	v	file:
@@ -2752,7 +2752,7 @@ inc	./Analysis/Metadata/Call.hs	42;"	v
 index	./Language/LLVMIR/Printer/NamedTypes.hs	19;"	v
 infoToString	./Analysis/Metadata/Call.hs	46;"	v
 infoValue	./Language/LLVMIR/Util.hs	78;"	v
-initProcessing	./Analysis/Type/Inference/Solver.hs	195;"	v
+initProcessing	./Analysis/Type/Inference/Solver.hs	182;"	v
 initenv	./Analysis/Type/Standard/Module.hs	21;"	v	file:
 input	Main.hs	57;"	v
 insert	./Analysis/Type/Util.hs	78;"	v
@@ -2828,7 +2828,7 @@ llvmmemset	./Analysis/Type/Inference/Initial.hs	42;"	v	file:
 loadMap	./Concurrent/Model/Analysis/DataFlow.hs	25;"	v
 locals	./Analysis/Asm/Lift.hs	168;"	v	file:
 locals	./Concurrent/Model/Analysis/DataFlow.hs	44;"	v
-look	./Analysis/Type/Inference/Solver.hs	405;"	v
+look	./Analysis/Type/Inference/Solver.hs	408;"	v
 lpc	./Concurrent/Model/Analysis/Context.hs	29;"	v
 lvals	./Concurrent/Model.hs	62;"	v
 main	Main.hs	135;"	v
@@ -2854,7 +2854,7 @@ mutex_Instruction_MutexInit	src/Language/LLVMIR.hs	299;"	v
 mutex_Instruction_MutexLock	src/Language/LLVMIR.hs	300;"	v
 mutex_Instruction_MutexUnlock	src/Language/LLVMIR.hs	301;"	v
 mutexes	./Concurrent/Model/Analysis/DataFlow.hs	42;"	v
-mutual	./Analysis/Type/Inference/Solver.hs	206;"	v
+mutual	./Analysis/Type/Inference/Solver.hs	193;"	v
 n_Align_Align	src/Language/LLVMIR.hs	89;"	v
 n_CConv_Cc	src/Language/LLVMIR.hs	152;"	v
 n_FunAttr_Alignstack	src/Language/LLVMIR.hs	205;"	v
@@ -3173,7 +3173,7 @@ putEnv	./Concurrent/Model/Analysis/Context.hs	196;"	v
 putEnv	./Language/LLVMIR/Extractor/Context.hs	41;"	v
 r_Terminator_Ret	src/Language/LLVMIR.hs	444;"	v
 rc	./Analysis/Type/Inference/Solver.hs	42;"	v
-replace	./Analysis/Type/Inference/Solver.hs	353;"	v
+replace	./Analysis/Type/Inference/Solver.hs	356;"	v
 retty_Function_FunctionDecl	src/Language/LLVMIR.hs	227;"	v
 retty_Function_FunctionDef	src/Language/LLVMIR.hs	226;"	v
 retty_Type_TyFunction	src/Language/LLVMIR.hs	469;"	v
@@ -3190,18 +3190,17 @@ rv_Instruction_MutexInit	src/Language/LLVMIR.hs	299;"	v
 rv_Instruction_MutexLock	src/Language/LLVMIR.hs	300;"	v
 rv_Instruction_MutexUnlock	src/Language/LLVMIR.hs	301;"	v
 rwEq	./Analysis/Type/Inference/Solver.hs	106;"	v
-rwEqc	./Analysis/Type/Inference/Solver.hs	141;"	v
-rwEqp	./Analysis/Type/Inference/Solver.hs	242;"	v
-rwEqq	./Analysis/Type/Inference/Solver.hs	134;"	v
-rwEqι	./Analysis/Type/Inference/Solver.hs	237;"	v
-rwEqλ	./Analysis/Type/Inference/Solver.hs	215;"	v
-rwEqπ	./Analysis/Type/Inference/Solver.hs	152;"	v
-rwEqτ	./Analysis/Type/Inference/Solver.hs	121;"	v
-rwGEP	./Analysis/Type/Inference/Solver.hs	203;"	v
+rwEqp	./Analysis/Type/Inference/Solver.hs	229;"	v
+rwEqq	./Analysis/Type/Inference/Solver.hs	133;"	v
+rwEqι	./Analysis/Type/Inference/Solver.hs	224;"	v
+rwEqλ	./Analysis/Type/Inference/Solver.hs	202;"	v
+rwEqπ	./Analysis/Type/Inference/Solver.hs	139;"	v
+rwEqτ	./Analysis/Type/Inference/Solver.hs	120;"	v
+rwGEP	./Analysis/Type/Inference/Solver.hs	190;"	v
 s_DataLayout_DataLayout	src/Language/LLVMIR.hs	197;"	v
 s_Section_Section	src/Language/LLVMIR.hs	429;"	v
 s_TargetData_TargetData	src/Language/LLVMIR.hs	441;"	v
-safeLookup	./Analysis/Type/Inference/Solver.hs	455;"	v
+safeLookup	./Analysis/Type/Inference/Solver.hs	459;"	v
 safePEx	./Language/LTL/Base.hs	89;"	v
 sc_Constant_SmpConst	src/Language/LLVMIR.hs	169;"	v
 seen	./Concurrent/Model/Analysis/Context.hs	100;"	v
@@ -5142,18 +5141,19 @@ sem_Visibility_Protected	src/Concurrent/Model/Analysis/Util.hs	5970;"	v
 sem_Visibility_Protected	src/Concurrent/Model/Domain/PThread.hs	9562;"	v
 sem_Visibility_Protected	src/Concurrent/Model/Visualizer.hs	9160;"	v
 sem_Visibility_Protected	src/Language/LLVMIR/Printer/Module.hs	8036;"	v
-showType	./Analysis/Type/Memory/TyAnn.hs	90;"	v
+showType	./Analysis/Type/Memory/TyAnn.hs	91;"	v
+showTypeAux	./Analysis/Type/Memory/TyAnn.hs	90;"	v
 size	./Language/LTL/Base.hs	213;"	v
 sizeOf	./Language/LLVMIR/Util.hs	158;"	v
-solveBit	./Analysis/Type/Inference/Solver.hs	429;"	v
-solveCast	./Analysis/Type/Inference/Solver.hs	415;"	v
-solveEq	./Analysis/Type/Inference/Solver.hs	389;"	v
-solveEqSimple	./Analysis/Type/Inference/Solver.hs	377;"	v
-solveEqual	./Analysis/Type/Inference/Solver.hs	284;"	v
-solveEqualSimple	./Analysis/Type/Inference/Solver.hs	367;"	v
-solveGep	./Analysis/Type/Inference/Solver.hs	309;"	v
-solveGeps	./Analysis/Type/Inference/Solver.hs	305;"	v
-solveGlobal	./Analysis/Type/Inference/Solver.hs	294;"	v
+solveBit	./Analysis/Type/Inference/Solver.hs	432;"	v
+solveCast	./Analysis/Type/Inference/Solver.hs	418;"	v
+solveEq	./Analysis/Type/Inference/Solver.hs	392;"	v
+solveEqSimple	./Analysis/Type/Inference/Solver.hs	380;"	v
+solveEqual	./Analysis/Type/Inference/Solver.hs	271;"	v
+solveEqualSimple	./Analysis/Type/Inference/Solver.hs	370;"	v
+solveGep	./Analysis/Type/Inference/Solver.hs	296;"	v
+solveGeps	./Analysis/Type/Inference/Solver.hs	292;"	v
+solveGlobal	./Analysis/Type/Inference/Solver.hs	281;"	v
 sortEnv	./Concurrent/Model/Analysis/DataFlow.hs	43;"	v
 splitConstrs	./Analysis/Type/Memory/Context.hs	34;"	v
 ssaValue	./Analysis/Asm/Lift.hs	405;"	v	file:
@@ -5190,8 +5190,8 @@ toRealPredicate	./Language/LLVMIR/Extractor/Predicate.hs	23;"	v
 toℂ	./Analysis/Type/Inference/Module.hs	55;"	v	file:
 trace	./Analysis/Type/Inference/Solver.hs	37;"	v
 trace	./Language/Asm.hs	20;"	v
-traceSolveEq	./Analysis/Type/Inference/Solver.hs	281;"	v
-traceString	./Analysis/Type/Inference/Solver.hs	117;"	v
+traceSolveEq	./Analysis/Type/Inference/Solver.hs	268;"	v
+traceString	./Analysis/Type/Inference/Solver.hs	116;"	v
 transition	./Language/LTL/Base.hs	161;"	v
 ty_CompareConstantExpr_FCmpExpr	src/Language/LLVMIR.hs	156;"	v
 ty_CompareConstantExpr_ICmpExpr	src/Language/LLVMIR.hs	155;"	v
@@ -5312,11 +5312,11 @@ unContext	./Language/LLVMIR/Extractor/Context.hs	28;"	v
 unPath	./Language/LTL/Base.hs	191;"	v
 unPathLasso	./Language/LTL/Base.hs	252;"	v
 unaryConstantExpr	./Language/LLVMIR/Extractor/Value.hs	146;"	v
-unifyGlobal	./Analysis/Type/Inference/Solver.hs	299;"	v
-unifyStructType	./Analysis/Type/Inference/Solver.hs	339;"	v
+unifyGlobal	./Analysis/Type/Inference/Solver.hs	286;"	v
+unifyStructType	./Analysis/Type/Inference/Solver.hs	337;"	v
 updateLoadMap	./Concurrent/Model/Analysis/DataFlow.hs	33;"	v
 updateLocs	./Concurrent/Model/Analysis/Context.hs	159;"	v
-updateStructType	./Analysis/Type/Inference/Solver.hs	331;"	v
+updateStructType	./Analysis/Type/Inference/Solver.hs	320;"	v
 updateThreads	./Concurrent/Model/Analysis/Context.hs	167;"	v
 v	./Language/LTL/Base.hs	80;"	v
 v1_Instruction_Store	src/Language/LLVMIR.hs	272;"	v
@@ -5697,7 +5697,7 @@ x_user	./Analysis/Type/Inference/Initial.hs	37;"	v	file:
 ~>	./Language/LTL/Base.hs	74;"	v
 Γ	./Analysis/Asm/Lift.hs	164;"	d	file:
 Γ	./Analysis/Asm/Lift.hs	164;"	t	file:
-Γ	./Analysis/Type/Inference/Solver.hs	269;"	t
+Γ	./Analysis/Type/Inference/Solver.hs	256;"	t
 Ε	./Analysis/Asm/Lift.hs	45;"	d	file:
 Ε	./Analysis/Asm/Lift.hs	45;"	t	file:
 Ε	./Analysis/Type/Inference/Base.hs	136;"	d
@@ -5741,22 +5741,22 @@ x_user	./Analysis/Type/Inference/Initial.hs	37;"	v	file:
 νname	./Analysis/Asm/Lift.hs	63;"	v	file:
 νΤℂ	./Analysis/Type/Inference/Solver.hs	55;"	v
 π	./Analysis/Type/Inference/Base.hs	181;"	v
-πgep	./Analysis/Type/Inference/Value.hs	112;"	v
+πgep	./Analysis/Type/Inference/Value.hs	115;"	v
 τGas2τ	./Analysis/Asm/Lift.hs	415;"	v	file:
 τList	./Analysis/Type/Inference/Base.hs	47;"	v
 τListR	./Analysis/Type/Inference/Base.hs	54;"	v
-τextract	./Analysis/Type/Inference/Instruction.hs	231;"	v
-τselect	./Analysis/Type/Inference/Instruction.hs	220;"	v
+τextract	./Analysis/Type/Inference/Instruction.hs	230;"	v
+τselect	./Analysis/Type/Inference/Instruction.hs	218;"	v
 τℂ	./Analysis/Type/Inference/Base.hs	174;"	v
 τℂalloca	./Analysis/Type/Inference/Instruction/Memory.hs	23;"	v
-τℂaop	./Analysis/Type/Inference/Instruction/Memory.hs	70;"	v
-τℂbin	./Analysis/Type/Inference/Instruction.hs	159;"	v
-τℂcall	./Analysis/Type/Inference/Instruction.hs	200;"	v
-τℂcast	./Analysis/Type/Inference/Instruction.hs	146;"	v
-τℂcmp	./Analysis/Type/Inference/Instruction.hs	185;"	v
+τℂaop	./Analysis/Type/Inference/Instruction/Memory.hs	73;"	v
+τℂbin	./Analysis/Type/Inference/Instruction.hs	160;"	v
+τℂcall	./Analysis/Type/Inference/Instruction.hs	201;"	v
+τℂcast	./Analysis/Type/Inference/Instruction.hs	147;"	v
+τℂcmp	./Analysis/Type/Inference/Instruction.hs	186;"	v
 τℂgep	./Analysis/Type/Inference/Instruction/Memory.hs	54;"	v
 τℂload	./Analysis/Type/Inference/Instruction/Memory.hs	43;"	v
-τℂnastyCast	./Analysis/Type/Inference/Instruction.hs	173;"	v
+τℂnastyCast	./Analysis/Type/Inference/Instruction.hs	174;"	v
 τℂr	./Analysis/Type/Inference/Base.hs	177;"	v
 τℂs	./Analysis/Type/Inference/Module.hs	60;"	v	file:
 τℂstore	./Analysis/Type/Inference/Instruction/Memory.hs	30;"	v
@@ -5781,8 +5781,8 @@ x_user	./Analysis/Type/Inference/Initial.hs	37;"	v	file:
 ∙	./Analysis/Type/Inference/Base.hs	31;"	v
 ∪	./Analysis/Asm/Lift.hs	35;"	v	file:
 ∪	./Analysis/Type/Inference/Base.hs	25;"	v
-≅	./Analysis/Type/Memory/TyAnn.hs	137;"	v
-≌	./Analysis/Type/Memory/TyAnn.hs	209;"	v
+≅	./Analysis/Type/Memory/TyAnn.hs	145;"	v
+≌	./Analysis/Type/Memory/TyAnn.hs	217;"	v
 ≥:	./Analysis/Type/Inference/Base.hs	133;"	v
-⊨	./Analysis/Type/Inference/Solver.hs	272;"	v
+⊨	./Analysis/Type/Inference/Solver.hs	259;"	v
 ⤜	./Analysis/Type/Inference/Base.hs	103;"	v

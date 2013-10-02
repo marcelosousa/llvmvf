@@ -103,15 +103,14 @@ rewriteEq (τℂ, pc) = --trace ("rewriteEq " ⧺ show τℂ) $
 
 -- rwEq
 rwEq ∷ Int → ℂ → ℂ → ΩState ℂ
-rwEq pc α β = --trace ("rwEq " ⧺ show α ⧺ " " ⧺ show β) $ 
+rwEq pc α β = trace ("rwEq " ⧺ show α ⧺ " " ⧺ show β) $ 
   case α of
     ℂτ τ     → rwEqτ pc α β -- type
-    ℂc cl    → rwEqc pc α β -- class
     ℂι c i   → rwEqι pc α β -- gep
     ℂp c τα  → rwEqp pc α β -- pointer
     ℂλ ca cr → rwEqλ pc α β -- function
     ℂπ n     → rwEqπ pc α β -- var
-    ℂq τ c   → rwEqq pc α β 
+    ℂq τ c   → rwEqq pc α β -- type tau is qualified by the qualifier in c 
 
 traceString ∷ String → NamedTypes → ℂ → ℂ → String
 traceString s nt α β = s ⧺ " " ⧺ showType nt α ⧺ " " ⧺ showType nt β
@@ -134,18 +133,6 @@ rwEqq ∷ Int → ℂ → ℂ → ΩState ℂ
 rwEqq pc α@(ℂq τ c) β = do
   νΤℂ (α :=: β,pc)
   (↣) α
-
-
--- Type Class
-rwEqc ∷ Int → ℂ → ℂ → ΩState ℂ
-rwEqc pc α@(ℂc cl1) β = do
-  nτs ← δNτ
-  trace (traceString "rwEqc" nτs α β) $ case β of
-    ℂc cl2 → case (≅) nτs cl1 cl2 of
-              Nothing → error $ traceString "rwEqc" nτs α β
-              Just cl → (↣) $ ℂc cl
-    _ → rwEq pc β α
-rwEqc _ _ _ = error $ "rwEqc: FATAL"
 
 -- Type Var
 rwEqπ ∷ Int → ℂ → ℂ → ΩState ℂ
@@ -200,7 +187,7 @@ initProcessing n@(Global _) β = νGVℂ n β
 
 -- Resolve GEP
 rwGEP ∷ String → ℂ → ℂ → ΩState ℂ
-rwGEP x α@(ℂι (ℂπ n) idxn) β = error "rwEqGep!!" 
+rwGEP x α@(ℂι (ℂπ n) idxn) β = Trace.trace ("rwGEP unsound " ++ show α ++ " " ++ show β) $ return β 
 
 mutual ∷ Id → [Id] → M.Map Id ℂ → Bool
 mutual n l γ | n ∈ l = True
@@ -234,7 +221,7 @@ rwEqλ _ _ _ = error $ "rwEqλ: FATAL"
 
 -- Type gep
 rwEqι ∷ Int → ℂ → ℂ → ΩState ℂ
-rwEqι pc α@(ℂι (ℂπ n) idxn) β = error "rwEqGep!!" 
+rwEqι pc α@(ℂι (ℂπ n) idxn) β = Trace.trace ("rwEqGEP unsound " ++ show α ++ " " ++ show β) $ return β 
 
 -- Type pointer
 -- Missing ℂc
@@ -248,7 +235,7 @@ rwEqp pc α@(ℂp c1 τα1) β = do
           Just τα → do c ← rwEq pc c1 (ℂτ τ1)
                        case c of
                         ℂτ τ' → (↣) $ ℂτ $ TyDer $ TyPtr τ' τα
-                        _     → error $ "rwEqp error: impossible case? " ⧺ showType nτs c
+                        _     → Trace.trace ("rwEqp warning: impossible case? " ⧺ showType nτs c) $ (↣) $ c
           Nothing → error $ "(rwEqp error) Type qualifier mismatch " ⧺ show pc ⧺ "\n" ⧺ showType nτs α ⧺ "\n" ⧺ showType nτs β
       _ → error $ traceString "rwEqp: types dont match" nτs α β
     ℂp c2 τα2 → 
@@ -287,7 +274,7 @@ solveEqual nt n y mic c = trace ("solveEqual " ++ show n ++ " " ++ show c) $
     Nothing → M.insert n ty1 y
     Just ty2 → case (≅) M.empty ty1 ty2 of
         Nothing  → error $ "Type Unification failed in solveEqual\n" ++ showType nt ty1 ++"\n" ++ showType nt ty2
-        Just ty → Trace.trace ("solveEqual inserting " ++ show ty) $ M.insert n ty y
+        Just ty → trace ("solveEqual inserting " ++ show ty) $ M.insert n ty y
 
 --SolveGlobal
 solveGlobal ∷ NamedTypes → Id → [ℂ] → Γ → Γ
@@ -307,13 +294,13 @@ solveGeps nt n lc y = foldr (solveGep nt n) y lc
 -- Cv(%tmp1) :=: Cgep(Cv(%x),[0,0])
 solveGep ∷ NamedTypes → Id → ℂ → Γ → Γ
 solveGep nt n α@(ℂι (ℂπ x) []) γ = error "empty indices list"
-solveGep nt n α@(ℂι (ℂπ x) idxn) γ =
-  let unWrap = \n x → MB.fromMaybe (error $ "solveGep " ++ show n) x   
+solveGep nt n α@(ℂι (ℂπ x) idxn) γ = trace ("solveGep " ++ show n ++ " " ++ show x ++ show idxn)$  
+  let unWrap = \m x → MB.fromMaybe (error $ "solveGep " ++ show m ++ " " ++ show n ++ " " ++ show α) x   
       (tn,tx) = (unWrap n (M.lookup n γ), unWrap x (M.lookup x γ)) -- lookup type of n and x
   in case tn of
-    TyDer (TyPtr tni _) → 
+    TyDer (TyPtr tni _) → trace ("solveGep2 " ++ show tn) $
       let wholeTypeX = getType nt tx
-          updateTypeX = updateStructType wholeTypeX (tail idxn) tni
+          updateTypeX = updateStructType nt wholeTypeX (tail idxn) tni
       in M.insert x updateTypeX γ
     _ → error "solveGep"
 solveGep nt n α γ = error "solveGep"
@@ -321,24 +308,39 @@ solveGep nt n α γ = error "solveGep"
 getType ∷ NamedTypes → Τα → Τα
 getType nt ty@(TyDer (TyPtr agg ann)) = 
   case agg of 
-    TyDer (TyAgg (TyStr sn i [])) -> 
+    TyDer (TyAgg (TyStr sn i [])) ->
       case M.lookup sn nt of
         Nothing → error "getType failed"
         Just t  → TyDer (TyPtr t ann)
     TyDer (TyAgg (TyStr sn i l)) -> ty
+    _ -> ty 
+getType nt ty = error $ "getType " ++ showType nt ty
 
-updateStructType ∷ Τα → [Int] → Τα → Τα
-updateStructType (TyDer (TyPtr agg ann)) idxs ty = 
+updateStructType ∷ NamedTypes -> Τα → [Int] → Τα → Τα
+updateStructType nt (TyDer (TyPtr ty1@(TyPri _) ann)) [] ty = 
+  case (≅) nt ty ty1 of
+    Nothing  → error $ "Type Unification failed in updateStructType\n" ++ showType nt ty ++"\n" ++ showType nt ty1
+    Just nty → TyDer $ TyPtr nty ann
+updateStructType nt tya@(TyDer (TyPtr agg ann)) []   ty = trace ("updateStructType 2 " ++ show tya ++ " " ++ show ty) $ 
+  case (≅) nt agg ty of
+    Nothing  → error $ "Type Unification failed in updateStructType\n" ++ showType nt agg ++"\n" ++ showType nt ty
+    Just nty → TyDer $ TyPtr nty ann
+updateStructType nt tya@(TyDer (TyPtr agg ann)) idxs ty = trace ("updateStructType " ++ show agg ++ show idxs ++ show ty) $
   case agg of
     TyDer (TyAgg (TyStr sn i [])) -> error "updateStructType: getType is wrong"
-    TyDer (TyAgg (TyStr sn i l)) -> let agg' = unifyStructType agg idxs ty
-                                    in TyDer $ TyPtr agg' ann 
-updateStructType _ _ _ = error "updateStructType: bad arguments"
+    TyDer (TyAgg (TyStr sn i l)) -> let agg' = unifyStructType nt agg idxs ty
+                                    in TyDer $ TyPtr agg' ann
+    _ -> tya
+updateStructType _  _ _ _ = error "updateStructType: bad arguments"
 
-unifyStructType ∷ Τα → [Int] → Τα → Τα
-unifyStructType agg idxs ty = case agg of
-    TyDer (TyAgg (TyStr sn i [])) -> error "updateStructType: getType is wrong"
-    TyDer (TyAgg (TyStr sn i l)) ->
+unifyStructType ∷ NamedTypes -> Τα → [Int] → Τα → Τα
+unifyStructType nt agg idxs ty = case agg of
+    TyDer (TyAgg (TyStr sn i [])) -> 
+      case M.lookup sn nt of
+        Nothing -> error "unifyStructType"
+        Just (TyDer (TyAgg (TyStr _ _ []))) -> error "unifyStructType 2"
+        Just wty -> unifyStructType nt wty idxs ty
+    TyDer (TyAgg (TyStr sn i l)) -> trace ("unifyStructType: " ++ show agg ++ show idxs) $
       case idxs of
         [] → error "empty indices list"
         [idx] → let ty' = l!!idx
@@ -346,9 +348,10 @@ unifyStructType agg idxs ty = case agg of
                     Nothing  → error $ "Type Unification failed in unifyStructType\n" ++ showType M.empty ty ++"\n" ++ showType M.empty ty'
                     Just nty → TyDer $ TyAgg $ TyStr sn i $ replace idx nty l
         idx:idxs → let ty' = l!!idx
-                       nty = unifyStructType ty' idxs ty
+                       nty = unifyStructType nt ty' idxs ty
                    in TyDer $ TyAgg $ TyStr sn i $ replace idx nty l
-
+    _ -> Trace.trace ("unifyStructType incomplete " ++ show agg) $ agg
+ 
 replace ∷ Int → a → [a] → [a]
 replace i a l = if length l <= i
                 then error "cannot replace"
@@ -379,7 +382,7 @@ solveEqSimple nτ e n τℂ = trace ("solveEq " ⧺ show n) $ case τℂ of
   ℂπ m → Nothing
   ℂq τ c → Nothing
   ℂc cl → error $ "solve does not expect a class " ⧺ show n ⧺ showType nτ τℂ
-  ℂι c is → error $ "solve does not expect a gep "
+  ℂι c is → M.lookup n $ solveGep nτ n τℂ e 
   ℂp c a → (\cτ → TyDer $ TyPtr cτ a) <$> solveEqSimple nτ e n c 
   ℂλ ca cr → do caτ ← mapM (solveEqSimple nτ e n) ca
                 crτ ← solveEqSimple nτ e n cr
@@ -420,9 +423,9 @@ solveCast nτ τℂ γ = case fst τℂ of
       Just t1a' → case (≅) nτ (TyDer (TyPtr t1 t1a')) t2 of
         Nothing → error $ "Type Unification failed solveCast\n" ++ showType nτ (TyDer (TyPtr t1 t1a')) ++"\n" ++ showType nτ t2
         Just k  → M.insert x k γ
-  c1 :=: c2 → error $ "solveCast :=: impossible " ++ showType nτ τℂ
-  c1 :<: c2 → Trace.trace "solveBit 1" $ solveBit (<) nτ γ c1 c2
-  c1 :≤: c2 → Trace.trace "solveBit 2" $ solveBit (<=) nτ γ c1 c2
+  c1 :=: c2 → Trace.trace ("solveCast unsound " ++ showType nτ τℂ) $ γ
+  c1 :<: c2 → Trace.trace ("solveBit 1 " ++ showType nτ τℂ) $ solveBit (<) nτ γ c1 c2
+  c1 :≤: c2 → Trace.trace ("solveBit 2 " ++ showType nτ τℂ) $ solveBit (<=) nτ γ c1 c2
   c1 :≌: c2 → Trace.trace "solveBit 3" $ solveBit (≡) nτ γ c1 c2
 
 solveBit ∷ (Int → Int → Bool) → NamedTypes → Γ → ℂ → ℂ → Γ
@@ -439,8 +442,9 @@ solveBit op nτ γ α@(ℂπ n) β =
                       case ata ≌ bta of
                       Nothing  → error $ "Type Unification failed in solveBit\n" ++ showType nτ ατ ++"\n" ++ showType nτ βτ
                       Just nta → M.insert n (TyDer (TyPtr at nta)) γ
-                  _ → error "solveBit: TODO"
-               else error $ "solveBit: invalid cast\n"  ++ showType nτ α ++"\n" ++ showType nτ β                 
+                  (TyPri _, TyPri _) → γ 
+                  _ → error $ "solveBit: TODO " ++ showType nτ ατ ++ " " ++ showType nτ βτ
+               else error $ "solveBit: invalid cast\n"  ++ showType nτ α ++ " " ++ showType nτ ατ ++ "\n" ++ showType nτ β ++ " " ++ showType nτ βτ                
     _ → error "solveBit: beta is not supported"
 solveBit op nτ γ α β@(ℂπ n) =
   let βτ = safeLookup n γ
@@ -477,6 +481,7 @@ instance AEq TClass where
     TAgg → (≅) nτs β TAgg
     T1   → Just β   
 
+
 gepτs ∷ NamedTypes → Τα → [Int] → Τα
 gepτs nτ τ [] = error "geps: no idxs"
 gepτs nτ τ (i:j) = trace ("gettys: " ⧺ showType nτ τ ⧺ "\n" ⧺ show (i:j) ⧺ "\n") $ case τ of 
@@ -507,3 +512,4 @@ gepτ nτ τ idx =  trace ("getty: " ⧺ showType nτ τ ⧺ "\n" ⧺ show idx �
                              else error $ "gepTy(2): " ⧺ showType nτ τ ⧺ " " ⧺ showType nτ τη ⧺ " " ⧺ show idx
                         else gepτ nτ τη idx
   _ → error $ "gepTy: wrong type " ⧺ showType nτ τ
+
