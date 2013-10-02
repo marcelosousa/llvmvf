@@ -350,7 +350,7 @@ unifyStructType nt agg idxs ty = case agg of
         idx:idxs → let ty' = l!!idx
                        nty = unifyStructType nt ty' idxs ty
                    in TyDer $ TyAgg $ TyStr sn i $ replace idx nty l
-    _ -> Trace.trace ("unifyStructType incomplete " ++ show agg) $ agg
+    _ -> trace ("unifyStructType incomplete " ++ show agg) $ agg
  
 replace ∷ Int → a → [a] → [a]
 replace i a l = if length l <= i
@@ -424,9 +424,9 @@ solveCast nτ τℂ γ = case fst τℂ of
         Nothing → error $ "Type Unification failed solveCast\n" ++ showType nτ (TyDer (TyPtr t1 t1a')) ++"\n" ++ showType nτ t2
         Just k  → M.insert x k γ
   c1 :=: c2 → Trace.trace ("solveCast unsound " ++ showType nτ τℂ) $ γ
-  c1 :<: c2 → Trace.trace ("solveBit 1 " ++ showType nτ τℂ) $ solveBit (<) nτ γ c1 c2
-  c1 :≤: c2 → Trace.trace ("solveBit 2 " ++ showType nτ τℂ) $ solveBit (<=) nτ γ c1 c2
-  c1 :≌: c2 → Trace.trace "solveBit 3" $ solveBit (≡) nτ γ c1 c2
+  c1 :<: c2 → trace ("solveBit 1 " ++ showType nτ τℂ) $ solveBit (<) nτ γ c1 c2
+  c1 :≤: c2 → trace ("solveBit 2 " ++ showType nτ τℂ) $ solveBit (<=) nτ γ c1 c2
+  c1 :≌: c2 → trace "solveBit 3" $ solveBit (≡) nτ γ c1 c2
 
 solveBit ∷ (Int → Int → Bool) → NamedTypes → Γ → ℂ → ℂ → Γ
 solveBit op nτ γ α@(ℂπ n) β =

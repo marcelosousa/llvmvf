@@ -15,6 +15,7 @@ import System.Directory
 import Language.LLVMIR             (Module)
 import Language.LLVMIR.Extractor   (extract)
 import Language.LLVMIR.Printer
+import Language.LLVMIR.Util        
 import Language.HTm.Base
 import Language.LLVMIR.Converter (llvmir2Htm)
 import Language.FeatherIR
@@ -67,7 +68,7 @@ data Option = Extract   {input :: FilePath, emode  ∷ ExtractMode}
             | Analyse {input :: FilePath}
   deriving (Show, Data, Typeable, Eq)
 
-data ExtractMode = Raw | Pretty | LiftAsm
+data ExtractMode = Raw | Pretty | LiftAsm | Isolated
   deriving (Show, Data, Typeable, Eq)
 
 data Domain = PThread | SystemC
@@ -139,9 +140,10 @@ runOption :: Option -> IO ()
 runOption (Extract bc m) = do mdl <- extract bc
                               let bf = dropExtension bc
                                   p = case m of
-                                    Raw → show $ liftAsm $ liftDebug mdl
+                                    Raw → show $ liftDebug mdl
                                     Pretty → show $ pretty mdl
                                     LiftAsm → show $ pretty $ liftAsm $ liftDebug mdl
+				    Isolated -> show $ liftDebug $ isolateFunction (makeGlobal "e1000e_reset_interrupt_capability") mdl
                               writeFile (addExtension bf "llvf") p
 runOption (Model bc d) = extractModel bc d                           
 runOption (CCFG bc d)  = runCCFG bc d
@@ -156,8 +158,11 @@ runOption (Type bc m ) = do mdl <- extract bc
                               Globals → typeInfGlobals $ liftAsm $ liftDebug mdl
 runOption (TypeConstrs bc) = do mdl <- extract bc
                                 typeConstraint $ liftAsm $ liftDebug mdl  --typeAnalysis mdl
-runOption (Analyse dir) = do res <- iterateAnalyse M.empty dir
-                             putStrLn $ infoToString res
+runOption (Analyse dir) = if isOptBytecode dir
+                          then do res <- iterateFile M.empty dir
+                                  putStrLn $ infoToString 0 res
+                          else do res <- iterateAnalyse M.empty dir
+                                  putStrLn $ infoToString 50 res
 runOption (TypeAnalyze lbc) = do 
   mdls ← mapM extract lbc
   let mdls' = map (liftAsm . liftDebug) mdls

@@ -43,6 +43,9 @@ isGlobalId _ = False
 identifierValue :: Value -> String
 identifierValue v = identifierName $ valueIdentifier' "" v
 
+makeGlobal :: String -> Identifier
+makeGlobal n = Global n
+
 findBasicBlock :: Identifier -> Function -> BasicBlock
 findBasicBlock i (FunctionDecl _ _ _ _ _) = error $ "findBasicBlock: " ++ show i ++ " not found."
 findBasicBlock i (FunctionDef  _ _ _ _ _ body) =
@@ -70,9 +73,22 @@ variadicFns (Module id layout target gvars funs nmdtys) =
   let fns = M.filter isVariadic funs
   in M.keys fns
 
+isolateFunction :: Identifier -> Module -> Module
+isolateFunction i (Module id layout target gvars funs nmdtys) = 
+  let fns = M.filterWithKey (\k _ -> i == k) funs
+  in Module id layout target [] fns M.empty 
+ 
 isVariadic ∷ Function → Bool
 isVariadic (FunctionDecl _ _ _ b _)   = b
 isVariadic (FunctionDef  _ _ _ b _ _) = b
+
+fnDefined :: Module -> [Identifier]
+fnDefined mdl = let fns = M.elems $ getModFns mdl
+                in catMaybes $ map isDefined fns
+      
+isDefined :: Function -> Maybe Identifier
+isDefined (FunctionDecl _ _ _ _ _) = Nothing 
+isDefined (FunctionDef  n _ _ _ _ _) = Just n
 
 infoValue :: Value -> Either Identifier (Identifier, [Int])
 infoValue v = case v of

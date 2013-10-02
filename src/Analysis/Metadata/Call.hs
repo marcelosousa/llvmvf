@@ -42,10 +42,10 @@ inc :: Maybe Int -> Maybe Int
 inc Nothing = Just 1
 inc (Just i) = Just $ i + 1
 
-infoToString :: Info -> String
-infoToString m = let s = foldr aux "" $ sortBy (comparing snd) $ M.toAscList m
-		 in s ++ (show $ statistics m)
-  where aux (k,s) r = if isTmp k || s < 50 
+infoToString :: Int -> Info -> String
+infoToString n m = let s = foldr aux "" $ sortBy (comparing snd) $ M.toAscList m
+	   	   in s ++ (show $ statistics m)
+  where aux (k,s) r = if isTmp k || s < n 
                       then r
                       else show (pretty k) ++ ": " ++ show s ++ "\n" ++ r
 

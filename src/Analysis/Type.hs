@@ -14,6 +14,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 
 import Language.LLVMIR hiding (Id, NamedTypes)
+import Language.LLVMIR.Util (fnDefined)
 
 import Analysis.Type.Util (TyEnv)
 import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
@@ -22,6 +23,8 @@ import Analysis.Type.Standard.Module (typeCheckModule, STyRes)
 import Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeAnnInferenceGlobals)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Solver
+import Analysis.Type.Inference.Initial
+
 import Analysis.Type.Memory.TyAnn (showType, NamedTypes)
 import Data.Set
 import Control.Monad
@@ -36,8 +39,9 @@ typeCheck = typeCheckModule
 -- Type Annotated Inference
 typeInfIntra ∷ Module → IO ()
 typeInfIntra mdl = do 
-	let (nt,γ) = typeAnnInference mdl 
-	forM_ (M.assocs γ) (uncurry (printTyInfFn nt))
+	let (nt,γ) = typeAnnInference mdl
+            fns = fnDefined mdl 
+	forM_ (M.assocs γ) (uncurry (printTyInfFn nt fns))
 
 typeInfInter ∷ Module → IO ()
 typeInfInter mdl = do 
@@ -47,14 +51,18 @@ typeInfInter mdl = do
 typeInfGlobals ∷ Module → IO ()
 typeInfGlobals mdl = do 
 	let (nt,γ) = typeAnnInferenceGlobals mdl
-	forM_ (M.assocs γ) (uncurry (printTyInfFn nt))
+            fns = fnDefined mdl 
+	forM_ (M.assocs γ) (uncurry (printTyInfFn nt fns))
 
-printTyInfFn ∷ NamedTypes → Id → Γ → IO ()
-printTyInfFn nt fn γ = do
-	putStrLn "----------------------"
-	print $ pretty fn
-	putStrLn "----------------------"
-	forM_ (M.assocs γ) (\(a,b) → putStrLn (show (pretty a) ++ " ∷ " ++ showType nt b))
+printTyInfFn ∷ NamedTypes → [Id] → Id → Γ → IO ()
+printTyInfFn nt fns fn γ = 
+        if fn `elem` fns
+        then do
+	  putStrLn "----------------------"
+	  print $ pretty fn
+	  putStrLn "----------------------"
+	  forM_ (M.assocs γ) (\(a,b) → putStrLn (show (pretty a) ++ " ∷ " ++ showType nt b))
+	else return ()
 
 typeConstraint ∷ Module → IO ()
 typeConstraint mdl = do
