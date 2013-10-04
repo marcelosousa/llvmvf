@@ -34,7 +34,7 @@ import qualified Data.Set as S
 	    (πα,πβ) = (π α,π β)  -- 
 	    τℂ = ℂτ (T.TyPri T.TyVoid) :=: cτρ
 	    βℂ = πβ :=: (πα ⤜ T.AnyAddr)
-	    αℂ = πα :=: ℂc T1
+	 --   αℂ = πα :=: ℂc T1
 	(↣) $ liftΤℂ pc $ τℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ))
 --	(↣) $ liftΤℂ pc $ τℂ ∘ (αℂ ∘ (βℂ ∘ (τℂα ∪ τℂβ))) 
 
@@ -45,7 +45,7 @@ import qualified Data.Set as S
 	let πα = π α
 	    πn = ℂπ n
 	    αℂ = πα :=: (πn ⤜ T.AnyAddr)
-	    nℂ = πn :=: ℂc T1
+	 --   nℂ = πn :=: ℂc T1
 	(↣) $ liftΤℂ pc $ αℂ ∘ τℂα
 	--(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ τℂα)
 
@@ -56,12 +56,12 @@ import qualified Data.Set as S
 	τℂs ← τListR τℂα δs
 	let cτn = ℂτ $ τn ↑^ T.AnyAddr                -- OK
 	    πα  = π α
-	    cℂ  = ℂp (ℂc TAgg) T.AnyAddr              -- Pointer to agg in reg mem
+	 --   cℂ  = ℂp (ℂc TAgg) T.AnyAddr              -- Pointer to agg in reg mem
 	    πδs = map π δs
-	    δsℂ = S.fromList $ map ((ℂc TInt) :=:) πδs
+	--    δsℂ = S.fromList $ map ((ℂc TInt) :=:) πδs
 	    n1ℂ = ℂπ n :=: cτn
 	 --   n2ℂ = ℂπ n :=: πgep α δs
-	    αℂ  = πα :=: cℂ
+	 --   αℂ  = πα :=: cℂ
         case πgep α δs of
           Nothing → (↣) $ liftΤℂ pc $ n1ℂ ∘ ε
           Just c  → (↣) $ liftΤℂ pc $ n1ℂ ∘ ((ℂπ n :=: c) ∘ ε)

@@ -12,7 +12,6 @@ import Data.Map
 
 type Id = String
 
-
 data P = 
 	P { namedTypes      ∷ Map Id Τ 
 	  , globalVariables ∷ Map Id G 

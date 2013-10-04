@@ -42,6 +42,8 @@ import Util.Demangler
 import Debug.Trace
 import Analysis.Type
 
+import Analysis.Type.Inference.Module (typeAnnInference,typeConstraints,typeAnnInferenceIP,typeAnnInferenceGlobals)
+
 _program, _summary :: String
 _summary = unlines ["LLVM Verification Framework - v0.2 (type beta)","llvmvf supports verification of pthread code at the LLVM IR level.","Copyright 2012-2013 @ Marcelo Sousa"]
 _program = "llvmvf"

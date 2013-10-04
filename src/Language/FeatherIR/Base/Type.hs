@@ -7,5 +7,4 @@
 
 module Language.FeatherIR.Base.Type where
 
-
 data Τ = Τ

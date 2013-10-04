@@ -109,7 +109,7 @@ instance Constr ConstantExpr where
  	  InsertValueConstantExpr        → error "π of InsertValueConstantExpr"
  	  SelectConstantExpr             → error "π of SelectConstantExpr"
  	  ShuffleVectorConstantExpr      → error "π of ShuffleVectorConstantExpr"
- 	  UnaryConstantExpr n op α τ     → ℂq ((↑)τ) $ π α
+ 	  UnaryConstantExpr n op α τ     → ℂq $ π α
 
 πgep ∷ Value → Values → Maybe ℂ
 πgep α δs = do let πα = π α

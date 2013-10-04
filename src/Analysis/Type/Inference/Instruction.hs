@@ -99,18 +99,18 @@ instance TyConstr Instruction where
  		FDiv pc n τ α β → τℂbin pc TFlt n τ α β
  		FRem pc n τ α β → τℂbin pc TFlt n τ α β
     -- Cast Operations
-		Trunc    pc n α τ → τℂcast pc n (α,TInt) (τ,TInt) (>:)  -- Truncate integers
-		ZExt     pc n α τ → τℂcast pc n (α,TInt) (τ,TInt) (:<:) -- Zero extend integers
-		SExt     pc n α τ → τℂcast pc n (α,TInt) (τ,TInt) (:<:) -- Sign extend integers
-		FPTrunc  pc n α τ → τℂcast pc n (α,TFlt) (τ,TFlt) (>:)  -- Truncate floating point
-		FPExt    pc n α τ → τℂcast pc n (α,TFlt) (τ,TFlt) (:≤:) -- Extend floating point
+		Trunc    pc n α τ → τℂcast pc n (α,TInt) (τ,TInt) -- (>:)  -- Truncate integers
+		ZExt     pc n α τ → τℂcast pc n (α,TInt) (τ,TInt) -- (:<:) -- Zero extend integers
+		SExt     pc n α τ → τℂcast pc n (α,TInt) (τ,TInt) -- (:<:) -- Sign extend integers
+		FPTrunc  pc n α τ → τℂcast pc n (α,TFlt) (τ,TFlt) -- (>:)  -- Truncate floating point
+		FPExt    pc n α τ → τℂcast pc n (α,TFlt) (τ,TFlt) -- (:≤:) -- Extend floating point
 		FPToUI   pc n α τ → τℂnastyCast pc n (α,TFlt) (τ,TInt) -- floating point → UInt
 		FPToSI   pc n α τ → τℂnastyCast pc n (α,TFlt) (τ,TInt) -- floating point → SInt
 		UIToFP   pc n α τ → τℂnastyCast pc n (α,TInt) (τ,TFlt) -- UInt → floating point
 		SIToFP   pc n α τ → τℂnastyCast pc n (α,TInt) (τ,TFlt) -- SInt → floating point
 		PtrToInt pc n α τ → τℂnastyCast pc n (α,TPtr) (τ,TInt) -- Pointer → integer 
 		IntToPtr pc n α τ → τℂnastyCast pc n (α,TInt) (τ,TPtr) -- integer → Pointer
-		BitCast  pc n α τ → τℂcast pc n (α,T1NA) (τ,T1NA) (:≤:) -- 1stclass non agg → 1stclass non agg
+		BitCast  pc n α τ → τℂcast pc n (α,T1NA) (τ,T1NA) -- (:≤:) -- 1stclass non agg → 1stclass non agg
     -- Comparison Operations
 		ICmp pc n _ τ α β → τℂcmp pc TInt n τ α β
 		FCmp pc n _ τ α β → τℂcmp pc TFlt n τ α β 
@@ -143,14 +143,14 @@ instance TyConstr Instruction where
 		InsertValue  pc n α β δs → error "insert agg operations not supported"
 
 -- Type Constraints for Cast Operations
-τℂcast ∷ Int → Id → (Value, TClass) → (Τ, TClass) → (ℂ → ℂ → Τℂ) → ℂState
-τℂcast pc n (α,τcα) (τ,τcτ) (?:) = do
+τℂcast ∷ Int → Id → (Value, TClass) → (Τ, TClass) → ℂState --(ℂ → ℂ → Τℂ) → ℂState
+τℂcast pc n (α,τcα) (τ,τcτ) = do
 	τℂα ← τℂr α
 	let cτρ = ℂτ $ (↑)τ
 	    πα = π α
-	    cℂα = πα :=: ℂc τcα
-	    cℂτ = cτρ :=: ℂc τcτ
-	    αℂ = πα ?: ℂπ n
+	 --   cℂα = πα :=: ℂc τcα
+	 --   cℂτ = cτρ :=: ℂc τcτ
+	    αℂ = ℂq (ℂπ n) :=: πα -- ?: ℂπ n
 	    nℂ = ℂπ n :=: cτρ
 	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ ε)-- τℂα)
 --	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))
@@ -165,7 +165,7 @@ instance TyConstr Instruction where
 	    αℂ = πα :=: cτρ  
 	    βℂ = πβ :=: cτρ  
 	    αβℂ = πα :=: πβ
-	    cℂ = cτρ :=: ℂc τc
+	--    cℂ = cτρ :=: ℂc τc
 	    nℂ = ℂπ n :=: cτρ
 	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (τℂα ∪ τℂβ))))
 	--(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (βℂ ∘ (αβℂ ∘ (cℂ ∘ (τℂα ∪ τℂβ)))))
@@ -175,8 +175,8 @@ instance TyConstr Instruction where
 	τℂα ← τℂr α
 	let cτρ = ℂτ $ (↑)τ
 	    πα = π α
-	    cℂα = πα :=: ℂc τcα
-	    cℂτ = cτρ :=: ℂc τcτ
+	 --   cℂα = πα :=: ℂc τcα
+	 --   cℂτ = cτρ :=: ℂc τcτ
 	    nℂ = ℂπ n :=: cτρ
 	(↣) $ liftΤℂ pc $ nℂ ∘ τℂα
 --	(↣) $ liftΤℂ pc $ nℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα))
@@ -222,7 +222,7 @@ instance TyConstr Instruction where
             nτℂ = ℂπ n :=: (ℂτ $ (↑)(typeOf β))
 	    nℂ = ℂπ n :=: πβ
 	    βηℂ = ℂπ n  :=: πη
-	    βℂ = πβ :=: ℂc T1	    
+	--    βℂ = πβ :=: ℂc T1	    
 	(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ (βηℂ ∘ (nτℂ ∘ ε))) 
 	--(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ (βηℂ ∘ (βℂ ∘ ε))) 
 
@@ -232,6 +232,6 @@ instance TyConstr Instruction where
 	let (πn, πα) = (ℂπ n, π α)
 	    nτ = ℂτ $ (↑)τ
 	    nℂ = πn :=: nτ
-	    cℂ = πα :=: ℂc TAgg
+	--    cℂ = πα :=: ℂc TAgg
 	(↣) $ liftΤℂ pc $ nℂ ∘ αℂ
 	--(↣) $ liftΤℂ pc $ nℂ ∘ (cℂ ∘ αℂ)

@@ -48,7 +48,40 @@ data TyAgg = TyArr  Int TyAnn        -- Derived + Aggregate
 data TyAnnot = UserAddr
              | KernelAddr
              | AnyAddr 
+             | TyVar String
   deriving (Eq, Ord, Show)
+
+generalizeType ∷ Int → TyAnn → M.Map String TyAnnot → (Int, TyAnn, M.Map String TyAnnot) 
+generalizeType counter ty env = case ty of
+  TyDer tyd → case tyd of
+    TyAgg tya → case tya of
+      TyArr i tye → let (nc,ntye,env') = generalizeType counter tye env
+                    in (nc, TyDer $ TyAgg $ TyArr i ntye, env')
+      TyStr sn n tys → let (nc,ntys,env') = generalizeTypes counter tys env
+                       in (nc, TyDer $ TyAgg $ TyStr sn n ntys,env')
+    TyVec i tye → let (nc,ntye,env') = generalizeType counter tye env
+                  in (nc, TyDer $ TyVec i ntye,env')
+    TyFun tyes tyr b → let (nc,ntyes,env') = generalizeTypes counter tyes env
+                           (nc',ntyr,env'') = generalizeType nc tyr env'
+                       in (nc', TyDer $ TyFun ntyes ntyr b,env'')
+    TyPtr typ tya → let (nc,ntyp,env') = generalizeType counter typ env
+                        (nc',ntya,env'') = generalizeAnn nc tya env'
+                    in (nc', TyDer $ TyPtr ntyp ntya,env'')
+  _ → (counter, ty, env)
+
+generalizeAnn ∷ Int → TyAnnot → M.Map String TyAnnot → (Int, TyAnnot, M.Map String TyAnnot)
+generalizeAnn counter tya env = case tya of
+  AnyAddr → (counter+1, TyVar $ "tyqVar"++show counter, env)
+  _ → let var = "tyqVar"++show counter
+      in (counter+1, TyVar var, M.insert var tya env)
+
+generalizeTypes ∷ Int → TysAnn → M.Map String TyAnnot → (Int, TysAnn, M.Map String TyAnnot)
+generalizeTypes c [] env = (c,[],env)
+generalizeTypes c xs env = 
+  let (nc,ty,env') = generalizeType c (last xs) env
+  in foldr (\tye (ic,r,env) → 
+    let (nic, ntye,env') = generalizeType ic tye env
+    in (nic, ntye:r,env')) (nc,[ty],env) (init xs)
 
 {-
 data TyAnnot = TyIOAddr
