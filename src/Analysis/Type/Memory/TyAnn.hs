@@ -97,7 +97,7 @@ resolveAnnot log env lhs rhs =
 getTypeQual ∷ TyAnn → TyAnnot
 getTypeQual ty = case ty of
   TyDer (TyPtr _ ta) → ta
-  _ → error "getTypeQual: no type qualifier" 
+  _ → error $ "getTypeQual: no type qualifier : " ++ show ty 
 
 expandType ∷ NamedTypes → Int → TyAnn → [Int] → (Int, TyAnn, TyAnn)
 expandType nt counter ty [] = error "expandType: empty indices list"
