@@ -388,7 +388,7 @@ mergeConstraint nt (lhs :=: rhs, pc) (counter,cm,env) = Trace.trace ("merge " ++
                   Just _ → error "mergeConstraint: probably invalid cast"
                 Just (TyVar var) → case vcr of
                   Nothing → error "mergeConstraint: probably invalid cast"
-                  Just _  → (counter, cm, M.insertWith (++) var [vcr] env)
+                  Just rvcr  → (counter, cm, M.insertWith (++) var [rvcr] env)
 
 -- Computes the type of the gep constraint; generates the appropriate unfolded type
 solveGep ∷ NamedTypes → Int → Γ → ℂ → [Int] → Ταρ → (Int, Τα, Γ)
