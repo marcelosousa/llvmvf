@@ -26,6 +26,7 @@ import qualified Data.Set as S
 import qualified Data.Map as M
 import qualified Data.Maybe as MB
 import Data.List
+import Data.Foldable (foldr')
 
 import Control.Applicative
 import Control.Monad hiding (join)
@@ -38,7 +39,7 @@ trace s f = f
 --trace = Trace.trace
 
 cToString ∷ S.Set Τℂ' → String
-cToString ts = foldr (\co r → show co ++ "\n" ++ r) "" (S.toList ts) 
+cToString ts = foldr' (\co r → show co ++ "\n" ++ r) "" (S.toList ts) 
 
 mcToString ∷ ConstraintMap → String
 mcToString ts = M.foldWithKey 
@@ -120,7 +121,7 @@ liftCAux counter cn pc = case cn of
            in (ncounter, ℂp nc a, r)
   ℂλ a r → let aux = \c (cn,la,rest) → let (ncn,nc,rc) = liftCAux cn c pc
                                        in (ncn,nc:la, S.union rc rest)
-               (ncounter, na, csa) = foldr aux (counter,[],S.empty) a
+               (ncounter, na, csa) = foldr' aux (counter,[],S.empty) a
                (ncounter', nr, csr) = liftCAux ncounter r pc
            in (ncounter', ℂλ na nr, S.union csr csa)
   ℂq c → let (ncounter, nc, r) = liftCAux counter c pc
@@ -132,7 +133,7 @@ liftCAux counter cn pc = case cn of
 prep ∷ NamedTypes → S.Set Τℂ' → (ConstraintMap, S.Set Τℂ')
 prep nt cs = 
   let (rcs, ecs) = S.partition (\(c1 :=: c2, _) → isComplexConstr c1 || isComplexConstr c2) cs
-  in (S.foldr (hash nt) M.empty ecs, rcs)
+  in (S.foldr' (hash nt) M.empty ecs, rcs)
 
 hash ∷ NamedTypes → Τℂ' → ConstraintMap → ConstraintMap
 hash nt (lhs@(ℂπ n) :=: rhs, pc) r = 
@@ -202,7 +203,7 @@ steprewrite nt n cn cm = Trace.trace "entering steprewrite" $
   if M.size cn <= 1
   then M.insert n cn cm
   else let cns = M.assocs cn
-           ((c,pcs), ncm) = foldr (rewrite nt n) (head cns, cm) $ tail cns
+           ((c,pcs), ncm) = foldr' (rewrite nt n) (head cns, cm) $ tail cns
        in M.insert n (M.singleton c pcs) ncm
 
 rewrite ∷ NamedTypes → Identifier → (ℂ,S.Set Int) → ((ℂ,S.Set Int), ConstraintMap) → ((ℂ,S.Set Int), ConstraintMap)
@@ -255,7 +256,7 @@ fuseWithType nt cm n ty rhs = Trace.trace ("entering fuseWithType " ++ show rhs 
           fuseLambdaParameters nt cm n xs = Trace.trace "entering fuseLambdaParameters" $ 
             let (ta,c) = last xs
                 (c',cm') = fuseWithType nt cm n ta c 
-            in foldr (\(ta,ca) (cas,icm) → 
+            in foldr' (\(ta,ca) (cas,icm) → 
                 let (c',cm') = fuseWithType nt icm n ta ca
                 in (c':cas,cm')) ([c'],cm') (init xs)
 
@@ -303,7 +304,7 @@ fuseWithFun nt cm n ca cr rhs = Trace.trace "entering fuseWithFun" $
           fuseLambdaParameters nt cm n xs = 
             let (a,c) = last xs
                 (c',cm') = fuse nt cm n a c 
-            in foldr (\(ta,ca) (cas,icm) → 
+            in foldr' (\(ta,ca) (cas,icm) → 
                 let (c',cm') = fuse nt icm n ta ca
                 in (c':cas,cm')) ([c'],cm') (init xs)
 
@@ -452,7 +453,7 @@ mergeDerTypes env lhs rhs =
            then (env, rhs)
            else if length alhs == length arhs
                 then let args = zip alhs arhs
-                         (nenv, argtys) = foldr (\(l,r) (e,lty) → 
+                         (nenv, argtys) = foldr' (\(l,r) (e,lty) → 
                                           let (ne,ty) = mergeTypes e l r 
                                           in (ne,ty:lty)) (env,[]) args 
                          (nenv', rty) = mergeTypes nenv rlhs rrhs
@@ -477,7 +478,7 @@ mergeAggTypes env lhs rhs =
       then let nn = length tslhs
                nsn = mergeNames snlhs snrhs
                args = zip tslhs tsrhs
-               (nenv, argtys) = foldr (\(l,r) (e,lty) → 
+               (nenv, argtys) = foldr' (\(l,r) (e,lty) → 
                                 let (ne,ty) = mergeTypes e l r 
                                 in (ne,ty:lty)) (env,[]) args
            in (nenv, TyStr nsn nn argtys)
