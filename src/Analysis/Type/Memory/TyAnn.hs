@@ -94,10 +94,10 @@ resolveAnnot log env lhs rhs =
     Nothing → error $ "resolveAnnot: Unification error\n" ++ show lhs ++ "\n" ++ show rhs
     Just t → t
 
-getTypeQual ∷ TyAnn → TyAnnot
+getTypeQual ∷ TyAnn → Just TyAnnot
 getTypeQual ty = case ty of
-  TyDer (TyPtr _ ta) → ta
-  _ → error $ "getTypeQual: no type qualifier : " ++ show ty 
+  TyDer (TyPtr _ ta) → Just ta
+  _ → Nothing
 
 expandType ∷ NamedTypes → Int → TyAnn → [Int] → (Int, TyAnn, TyAnn)
 expandType nt counter ty [] = error "expandType: empty indices list"

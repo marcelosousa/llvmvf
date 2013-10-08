@@ -380,9 +380,15 @@ mergeConstraint nt (lhs :=: rhs, pc) (counter,cm,env) = Trace.trace ("merge " ++
           Just csm → let (nenv, nty) = mergeGepTypes env tya csm
                      in (nc, M.insert c nty ncm, nenv)
     ℂq cl → case rhs of
-      ℂq cr → let TyVar var = Trace.trace ("getTyQual result = " ++ show (getTyQual cm cl) ++ " " ++ show cl) $ getTyQual cm cl 
+      ℂq cr → let vcl = Trace.trace ("getTyQual result = " ++ show (getTyQual cm cl) ++ " " ++ show cl) $ getTyQual cm cl 
                   vcr = getTyQual cm cr
-              in (counter, cm, M.insertWith (++) var [vcr] env)
+              in case vcl of 
+                Nothing → case vcr of 
+                  Nothing → (counter, cm, env)
+                  Just _ → error "mergeConstraint: probably invalid cast"
+                Just (TyVar var) → case vcr of
+                  Nothing → error "mergeConstraint: probably invalid cast"
+                  Just _  → (counter, cm, M.insertWith (++) var [vcr] env)
 
 -- Computes the type of the gep constraint; generates the appropriate unfolded type
 solveGep ∷ NamedTypes → Int → Γ → ℂ → [Int] → Ταρ → (Int, Τα, Γ)
@@ -493,13 +499,13 @@ addTyConstr env lhs rhs =
     Just ann → (env,ann)
 
 
-getTyQual ∷ Γ → ℂ → Ταρ
+getTyQual ∷ Γ → ℂ → Maybe Ταρ
 getTyQual cm c = case c of
     ℂτ t → getTypeQual t
     ℂπ n → case M.lookup n cm of
         Nothing → error $ "getTyQual: " ++ show n ++ " is not in *env*"
         Just t → getTypeQual t
-    ℂp cp ta → ta
+    ℂp cp ta → Just ta
     ℂι ca idxs ann → error "getTyQual: TODO GEP"
     _ → error "getTyQual: unsupported"
 
