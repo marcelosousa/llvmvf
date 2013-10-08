@@ -143,7 +143,11 @@ hash nt (lhs@(ℂπ n) :=: rhs, pc) r =
            else addConstr nt n (rhs,pc) r 
     _ → case simplify nt rhs of
       Nothing → addConstr nt n (rhs,pc) r
-      Just ty → addConstr nt n (ℂτ ty,pc) r
+      Just ty → addConstr nt n (ℂτ ty,pc) r 
+hash nt c@(ℂτ t :=: ℂp (ℂπ n) AnyAddr, pc) r = 
+  case t of
+    TyDer (TyPtr ty nta) → hash nt (ℂπ n :=: ℂτ (TyDer $ TyPtr ty nta),pc) r
+    _ →  error $ "gather: invalid types " ++ show c
 hash nt c _ = error $ "gather: should not happen " ++ show c 
 
 -- Is n reachable from m given r?
