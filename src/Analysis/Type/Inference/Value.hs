@@ -109,12 +109,12 @@ instance Constr ConstantExpr where
  	  InsertValueConstantExpr        → error "π of InsertValueConstantExpr"
  	  SelectConstantExpr             → error "π of SelectConstantExpr"
  	  ShuffleVectorConstantExpr      → error "π of ShuffleVectorConstantExpr"
- 	  UnaryConstantExpr n op α τ     → ℂq $ π α
+ 	  UnaryConstantExpr n op α τ     → ℂa ((↑)τ) $ π α
 
 πgep ∷ Value → Values → Maybe ℂ
 πgep α δs = do let πα = π α
                δis <- mapM getIntValue δs
-	       return $ ℂι πα δis
+	       return $ ℂι πα δis AnyAddr
 
 instance Constr CompareConstantExpr where
 	π e = case e of

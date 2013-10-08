@@ -150,7 +150,7 @@ instance TyConstr Instruction where
 	    πα = π α
 	 --   cℂα = πα :=: ℂc τcα
 	 --   cℂτ = cτρ :=: ℂc τcτ
-	    αℂ = ℂq (ℂπ n) :=: πα -- ?: ℂπ n
+	    αℂ = ℂq (ℂπ n) :=: (ℂq πα) -- ?: ℂπ n
 	    nℂ = ℂπ n :=: cτρ
 	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ ε)-- τℂα)
 --	(↣) $ liftΤℂ pc $ nℂ ∘ (αℂ ∘ (cℂτ ∘ (cℂα ∘ τℂα)))

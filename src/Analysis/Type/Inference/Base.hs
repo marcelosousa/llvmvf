@@ -89,20 +89,23 @@ data ℂ = ℂτ Τα -- Type α
        | ℂπ Id -- Type of Id
        | ℂp ℂ Ταρ  -- Pointer to ℂ Τα
        | ℂλ [ℂ] ℂ  -- Function
-       | ℂι ℂ [Int] -- for GEP instruction
+       | ℂι ℂ [Int] Ταρ -- for GEP instruction
        | ℂq ℂ -- type qualifier of id 
-  deriving (Eq, Ord, Show)
+       | ℂa Τα ℂ
+  deriving (Eq, Ord)
 
+-- generate all constraints with type variables
+-- 
 simplify ∷ NamedTypes → ℂ → Maybe Τα
 simplify nt c = case c of
   ℂτ t → Just t
   ℂπ n → Nothing
-  ℂι c idxs → (\t → gepType nt t idxs) <$> simplify nt c
+  ℂι c idxs a → (\t → gepType nt t idxs a) <$> simplify nt c
   ℂp c a → (\t → TyDer $ TyPtr t a) <$> simplify nt c
   ℂλ a r → (\ta tr → TyDer $ TyFun ta tr False) <$> mapM (simplify nt) a <*> simplify nt r
   ℂq c → Nothing
 
-generalizeCons ∷ Int → ℂ → M.Map String Ταρ → (Int, ℂ, M.Map String Ταρ)
+generalizeCons ∷ Int → ℂ → M.Map String [Ταρ] → (Int, ℂ, M.Map String [Ταρ])
 generalizeCons counter c env = case c of
   ℂτ τ → let (ncounter, nτ,env') = generalizeType counter τ env
          in (ncounter, ℂτ nτ,env') 
@@ -120,8 +123,9 @@ generalizeCons counter c env = case c of
                     in (nc, ncc:lc,env))  (nco,[ncaa],env') (init ca)
         (ncr', ncr,env'') = generalizeCons nc cr env'
     in (ncr', ℂλ nca ncr,env'')
-  ℂι c idxs → let (ncounter, nc,env') = generalizeCons counter c env
-              in (ncounter, ℂι nc idxs,env') 
+  ℂι c idxs ann → let (ncounter, nc,env') = generalizeCons counter c env
+                      (ncounter', nann, env'') = generalizeAnn ncounter ann env'
+                in (ncounter', ℂι nc idxs nann,env'') 
   ℂq c → let (ncounter, nc, env') = generalizeCons counter c env
          in (ncounter, ℂq nc, env') 
 
@@ -131,8 +135,9 @@ isComplexConstr c = case c of
   ℂπ _ → False
   ℂp cp _ → isComplexConstr cp
   ℂλ ca cr → any isComplexConstr (cr:ca)
-  ℂι _ _ → True
+  ℂι _ _ _ → True
   ℂq _ → True
+  ℂa _ _ → True
 
 vars ∷ ℂ → [Id]
 vars c = case c of
@@ -140,46 +145,48 @@ vars c = case c of
   ℂπ x → [x]
   ℂp cp _ → vars cp
   ℂλ ca cr → nub $ concatMap vars (cr:ca)
-  ℂι ca _ → vars ca
+  ℂι ca _ _ → vars ca
   ℂq ca → vars ca
+  ℂa _ ca → vars ca
 
 isℂτ ∷ ℂ → Bool
 isℂτ (ℂτ _) = True
 isℂτ _ = False
 
-gepType ∷ NamedTypes → Τα → [Int] → Τα
-gepType nt ty [] = error "gepType: empty indices"
-gepType nt (TyDer (TyPtr ty _)) idxs = gepType' nt ty $ tail idxs
-gepType nt ty idxs = error "gepType: wrong type"
+gepType ∷ NamedTypes → Τα → [Int] → Ταρ → Τα
+gepType nt ty [] ann = error "gepType: empty indices"
+gepType nt (TyDer (TyPtr ty _)) idxs ann = gepType' nt ty (tail idxs) ann
+gepType nt ty idxs ann = error "gepType: wrong type"
 
-gepType' ∷ NamedTypes → Τα → [Int] → Τα
-gepType' nt ty [] = ty
-gepType' nt ty (i:is) = 
+gepType' ∷ NamedTypes → Τα → [Int] → Ταρ → Τα
+gepType' nt ty [] ann = TyDer $ TyPtr ty ann
+gepType' nt ty (i:is) ann = 
   case ty of
     TyDer (TyAgg (TyArr n ety)) → 
       if i >= n 
-      then Trace.trace "warning: possible array out of bounds" $ gepType' nt ety is
-      else gepType' nt ety is
+      then Trace.trace "warning: possible array out of bounds" $ gepType' nt ety is ann
+      else gepType' nt ety is ann
     TyDer (TyAgg (TyStr ns ne etys)) →
       case M.lookup ns nt of
-        Nothing → getSubstruct nt etys (i:is)
-        Just (TyDer (TyAgg (TyStr _ _ etys'))) → getSubstruct nt etys' (i:is)                  
+        Nothing → getSubstruct nt etys (i:is) ann
+        Just (TyDer (TyAgg (TyStr _ _ etys'))) → getSubstruct nt etys' (i:is) ann                  
     _ → error "gepType': not an aggregate type"
 
-getSubstruct ∷ NamedTypes → [Τα] → [Int] → Τα
-getSubstruct nt etys (i:is) =
+getSubstruct ∷ NamedTypes → [Τα] → [Int] → Ταρ → Τα
+getSubstruct nt etys (i:is) ann =
   if i >= (length etys)
   then error "gepType: index is out of bounds"
-  else gepType' nt (etys!!i) is
+  else gepType' nt (etys!!i) is ann
 
 
-instance ShowType ℂ where
-  showType γ (ℂτ τα)    = "Ctau(" ⧺ showType γ τα ⧺ ")"
-  showType γ (ℂπ α)     = "Cv(" ⧺ (show $ pretty α) ⧺ ")"
-  showType γ (ℂι c i)   = "Cgep(" ⧺ showType γ c ⧺ "," ⧺ show i ⧺ ")"
-  showType γ (ℂp c ταρ) = "Cptr(" ⧺ showType γ c ⧺ "," ⧺ show ταρ ⧺ ")"
-  showType γ (ℂλ cl c)  = "Cfn(" ⧺ foldr (\a r → showType γ a ⧺ "->" ⧺ r) "" cl ⧺ showType γ c ⧺ ")"
-  showType γ (ℂq c)     = "Cq(" ⧺ showType γ c ⧺ ")"
+instance Show ℂ where
+  show (ℂτ τα)    = "Ctau(" ⧺ show τα ⧺ ")"
+  show (ℂπ α)     = "Cv(" ⧺ (show $ pretty α) ⧺ ")"
+  show (ℂι c i ταρ)   = "Cgep(" ⧺ show c ⧺ "," ⧺ show i ⧺ "," ⧺ show ταρ ⧺ ")"
+  show (ℂp c ταρ) = "Cptr(" ⧺ show c ⧺ "," ⧺ show ταρ ⧺ ")"
+  show (ℂλ cl c)  = "Cfn(" ⧺ foldr (\a r → show a ⧺ "->" ⧺ r) "" cl ⧺ show c ⧺ ")"
+  show (ℂq c)     = "Cq(" ⧺ show c ⧺ ")"
+  show (ℂa t c)   = "Ca(" ⧺ show t ⧺ ", " ⧺ show c ⧺ ")"
 
 -- Normalize the constraint
 (⤜) ∷ ℂ → Ταρ → ℂ
@@ -197,19 +204,19 @@ data Τℂ = ℂ :=: ℂ -- same type
 --        | ℂ :<: ℂ -- subtyping i1 :<: i2
 --        | ℂ :≤: ℂ -- less than 
 --        | ℂ :≌: ℂ -- bit size equality
-  deriving (Eq, Ord,Show)
+  deriving (Eq, Ord)
 
-generalizeTyConst ∷ Τℂ' → (Int, S.Set Τℂ',M.Map String Ταρ) → (Int, S.Set Τℂ',M.Map String Ταρ)
+generalizeTyConst ∷ Τℂ' → (Int, S.Set Τℂ',M.Map String [Ταρ]) → (Int, S.Set Τℂ',M.Map String [Ταρ])
 generalizeTyConst (c1 :=: c2, pc) (c, res,env) =
   let (nc,nc1,env') = generalizeCons c c1 env
       (nc',nc2,env'') = generalizeCons nc c2 env'
   in (nc', S.insert (nc1 :=: nc2,pc) res, env'')
 
-instance ShowType Τℂ' where
-  showType γ (c,i) = showType γ c ⧺ "@pc(" ⧺ show i ⧺ ")"
+--instance Show Τℂ' where
+-- show (c,i) = show c ⧺ "@pc(" ⧺ show i ⧺ ")"
 
-instance ShowType Τℂ where
-  showType γ (α :=: β) = showType γ α ⧺ " :=: " ⧺ showType γ β
+instance Show Τℂ where
+  show (α :=: β) = show α ⧺ " :=: " ⧺ show β
 --  showType γ (α :<: β) = showType γ α ⧺ " :<: " ⧺ showType γ β
 --  showType γ (α :≤: β) = showType γ α ⧺ " :≤: " ⧺ showType γ β
 --  showType γ (α :≌: β) = showType γ α ⧺ " :≌: " ⧺ showType γ β

@@ -12,7 +12,9 @@ import Language.LLVMIR (Identifier, Identifiers)
 import Control.Applicative
 import Prelude.Unicode ((≡),(⧺))
 
+import qualified Data.List as L
 import qualified Data.Map as M
+import qualified Data.Maybe as MB
 
 import Debug.Trace 
 
@@ -26,7 +28,7 @@ data TyAnn = TyBot
            | TyUndef
            | TyPri TyPri
            | TyDer TyDer
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
 
 data TyPri = TyVoid
            | TyInt Int
@@ -39,11 +41,11 @@ data TyDer = TyAgg TyAgg
            | TyVec Int TyAnn
            | TyFun TysAnn TyAnn Bool
            | TyPtr TyAnn  TyAnnot
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
 
 data TyAgg = TyArr  Int TyAnn        -- Derived + Aggregate  
            | TyStr String Int TysAnn -- Derived + Aggregate
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
 
 data TyAnnot = UserAddr
              | KernelAddr
@@ -51,7 +53,92 @@ data TyAnnot = UserAddr
              | TyVar String
   deriving (Eq, Ord, Show)
 
-generalizeType ∷ Int → TyAnn → M.Map String TyAnnot → (Int, TyAnn, M.Map String TyAnnot) 
+resolve ∷ M.Map String [TyAnnot] → TyAnn → TyAnn
+resolve env ty = case ty of
+  TyDer tyd → case tyd of
+    TyAgg tya → case tya of
+      TyArr i tye → let ntye = resolve env tye
+                    in TyDer $ TyAgg $ TyArr i ntye
+      TyStr sn n tys → let ntys = map (resolve env) tys
+                       in TyDer $ TyAgg $ TyStr sn n ntys
+    TyVec i tye → let ntye = resolve env tye
+                  in TyDer $ TyVec i ntye
+    TyFun tyes tyr b → let ntyes = map (resolve env) tyes
+                           ntyr = resolve env tyr
+                       in TyDer $ TyFun ntyes ntyr b
+    TyPtr typ tya → let ntyp = resolve env typ
+                        ntya = resolveAnn [] env tya 
+                    in TyDer $ TyPtr ntyp ntya
+  _ → ty
+
+resolveAnn ∷ [String] → M.Map String [TyAnnot] → TyAnnot → TyAnnot
+resolveAnn log env ann@(TyVar s) = 
+  if s `elem` log
+  then AnyAddr
+  else 
+    let vals = M.assocs env
+        helper = \(a,v) → (TyVar a):(L.delete ann v)
+        cleft = MB.fromMaybe [] $ M.lookup s env
+        cright = concatMap helper $ filter (\(a,v) → ann `elem` v) vals
+        c = cleft ++ cright
+    in case c of
+      []     → AnyAddr
+      (x:xs) → resolveAnn (s:log) env $ foldr (resolveAnnot (s:log) env) x xs
+resolveAnn log env a = a 
+
+resolveAnnot ∷ [String] → M.Map String [TyAnnot] → TyAnnot → TyAnnot → TyAnnot
+resolveAnnot log env lhs rhs = 
+  let ta = resolveAnn log env lhs
+      tb = resolveAnn log env rhs
+  in case ta ≌ tb of
+    Nothing → error $ "resolveAnnot: Unification error\n" ++ show lhs ++ "\n" ++ show rhs
+    Just t → t
+
+getTypeQual ∷ TyAnn → TyAnnot
+getTypeQual ty = case ty of
+  TyDer (TyPtr _ ta) → ta
+  _ → error "getTypeQual: no type qualifier" 
+
+expandType ∷ NamedTypes → Int → TyAnn → [Int] → (Int, TyAnn, TyAnn)
+expandType nt counter ty [] = error "expandType: empty indices list"
+expandType nt counter ty idxs =
+  case ty of 
+    TyDer (TyPtr ity ann) → 
+      let (nc, nity, rty) = expandTypeAgg nt counter False ity $ tail idxs
+          nty = TyDer (TyPtr nity ann)
+      in (nc, nty, rty)
+    _ → error "expandType: type is not a pointer" 
+
+expandTypeAgg ∷ NamedTypes → Int → Bool → TyAnn → [Int] → (Int, TyAnn, TyAnn)
+expandTypeAgg nt counter isNty ty [] = (counter, ty, ty)
+expandTypeAgg nt counter isNty ty (x:xs) = trace ("expandTypeAgg " ++ show x) $ case ty of
+  TyDer (TyAgg ity) → 
+    case ity of
+      TyArr i tye → 
+        let (nc, nite, rty) = expandTypeAgg nt counter isNty tye xs
+            nity = TyDer $ TyAgg $ TyArr i nite
+        in if i>x
+           then (nc, nity, rty)
+           else trace "expandTypeAgg: possible array out of bounds" $ (nc, nity, rty)
+      TyStr sn n tys → 
+        if length tys >= x
+        then                        -- we already have it
+          let ity = tys!!x
+              (nc, genTy,_) = generalizeType counter ity M.empty
+              (nc',nity,rty) = expandTypeAgg nt nc False genTy xs
+              (btys,atys) = splitAt x tys  
+              ntys = btys ++ (nity:tail atys)
+              nty = TyDer $ TyAgg $ TyStr sn n ntys
+          in (nc',nty,rty)
+        else case M.lookup sn nt of -- search for it 
+          Nothing → error $ "expandTypeAgg: not in map " ++ show ty
+          Just nty → if isNty
+                     then error $ "expandTypeAgg: out of bounds " ++ show nty
+                     else expandTypeAgg nt counter True nty (x:xs)
+
+  _ → error $ "expandTypeAgg: " ++ show ty ++ " is not aggregate"
+
+generalizeType ∷ Int → TyAnn → M.Map String [TyAnnot] → (Int, TyAnn, M.Map String [TyAnnot]) 
 generalizeType counter ty env = case ty of
   TyDer tyd → case tyd of
     TyAgg tya → case tya of
@@ -69,13 +156,13 @@ generalizeType counter ty env = case ty of
                     in (nc', TyDer $ TyPtr ntyp ntya,env'')
   _ → (counter, ty, env)
 
-generalizeAnn ∷ Int → TyAnnot → M.Map String TyAnnot → (Int, TyAnnot, M.Map String TyAnnot)
+generalizeAnn ∷ Int → TyAnnot → M.Map String [TyAnnot] → (Int, TyAnnot, M.Map String [TyAnnot])
 generalizeAnn counter tya env = case tya of
   AnyAddr → (counter+1, TyVar $ "tyqVar"++show counter, env)
   _ → let var = "tyqVar"++show counter
-      in (counter+1, TyVar var, M.insert var tya env)
+      in (counter+1, TyVar var, M.insertWith (++) var [tya] env)
 
-generalizeTypes ∷ Int → TysAnn → M.Map String TyAnnot → (Int, TysAnn, M.Map String TyAnnot)
+generalizeTypes ∷ Int → TysAnn → M.Map String [TyAnnot] → (Int, TysAnn, M.Map String [TyAnnot])
 generalizeTypes c [] env = (c,[],env)
 generalizeTypes c xs env = 
   let (nc,ty,env') = generalizeType c (last xs) env
@@ -101,7 +188,7 @@ data UserAddr = UserVirtualAddr
 data KernelAddr = 
     KernelLogicalAddr 
   | KernelVirtualAddr
---  | KernelPhysicalAddr
+--  | KernelPhycalAddr
   deriving (Eq, Ord)
 
 anyRegAddr ∷ TyAnnot
@@ -119,16 +206,11 @@ uVirAddr = TyRegAddr UserAddr
 i ∷ Int → TyAnn
 i n = TyPri $ TyInt n
 
-class ShowType α where
-  showTypeAux :: [String] -> NamedTypes -> α -> String
-  showType ∷ NamedTypes → α → String
-  showType n a = showTypeAux [] n a
-
-instance ShowType TyAnn where
-  showTypeAux log γ TyBot = "⊥"
-  showTypeAux log γ TyUndef = "undef"
-  showTypeAux log γ (TyPri t) = show t
-  showTypeAux log γ (TyDer t) = showTypeAux log γ t
+instance Show TyAnn where
+  show TyBot = "⊥"
+  show TyUndef = "undef"
+  show (TyPri t) = show t
+  show (TyDer t) = show t
 
 instance Show TyPri where
   show TyVoid     = "void"
@@ -137,26 +219,17 @@ instance Show TyPri where
   show TyMetadata = "metadata"
   show (TyInt n)  = "i"++show n
 
-instance ShowType TyDer where
-  showTypeAux log γ (TyAgg t) = showTypeAux log γ t
-  showTypeAux log γ (TyVec n t) = "<" ++ show n ++ " x " ++ showTypeAux log γ t ++ ">"
-  showTypeAux log γ (TyFun [] t _) = "fn :: " ++ showTypeAux log γ t
-  showTypeAux log γ (TyFun tys t _) = "fn :: " ++ (foldr (\x s -> showTypeAux log γ x ++ " -> " ++ s) (showTypeAux log γ t) tys)
-  showTypeAux log γ (TyPtr ty tya) = "*" ++ show tya ++ "(" ++ showTypeAux log γ ty ++ ")"
+instance Show TyDer where
+  show (TyAgg t) = show t
+  show (TyVec n t) = "<" ++ show n ++ " x " ++ show t ++ ">"
+  show (TyFun [] t _) = "fn :: " ++ show t
+  show (TyFun tys t _) = "fn :: " ++ (foldr (\x s -> show x ++ " -> " ++ s) (show t) tys)
+  show (TyPtr ty tya) = "*" ++ show tya ++ "(" ++ show ty ++ ")"
 
-instance ShowType TyAgg where
-  showTypeAux log γ (TyArr n t) = "[" ++ show n ++ " x " ++ showTypeAux log γ t ++ "]"
-  showTypeAux log g (TyStr "" 0 []) = "{}*"
-  showTypeAux log γ t@(TyStr nm n []) = 
-    if nm `elem` log
-    then nm
-    else case M.lookup nm γ of
-      Nothing → error $ "showType failed in struct " ++ show t
-      Just t  → nm ++ "=" ++ showTypeAux (nm:log) γ t
-  showTypeAux log γ (TyStr nm n t) = 
-    if nm `elem` log
-    then nm 
-    else "{" ++ (foldr (\x s -> showTypeAux (nm:log) γ x ++ ", " ++ s) (showTypeAux (nm:log) γ $ last t) (init t)) ++ "}"
+instance Show TyAgg where
+  show (TyArr n t) = "[" ++ show n ++ " x " ++ show t ++ "]"
+  show (TyStr "" 0 []) = "{}*"
+  show (TyStr nm n t) = nm ++ "{" ++ (foldr (\x s -> show x ++ ", " ++ s) "" t) ++ "}"
 
 {-
 instance Show TyAnnot where
@@ -251,10 +324,18 @@ class IEq α where
 
 instance IEq TyAnnot where
   UserAddr   ≌ KernelAddr = Nothing
-  UserAddr   ≌ UserAddr   = Just UserAddr
-  KernelAddr ≌ KernelAddr = Just KernelAddr
-  AnyAddr    ≌ a = Just a
-  a ≌ β = β ≌ a 
+  UserAddr   ≌ α          = Just UserAddr
+  KernelAddr ≌ UserAddr   = Nothing
+  KernelAddr ≌ α          = Just KernelAddr
+  TyVar s    ≌ UserAddr   = Just UserAddr
+  TyVar s    ≌ KernelAddr = Just KernelAddr
+  TyVar s    ≌ AnyAddr    = Just $ TyVar s
+  TyVar s    ≌ TyVar r    = 
+    if s == r
+    then Just $ TyVar s
+    else Nothing
+  AnyAddr    ≌ α          = Just α
+  
 {-
 instance IEq TyAnnot where
   TyIOAddr ≌ (TyRegAddr α) = Nothing

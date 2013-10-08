@@ -51,6 +51,7 @@ strlen = cFn $ ℂλ [cPtr (i 8) KernelAddr] (cI 64)
 strnlen = cFn $ ℂλ [cPtr (i 8) KernelAddr, cI 64] (cI 64)
 kmalloc = cFn $ ℂλ [cI 64, cI 32] (cPtr (i 8) KernelAddr)
 kfree = cFn $ ℂλ [cPtr (i 8) KernelAddr] cVoid
+sys_getint = cFn $ ℂλ [cPtr (i 32) UserAddr] cVoid
 
 iτℂ ∷ S.Set Τℂ
 iτℂ = S.fromList $ 
@@ -91,4 +92,5 @@ iτℂ = S.fromList $
   , "memscan" =: memscan 
   , "__kmalloc" =: kmalloc
   , "kfree" =: kfree
+  , "sys_getint" =: sys_getint
   ]

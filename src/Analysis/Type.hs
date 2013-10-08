@@ -25,7 +25,7 @@ import Analysis.Type.Inference.Base
 import Analysis.Type.Inference.Solver
 import Analysis.Type.Inference.Initial
 
-import Analysis.Type.Memory.TyAnn (showType, NamedTypes)
+import Analysis.Type.Memory.TyAnn (NamedTypes)
 import Data.Set
 import Control.Monad
 import UU.PPrint
@@ -46,7 +46,7 @@ typeInfIntra mdl = do
 typeInfInter ∷ Module → IO ()
 typeInfInter mdl = do 
 	let (nt,γ) = typeAnnInferenceIP mdl
-	forM_ (M.assocs γ) (\(a,b) → print (pretty a,showType nt b))
+	forM_ (M.assocs γ) (\(a,b) → print (pretty a,show b))
 
 typeInfGlobals ∷ Module → IO ()
 typeInfGlobals mdl = do 
@@ -61,7 +61,7 @@ printTyInfFn nt fns fn γ =
 	  putStrLn "----------------------"
 	  print $ pretty fn
 	  putStrLn "----------------------"
-	  forM_ (M.assocs γ) (\(a,b) → putStrLn (show (pretty a) ++ " ∷ " ++ showType nt b))
+	  forM_ (M.assocs γ) (\(a,b) → putStrLn (show (pretty a) ++ " ∷ " ++ show b))
 	else return ()
 
 typeConstraint ∷ Module → IO ()
@@ -76,7 +76,7 @@ printTyℂFn nt fn c = do
 	putStrLn "----------------------"
 	putStrLn $ show $ pretty fn
 	putStrLn "----------------------"
-	forM_ (S.toList c) (\co → putStrLn $ showType nt co)
+	forM_ (S.toList c) (\co → putStrLn $ show co)
 
 -- Type unify inter modular
 {-

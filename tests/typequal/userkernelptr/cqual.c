@@ -1,5 +1,5 @@
-void * copy_from_user(void *, const void *, unsigned long);
-void * copy_to_user(const void *, void *, unsigned long);
+unsigned long copy_from_user(void *, const void *, int);
+unsigned long copy_to_user(const void *, void *, int);
 
 int x;
 
