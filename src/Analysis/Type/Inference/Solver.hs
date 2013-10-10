@@ -478,9 +478,11 @@ grabCTyAux table log (x:xs) =
       case grabCTy log n table of
         Nothing → grabCTyAux table (n:log) xs
         Just ty → Just ty
-    _ → case toType x of 
-      Nothing → grabCTyAux table log xs
-      Just t  → Just t
+    ℂτ t → Just t
+    ℂp c ann →  
+      case grabCTyAux table log [c] of 
+        Nothing → grabCTyAux table log xs
+        Just t  → Just $ TyDer $ TyPtr t ann
 
 toType ∷ ℂ → Maybe Τα
 toType (ℂτ ty) = Just ty
