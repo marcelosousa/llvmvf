@@ -15,6 +15,7 @@ import Analysis.Type.Memory.TyAnn as T
 import Analysis.Type.Inference.Value
 import Control.Monad.State
 import Analysis.Type.Util
+import Language.LLVMIR.Util
 
 import qualified Data.Set as S
 
@@ -45,11 +46,10 @@ import qualified Data.Set as S
 	let πα = π α
 	    πn = ℂπ n
 	    αℂ = πα :=: (πn ⤜ T.AnyAddr)
-	case πn of 
-	   	ℂτ (T.TyDer (T.TyPtr ty _)) → do 
-	   		let nn = πn :=: ℂτ ty
-	   		(↣) $ liftΤℂ pc $ αℂ ∘ (nn ∘ τℂα)
-	   	_ → (↣) $ liftΤℂ pc $ αℂ ∘ τℂα
+	    ty = typeOf α
+	    nn = πn :=: ℂτ (T.TyDer $ T.TyPtr ((↑) ty) T.AnyAddr) 
+	(↣) $ liftΤℂ pc $ αℂ ∘ (nn ∘ τℂα)
+	   	
 	 --   nℂ = πn :=: ℂc T1
 	
 	--(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ τℂα)
