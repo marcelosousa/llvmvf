@@ -516,8 +516,20 @@ grabCTy log n table =
   else case M.lookup n table of
     Nothing → Nothing
     Just cm → case foldr checkCTy ([],[]) (M.keys cm) of
-      ([],ys) → foldr (\(ℂπ n) x → checkGrab (grabCTy (n:log) n table) x) Nothing ys
+      ([],ys) → grabCTyAux table log ys --foldr (\(ℂπ n) x → checkGrab (grabCTy (n:log) n table) x) Nothing ys
       (xs,ys) → Just $ head xs
+
+grabCTyAux table log []     = Nothing
+grabCTyAux table log (x:xs) = 
+  case x of
+    ℂπ n → 
+      let ny = grabCTy (n:log) n table
+      in checkGrab ny $ grabCTyAux table log xs
+    ℂτ ty → Just ty
+
+--grabAux table log c r = case c of
+--  ℂπ n → checkGrab (grabCTy (n:log) n table r)
+--  ℂτ  → Just 
 
 -- Step 6 - Rewrite again
 replace ∷ ConstraintMap → ConstraintMap
