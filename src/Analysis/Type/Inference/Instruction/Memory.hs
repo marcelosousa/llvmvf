@@ -47,7 +47,7 @@ import qualified Data.Set as S
 	    πn = ℂπ n
 	    αℂ = πα :=: (πn ⤜ T.AnyAddr)
 	    ty = typeOf α
-	    nn = πn :=: ℂτ (T.TyDer $ T.TyPtr ((↑) ty) T.AnyAddr) 
+	    nn = πn :=: ℂτ ((↑) ty)
 	(↣) $ liftΤℂ pc $ αℂ ∘ (nn ∘ τℂα)
 	   	
 	 --   nℂ = πn :=: ℂc T1
