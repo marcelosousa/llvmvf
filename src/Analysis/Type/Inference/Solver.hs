@@ -516,7 +516,7 @@ grabCTy log n table =
   else case M.lookup n table of
     Nothing → Nothing
     Just cm → case foldr checkCTy ([],[]) (M.keys cm) of
-      ([],ys) → grabCTyAux table log ys --foldr (\(ℂπ n) x → checkGrab (grabCTy (n:log) n table) x) Nothing ys
+      ([],ys) → grabCTyAux table log ys --bfoldr (\(ℂπ n) x → checkGrab (grabCTy (n:log) n table) x) Nothing ys
       (xs,ys) → Just $ head xs
 
 grabCTyAux table log []     = Nothing
@@ -526,6 +526,7 @@ grabCTyAux table log (x:xs) =
       let ny = grabCTy (n:log) n table
       in checkGrab ny $ grabCTyAux table log xs
     ℂτ ty → Just ty
+    _ → grabCTyAux table log xs
 
 --grabAux table log c r = case c of
 --  ℂπ n → checkGrab (grabCTy (n:log) n table r)
