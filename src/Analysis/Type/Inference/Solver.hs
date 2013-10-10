@@ -79,12 +79,12 @@ solve nt cs = trace ("solve init\n---------------\n" ++ cToString cs ++ "-------
                      buildHash ncs
       (ncounter, gtable, gecs, env) = trace ("after buildHash\n" ++ scToString (erasePC table) ++ "---------------\n" ++ cToString ecs ++ "---------------\n") $
                                       generalize table ecs counter
-      (ncounter', ntable, necs, nenv) = trace ("after generalize\n---------------\n" ++ scToString (erasePC gtable) ++ "---------------\n" ++ cToString gecs ++ "---------------\n" ++ envToString env ++ "---------------\n") $
-                                        solveGeps nt (ncounter, gtable, gecs, env)
-      (renv, rtable) = trace ("after solveGeps\n---------------\n" ++ scToString (erasePC ntable) ++ "---------------\n" ++ envToString nenv ++ "---------------\n" ++ cToString necs ++ "---------------\n") $
-                       rewrite nenv ntable 
-      (itable, ienv) = trace ("after 1st rewrite\n---------------\n" ++ scToString (erasePC rtable) ++ "---------------\n" ++ cToString necs ++ "---------------\n" ++ envToString renv ++ "---------------\n") $
-                       incorporate rtable renv necs
+      (renv, rtable) = trace ("after generalize\n---------------\n" ++ scToString (erasePC gtable) ++ "---------------\n" ++ cToString gecs ++ "---------------\n" ++ envToString env ++ "---------------\n") $
+                       rewrite env gtable 
+      (ncounter', ntable, necs, nenv) = trace ("after 1st rewrite\n---------------\n" ++ scToString (erasePC rtable) ++ "---------------\n" ++ cToString necs ++ "---------------\n" ++ envToString renv ++ "---------------\n") $
+                                        solveGeps nt (ncounter, rtable, gecs, renv)      
+      (itable, ienv) = trace ("after solveGeps\n---------------\n" ++ scToString (erasePC ntable) ++ "---------------\n" ++ envToString nenv ++ "---------------\n" ++ cToString necs ++ "---------------\n") $
+                       incorporate ntable nenv necs
       (fenv, ftable) = trace ("after incorporate\n---------------\n" ++ scToString (erasePC itable) ++ "---------------\n" ++ envToString ienv ++ "---------------\n") $
                        rewrite ienv itable 
   in trace ("after 2nd rewrite\n---------------\n" ++ scToString (erasePC ftable) ++ "---------------\n" ++ envToString fenv ++ "---------------\n") $
