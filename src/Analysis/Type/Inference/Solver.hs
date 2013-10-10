@@ -83,32 +83,12 @@ solve nt cs = trace ("solve init\n---------------\n" ++ cToString cs ++ "-------
                                         solveGeps nt (ncounter, gtable, gecs, env)
       (renv, rtable) = trace ("after solveGeps\n---------------\n" ++ scToString (erasePC ntable) ++ "---------------\n" ++ envToString nenv ++ "---------------\n" ++ cToString necs ++ "---------------\n") $
                        rewrite nenv ntable 
-      (itable, ienv) = trace ("after 1st rewrite\n---------------\n" ++ scToString (erasePC rtable) ++ "---------------\n" ++ cToString necs ++ "---------------\n" ++ envToString renv ++ "---------------\n") $
+      (itable, ienv) = Trace.trace ("after 1st rewrite\n---------------\n" ++ scToString (erasePC rtable) ++ "---------------\n" ++ cToString necs ++ "---------------\n" ++ envToString renv ++ "---------------\n") $
                        incorporate rtable renv necs
       (fenv, ftable) = trace ("after incorporate\n---------------\n" ++ scToString (erasePC itable) ++ "---------------\n" ++ envToString ienv ++ "---------------\n") $
                        rewrite ienv itable 
   in trace ("after 2nd rewrite\n---------------\n" ++ scToString (erasePC ftable) ++ "---------------\n" ++ envToString fenv ++ "---------------\n") $
      typify ftable fenv
-{-      (oc,ocs) = trace ("after solveEqualType & liftCa\n---------------\n" ++ cToString ncs ++ "---------------\n") $ 
-                 prep nt ncs
-      (y',rc)  = trace ("after prep\n---------------\n" ++ scToString (erasePC oc) ++ "---------------\n") $ 
-                 collect nt oc y                 
-      nrc      = trace ("after collect\n---------------\n" ++ scToString (erasePC rc) ++ "---------------\n") $ 
-                 fixrewrite nt rc
-      (nc,grc,nocs,tyq) = trace ("after fixrewrite\n---------------\n" ++ scToString (erasePC nrc) ++ "---------------\n") $
-                          generalize nrc ocs counter
-      rrc = trace ("after generalize\n---------------\n" ++ scToString (erasePC grc) ++ "---------------\n" ++ cToString ocs ++ "---------------\n") $
-            replace grc
-      (orc,ny) = trace ("after replace\n---------------\n" ++ scToString (erasePC grc) ++ "---------------\n") $
-                 liftPrimitive rrc y'
-  in if not $ M.null orc
-     then error $ "solve: something went wrong\n" ++ scToString (erasePC nrc)
-     else let (nc',ny',ntyq) = trace ("after lift\n---------------\n" ++ gammaToString ny ++ "\n" ++ envToString tyq ++ "---------------\n" ++ cToString nocs ++ "---------------\n") $ 
-                               merge nt nc ny nocs tyq
-              finaly = trace ("after merge\n---------------\n" ++ gammaToString ny' ++ "\n" ++ envToString ntyq ++ "---------------\n") $ 
-                       typify ntyq ny'
-          in  trace ("finaly\n---------------\n") $ finaly          
--}
 
 
 -- Step 1 - Remove trivial constraints
@@ -225,7 +205,7 @@ solveGeps ∷ NamedTypes → (Int, ConstraintMap, S.Set Τℂ', Env) → (Int, C
 solveGeps nt (counter,table,cs,env) = S.foldr (nsolveGep nt) (counter, table, S.empty, env) cs
 
 nsolveGep ∷ NamedTypes → Τℂ' → (Int, ConstraintMap, S.Set Τℂ', Env) → (Int, ConstraintMap, S.Set Τℂ', Env)
-nsolveGep nt cn@(lhs :=: rhs,pc) (counter, table, rest, env) = trace ("nsolveGep " ++ show cn) $ 
+nsolveGep nt cn@(lhs :=: rhs,pc) (counter, table, rest, env) = --trace ("nsolveGep " ++ show cn) $ 
   let (nlhs,ncounter,ntable,nrest,nenv) = solveGepConstraint nt counter lhs table rest env
       (nrhs,ncounter',ntable',nrest',nenv') = solveGepConstraint nt ncounter rhs ntable nrest nenv
       ncn = (nlhs :=: nrhs,pc)
@@ -334,35 +314,6 @@ selectCAux log (c:cs) =
            else Just c
     _ → selectCAux log cs
 
--- Is n reachable from m given r?
-reachable ∷ [Id] → Id → Id → ConstraintMap → Bool
-reachable log n m r = trace ("reachable " ++ show n ++ " " ++ show m) $ 
-  if n == m 
-  then True
-  else if m `elem` log 
-       then False
-       else case M.lookup m r of
-          Nothing → False
-          Just mc → 
-            let ids = nub $ concatMap vars $ M.keys mc
-            in any (\o → reachable (m:log) n o r) ids
-
-addConstr ∷ NamedTypes → Identifier → (ℂ,Int) → ConstraintMap → ConstraintMap
-addConstr nt n (c,pc) res = 
-  case M.lookup n res of
-    Nothing → M.insert n (M.singleton c $ S.singleton pc) res
-    Just m  → case c of 
-      ℂτ ty → let m' = M.fromList $ simplifyType nt (c,pc) $ M.assocs m
-              in M.insert n m' res
-      _ → let m' = M.insertWith S.union c (S.singleton pc) m
-          in M.insert n m' res
-
-simplifyType ∷ NamedTypes → (ℂ, Int) → [(ℂ,(S.Set Int))] → [(ℂ,(S.Set Int))]
-simplifyType nt (c,i) [] = [(c,S.singleton i)] 
-simplifyType nt (ℂτ ty1,i) ((ℂτ ty2,si):xs) = (ℂτ $ tyEq i nt ty1 ty2, S.insert i si):xs
-simplifyType nt (ℂτ ty1,i) (x:xs) = x:(simplifyType nt (ℂτ ty1,i) xs) 
-
-
 -- Step 4a
 incorporate ∷ ConstraintMap → Env → S.Set Τℂ' → (ConstraintMap, Env)
 incorporate table env cs = S.fold incorporateConstraint (table,env) cs
@@ -373,7 +324,7 @@ incorporateConstraint cn@(ℂπ n :=: rhs, pc) (table, env) =
   in (ntable, env)
 incorporateConstraint (ℂq cl :=: rhs,pc) (table, env) =
   case rhs of
-      ℂq cr → let vcl = trace ("getTyQual result = " ++ show (getTyQual table cl) ++ " " ++ show cl) $ getTyQual table cl 
+      ℂq cr → let vcl = getTyQual table cl 
                   vcr = getTyQual table cr
               in case vcl of 
                 Nothing → case vcr of 
@@ -509,6 +460,7 @@ checkCTy ∷ ℂ → ([Τα],[ℂ]) → ([Τα],[ℂ])
 checkCTy lhs@(ℂτ ty) (a,b) = (ty:a,b)
 checkCTy lhs         (a,b) = (a,lhs:b)
 
+-- Retrieve a possible type of the table given an identifier
 grabCTy ∷ [Id] → Id → ConstraintMap → Maybe Τα
 grabCTy log n table = 
   if n `elem` log
@@ -516,103 +468,30 @@ grabCTy log n table =
   else case M.lookup n table of
     Nothing → Nothing
     Just cm → case foldr checkCTy ([],[]) (M.keys cm) of
-      ([],ys) → grabCTyAux table log ys --bfoldr (\(ℂπ n) x → checkGrab (grabCTy (n:log) n table) x) Nothing ys
+      ([],ys) → grabCTyAux table log ys
       (xs,ys) → Just $ head xs
 
 grabCTyAux table log []     = Nothing
 grabCTyAux table log (x:xs) = 
   case x of
-    ℂπ n → 
-      let ny = grabCTy (n:log) n table
-      in checkGrab ny $ grabCTyAux table log xs
-    ℂτ ty → Just ty
-    _ → grabCTyAux table log xs
+    ℂπ n →
+      case grabCTy log n table of
+        Nothing → grabCTyAux table (n:log) xs
+        Just ty → Just ty
+    _ → case toType x of 
+      Nothing → grabCTyAux table log xs
+      Just t  → Just t
 
---grabAux table log c r = case c of
---  ℂπ n → checkGrab (grabCTy (n:log) n table r)
---  ℂτ  → Just 
-
--- Step 6 - Rewrite again
-replace ∷ ConstraintMap → ConstraintMap
-replace cm = M.map (replaceConstraints cm) cm
-
-replaceConstraints ∷ ConstraintMap → M.Map ℂ (S.Set Int) → M.Map ℂ (S.Set Int)
-replaceConstraints ocm = M.mapKeys (replaceConstraint ocm)
-
-replaceConstraint ∷ ConstraintMap → ℂ → ℂ
-replaceConstraint cm rhs = trace ("replaceConstraint " ++ show rhs ++ " " ++ show cm) $ 
-  case rhs of
-    ℂτ tyr → rhs
-    ℂπ m   → 
-      case M.lookup m cm of
-        Nothing → error $ "replaceConstraint: can't find it! " ++ show rhs  
-        Just nc → if M.size nc == 1 
-                  then replaceConstraint cm $ head $ M.keys nc
-                  else error "replaceConstraint: more than one candidate"
-    ℂp cr a → ℂp (replaceConstraint cm cr) a 
-    ℂλ a r → ℂλ (map (replaceConstraint cm) a) (replaceConstraint cm r)
-    _ → error "fuseWithPtr error: unsupported constraint"   
-
--- Step 7 -- Lift all primitive types
--- At this point, all constraints should be Tτ
-liftPrimitive ∷ ConstraintMap → Γ → (ConstraintMap, Γ)
-liftPrimitive cm y = 
-  M.foldWithKey liftPrimitiveConstraints (M.empty, y) cm 
-
-liftPrimitiveConstraints ∷ Identifier → M.Map ℂ (S.Set Int) → (ConstraintMap,Γ) → (ConstraintMap,Γ)
-liftPrimitiveConstraints n cs (mc,y) = 
-  let (ncs,y') = M.foldWithKey (liftPrimitiveConstraint n) (M.empty,y) cs
-  in if M.null ncs 
-     then (mc,y')
-     else (M.insert n ncs mc, y')
-
-liftPrimitiveConstraint ∷ Identifier → ℂ → S.Set Int → (M.Map ℂ (S.Set Int), Γ) → (M.Map ℂ (S.Set Int), Γ)
-liftPrimitiveConstraint n rhs pcs (cs, y) = 
-  case rhs of
-    ℂτ tyr → (cs, M.insert n tyr y)
-    ℂp c ann → case simplify M.empty c of
-      Nothing → (M.insert rhs pcs cs, y)
-      Just ty → let tyr = TyDer $ TyPtr ty ann
-                in (cs, M.insert n tyr y)
-    _ → (M.insert rhs pcs cs, y)
-
--- Step 8 -- Incorporate other constraints and rewrite
-merge ∷ NamedTypes → Int → Γ → S.Set Τℂ' → Env → (Int,Γ,Env)
-merge nt counter cm cs env = 
-  let (nc,y,env') = S.fold (mergeConstraint nt) (counter,cm,env) cs
-  in trace (show env') $ (nc,y,env')
-
-mergeConstraint ∷ NamedTypes → Τℂ' → (Int, Γ, Env) → (Int, Γ, Env)
-mergeConstraint nt (lhs :=: rhs, pc) (counter,cm,env) = trace ("merge " ++ show lhs ++ " " ++ show rhs) $
-  case lhs of
-    ℂπ c → case rhs of
-      ℂι ca idxs ann → 
-        let (nc,tya,ncm) = solveGep nt counter cm ca idxs ann 
-        in case M.lookup c cm of
-          Nothing → (nc, M.insert c tya ncm, env)
-          Just csm → let (nenv, nty) = mergeGepTypes env tya csm
-                     in (nc, M.insert c nty ncm, nenv)
-
--- Computes the type of the gep constraint; generates the appropriate unfolded type
-solveGep ∷ NamedTypes → Int → Γ → ℂ → [Int] → Ταρ → (Int, Τα, Γ)
-solveGep nt counter env rhs idxs ann =  
-  case rhs of
-    ℂτ t → let (nc, ty, gepty) = expandType nt counter t idxs
-           in (nc, TyDer (TyPtr gepty ann), env)
-    ℂπ m → case M.lookup m env of
-              Nothing → error $ "solveGep: " ++ show m ++ " is not in *env*"
-              Just t  → let (nc, ty, gepty) = expandType nt counter t idxs
-                            nty = TyDer (TyPtr gepty ann)
-                            nenv = M.insert m ty env
-                        in (nc, nty, nenv) 
-    _ → error $ "solveGep: unsupported constraint " ++ show rhs
-
-mergeGepTypes ∷ Env → Τα → Τα → (Env, Τα)
-mergeGepTypes env (TyDer (TyPtr lhs lann)) (TyDer (TyPtr rhs rann)) = 
-  let (enva,ann) = addTyConstr env lann rann
-      (nenv,ty)  = mergeTypes enva lhs rhs
-  in (nenv, TyDer $ TyPtr ty ann)
-mergeGepTypes env lhs rhs = error $ "mergeGepTypes: Unification error\n" ++ show lhs ++ "\n" ++ show rhs
+toType ∷ ℂ → Maybe Τα
+toType (ℂτ ty) = Just ty
+toType (ℂp c ann) = do  
+  ty ← toType c 
+  return $ TyDer $ TyPtr ty ann
+toType (ℂλ ca cr) = do 
+  tya ← mapM toType ca
+  tyr ← toType cr
+  return $ TyDer $ TyFun tya tyr False
+toType _ = Nothing
 
 mergeTypes ∷ Env → Τα → Τα → (Env, Τα)
 mergeTypes env lhs rhs = 
@@ -704,7 +583,6 @@ addTyConstr env lhs rhs =
   case lhs ≌ rhs of
     Nothing → error $ "addTyConstr: Unification error\n" ++ show lhs ++ "\n" ++ show rhs
     Just ann → (env,ann)
-
 
 -- This is wrong: It should be [Ταρ]
 getTyQual ∷ ConstraintMap → ℂ → Maybe Ταρ
