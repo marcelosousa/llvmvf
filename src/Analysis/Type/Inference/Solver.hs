@@ -716,7 +716,7 @@ unfoldAndResolve table env n cn =
   else error "unfoldAndResolve error" 
 
 resolveType ∷ ConstraintMap → Env → Id → ℂ → Τα
-resolveType table env n cn = 
+resolveType table env n cn = trace ("resolveType " ++ show cn) $ 
   case cn of 
     ℂτ t → resolve env t
     ℂπ m → case M.lookup m table of

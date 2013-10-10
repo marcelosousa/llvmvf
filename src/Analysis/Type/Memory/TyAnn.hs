@@ -19,7 +19,7 @@ import qualified Data.Maybe as MB
 import qualified Debug.Trace as Trace
 
 trace s f = f
---trace = trace
+--trace = Trace.trace
 
 type NamedTypes = M.Map String TyAnn
 
@@ -57,7 +57,7 @@ data TyAnnot = UserAddr
   deriving (Eq, Ord, Show)
 
 resolve ∷ M.Map String [TyAnnot] → TyAnn → TyAnn
-resolve env ty = case ty of
+resolve env ty = trace ("resolve: " ++ show ty ) $ case ty of
   TyDer tyd → case tyd of
     TyAgg tya → case tya of
       TyArr i tye → let ntye = resolve env tye
@@ -75,24 +75,35 @@ resolve env ty = case ty of
   _ → ty
 
 resolveAnn ∷ [String] → M.Map String [TyAnnot] → TyAnnot → TyAnnot
-resolveAnn log env ann@(TyVar s) = 
-  if s `elem` log
-  then AnyAddr
+resolveAnn log env ann@(TyVar s) = trace ("resolveAnn: " ++ show log ++ " " ++ show ann ) $
+  fst $ resolveAnnAux log env ann
+resolveAnn log env a = a
+
+resolveAnnAux log env ann@(TyVar s) =
+  if s `elem` log 
+  then (AnyAddr,log) -- Loop
   else 
     let vals = M.assocs env
-        helper = \(a,v) → (TyVar a):(L.delete ann v)
         cleft = MB.fromMaybe [] $ M.lookup s env
+        helper = \(a,v) → (TyVar a):(L.delete ann v)
         cright = concatMap helper $ filter (\(a,v) → ann `elem` v) vals
-        c = cleft ++ cright
-    in case c of
-      []     → AnyAddr
-      (x:xs) → resolveAnn (s:log) env $ foldr (resolveAnnot (s:log) env) x xs
-resolveAnn log env a = a 
+        c = L.nub $ cleft ++ cright
+    in computeAnnot (s:log) env c
+resolveAnnAux log env a = (a,log) 
+
+computeAnnot ∷ [String] → M.Map String [TyAnnot] → [TyAnnot] → (TyAnnot, [String])
+computeAnnot log env [] = (AnyAddr,log)
+computeAnnot log env (x:xs) = 
+  let (ta,nlog) = resolveAnnAux log env x
+      (tb,nlog') = computeAnnot nlog env xs
+  in case ta ≌ tb of
+    Nothing → error $ "computeAnnot: Unification error " ++ show log ++ "\n" ++ show ta ++ "\n" ++ show tb
+    Just t → (t,nlog')
 
 resolveAnnot ∷ [String] → M.Map String [TyAnnot] → TyAnnot → TyAnnot → TyAnnot
 resolveAnnot log env lhs rhs = 
-  let ta = resolveAnn log env lhs
-      tb = resolveAnn log env rhs
+  let ta = fst $ resolveAnnAux log env lhs
+      tb = fst $ resolveAnnAux log env rhs
   in case ta ≌ tb of
     Nothing → error $ "resolveAnnot: Unification error " ++ show log ++ "\n" ++ show (lhs,ta) ++ "\n" ++ show (rhs,tb)
     Just t → t

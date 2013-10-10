@@ -101,10 +101,10 @@ instance Constr ConstantExpr where
  	  CompareConstantExpr ce         → π ce
  	  ExtractElementConstantExpr     → error "π of ExtractElementConstantExpr"
  	  ExtractValueConstantExpr       → error "π of ExtractValueConstantExpr"
- 	  GetElementPtrConstantExpr τ α δs → 
-            case πgep α δs of
-              Nothing → ℂτ $ (↑)τ
-              Just c  → c                               
+ 	  GetElementPtrConstantExpr τ α δs → ℂτ $ (↑)τ
+          --  case πgep α δs of
+          --    Nothing → ℂτ $ (↑)τ
+          --    Just c  → c                               
  	  InsertElementConstantExpr      → error "π of InsertElementConstantExpr"
  	  InsertValueConstantExpr        → error "π of InsertValueConstantExpr"
  	  SelectConstantExpr             → error "π of SelectConstantExpr"
