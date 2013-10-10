@@ -288,13 +288,14 @@ getOtherOp Call = do ival  <- getInstructionValue
                              args <- getOperands ival >>= (\l -> mapM getValue (init l))
                              let (hsd,isa) = (cInt2Bool iasmhsd, cInt2Bool iasmhsd)
                              --liftIO $ print $ "parsing asm string: " ++ iasmStr
-                             let asmInfo = (,) <$> parseAsm iasmStr <*> parseAsmC iasmCtr
-                             case asmInfo of
-                              Nothing -> do --liftIO $ appendFile "/home/marcelosousa/Research/llvmlinux/targets/x86_64/src/linux/llvmvf.asm.fail" iasmStr
-                                            return $ LL.InlineAsm pc (LL.Local ident) ty False hsd isa iasmdlct ([],[]) [] args
-                              Just (piasmStr,piasmCtr) -> do
+                             return $ LL.InlineAsm pc (LL.Local ident) ty False hsd isa iasmdlct ([],[]) [] args
+                             --let asmInfo = (,) <$> parseAsm iasmStr <*> parseAsmC iasmCtr
+                             --case asmInfo of
+                             -- Nothing -> do --liftIO $ appendFile "/home/marcelosousa/Research/llvmlinux/targets/x86_64/src/linux/llvmvf.asm.fail" iasmStr
+                             --               return $ LL.InlineAsm pc (LL.Local ident) ty False hsd isa iasmdlct ([],[]) [] args
+                             -- Just (piasmStr,piasmCtr) -> do
                                -- liftIO $ appendFile "/home/marcelosousa/Research/llvmlinux/targets/x86_64/src/linux/llvmvf.asm.lifted" iasmStr
-                                return $ LL.InlineAsm pc (LL.Local ident) ty True hsd isa iasmdlct piasmStr piasmCtr args
+                             --   return $ LL.InlineAsm pc (LL.Local ident) ty True hsd isa iasmdlct piasmStr piasmCtr args
                      else do (callee, args) <- getOperands ival >>= getCallArgs
                              --liftIO $ print callee
                              callee' <- liftIO $ demangler callee
