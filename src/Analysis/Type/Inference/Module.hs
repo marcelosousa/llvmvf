@@ -27,7 +27,7 @@ typeAnnInference ∷ Module → (NamedTypes, M.Map Id Γ)
 typeAnnInference mdl = 
 	let (nmdτ, gτℂ, fnτℂ) = typeConstraints mdl
 	    --gγ = (⊨) nmdτ M.empty gτℂ
-	    gnγ = M.map (\c → solve nmdτ M.empty (c ∪ gτℂ)) fnτℂ
+	    gnγ = M.map (\c → solve nmdτ (c ∪ gτℂ)) fnτℂ
 	in (nmdτ, gnγ) --M.insert (Global "globals") gγ gnγ)
 
 typeConstraints ∷ Module → (NamedTypes, S.Set Τℂ', M.Map Id (S.Set Τℂ'))

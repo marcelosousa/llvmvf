@@ -16,7 +16,10 @@ import qualified Data.List as L
 import qualified Data.Map as M
 import qualified Data.Maybe as MB
 
-import Debug.Trace 
+import qualified Debug.Trace as Trace
+
+trace s f = f
+--trace = trace
 
 type NamedTypes = M.Map String TyAnn
 
@@ -91,7 +94,7 @@ resolveAnnot log env lhs rhs =
   let ta = resolveAnn log env lhs
       tb = resolveAnn log env rhs
   in case ta ≌ tb of
-    Nothing → error $ "resolveAnnot: Unification error\n" ++ show lhs ++ "\n" ++ show rhs
+    Nothing → error $ "resolveAnnot: Unification error " ++ show log ++ "\n" ++ show (lhs,ta) ++ "\n" ++ show (rhs,tb)
     Just t → t
 
 getTypeQual ∷ TyAnn → Maybe TyAnnot
@@ -121,9 +124,9 @@ expandTypeAgg nt counter isNty ty (x:xs) = trace ("expandTypeAgg " ++ show x) $ 
            then (nc, nity, rty)
            else trace "expandTypeAgg: possible array out of bounds" $ (nc, nity, rty)
       TyStr sn n tys → 
-        if length tys >= x
+        if length tys >= x && (not $ null tys)
         then                        -- we already have it
-          let ity = tys!!x
+          let ity = tys!!x 
               (nc, genTy,_) = generalizeType counter ity M.empty
               (nc',nity,rty) = expandTypeAgg nt nc False genTy xs
               (btys,atys) = splitAt x tys  
@@ -135,8 +138,7 @@ expandTypeAgg nt counter isNty ty (x:xs) = trace ("expandTypeAgg " ++ show x) $ 
           Just nty → if isNty
                      then error $ "expandTypeAgg: out of bounds " ++ show nty
                      else expandTypeAgg nt counter True nty (x:xs)
-
-  _ → error $ "expandTypeAgg: " ++ show ty ++ " is not aggregate"
+  _ → error $ "expandTypeAgg: " ++ show ty ++ " is not aggregate " ++ show (x:xs)
 
 generalizeType ∷ Int → TyAnn → M.Map String [TyAnnot] → (Int, TyAnn, M.Map String [TyAnnot]) 
 generalizeType counter ty env = case ty of

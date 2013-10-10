@@ -13,7 +13,7 @@ module Analysis.Type.Inference.Solver where
 import Language.LLVMIR hiding (Id, NamedTypes)
 import Analysis.Type.Inference.Base
 import Analysis.Type.Memory.Util
-import Analysis.Type.Memory.TyAnn as T
+import Analysis.Type.Memory.TyAnn as T hiding (trace)
 import Language.LLVMIR.Util
 import Analysis.Type.Inference.Value
 import Analysis.Type.Util
@@ -26,7 +26,6 @@ import qualified Data.Set as S
 import qualified Data.Map as M
 import qualified Data.Maybe as MB
 import Data.List
-import Data.Foldable (foldr')
 
 import Control.Applicative
 import Control.Monad hiding (join)
@@ -36,10 +35,10 @@ import qualified Debug.Trace as Trace
 import UU.PPrint hiding ((<$>))
 
 trace s f = f
---trace = Trace.trace
+--trace = trace
 
 cToString ∷ S.Set Τℂ' → String
-cToString ts = foldr' (\co r → show co ++ "\n" ++ r) "" (S.toList ts) 
+cToString ts = foldr (\co r → show co ++ "\n" ++ r) "" (S.toList ts) 
 
 mcToString ∷ ConstraintMap → String
 mcToString ts = M.foldWithKey 
@@ -65,43 +64,59 @@ type Env = M.Map String [Ταρ]
 type ConstraintMap = M.Map Identifier (M.Map ℂ (S.Set Int))
 
 tyEq ∷ Int → NamedTypes → Τα → Τα → Τα
-tyEq pc nt ty1 ty2 = Trace.trace ("tyEq " ++ show ty1 ++ " " ++ show ty2) $ 
+tyEq pc nt ty1 ty2 = trace ("tyEq " ++ show ty1 ++ " " ++ show ty2) $ 
   case (≅) nt ty1 ty2 of
     Nothing → error $ "Type Unification failed in pc=: " ⧺ show pc ⧺ "\n" ⧺ show ty1 ⧺ "\n" ⧺ show ty2
     Just ty → ty
 
 erasePC = M.map (S.fromList . M.keys)
 
-solve ∷ NamedTypes → Γ → S.Set Τℂ' → Γ 
-solve nt y cs = Trace.trace ("solve init\n---------------\n" ++ cToString cs ++ "---------------\n") $
-  let cs' = S.fold (solveEqualType nt) S.empty cs -- type with type
-      (counter,ncs) = liftCa cs'
-      (oc,ocs) = Trace.trace ("after solveEqualType & liftCa\n---------------\n" ++ cToString ncs ++ "---------------\n") $ 
+solve ∷ NamedTypes → S.Set Τℂ' → Γ 
+solve nt cs = trace ("solve init\n---------------\n" ++ cToString cs ++ "---------------\n") $
+  let scs = S.fold (solveEqualType nt) S.empty cs -- type with type
+      (counter, ncs) = liftCa scs                 -- remove ℂa 
+      (table, ecs) = trace ("after solveEqualType & liftCa\n---------------\n" ++ cToString ncs ++ "---------------\n") $ 
+                     buildHash ncs
+      (ncounter, gtable, gecs, env) = trace ("after buildHash\n" ++ scToString (erasePC table) ++ "---------------\n" ++ cToString ecs ++ "---------------\n") $
+                                      generalize table ecs counter
+      (ncounter', ntable, necs, nenv) = trace ("after generalize\n---------------\n" ++ scToString (erasePC gtable) ++ "---------------\n" ++ cToString gecs ++ "---------------\n" ++ envToString env ++ "---------------\n") $
+                                        solveGeps nt (ncounter, gtable, gecs, env)
+      (renv, rtable) = trace ("after solveGeps\n---------------\n" ++ scToString (erasePC ntable) ++ "---------------\n" ++ envToString nenv ++ "---------------\n" ++ cToString necs ++ "---------------\n") $
+                       rewrite nenv ntable 
+      (itable, ienv) = trace ("after 1st rewrite\n---------------\n" ++ scToString (erasePC rtable) ++ "---------------\n" ++ cToString necs ++ "---------------\n" ++ envToString renv ++ "---------------\n") $
+                       incorporate rtable renv necs
+      (fenv, ftable) = trace ("after incorporate\n---------------\n" ++ scToString (erasePC itable) ++ "---------------\n" ++ envToString ienv ++ "---------------\n") $
+                       rewrite ienv itable 
+  in trace ("after 2nd rewrite\n---------------\n" ++ scToString (erasePC ftable) ++ "---------------\n" ++ envToString fenv ++ "---------------\n") $
+     typify ftable fenv
+{-      (oc,ocs) = trace ("after solveEqualType & liftCa\n---------------\n" ++ cToString ncs ++ "---------------\n") $ 
                  prep nt ncs
-      (y',rc)  = Trace.trace ("after prep\n---------------\n" ++ scToString (erasePC oc) ++ "---------------\n") $ 
-                 collect nt oc y
-      nrc      = Trace.trace ("after collect\n---------------\n" ++ scToString (erasePC rc) ++ "---------------\n") $ 
+      (y',rc)  = trace ("after prep\n---------------\n" ++ scToString (erasePC oc) ++ "---------------\n") $ 
+                 collect nt oc y                 
+      nrc      = trace ("after collect\n---------------\n" ++ scToString (erasePC rc) ++ "---------------\n") $ 
                  fixrewrite nt rc
-      (nc,grc,nocs,tyq) = Trace.trace ("after fixrewrite\n---------------\n" ++ scToString (erasePC rc) ++ "---------------\n") $ 
-                   generalize nrc ocs counter
-      rrc = Trace.trace ("after generalize\n---------------\n" ++ scToString (erasePC grc) ++ "---------------\n") $
+      (nc,grc,nocs,tyq) = trace ("after fixrewrite\n---------------\n" ++ scToString (erasePC nrc) ++ "---------------\n") $
+                          generalize nrc ocs counter
+      rrc = trace ("after generalize\n---------------\n" ++ scToString (erasePC grc) ++ "---------------\n" ++ cToString ocs ++ "---------------\n") $
             replace grc
-      (orc,ny) = Trace.trace ("after replace\n---------------\n" ++ scToString (erasePC rrc) ++ "---------------\n") $
+      (orc,ny) = trace ("after replace\n---------------\n" ++ scToString (erasePC grc) ++ "---------------\n") $
                  liftPrimitive rrc y'
   in if not $ M.null orc
-     then error "solve: something went wrong"
-     else let (nc',ny',ntyq) = Trace.trace ("after lift\n---------------\n" ++ gammaToString ny ++ "\n" ++ envToString tyq ++ "---------------\n" ++ cToString nocs ++ "---------------\n") $ 
+     then error $ "solve: something went wrong\n" ++ scToString (erasePC nrc)
+     else let (nc',ny',ntyq) = trace ("after lift\n---------------\n" ++ gammaToString ny ++ "\n" ++ envToString tyq ++ "---------------\n" ++ cToString nocs ++ "---------------\n") $ 
                                merge nt nc ny nocs tyq
-              finaly = Trace.trace ("after merge\n---------------\n" ++ gammaToString ny' ++ "\n" ++ envToString ntyq ++ "---------------\n") $ 
+              finaly = trace ("after merge\n---------------\n" ++ gammaToString ny' ++ "\n" ++ envToString ntyq ++ "---------------\n") $ 
                        typify ntyq ny'
-          in  Trace.trace ("finaly\n---------------\n") $ finaly
+          in  trace ("finaly\n---------------\n") $ finaly          
+-}
+
 
 -- Step 1 - Remove trivial constraints
 solveEqualType ∷ NamedTypes → Τℂ' → S.Set Τℂ' → S.Set Τℂ'
 solveEqualType nt (ℂτ ty1 :=: ℂτ ty2, pc) r = tyEq pc nt ty1 ty2 `seq` r
 solveEqualType nt c r = S.insert c r
 
--- Step 2a - Remove ℂa constraints
+-- Step 2 - Remove ℂa constraints
 liftCa ∷ S.Set Τℂ' → (Int, S.Set Τℂ')
 liftCa = S.fold liftCaAux (0,S.empty) 
 
@@ -121,7 +136,7 @@ liftCAux counter cn pc = case cn of
            in (ncounter, ℂp nc a, r)
   ℂλ a r → let aux = \c (cn,la,rest) → let (ncn,nc,rc) = liftCAux cn c pc
                                        in (ncn,nc:la, S.union rc rest)
-               (ncounter, na, csa) = foldr' aux (counter,[],S.empty) a
+               (ncounter, na, csa) = foldr aux (counter,[],S.empty) a
                (ncounter', nr, csr) = liftCAux ncounter r pc
            in (ncounter', ℂλ na nr, S.union csr csa)
   ℂq c → let (ncounter, nc, r) = liftCAux counter c pc
@@ -129,38 +144,168 @@ liftCAux counter cn pc = case cn of
   ℂa t c → let (ncounter,nt,_) = generalizeType counter t M.empty 
            in (ncounter, ℂτ nt, S.singleton (ℂq (ℂτ nt) :=: ℂq c, pc))                
 
--- Step 2b - Hash and simplify type
-prep ∷ NamedTypes → S.Set Τℂ' → (ConstraintMap, S.Set Τℂ')
-prep nt cs = 
-  let (rcs, ecs) = S.partition (\(c1 :=: c2, _) → isComplexConstr c1 || isComplexConstr c2) cs
-  in (S.foldr' (hash nt) M.empty ecs, rcs)
+-- Step 3 - Build an hash table 
+-- Build huge hash table and separate
+-- type ConstraintMap = M.Map Identifier (M.Map ℂ (S.Set Int))
+buildHash ∷ S.Set Τℂ' → (ConstraintMap, S.Set Τℂ')
+buildHash = S.foldr buildHashElement (M.empty, S.empty) 
 
-hash ∷ NamedTypes → Τℂ' → ConstraintMap → ConstraintMap
-hash nt (lhs@(ℂπ n) :=: rhs, pc) r = 
-  case rhs of
-    ℂτ t → addConstr nt n (rhs,pc) r 
-    ℂπ m → if reachable n m r
-           then r
-           else addConstr nt n (rhs,pc) r 
-    _ → case simplify nt rhs of
-      Nothing → addConstr nt n (rhs,pc) r
-      Just ty → addConstr nt n (ℂτ ty,pc) r 
-hash nt c@(ℂτ t :=: ℂp (ℂπ n) AnyAddr, pc) r = 
-  case t of
-    TyDer (TyPtr ty nta) → hash nt (ℂπ n :=: ℂτ ty,pc) r
-    _ →  error $ "gather: invalid types " ++ show c
-hash nt c _ = error $ "gather: should not happen " ++ show c 
+buildHashElement ∷ Τℂ' → (ConstraintMap, S.Set Τℂ') → (ConstraintMap, S.Set Τℂ')
+buildHashElement cn@(lhs :=: rhs, pc) (table, rest) = 
+  case lhs of 
+    ℂτ tl → case rhs of      
+      ℂπ n  → (addConstraint n (lhs,pc) table, rest)
+      ℂp c ta → case tl of
+        TyDer (TyPtr ty tta) → 
+          let (ntable, nrest) = buildHashElement (c :=: (ℂτ ty),pc) (table, rest)
+          in (ntable, S.insert cn rest)
+        _ → error $ "buildHashElement: Type Unification failed :" ++ show cn 
+      ℂλ ca cr → case tl of
+        TyDer (TyFun ta tr _) → 
+          if length ca == length ta
+          then let (ntable, nrest) = foldr (\(c,t) res → buildHashElement (c :=: (ℂτ t),pc) res) (table,rest) $ zip ca ta
+                   (ntable', nrest') = buildHashElement (cr :=: (ℂτ tr), pc) (ntable, nrest)
+               in (ntable', S.insert cn nrest')
+          else error $ "buildHashElement: Argument list mismatch"
+      _     → (table, S.insert cn rest)
+    ℂπ n → case rhs of
+      ℂπ m → let ntable = addConstraint n (rhs,pc) table
+                 ntable' = addConstraint m (lhs,pc) ntable
+             in (ntable', rest)
+      ℂι c i a → (table, S.insert cn rest)
+      _ → (addConstraint n (rhs,pc) table, rest)
+    ℂι c i a → case rhs of
+      ℂι d j b → let (ntable, nrest) = buildHashElement (c :=: d, pc) (table, rest)
+                 in (ntable, S.insert cn nrest)
+      ℂp d b → (table, S.insert cn rest)
+      ℂλ a r → error $ "buildHashElement: Type Unification failed :" ++ show cn 
+      ℂq d → (table, S.insert cn rest)
+      _ → buildHashElement (rhs :=: lhs, pc) (table, rest)
+    ℂp c a → case rhs of
+      ℂp d b → let (ntable, nrest) = buildHashElement (c :=: d, pc) (table, rest)
+               in (ntable, S.insert cn nrest)
+      ℂλ a r → error $ "buildHashElement: Type Unification failed :" ++ show cn 
+      ℂq d → (table, S.insert cn rest)
+      _ → buildHashElement (rhs :=: lhs, pc) (table, rest)
+    ℂλ a r → case rhs of
+      ℂλ b s → 
+        if length a == length b
+        then let (ntable, nrest) = foldr (\(c,t) res → buildHashElement (c :=: t,pc) res) (table,rest) $ zip a b
+                 (ntable', nrest') = buildHashElement (r :=: s, pc) (ntable, nrest)
+             in (ntable', S.insert cn nrest')
+        else error $ "buildHashElement: Argument list mismatch" 
+      _ → buildHashElement (rhs :=: lhs, pc) (table, rest)
+    ℂq c → (table, S.insert cn rest)
+      
+addConstraint ∷ Identifier → (ℂ,Int) → ConstraintMap → ConstraintMap
+addConstraint n (c,pc) res = 
+  case M.lookup n res of
+    Nothing → M.insert n (M.singleton c $ S.singleton pc) res
+    Just m  → let m' = M.insertWith S.union c (S.singleton pc) m
+              in M.insert n m' res
+
+-- Step 4 - Generate the type qualifier variables
+generalize ∷ ConstraintMap → S.Set Τℂ' → Int → (Int, ConstraintMap, S.Set Τℂ', Env)
+generalize mc oc n = let (c, nmc,env) = M.foldWithKey generalizeConstraints (n,M.empty,M.empty)  mc
+                         (nc, goc,env') = S.fold generalizeTyConst (c,S.empty,env) oc
+                     in trace "generalize" $ (nc, nmc, goc, env')
+
+generalizeConstraints ∷ Identifier → M.Map ℂ (S.Set Int) → (Int, ConstraintMap,Env) → (Int, ConstraintMap,Env)
+generalizeConstraints n cs (counter,mc,env) = 
+  let (ncounter, ncs,env') = M.foldrWithKey generalizeConstraint (counter,M.empty,env) cs 
+  in (ncounter, M.insert n ncs mc,env')
+
+generalizeConstraint ∷ ℂ → S.Set Int → (Int, M.Map ℂ (S.Set Int),Env) → (Int, M.Map ℂ (S.Set Int),Env)
+generalizeConstraint c pcs (counter, res,env) = 
+  let (ncounter, nc,env') = generalizeCons counter c env
+  in (ncounter, M.insert nc pcs res,env')
+
+-- Step 5 - Solve geps
+solveGeps ∷ NamedTypes → (Int, ConstraintMap, S.Set Τℂ', Env) → (Int, ConstraintMap, S.Set Τℂ', Env)
+solveGeps nt (counter,table,cs,env) = S.foldr (nsolveGep nt) (counter, table, S.empty, env) cs
+
+nsolveGep ∷ NamedTypes → Τℂ' → (Int, ConstraintMap, S.Set Τℂ', Env) → (Int, ConstraintMap, S.Set Τℂ', Env)
+nsolveGep nt cn@(lhs :=: rhs,pc) (counter, table, rest, env) = trace ("nsolveGep " ++ show cn) $ 
+  let (nlhs,ncounter,ntable,nrest,nenv) = solveGepConstraint nt counter lhs table rest env
+      (nrhs,ncounter',ntable',nrest',nenv') = solveGepConstraint nt ncounter rhs ntable nrest nenv
+      ncn = (nlhs :=: nrhs,pc)
+  in (ncounter',ntable', S.insert ncn nrest', nenv')
+
+solveGepConstraint ∷ NamedTypes → Int → ℂ → ConstraintMap → S.Set Τℂ' → Env → (ℂ, Int, ConstraintMap, S.Set Τℂ', Env)
+solveGepConstraint nt counter cn table rest env = 
+  case cn of
+    ℂτ ty → (cn,counter,table,rest,env)
+    ℂπ n  → (cn,counter,table,rest,env)
+    ℂι c idxs ca → 
+      case solveGepType nt counter [] c idxs ca table rest env of
+        (Nothing,_,_,_,_) → error $ "solveGepConstraint: couldn't solve " ++ show cn
+        (Just (_,tyl),ncounter,ntable,nrest,nenv) → trace ("solved " ++ show tyl) $ (ℂτ tyl,ncounter,ntable,nrest,nenv)
+    ℂp c ca → 
+      let (nc,ncounter,ntable,nrest,nenv) = solveGepConstraint nt counter c table rest env
+      in (ℂp nc ca,ncounter,ntable,nrest,nenv)
+    ℂλ ca cr → 
+      let foldrAux = \c (rest,counter,table,rest',env) → let (nc,ncounter,ntable,nrest,nenv) = solveGepConstraint nt counter c table rest' env
+                                                         in (nc:rest,ncounter,ntable,nrest,nenv)
+          (nca,ncounter,ntable,nrest,nenv) = foldr foldrAux ([],counter,table,rest,env) ca
+          (ncr,ncounter',ntable',nrest',nenv') = solveGepConstraint nt ncounter cr ntable nrest nenv
+      in (ℂλ nca ncr,ncounter',ntable',nrest',nenv')
+    ℂq c → 
+      let (nc,ncounter,ntable,nrest,nenv) = solveGepConstraint nt counter c table rest env
+      in (ℂq nc,ncounter,ntable,nrest,nenv)
+
+solveGepType ∷ NamedTypes → Int → [Id] → ℂ → [Int] → Ταρ → ConstraintMap → S.Set Τℂ' → Env → (Maybe (Τα,Τα), Int, ConstraintMap, S.Set Τℂ', Env)
+solveGepType nt counter hist cn idxs ann table rest env = trace ("solveGepType " ++ show cn ++ " " ++ show idxs) $ 
+  case cn of
+    ℂτ ty → 
+      let (ncounter,ety,gty) = trace ("expanding " ++ show ty ++ " " ++ show idxs) $ expandType nt counter ty idxs 
+          nty = TyDer $ TyPtr gty ann
+      in (Just (ety,nty), ncounter, table, rest, env)      
+    ℂp c cann →
+      case ann ≌ cann of
+        Nothing → error $ "solveGepType: Type Unification error"
+        Just nann → solveGepType nt counter hist c idxs nann table rest env
+    ℂπ n → if n `elem` hist
+           then (Nothing,counter,table,rest,env)
+           else case M.lookup n table of
+              Nothing → (Nothing,counter,table,rest,env)
+              Just cs →
+                let acs = M.assocs cs
+                in case mapSolveGep nt counter (n:hist) acs idxs ann table rest env of
+                      (Nothing,ncounter,ntable,nrest,nenv) → (Nothing,ncounter,ntable,nrest,nenv)
+                      (Just ((ety,ty),pc),ncounter,ntable,nrest,nenv) → 
+                        let ntable' = addConstraint n (ℂτ ety,pc) ntable
+                        in (Just (ety,ty),ncounter,ntable',nrest,nenv)
+    ℂι c didxs da → 
+          case solveGepType nt counter hist c didxs da table rest env of
+            (Nothing,_,_,_,_) → error $ "solveGepType: couldn't solve " ++ show cn
+            (Just (_,tyl),ncounter,ntable,nrest,nenv) → 
+              let (ncounter',ety,gty) = expandType nt ncounter tyl idxs 
+                  fty = TyDer $ TyPtr gty ann
+                  nrest' = S.insert (ℂτ tyl :=: ℂτ ety,(-10)) nrest
+              in (Just (ety,fty), ncounter', ntable, nrest',nenv) -- Missing adding ℂτ tyl :=: ℂτ ety
+    ℂλ ca cr → error $ "solveGepType: Not allowed"
+    ℂq c → error $ "solveGepType: Not allowed"
+
+mapSolveGep ∷ NamedTypes → Int → [Id] → [(ℂ,S.Set Int)] → [Int] → Ταρ → ConstraintMap → S.Set Τℂ' → Env → (Maybe ((Τα,Τα),Int),Int,ConstraintMap,S.Set Τℂ',Env)
+mapSolveGep nt counter hist [] idxs ann table rest env = (Nothing,counter,table,rest,env)
+mapSolveGep nt counter hist ((c,pcs):xs) idxs ann table rest env = 
+  case solveGepType nt counter hist c idxs ann table rest env of
+    (Nothing,ncounter,ntable,nrest,nenv) → mapSolveGep nt ncounter hist xs idxs ann ntable nrest nenv
+    (Just (ety,ty),ncounter,ntable,nrest,nenv) → (Just ((ety,ty),head $ S.toList pcs), ncounter, ntable, nrest,nenv)
+
 
 -- Is n reachable from m given r?
-reachable ∷ Id → Id → ConstraintMap → Bool
-reachable n m r = 
+reachable ∷ [Id] → Id → Id → ConstraintMap → Bool
+reachable log n m r = trace ("reachable " ++ show n ++ " " ++ show m) $ 
   if n == m 
   then True
-  else case M.lookup m r of
-    Nothing → False
-    Just mc → 
-      let ids = nub $ concatMap vars $ M.keys mc
-      in any (\o → reachable n o r) ids
+  else if m `elem` log 
+       then False
+       else case M.lookup m r of
+          Nothing → False
+          Just mc → 
+            let ids = nub $ concatMap vars $ M.keys mc
+            in any (\o → reachable (m:log) n o r) ids
 
 addConstr ∷ NamedTypes → Identifier → (ℂ,Int) → ConstraintMap → ConstraintMap
 addConstr nt n (c,pc) res = 
@@ -177,152 +322,158 @@ simplifyType nt (c,i) [] = [(c,S.singleton i)]
 simplifyType nt (ℂτ ty1,i) ((ℂτ ty2,si):xs) = (ℂτ $ tyEq i nt ty1 ty2, S.insert i si):xs
 simplifyType nt (ℂτ ty1,i) (x:xs) = x:(simplifyType nt (ℂτ ty1,i) xs) 
 
--- Step 3 - Process trivial 
-collect ∷ NamedTypes → ConstraintMap → Γ → (Γ, ConstraintMap)
-collect nt m y = 
-  let (toProcess, rest) = M.partitionWithKey partitionCondition m
-  in (M.foldrWithKey (\k im yy → process nt k (M.assocs im) yy) y toProcess,rest)
-    where process ∷ NamedTypes → Identifier → [(ℂ,S.Set Int)] → Γ → Γ
-          process nt k [(ℂτ ty, pcs)] y = case M.lookup k y of 
-            Nothing → M.insert k ty y
-            Just ty' → M.insert k (tyEq (head $ S.toList pcs) nt ty ty') y
-          process nt k _ y = error "process: bad arguments"
-          partitionCondition k m = isGlobalId k && M.size m == 1 &&  length (filter isℂτ (M.keys m)) == 1
 
--- Step 4 - Fix point and solve 
+-- Step 4a
+incorporate ∷ ConstraintMap → Env → S.Set Τℂ' → (ConstraintMap, Env)
+incorporate table env cs = S.fold incorporateConstraint (table,env) cs
+
+incorporateConstraint ∷ Τℂ' → (ConstraintMap, Env) → (ConstraintMap, Env)
+incorporateConstraint (ℂπ n :=: rhs, pc) (table, env) = 
+  let ntable = addConstraint n (rhs, pc) table
+  in (ntable, env)
+incorporateConstraint (ℂq cl :=: rhs,pc) (table, env) =
+  case rhs of
+      ℂq cr → let vcl = trace ("getTyQual result = " ++ show (getTyQual table cl) ++ " " ++ show cl) $ getTyQual table cl 
+                  vcr = getTyQual table cr
+              in case vcl of 
+                Nothing → case vcr of 
+                  Nothing → (table, env)
+                  Just _ → error "mergeConstraint: probably invalid cast"
+                Just (TyVar var) → case vcr of
+                  Nothing → error "mergeConstraint: probably invalid cast"
+                  Just rvcr  → (table, M.insertWith (++) var [rvcr] env)
+
+-- Step 4b - Fix point and solve 
 -- The termination condition is the cardinality of the all the elements in the table to be one
-fixrewrite ∷ NamedTypes → ConstraintMap → ConstraintMap
-fixrewrite nt cm = Trace.trace "entering fixrewrite" $ 
-  let cm' = M.foldrWithKey (steprewrite nt) M.empty cm
-  in if cm == cm'
-     then cm
-     else fixrewrite nt cm'
+rewrite ∷ Env → ConstraintMap → (Env, ConstraintMap)
+rewrite env table = M.foldWithKey (steprewrite table) (env, M.empty) table
 
-steprewrite ∷ NamedTypes → Identifier → M.Map ℂ (S.Set Int) → ConstraintMap → ConstraintMap
-steprewrite nt n cn cm = Trace.trace "entering steprewrite" $ 
+steprewrite ∷ ConstraintMap → Identifier → M.Map ℂ (S.Set Int) → (Env, ConstraintMap) → (Env, ConstraintMap)
+steprewrite table n cn (env, gamma) = trace ("entering steprewrite " ++ show n ++ " " ++ show cn) $
   if M.size cn <= 1
-  then M.insert n cn cm
-  else let cns = M.assocs cn
-           ((c,pcs), ncm) = foldr' (rewrite nt n) (head cns, cm) $ tail cns
-       in M.insert n (M.singleton c pcs) ncm
-
-rewrite ∷ NamedTypes → Identifier → (ℂ,S.Set Int) → ((ℂ,S.Set Int), ConstraintMap) → ((ℂ,S.Set Int), ConstraintMap)
-rewrite nt n (c1,pc1) ((c2,pc2),cm) = Trace.trace "entering rewrite" $ 
-  let (c,icm) = fuse nt cm n c1 c2
-  in ((c, S.union pc1 pc2), icm)
-
-join ∷ ConstraintMap → ConstraintMap → ConstraintMap
-join cm1 cm2 = M.unionWith (M.unionWith (S.union)) cm1 cm2
-
-update ∷ Identifier → ℂ → ConstraintMap → ConstraintMap
-update n c mc = Trace.trace "update" $ 
-  case M.lookup n mc of
-    Nothing → M.insert n (M.singleton c S.empty) mc
-    Just cs → M.insert n (M.insertWith S.union c S.empty cs) mc
+  then trace ("steprewrite inserting") $  (env, M.insert n cn gamma)
+  else let (cns,pcs) = unzip $ M.assocs cn
+           (c, nenv,ngamma) = foldr (\c1 (c2,env,gamma) → fuse table env gamma c1 c2) (head cns, env, gamma) $ tail cns
+       in (nenv, M.insert n (M.singleton c (S.unions pcs)) ngamma)
 
 -- Important fun
-fuse ∷ NamedTypes → ConstraintMap → Identifier → ℂ → ℂ → (ℂ, ConstraintMap)
-fuse nt cm n lhs rhs = Trace.trace "entering fuse" $ 
+fuse ∷ ConstraintMap → Env → ConstraintMap → ℂ → ℂ → (ℂ, Env, ConstraintMap)
+fuse table env gamma lhs rhs = trace ("entering fuse " ++ show lhs ++ " " ++ show rhs) $
   case lhs of
-    ℂτ t → fuseWithType nt cm n t rhs
-    ℂπ m → fuseWithVar  nt cm n m rhs 
-    ℂp c a → fuseWithPtr nt cm n c a rhs
-    ℂλ a r → fuseWithFun nt cm n a r rhs
+    ℂτ t   → fuseWithType table env gamma t rhs
+    ℂπ m   → case grabNonVar m gamma of 
+        Nothing → case grabNonVar m table of 
+          Nothing → (lhs, env, M.insert m (M.singleton rhs S.empty) gamma)
+          Just ct → fuse table env gamma ct rhs
+        Just ct → fuse table env gamma ct rhs
+    ℂp c a → fuseWithPtr  table env gamma c a rhs
+    ℂλ a r → fuseWithFun  table env gamma a r rhs
     _ → error "fuse error: unsupported constraint"
 
-fuseWithType ∷ NamedTypes → ConstraintMap → Identifier → Τα → ℂ → (ℂ, ConstraintMap)
-fuseWithType nt cm n ty rhs = Trace.trace ("entering fuseWithType " ++ show rhs ++ " " ++ show ty) $ 
+fuseWithType ∷ ConstraintMap → Env → ConstraintMap → Τα → ℂ → (ℂ, Env, ConstraintMap)
+fuseWithType table env gamma ty rhs = trace ("entering fuseWithType " ++ show rhs ++ " " ++ show ty) $
   case rhs of
-    ℂτ tyr → (ℂτ $ tyEq (-1) nt ty tyr, cm)
-    ℂπ m   → (rhs, update m (ℂτ ty) cm)
+    ℂτ tyr → let (nenv, nty) = mergeTypes env ty tyr
+             in (ℂτ nty, nenv, gamma)
+    ℂπ m   → fuse table env gamma rhs (ℂτ ty)
     ℂp c a → case ty of
-        TyDer (TyPtr typ ann) → case (≌) a ann of
-              Nothing → error $ "Unification failed in fuseWithType " ++ show a ++ " " ++ show ann
-              Just na → let (nc, ncm) = fuseWithType nt cm n typ c
-                        in (ℂp nc na, ncm)
+        TyDer (TyPtr typ ann) → 
+          let (na, nenv) = addToEnv a ann env
+              (nc, nenv',gamma') = fuseWithType table nenv gamma typ c
+          in (ℂp c na, nenv', gamma')
         _ → error "fuseWithType: type is not pointer"
     ℂλ a r → case ty of
         TyDer (TyFun ta tr _) → 
           if length ta /= length a
           then error "fuseWithType: functions have different argument list length"
           else let as = zip ta a
-                   (na, mcs) = fuseLambdaParameters nt cm n as
-                   (nr, rmc) = fuseWithType nt mcs n tr r
-               in (ℂλ na nr, rmc)
+                   (na, nenv,ngamma) = fuseLambdaParameters table env gamma as
+                   (nr, nenv',ngamma') = fuseWithType table nenv ngamma tr r
+               in (ℂλ na nr, nenv',ngamma')
         _ → error "fuseWithType: type is not a function"
     _ → error "fuseWithType error: unsupported constraint"   
-    where fuseLambdaParameters ∷ NamedTypes → ConstraintMap → Identifier → [(Τα, ℂ)] → ([ℂ],ConstraintMap)
-          fuseLambdaParameters nt cm n [] = ([],cm)
-          fuseLambdaParameters nt cm n xs = Trace.trace "entering fuseLambdaParameters" $ 
-            let (ta,c) = last xs
-                (c',cm') = fuseWithType nt cm n ta c 
-            in foldr' (\(ta,ca) (cas,icm) → 
-                let (c',cm') = fuseWithType nt icm n ta ca
-                in (c':cas,cm')) ([c'],cm') (init xs)
+    where fuseLambdaParameters ∷ ConstraintMap → Env → ConstraintMap → [(Τα, ℂ)] → ([ℂ],Env,ConstraintMap)          
+          fuseLambdaParameters table env gamma xs = trace "entering fuseLambdaParameters" $
+            foldr (\(ta,ca) (cas,icm,igamma) → 
+                let (c',cm',gamma') = fuseWithType table icm igamma ta ca
+                in (c':cas,cm',gamma')) ([],env,gamma) xs
 
-fuseWithVar ∷ NamedTypes → ConstraintMap → Identifier → Identifier → ℂ → (ℂ, ConstraintMap)
-fuseWithVar nt cm n m rhs = Trace.trace "entering fuseWithVar" $ 
+fuseWithPtr ∷ ConstraintMap → Env → ConstraintMap → ℂ → Ταρ → ℂ → (ℂ, Env, ConstraintMap)
+fuseWithPtr table env gamma c ann rhs = trace "entering fuseWithPtr" $ 
   case rhs of
-    ℂτ tyr → fuseWithType nt cm n tyr (ℂπ m)
-    ℂπ o   → if reachable o m cm
-             then (ℂπ m, cm)
-             else if reachable m o cm
-                  then (rhs, cm)
-                  else (rhs, update m (ℂπ o) cm)
-    ℂp c a → (ℂπ m, update m rhs cm)
-    ℂλ a r → (ℂπ m, update m rhs cm)
-    _ → error "fuseWithVar error: unsupported constraint"   
-
-fuseWithPtr ∷ NamedTypes → ConstraintMap → Identifier → ℂ → Ταρ → ℂ → (ℂ, ConstraintMap)
-fuseWithPtr nt cm n c ann rhs = Trace.trace "entering fuseWithPtr" $ 
-  case rhs of
-    ℂτ tyr → fuseWithType nt cm n tyr (ℂp c ann)
-    ℂπ m   → fuseWithVar  nt cm n m   (ℂp c ann)
-    ℂp cr a → let (ncr, ncm) = fuse nt cm n c cr 
-              in case (≌) a ann of
-                Nothing → error $ "Unification failed in fuseWithPtr " ++ show a ++ " " ++ show ann
-                Just na → (ℂp ncr na, ncm) 
+    ℂτ tyr → fuseWithType table env gamma tyr (ℂp c ann)
+    ℂπ m   → fuse table env gamma rhs (ℂp c ann) 
+    ℂp cr a → let (ncr, nenv,ngamma) = fuse table env gamma c cr 
+                  (na, nenv') = addToEnv a ann nenv
+              in (ℂp ncr na, nenv',ngamma) 
     ℂλ a r → error "fuseWithPtr error: CPtr with CFn"   
     _ → error "fuseWithPtr error: unsupported constraint"   
 
-fuseWithFun ∷ NamedTypes → ConstraintMap → Identifier → [ℂ] → ℂ → ℂ → (ℂ, ConstraintMap)
-fuseWithFun nt cm n ca cr rhs = Trace.trace "entering fuseWithFun" $ 
+fuseWithFun ∷ ConstraintMap → Env → ConstraintMap → [ℂ] → ℂ → ℂ → (ℂ, Env, ConstraintMap)
+fuseWithFun table env gamma ca cr rhs = trace "entering fuseWithFun" $
   case rhs of
-    ℂτ tyr → fuseWithType nt cm n tyr (ℂλ ca cr)
-    ℂπ m   → fuseWithVar  nt cm n m   (ℂλ ca cr)
-    ℂp cr a → fuseWithPtr nt cm n cr a (ℂλ ca cr)
+    ℂτ tyr → fuseWithType table env gamma tyr (ℂλ ca cr)
+    ℂπ m   → fuse table env gamma rhs (ℂλ ca cr)
+    ℂp cr a → error "fuseWithFun error: CFn with CPtr"   
     ℂλ a r → 
       if length ca /= length a
       then error "fuseWithType: functions have different argument list length"
       else let as = zip ca a
-               (na, mcs) = fuseLambdaParameters nt cm n as
-               (nr, rmc) = fuse nt mcs n cr r
-           in (ℂλ na nr, rmc)
+               (na, nenv,ngamma) = fuseLambdaParameters table env gamma as
+               (nr, nenv',ngamma') = fuse table nenv ngamma cr r
+           in (ℂλ na nr, nenv',ngamma')
     _ → error "fuseWithFun error: unsupported constraint"   
-    where fuseLambdaParameters ∷ NamedTypes → ConstraintMap → Identifier → [(ℂ, ℂ)] → ([ℂ],ConstraintMap)
-          fuseLambdaParameters nt cm n [] = ([],cm)
-          fuseLambdaParameters nt cm n xs = 
-            let (a,c) = last xs
-                (c',cm') = fuse nt cm n a c 
-            in foldr' (\(ta,ca) (cas,icm) → 
-                let (c',cm') = fuse nt icm n ta ca
-                in (c':cas,cm')) ([c'],cm') (init xs)
+    where fuseLambdaParameters ∷ ConstraintMap → Env → ConstraintMap → [(ℂ, ℂ)] → ([ℂ],Env,ConstraintMap)
+          fuseLambdaParameters table env gamma xs = trace "entering fuseLambdaParameters2" $
+            foldr (\(ta,ca) (cas,icm,igamma) → 
+                let (c',cm',gamma') = fuse table icm igamma ta ca
+                in (c':cas,cm',gamma')) ([],env,gamma) xs
 
--- Step 5 - Generate the type qualifier variables
-generalize ∷ ConstraintMap → S.Set Τℂ' → Int → (Int, ConstraintMap, S.Set Τℂ', Env)
-generalize mc oc n = let (c, nmc,env) = M.foldWithKey generalizeConstraints (n,M.empty,M.empty)  mc
-                         (nc, goc,env') = S.fold generalizeTyConst (c,S.empty,env) oc
-                     in Trace.trace "generalize" $ (nc, nmc, goc, env')
+addToEnv ∷ Ταρ → Ταρ → Env → (Ταρ,Env)
+addToEnv AnyAddr       rhs        env = (rhs, env)
+addToEnv lhs@(TyVar x) AnyAddr    env = (lhs, env)
+addToEnv lhs@(TyVar x) rhs        env = (lhs, M.insertWith (++) x [rhs] env)
+addToEnv UserAddr      UserAddr   env = (UserAddr, env)
+addToEnv UserAddr      KernelAddr env = error $ "addToEnv: Unification error: User vs Kernel"
+addToEnv KernelAddr    KernelAddr env = (KernelAddr, env)
+addToEnv a             b          env = addToEnv b a env 
 
-generalizeConstraints ∷ Identifier → M.Map ℂ (S.Set Int) → (Int, ConstraintMap,Env) → (Int, ConstraintMap,Env)
-generalizeConstraints n cs (counter,mc,env) = 
-  let (ncounter, ncs,env') = M.foldrWithKey generalizeConstraint (counter,M.empty,env) cs 
-  in (ncounter, M.insert n ncs mc,env')
+grabNonVar ∷ Id → ConstraintMap → Maybe ℂ
+grabNonVar m table = grabNonVarAux [] m table 
 
-generalizeConstraint ∷ ℂ → S.Set Int → (Int, M.Map ℂ (S.Set Int),Env) → (Int, M.Map ℂ (S.Set Int),Env)
-generalizeConstraint c pcs (counter, res,env) = 
-  let (ncounter, nc,env') = generalizeCons counter c env
-  in (ncounter, M.insert nc pcs res,env')
+grabNonVarAux ∷ [Id] → Id → ConstraintMap → Maybe ℂ
+grabNonVarAux log m table = 
+  if m `elem` log
+  then Nothing
+  else case M.lookup m table of
+        Nothing → Nothing
+        Just cm → 
+          let (a,b) = foldr checkNonVar ([],[]) $ M.keys cm
+          in if null a
+             then foldr (\(ℂπ n) x → checkGrab (grabNonVarAux (m:log) n table) x) Nothing b
+             else Just $ head a 
+
+checkNonVar ∷ ℂ → ([ℂ],[ℂ]) → ([ℂ],[ℂ])
+checkNonVar lhs@(ℂπ _) (a,b) = (a,lhs:b)
+checkNonVar lhs        (a,b) = (lhs:a,b)
+
+checkGrab ∷ Maybe a → Maybe a → Maybe a
+checkGrab lhs@(Just _) rhs = lhs
+checkGrab Nothing      rhs = rhs
+
+checkCTy ∷ ℂ → ([Τα],[ℂ]) → ([Τα],[ℂ])
+checkCTy lhs@(ℂτ ty) (a,b) = (ty:a,b)
+checkCTy lhs         (a,b) = (a,lhs:b)
+
+grabCTy ∷ [Id] → Id → ConstraintMap → Maybe Τα
+grabCTy log n table = 
+  if n `elem` log
+  then Nothing
+  else case M.lookup n table of
+    Nothing → Nothing
+    Just cm → case foldr checkCTy ([],[]) (M.keys cm) of
+      ([],ys) → foldr (\(ℂπ n) x → checkGrab (grabCTy (n:log) n table) x) Nothing ys
+      (xs,ys) → Just $ head xs
 
 -- Step 6 - Rewrite again
 replace ∷ ConstraintMap → ConstraintMap
@@ -332,12 +483,12 @@ replaceConstraints ∷ ConstraintMap → M.Map ℂ (S.Set Int) → M.Map ℂ (S.
 replaceConstraints ocm = M.mapKeys (replaceConstraint ocm)
 
 replaceConstraint ∷ ConstraintMap → ℂ → ℂ
-replaceConstraint cm rhs = 
+replaceConstraint cm rhs = trace ("replaceConstraint " ++ show rhs ++ " " ++ show cm) $ 
   case rhs of
     ℂτ tyr → rhs
     ℂπ m   → 
       case M.lookup m cm of
-        Nothing → error "replaceConstraint: can't find it!" 
+        Nothing → error $ "replaceConstraint: can't find it! " ++ show rhs  
         Just nc → if M.size nc == 1 
                   then replaceConstraint cm $ head $ M.keys nc
                   else error "replaceConstraint: more than one candidate"
@@ -372,10 +523,10 @@ liftPrimitiveConstraint n rhs pcs (cs, y) =
 merge ∷ NamedTypes → Int → Γ → S.Set Τℂ' → Env → (Int,Γ,Env)
 merge nt counter cm cs env = 
   let (nc,y,env') = S.fold (mergeConstraint nt) (counter,cm,env) cs
-  in Trace.trace (show env') $ (nc,y,env')
+  in trace (show env') $ (nc,y,env')
 
 mergeConstraint ∷ NamedTypes → Τℂ' → (Int, Γ, Env) → (Int, Γ, Env)
-mergeConstraint nt (lhs :=: rhs, pc) (counter,cm,env) = Trace.trace ("merge " ++ show lhs ++ " " ++ show rhs) $
+mergeConstraint nt (lhs :=: rhs, pc) (counter,cm,env) = trace ("merge " ++ show lhs ++ " " ++ show rhs) $
   case lhs of
     ℂπ c → case rhs of
       ℂι ca idxs ann → 
@@ -384,16 +535,6 @@ mergeConstraint nt (lhs :=: rhs, pc) (counter,cm,env) = Trace.trace ("merge " ++
           Nothing → (nc, M.insert c tya ncm, env)
           Just csm → let (nenv, nty) = mergeGepTypes env tya csm
                      in (nc, M.insert c nty ncm, nenv)
-    ℂq cl → case rhs of
-      ℂq cr → let vcl = Trace.trace ("getTyQual result = " ++ show (getTyQual cm cl) ++ " " ++ show cl) $ getTyQual cm cl 
-                  vcr = getTyQual cm cr
-              in case vcl of 
-                Nothing → case vcr of 
-                  Nothing → (counter, cm, env)
-                  Just _ → error "mergeConstraint: probably invalid cast"
-                Just (TyVar var) → case vcr of
-                  Nothing → error "mergeConstraint: probably invalid cast"
-                  Just rvcr  → (counter, cm, M.insertWith (++) var [rvcr] env)
 
 -- Computes the type of the gep constraint; generates the appropriate unfolded type
 solveGep ∷ NamedTypes → Int → Γ → ℂ → [Int] → Ταρ → (Int, Τα, Γ)
@@ -453,7 +594,7 @@ mergeDerTypes env lhs rhs =
            then (env, rhs)
            else if length alhs == length arhs
                 then let args = zip alhs arhs
-                         (nenv, argtys) = foldr' (\(l,r) (e,lty) → 
+                         (nenv, argtys) = foldr (\(l,r) (e,lty) → 
                                           let (ne,ty) = mergeTypes e l r 
                                           in (ne,ty:lty)) (env,[]) args 
                          (nenv', rty) = mergeTypes nenv rlhs rrhs
@@ -478,11 +619,15 @@ mergeAggTypes env lhs rhs =
       then let nn = length tslhs
                nsn = mergeNames snlhs snrhs
                args = zip tslhs tsrhs
-               (nenv, argtys) = foldr' (\(l,r) (e,lty) → 
+               (nenv, argtys) = foldr (\(l,r) (e,lty) → 
                                 let (ne,ty) = mergeTypes e l r 
                                 in (ne,ty:lty)) (env,[]) args
            in (nenv, TyStr nsn nn argtys)
-      else error $ "mergeAggTypes: Unification error\n" ++ show lhs ++ "\n" ++ show rhs
+      else if snlhs == snrhs 
+           then if length tslhs > length tsrhs 
+                then (env, lhs)
+                else (env, rhs)
+           else error $ "mergeAggTypes: Unification error\n" ++ show lhs ++ "\n" ++ show rhs
 
 
 mergeNames ∷ String → String → String
@@ -504,10 +649,11 @@ addTyConstr env lhs rhs =
     Just ann → (env,ann)
 
 
-getTyQual ∷ Γ → ℂ → Maybe Ταρ
+-- This is wrong: It should be [Ταρ]
+getTyQual ∷ ConstraintMap → ℂ → Maybe Ταρ
 getTyQual cm c = case c of
     ℂτ t → getTypeQual t
-    ℂπ n → case M.lookup n cm of
+    ℂπ n → case grabCTy [] n cm of
         Nothing → error $ "getTyQual: " ++ show n ++ " is not in *env*"
         Just t → getTypeQual t
     ℂp cp ta → Just ta
@@ -515,8 +661,30 @@ getTyQual cm c = case c of
     _ → error "getTyQual: unsupported"
 
 -- Step 9
-typify ∷ Env → Γ → Γ 
-typify env types = M.map (resolve env) types
+typify ∷ ConstraintMap → Env → Γ 
+typify table env =  M.mapWithKey (unfoldAndResolve table env) table
+
+unfoldAndResolve ∷ ConstraintMap → Env → Id → M.Map ℂ (S.Set Int) → Τα
+unfoldAndResolve table env n cn = 
+  if M.size cn == 1
+  then let c = head $ M.keys cn
+       in resolveType table env n c  
+  else error "unfoldAndResolve error" 
+
+resolveType ∷ ConstraintMap → Env → Id → ℂ → Τα
+resolveType table env n cn = 
+  case cn of 
+    ℂτ t → resolve env t
+    ℂπ m → case M.lookup m table of
+      Nothing → error "resolveType"
+      Just cns → unfoldAndResolve table env m cns
+    ℂp c ann → let ty = resolveType table env n c 
+               in resolve env $ TyDer $ TyPtr ty ann
+    ℂλ ca cr → let tyas = foldr (\a r → (resolveType table env n a):r) [] ca
+                   tycr = resolveType table env n cr
+                   ty = TyDer $ TyFun tyas tycr False
+               in resolve env ty
+    _ → error "resolveType: not supported"
 
 (⊨) ∷ NamedTypes → Γ → S.Set Τℂ' → Γ
 (⊨) = undefined

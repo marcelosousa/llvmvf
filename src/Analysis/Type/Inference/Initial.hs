@@ -55,7 +55,8 @@ sys_getint = cFn $ ℂλ [cPtr (i 32) UserAddr] cVoid
 
 iτℂ ∷ S.Set Τℂ
 iτℂ = S.fromList $ 
-  [ "_copy_from_user" =: (copy_from_user_N 64)
+  [
+    "_copy_from_user" =: (copy_from_user_N 64)
   , "_copy_from_user_nmi" =: (copy_from_user_N 32)
   , "_copy_from_user_io" =: (copy_from_user_N 32)
   , "_copy_to_user"   =: (copy_to_user_N 64)
