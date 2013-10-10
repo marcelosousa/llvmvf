@@ -368,7 +368,7 @@ incorporate ∷ ConstraintMap → Env → S.Set Τℂ' → (ConstraintMap, Env)
 incorporate table env cs = S.fold incorporateConstraint (table,env) cs
 
 incorporateConstraint ∷ Τℂ' → (ConstraintMap, Env) → (ConstraintMap, Env)
-incorporateConstraint (ℂπ n :=: rhs, pc) (table, env) = 
+incorporateConstraint cn@(ℂπ n :=: rhs, pc) (table, env) = trace ("incorporateConstraint " ++ show cn) $ 
   let ntable = addConstraint n (rhs, pc) table
   in (ntable, env)
 incorporateConstraint (ℂq cl :=: rhs,pc) (table, env) =
