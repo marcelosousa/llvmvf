@@ -83,7 +83,7 @@ solve nt cs = trace ("solve init\n---------------\n" ++ cToString cs ++ "-------
                                         solveGeps nt (ncounter, gtable, gecs, env)
       (renv, rtable) = trace ("after solveGeps\n---------------\n" ++ scToString (erasePC ntable) ++ "---------------\n" ++ envToString nenv ++ "---------------\n" ++ cToString necs ++ "---------------\n") $
                        rewrite nenv ntable 
-      (itable, ienv) = Trace.trace ("after 1st rewrite\n---------------\n" ++ scToString (erasePC rtable) ++ "---------------\n" ++ cToString necs ++ "---------------\n" ++ envToString renv ++ "---------------\n") $
+      (itable, ienv) = trace ("after 1st rewrite\n---------------\n" ++ scToString (erasePC rtable) ++ "---------------\n" ++ cToString necs ++ "---------------\n" ++ envToString renv ++ "---------------\n") $
                        incorporate rtable renv necs
       (fenv, ftable) = trace ("after incorporate\n---------------\n" ++ scToString (erasePC itable) ++ "---------------\n" ++ envToString ienv ++ "---------------\n") $
                        rewrite ienv itable 
