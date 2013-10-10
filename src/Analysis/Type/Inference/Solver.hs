@@ -267,7 +267,7 @@ solveGepType nt counter hist cn idxs ann table rest env = trace ("solveGepType "
     ℂπ n → if n `elem` hist
            then (Nothing,counter,table,rest,env)
            else case M.lookup n table of
-              Nothing → (Nothing,counter,table,rest,env)
+              Nothing → findCandidate [] (nt, counter, M.assocs table, table, rest, env) n idxs ann -- 
               Just cs →
                 let acs = M.assocs cs
                 in case mapSolveGep nt counter (n:hist) acs idxs ann table rest env of
@@ -293,6 +293,46 @@ mapSolveGep nt counter hist ((c,pcs):xs) idxs ann table rest env =
     (Nothing,ncounter,ntable,nrest,nenv) → mapSolveGep nt ncounter hist xs idxs ann ntable nrest nenv
     (Just (ety,ty),ncounter,ntable,nrest,nenv) → (Just ((ety,ty),head $ S.toList pcs), ncounter, ntable, nrest,nenv)
 
+--findCandidate ∷ [(Id,M.Map ℂ (S.Set Int))] → Id → Maybe Τα
+findCandidate log (nt, counter, vals, table, rest, env) n idxs ann = 
+  if n `elem` log
+  then (Nothing,counter,table,rest,env)
+  else let ncs = filter (hasN n) vals 
+       in if null ncs
+          then (Nothing,counter,table,rest,env)
+          else case selectC log n ncs of
+            Nothing → (Nothing,counter,table,rest,env)
+            Just cs' → case cs' of
+              ℂτ ty → 
+                let (ncounter,ety,gty) = trace ("expanding " ++ show ty ++ " " ++ show idxs) $ expandType nt counter ty idxs 
+                    nty = TyDer $ TyPtr gty ann
+                    nrest = S.insert (ℂπ n :=: ℂτ ety, (-1)) rest
+                in (Just (ety,nty), ncounter, table, nrest, env) 
+              ℂπ m → findCandidate (n:log) (nt, counter, vals, table, rest, env) m idxs ann
+ 
+hasN ∷ Id → (Id, M.Map ℂ (S.Set Int)) → Bool
+hasN n (_,cs) = 
+  let ncs = M.keys cs
+  in any ((==) (ℂπ n)) ncs
+
+selectC ∷ [Id] → Id → [(Id, M.Map ℂ (S.Set Int))] → Maybe ℂ
+selectC log n [] = Nothing
+selectC log n ((_,cs):ys) = 
+  if n `elem` log
+  then Nothing
+  else case selectCAux (n:log) (M.keys cs) of
+    Nothing → selectC log n ys
+    Just c  → Just c
+
+selectCAux ∷ [Id] → [ℂ] → Maybe ℂ
+selectCAux log [] = Nothing
+selectCAux log (c:cs) = 
+  case c of 
+    ℂτ _ → Just c
+    ℂπ m → if m `elem` log
+           then selectCAux log cs
+           else Just c
+    _ → selectCAux log cs
 
 -- Is n reachable from m given r?
 reachable ∷ [Id] → Id → Id → ConstraintMap → Bool
