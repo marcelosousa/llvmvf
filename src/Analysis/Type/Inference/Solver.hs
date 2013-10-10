@@ -368,7 +368,7 @@ incorporate ∷ ConstraintMap → Env → S.Set Τℂ' → (ConstraintMap, Env)
 incorporate table env cs = S.fold incorporateConstraint (table,env) cs
 
 incorporateConstraint ∷ Τℂ' → (ConstraintMap, Env) → (ConstraintMap, Env)
-incorporateConstraint cn@(ℂπ n :=: rhs, pc) (table, env) = trace ("incorporateConstraint " ++ show cn) $ 
+incorporateConstraint cn@(ℂπ n :=: rhs, pc) (table, env) =
   let ntable = addConstraint n (rhs, pc) table
   in (ntable, env)
 incorporateConstraint (ℂq cl :=: rhs,pc) (table, env) =
@@ -382,6 +382,7 @@ incorporateConstraint (ℂq cl :=: rhs,pc) (table, env) =
                 Just (TyVar var) → case vcr of
                   Nothing → error "mergeConstraint: probably invalid cast"
                   Just rvcr  → (table, M.insertWith (++) var [rvcr] env)
+incorporateConstraint cn _ =  error ("incorporateConstraint " ++ show cn) 
 
 -- Step 4b - Fix point and solve 
 -- The termination condition is the cardinality of the all the elements in the table to be one
