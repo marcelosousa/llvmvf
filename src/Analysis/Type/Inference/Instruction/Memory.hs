@@ -45,8 +45,13 @@ import qualified Data.Set as S
 	let πα = π α
 	    πn = ℂπ n
 	    αℂ = πα :=: (πn ⤜ T.AnyAddr)
+	case πn of 
+	   	ℂτ (T.TyDer (T.TyPtr ty _)) → do 
+	   		let nn = πn :=: ℂτ ty
+	   		(↣) $ liftΤℂ pc $ αℂ ∘ (nn ∘ τℂα)
+	   	_ → (↣) $ liftΤℂ pc $ αℂ ∘ τℂα
 	 --   nℂ = πn :=: ℂc T1
-	(↣) $ liftΤℂ pc $ αℂ ∘ τℂα
+	
 	--(↣) $ liftΤℂ pc $ αℂ ∘ (nℂ ∘ τℂα)
 
 -- Type Constraints for GEP
