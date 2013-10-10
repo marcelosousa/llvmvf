@@ -34,8 +34,8 @@ import Control.Monad.State hiding (join)
 import qualified Debug.Trace as Trace
 import UU.PPrint hiding ((<$>))
 
-trace s f = f
---trace = trace
+--trace s f = f
+trace = Trace.trace
 
 cToString ∷ S.Set Τℂ' → String
 cToString ts = foldr (\co r → show co ++ "\n" ++ r) "" (S.toList ts) 
