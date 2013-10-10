@@ -145,7 +145,7 @@ runOption (Extract bc m) = do mdl <- extract bc
                                     Raw → show $ liftDebug mdl
                                     Pretty → show $ pretty mdl
                                     LiftAsm → show $ pretty $ liftAsm $ liftDebug mdl
-				    Isolated -> show $ liftDebug $ isolateFunction (makeGlobal "1000_read_pba_string_generic") mdl
+				    Isolated -> show $ liftDebug $ isolateFunction (makeGlobal "e1000_read_pba_string_generic") mdl
                               writeFile (addExtension bf "llvf") p
 runOption (Model bc d) = extractModel bc d                           
 runOption (CCFG bc d)  = runCCFG bc d

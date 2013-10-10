@@ -76,7 +76,7 @@ variadicFns (Module id layout target gvars funs nmdtys) =
 isolateFunction :: Identifier -> Module -> Module
 isolateFunction i (Module id layout target gvars funs nmdtys) = 
   let fns = M.filterWithKey (\k _ -> i == k) funs
-  in Module id layout target [] fns nmdtys 
+  in Module id layout target gvars fns nmdtys 
  
 isVariadic ∷ Function → Bool
 isVariadic (FunctionDecl _ _ _ b _)   = b
