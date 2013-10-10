@@ -382,6 +382,9 @@ incorporateConstraint (ℂq cl :=: rhs,pc) (table, env) =
                 Just (TyVar var) → case vcr of
                   Nothing → error "mergeConstraint: probably invalid cast"
                   Just rvcr  → (table, M.insertWith (++) var [rvcr] env)
+incorporateConstraint (lhs@(ℂτ ty) :=: rhs@(ℂp _ _),pc) (table, env) = 
+  let (_,nenv,ntable) = fuse table env table lhs rhs
+  in (ntable,nenv)
 incorporateConstraint cn _ =  error ("incorporateConstraint " ++ show cn) 
 
 -- Step 4b - Fix point and solve 
