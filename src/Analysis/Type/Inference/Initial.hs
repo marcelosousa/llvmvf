@@ -3,6 +3,7 @@
 -- Module    :  Analysis.Type.Inference.Initial
 -- Copyright :  (c) 2013 Marcelo Sousa
 -- Initial Type Constraints
+-- This file contains several analysis
 -------------------------------------------------------------------------------
 
 module Analysis.Type.Inference.Initial (iτℂ) where
